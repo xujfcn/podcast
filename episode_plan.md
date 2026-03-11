@@ -1,0 +1,56 @@
+# 播客每日更新计划
+
+## 已发布
+- EP001 (2026-03-11): AI API Gateway Explained — Your Questions Answered
+
+## 待发布话题队列
+
+### Week 1 (Mar 12-18)
+- EP002: GPT-5 vs Claude Opus 4.6 vs Gemini 3 — Which Model Should You Use?
+- EP003: How to Cut Your AI API Costs by 60% Without Switching Models
+- EP004: What is MCP? Model Context Protocol Explained in 5 Minutes
+- EP005: DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?
+- EP006: Building an AI Chatbot in 10 Minutes with One API Key
+- EP007: AI API Rate Limits — What Every Developer Needs to Know
+- EP008: The Hidden Costs of Using Multiple AI Providers
+
+### Week 2 (Mar 19-25)
+- EP009: OpenRouter vs Crazyrouter — Honest Comparison
+- EP010: How to Migrate from OpenAI to a Multi-Model Gateway
+- EP011: AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux
+- EP012: Token Pricing Explained — Why You're Probably Overpaying
+- EP013: Self-Hosting vs API Gateway — When Does Each Make Sense?
+- EP014: Top 5 AI Coding Assistants in 2026
+- EP015: AI API Security Best Practices for Production Apps
+
+### Week 3 (Mar 26-Apr 1)
+- EP016: Streaming vs Non-Streaming API Calls — Performance Deep Dive
+- EP017: LangChain + Crazyrouter — Build Agents with 627 Models
+- EP018: AI Model Benchmarks That Actually Matter
+- EP019: Function Calling Across Different AI Models
+- EP020: The Future of AI APIs — Predictions for 2026-2027
+- EP021: How Small Teams Use AI Gateways to Ship Faster
+- EP022: Whisper vs Gemini vs DeepSeek for Speech-to-Text
+
+### Week 4+ (备用话题)
+- Embedding Models Compared
+- AI for Non-English Languages
+- Building RAG Pipelines with Multiple Models
+- AI API Monitoring and Observability
+- Claude vs GPT for Code Generation
+- Vision Models Compared — GPT-4V vs Gemini vs Claude
+- AI Gateway Architecture — How It Works Under the Hood
+- Prompt Engineering Tips That Actually Work
+
+## 制作流程
+1. 88号写脚本（Q&A 或独白格式，3-5 分钟）
+2. CrazyRouter TTS API 生成音频（tts-1, alloy voice）
+3. 上传到 GitHub repo: /root/.openclaw/workspace/podcast/audio/
+4. 更新 feed.xml 加新 <item>
+5. git push → GitHub Pages 部署 → Spotify 自动同步
+
+## 注意事项
+- 每期 3-5 分钟（800-1200 词脚本）
+- 话题紧扣 AI 开发者工具 + Crazyrouter 产品
+- 自然植入 Crazyrouter 但不硬广
+- 每期结尾 CTA: "Try Crazyrouter at crazyrouter.com"
