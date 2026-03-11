@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:podcast="https://podcastindex.org/namespace/1.0">
+  <channel>
+    <title>AI Dev Tools — The Crazyrouter Podcast</title>
+    <link>https://crazyrouter.com</link>
+    <description>Your weekly breakdown of AI development tools, API gateways, model pricing, and building with GPT, Claude, Gemini, and DeepSeek. Hosted by Crazyrouter — one API key for 627+ AI models.</description>
+    <language>en</language>
+    <copyright>© 2026 Crazyrouter</copyright>
+    <atom:link href="https://xujfcn.github.io/podcast/feed.xml" rel="self" type="application/rss+xml"/>
+    <itunes:author>Crazyrouter</itunes:author>
+    <itunes:owner>
+      <itunes:name>Crazyrouter</itunes:name>
+      <itunes:email>support@crazyrouter.com</itunes:email>
+    </itunes:owner>
+    <itunes:image href="https://crazyrouter.com/logo.png"/>
+    <itunes:category text="Technology"/>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+
+    <item>
+      <title>EP001: AI API Gateway Explained — Your Questions Answered</title>
+      <description>What is an AI API gateway? How many models does Crazyrouter support? Is it cheaper than going direct? How hard is migration? We answer the 9 most common questions about using a unified API gateway for GPT-5, Claude Sonnet 4.6, Gemini 3, DeepSeek V3.2, and 627+ other models.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep001.mp3" length="3737853" type="audio/mpeg"/>
+      <guid>ep001-ai-api-gateway-faq</guid>
+      <pubDate>Tue, 11 Mar 2026 09:00:00 +0000</pubDate>
+      <itunes:duration>233</itunes:duration>
+      <itunes:episode>1</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+  </channel>
+</rss>
