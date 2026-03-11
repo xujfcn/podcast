@@ -22,6 +22,19 @@
     <itunes:type>episodic</itunes:type>
 
     <item>
+      <title>EP003: How to Cut Your AI API Costs by 60% Without Switching Models</title>
+      <description>Most teams overpay for AI APIs by 40-60%. We break down the three biggest cost killers: model routing (use cheap models for simple tasks), prompt caching (save 50-90% on repeated tokens), and provider price optimization. Real examples, real numbers, one line of code to switch.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep003.mp3" length="4284000" type="audio/mpeg"/>
+      <guid>ep003-cut-ai-api-costs-60-percent</guid>
+      <pubDate>Thu, 13 Mar 2026 09:00:00 +0000</pubDate>
+      <itunes:duration>268</itunes:duration>
+      <itunes:episode>3</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP002: GPT-5 vs Claude Opus 4.6 vs Gemini 3 — Which Model Should You Use?</title>
       <description>Comparing the big three AI models for developers. GPT-5 for reliable tool calling, Claude Opus 4.6 for deep reasoning and clean code, Gemini 3 for massive context and multimodal. We break down when to use each — and why the smartest teams use all three with a single API gateway.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep002.mp3" length="4880640" type="audio/mpeg"/>

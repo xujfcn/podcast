@@ -2,6 +2,7 @@
 
 ## 已发布
 - EP001 (2026-03-11): AI API Gateway Explained — Your Questions Answered
+- EP002 (2026-03-12): GPT-5 vs Claude Opus 4.6 vs Gemini 3 — Which Model Should You Use?
 
 ## 待发布话题队列
 
