@@ -22,11 +22,24 @@
     <itunes:type>episodic</itunes:type>
 
     <item>
+      <title>EP005: DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?</title>
+      <description>DeepSeek V3.2 is making waves with 88% on HumanEval and 35x cheaper pricing than GPT-4o. But is it actually better? We break down the benchmarks, real-world performance, where it excels (coding, reasoning, Chinese), where it falls short (creative writing, censorship), and when to use each model. Plus the multi-model strategy that saves you money.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep005.mp3" length="4300000" type="audio/mpeg"/>
+      <guid>ep005-deepseek-v32-vs-gpt4o</guid>
+      <pubDate>Fri, 13 Mar 2026 09:00:00 +0000</pubDate>
+      <itunes:duration>240</itunes:duration>
+      <itunes:episode>5</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP004: AI Agent Skills — Build Smarter Agents with One Command</title>
       <description>Everyone's building AI agents, but everyone's writing the same boilerplate. What if you could install pre-built skills with one command? We introduce npx crazyrouter-skills — 8 ready-to-use agent capabilities from chat to image gen to video. Plus how it fits into MCP and why composability is the future of agent development.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep004.mp3" length="1277136" type="audio/mpeg"/>
       <guid>ep004-ai-agent-skills-one-command</guid>
-      <pubDate>Fri, 14 Mar 2026 09:00:00 +0000</pubDate>
+      <pubDate>Thu, 12 Mar 2026 09:00:00 +0000</pubDate>
       <itunes:duration>160</itunes:duration>
       <itunes:episode>4</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
