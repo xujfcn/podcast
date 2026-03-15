@@ -21,6 +21,20 @@
     <itunes:explicit>false</itunes:explicit>
     <itunes:type>episodic</itunes:type>
 
+
+    <item>
+      <title>EP006: Building an AI Chatbot in 10 Minutes with One API Key</title>
+      <description>Building an AI chatbot is easier than most tutorials make it look. In this episode, we break down the simplest architecture: a tiny backend, one API key, one OpenAI-compatible endpoint, and the freedom to switch between models without rewriting your app. Perfect for developers shipping their first chat product fast.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep006.mp3" length="4825920" type="audio/mpeg"/>
+      <guid>ep006-build-ai-chatbot-one-api-key</guid>
+      <pubDate>Sun, 15 Mar 2026 10:00:00 +0000</pubDate>
+      <itunes:duration>290</itunes:duration>
+      <itunes:episode>6</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
     <item>
       <title>EP005: DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?</title>
       <description>DeepSeek V3.2 is making waves with 88% on HumanEval and 35x cheaper pricing than GPT-4o. But is it actually better? We break down the benchmarks, real-world performance, where it excels (coding, reasoning, Chinese), where it falls short (creative writing, censorship), and when to use each model. Plus the multi-model strategy that saves you money.</description>

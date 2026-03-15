@@ -6,6 +6,15 @@ Your weekly breakdown of AI development tools, API gateways, model pricing, and 
 
 ## Episodes
 
+### EP006: Building an AI Chatbot in 10 Minutes with One API Key
+*March 15, 2026 · 4 min*
+
+Building an AI chatbot is easier than most tutorials make it look. This episode breaks down the simplest architecture: one API key, one compatible endpoint, and a thin backend you can ship fast.
+
+🔗 [Listen (MP3)](https://xujfcn.github.io/podcast/audio/ep006.mp3)
+
+---
+
 ### EP001: AI API Gateway Explained — Your Questions Answered
 *March 11, 2026 · 3 min*
 

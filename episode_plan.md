@@ -3,15 +3,14 @@
 ## 已发布
 - EP001 (2026-03-11): AI API Gateway Explained — Your Questions Answered
 - EP002 (2026-03-12): GPT-5 vs Claude Opus 4.6 vs Gemini 3 — Which Model Should You Use?
+- EP003 (2026-03-12): How to Cut Your AI API Costs by 60% Without Switching Models
+- EP004 (2026-03-12): AI Agent Skills — Build Smarter Agents with One Command
+- EP005 (2026-03-13): DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?
+- EP006 (2026-03-15): Building an AI Chatbot in 10 Minutes with One API Key
 
 ## 待发布话题队列
 
 ### Week 1 (Mar 12-18)
-- EP002: GPT-5 vs Claude Opus 4.6 vs Gemini 3 — Which Model Should You Use?
-- EP003: How to Cut Your AI API Costs by 60% Without Switching Models
-- EP004: What is MCP? Model Context Protocol Explained in 5 Minutes
-- EP005: DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?
-- EP006: Building an AI Chatbot in 10 Minutes with One API Key
 - EP007: AI API Rate Limits — What Every Developer Needs to Know
 - EP008: The Hidden Costs of Using Multiple AI Providers
 
