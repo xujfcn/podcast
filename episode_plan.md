@@ -7,11 +7,11 @@
 - EP004 (2026-03-12): AI Agent Skills — Build Smarter Agents with One Command
 - EP005 (2026-03-13): DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?
 - EP006 (2026-03-15): Building an AI Chatbot in 10 Minutes with One API Key
+- EP007 (2026-03-28): AI API Rate Limits — What Every Developer Needs to Know
 
 ## 待发布话题队列
 
-### Week 1 (Mar 12-18)
-- EP007: AI API Rate Limits — What Every Developer Needs to Know
+### Week 1 (Mar 12-18) — DONE
 - EP008: The Hidden Costs of Using Multiple AI Providers
 
 ### Week 2 (Mar 19-25)
