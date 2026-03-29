@@ -1,0 +1,49 @@
+Hey, welcome back to AI Dev Tools — the Crazyrouter Podcast. I'm your host, and today we're talking about something that doesn't show up on any pricing page: the hidden costs of using multiple AI providers.
+
+Most teams start with one model — usually GPT-4o or Claude Sonnet. But eventually, someone says, "Hey, DeepSeek is way cheaper for summarization," or "Gemini's context window is massive, let's use that for document analysis." Before you know it, you're calling three, four, maybe five different AI APIs from the same codebase.
+
+On paper, this sounds smart. Pick the best model for each task. Optimize costs. But in practice? It creates a tax that most teams don't see until it's already costing them thousands.
+
+Let's start with the obvious one that people somehow still underestimate. Every AI provider has a slightly different API format.
+
+OpenAI uses the chat completions format — messages array, role and content fields. Anthropic? Different. They use their own Messages API with a separate system parameter. Google Gemini? Yet another format — generateContent with a parts array.
+
+So now your backend needs three different API clients, three different request formatters, three different response parsers. That's not a one-time setup cost. Every time a provider updates their API — and they do this constantly — you need to update your integration. Anthropic changed their API version header. OpenAI deprecated an endpoint. Gemini added a new safety setting that's required.
+
+A developer spending four hours a month maintaining these integrations might not seem like much. But at a hundred fifty dollars an hour fully loaded? That's seventy-two hundred dollars a year just to keep the lights on. And that assumes nothing breaks.
+
+Here's one that drives finance teams crazy. Three providers means three separate billing dashboards. Three sets of API keys to rotate. Three different billing cycles. Three different usage metrics that don't use the same units.
+
+OpenAI charges per token. Anthropic charges per token but with different tokenizers, so the same text costs different amounts. Google gives you a free tier but then charges per character for some models and per token for others.
+
+Try explaining to your CFO why your AI spend went up twenty percent last month when each individual provider's bill only went up five percent. The answer is usually that one provider changed their pricing, another switched you to a new billing tier, and the third started counting tokens differently after an API update.
+
+I've talked to teams that spend a full day every month just reconciling their AI bills across providers. That's a real cost that never shows up in any pricing comparison.
+
+This is the big one. When you depend on multiple providers, you need failover logic. What happens when OpenAI goes down? Do you automatically route to Claude? Great — but does your prompt format work with Claude? Are the responses similar enough that your downstream code doesn't break?
+
+Building proper failover means maintaining prompt templates for each provider, testing that outputs are compatible, monitoring latency across providers, and having routing logic that's smart enough to switch without your users noticing.
+
+One team I talked to spent three months building a custom routing layer to handle failover between GPT-4o and Claude Sonnet. Three months of engineering time — for something that's not even their core product.
+
+Different models behave differently. That sounds obvious, but the implications are subtle.
+
+Your JSON extraction prompt works perfectly with GPT-4o. You switch one task to Claude, and suddenly it's wrapping the JSON in markdown code blocks. Your parser breaks. Or Gemini adds a preamble like "Here's the JSON you requested" before the actual output. Now you need model-specific post-processing.
+
+These edge cases multiply fast. Every new model you add increases the testing surface. Every prompt needs to be validated against every model it might run on. Your QA time goes up. Your bug count goes up. Your confidence goes down.
+
+Here's where I'll be direct — this is exactly the problem that API gateways solve.
+
+With a gateway like Crazyrouter, you get one API format — OpenAI-compatible — for all six hundred twenty-seven plus models. One API key. One billing dashboard. One set of usage metrics. Switch models by changing a single string in your code.
+
+Failover? Built in. If one upstream provider goes down, the gateway routes to another automatically. You don't build it, you don't maintain it, you don't debug it at two AM.
+
+The math is simple. Take the engineering hours you'd spend on multi-provider integration, key management, billing reconciliation, failover logic, and model-specific edge cases. Multiply by your engineering hourly rate. Compare that to the cost of a gateway. For most teams, it's not even close.
+
+So here's the takeaway. Using multiple AI providers is the right strategy — you should pick the best model for each task. But doing it yourself, with direct integrations to each provider? That's where the hidden costs live.
+
+The API bills are the tip of the iceberg. The real expense is the engineering time, the operational complexity, and the reliability risk.
+
+Next time someone proposes adding "just one more AI provider" to your stack, ask them: who's going to maintain it?
+
+That's it for today. If you want to try the one-key approach, check out Crazyrouter at crazyrouter dot com. See you next time.

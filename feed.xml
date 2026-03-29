@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP008: The Hidden Costs of Using Multiple AI Providers</title>
+      <description>Most teams use multiple AI providers — GPT for chat, Claude for reasoning, DeepSeek for cheap summarization. Smart strategy, right? Not so fast. We break down the four hidden costs nobody talks about: integration overhead that costs $7,200/year in engineering time, billing chaos across three dashboards, failover logic that takes months to build, and inconsistent model behavior that multiplies your QA burden. Plus the one-line fix that eliminates all of them.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep008.mp3" length="6710445" type="audio/mpeg"/>
+      <guid>ep008-hidden-costs-multiple-ai-providers</guid>
+      <pubDate>Sun, 29 Mar 2026 15:00:00 +0000</pubDate>
+      <itunes:duration>335</itunes:duration>
+      <itunes:episode>8</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP007: AI API Rate Limits — What Every Developer Needs to Know</title>
       <description>You're building your app, everything works in dev, then production hits and you're drowning in 429 errors. Today we break down rate limits across OpenAI, Anthropic, and Google — what they are, why they bite, and five battle-tested strategies to handle them. Plus the multi-provider trick that effectively triples your capacity.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep007.mp3" length="6137325" type="audio/mpeg"/>
