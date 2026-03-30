@@ -1,0 +1,57 @@
+Hey, welcome back to AI Dev Tools — the Crazyrouter Podcast. I'm your host, and today we're doing something a little different. We're comparing ourselves — Crazyrouter — with our biggest competitor: OpenRouter.
+
+Now, I know what you're thinking. "Of course you're going to say Crazyrouter is better." And yeah, I have obvious bias here. But I'm going to be genuinely honest, because developers can smell marketing from a mile away, and I respect your time too much for that.
+
+So let's break it down. What does OpenRouter do well? What does Crazyrouter do well? And which one should you actually use?
+
+First, if you don't know OpenRouter — they're the OG of AI API gateways. They've been around since 2023, they have over sixty-six thousand followers on X, and they aggregate hundreds of AI models behind a single API endpoint. You get one API key, and you can call GPT-4o, Claude Sonnet, Gemini, DeepSeek, Llama, Mistral — all through the same OpenAI-compatible format.
+
+Sound familiar? Yeah. That's basically what Crazyrouter does too. So what's different?
+
+Let's start with pricing, because that's where most developers make their decision.
+
+OpenRouter adds a markup on top of provider prices. It varies by model, but it's typically around five to fifteen percent above what you'd pay going directly to OpenAI or Anthropic. They're transparent about this — you can see the markup on their pricing page.
+
+Crazyrouter takes a different approach. Our prices are generally lower — sometimes significantly lower — because we negotiate volume deals with providers and pass the savings through. For example, GPT-4o on Crazyrouter is roughly thirty to forty percent cheaper than going direct to OpenAI, and often cheaper than OpenRouter's marked-up price too.
+
+But here's where I need to be honest. OpenRouter sometimes has flash sales or promotional pricing on specific models that can be very competitive. And their free tier for certain open-source models is genuinely generous. If you're a hobbyist running Llama or Mixtral, OpenRouter's free tier is hard to beat.
+
+Both platforms offer six hundred plus models. In practice, there's about ninety percent overlap. The differences are in the long tail — niche models, fine-tuned variants, and newly released models.
+
+OpenRouter tends to add new models faster. They have a huge community that contributes provider endpoints, so when a new model drops, it's often on OpenRouter within hours. We're usually a day or two behind, though we're getting faster.
+
+Where Crazyrouter has an edge is in model reliability. We actively monitor every endpoint's latency and uptime. If a provider is having issues, we route to backup providers automatically. OpenRouter does some of this too, but our health monitoring is more aggressive about failover.
+
+This is where things get interesting. Both platforms use the OpenAI-compatible API format, so switching between them is literally a one-line change — just swap the base URL and API key.
+
+OpenRouter has a nicer dashboard, I'll admit that. Their usage analytics, model playground, and community features are polished. They've had years to refine it.
+
+Crazyrouter is more developer-focused. We have deeper documentation around cost optimization — things like automatic model fallback chains, token-level cost tracking, and budget alerts. Our API also supports some features that OpenRouter doesn't, like request-level model routing rules and cost caps per request.
+
+If you want pretty graphs and a community forum, OpenRouter wins. If you want granular cost control and production-grade reliability features, that's our lane.
+
+Here's where the rubber meets the road for production apps. Both services add a small amount of latency because your request goes through a proxy. Typically ten to thirty milliseconds overhead.
+
+OpenRouter has had some notable outages — they're a smaller team running a lot of traffic. We've had our share too, so I'm not throwing stones here. But we've invested heavily in multi-region infrastructure and automatic failover.
+
+The honest answer? Both are reliable enough for most use cases. If you're building something where every millisecond matters — like a real-time voice assistant — you should probably go direct to the provider anyway. For everything else, either gateway works fine.
+
+Here's something developers don't talk about enough. When you use an API gateway, your requests — including potentially sensitive data — pass through a third party. Both OpenRouter and Crazyrouter see your prompts and completions.
+
+OpenRouter's privacy policy is reasonable. They say they don't train on your data. We make the same promise. But ultimately, you're trusting a third party with your API traffic.
+
+If that's a concern, both platforms support direct provider routing where we just handle the billing and key management without proxying the actual request. But most developers use the proxy mode for the convenience and failover benefits.
+
+So which one should you pick? Here's my honest recommendation.
+
+Choose OpenRouter if you want the largest community, you're using mostly free open-source models, or you value the playground and community features. They're the established player with a great ecosystem.
+
+Choose Crazyrouter if cost optimization is your priority, you need production-grade reliability features like automatic failover and cost caps, or you're running high-volume API calls where even a few percent price difference adds up to thousands.
+
+Or — and this is what a surprising number of teams do — use both. Keep Crazyrouter as your primary for production traffic where cost matters, and use OpenRouter for experimentation and testing new models. Since both use the same API format, switching is trivial.
+
+That's the honest comparison. No shade to OpenRouter — they built this category and they do it well. We just think there's room for a more cost-focused, reliability-first alternative.
+
+If you want to test the difference yourself, sign up at crazyrouter.com and run the same requests through both. The numbers speak for themselves.
+
+Thanks for listening. If this was helpful, share it with a developer friend who's choosing between gateways. See you next episode.

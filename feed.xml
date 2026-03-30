@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP009: OpenRouter vs Crazyrouter — An Honest Comparison</title>
+      <description>We compare ourselves with our biggest competitor — OpenRouter. Pricing differences, model selection, developer experience, reliability, and trust. Where OpenRouter wins, where Crazyrouter wins, and why a surprising number of teams use both. No marketing fluff — just an honest breakdown to help you choose.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep009.mp3" length="7640205" type="audio/mpeg"/>
+      <guid>ep009-openrouter-vs-crazyrouter-honest-comparison</guid>
+      <pubDate>Mon, 30 Mar 2026 15:00:00 +0000</pubDate>
+      <itunes:duration>382</itunes:duration>
+      <itunes:episode>9</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP008: The Hidden Costs of Using Multiple AI Providers</title>
       <description>Most teams use multiple AI providers — GPT for chat, Claude for reasoning, DeepSeek for cheap summarization. Smart strategy, right? Not so fast. We break down the four hidden costs nobody talks about: integration overhead that costs $7,200/year in engineering time, billing chaos across three dashboards, failover logic that takes months to build, and inconsistent model behavior that multiplies your QA burden. Plus the one-line fix that eliminates all of them.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep008.mp3" length="6710445" type="audio/mpeg"/>
