@@ -23,6 +23,17 @@
 
 
     <item>
+      <title>EP010: How to Migrate from OpenAI to a Multi-Model Gateway</title>
+      <description>You built your app on OpenAI's API — now you want Claude, Gemini, DeepSeek, and hundreds more without rewriting everything. Good news: migration takes about sixty seconds. We walk through the step-by-step process, address the three biggest concerns developers have, and share the multi-model strategy that typically cuts costs by thirty to fifty percent.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep010.mp3" length="5739360" type="audio/mpeg"/>
+      <guid>ep010-migrate-openai-to-multi-model-gateway</guid>
+      <pubDate>Mon, 31 Mar 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>240</itunes:duration>
+      <itunes:episode>10</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+
+    <item>
       <title>EP009: OpenRouter vs Crazyrouter — An Honest Comparison</title>
       <description>We compare ourselves with our biggest competitor — OpenRouter. Pricing differences, model selection, developer experience, reliability, and trust. Where OpenRouter wins, where Crazyrouter wins, and why a surprising number of teams use both. No marketing fluff — just an honest breakdown to help you choose.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep009.mp3" length="7640205" type="audio/mpeg"/>

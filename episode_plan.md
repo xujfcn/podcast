@@ -8,6 +8,9 @@
 - EP005 (2026-03-13): DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?
 - EP006 (2026-03-15): Building an AI Chatbot in 10 Minutes with One API Key
 - EP007 (2026-03-28): AI API Rate Limits — What Every Developer Needs to Know
+- EP008 (2026-03-29): The Hidden Costs of Using Multiple AI Providers
+- EP009 (2026-03-30): OpenRouter vs Crazyrouter — An Honest Comparison
+- EP010 (2026-03-31): How to Migrate from OpenAI to a Multi-Model Gateway
 
 ## 待发布话题队列
 
