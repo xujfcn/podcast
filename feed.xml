@@ -23,6 +23,17 @@
 
 
     <item>
+      <title>EP011: AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux</title>
+      <description>We compare the three biggest AI image generation APIs head-to-head: DALL-E 3, Midjourney, and Flux from Black Forest Labs. Quality, pricing, developer experience, and when to use each one. Plus how an API gateway lets you use all three through a single endpoint.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep011.mp3" length="2205648" type="audio/mpeg"/>
+      <guid>ep011-ai-image-generation-apis-compared</guid>
+      <pubDate>Tue, 01 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>275</itunes:duration>
+      <itunes:episode>11</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+
+    <item>
       <title>EP010: How to Migrate from OpenAI to a Multi-Model Gateway</title>
       <description>You built your app on OpenAI's API — now you want Claude, Gemini, DeepSeek, and hundreds more without rewriting everything. Good news: migration takes about sixty seconds. We walk through the step-by-step process, address the three biggest concerns developers have, and share the multi-model strategy that typically cuts costs by thirty to fifty percent.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep010.mp3" length="5739360" type="audio/mpeg"/>
