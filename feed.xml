@@ -23,6 +23,17 @@
 
 
     <item>
+      <title>EP012: Building AI Agents with Tool Calling — A Practical Guide</title>
+      <description>Tool calling is what turns a chatbot into an agent. We break down how GPT-5, Claude, and Gemini handle function calling, walk through building your first agent in 30 lines of Python, cover multi-tool patterns for production, and share four hard-won lessons from building agents at scale. Plus why an API gateway is the secret weapon for agent development.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep012.mp3" length="7058880" type="audio/mpeg"/>
+      <guid>ep012-building-ai-agents-tool-calling</guid>
+      <pubDate>Thu, 02 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>441</itunes:duration>
+      <itunes:episode>12</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+
+    <item>
       <title>EP011: AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux</title>
       <description>We compare the three biggest AI image generation APIs head-to-head: DALL-E 3, Midjourney, and Flux from Black Forest Labs. Quality, pricing, developer experience, and when to use each one. Plus how an API gateway lets you use all three through a single endpoint.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep011.mp3" length="2205648" type="audio/mpeg"/>
