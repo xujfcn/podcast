@@ -23,6 +23,16 @@
 
 
     <item>
+      <title>EP013: Self-Hosting vs API Gateway — The Real Cost of Running Your Own AI Models</title>
+      <description>Should you self-host AI models or use an API gateway? We break down the true costs of running Llama 4 and DeepSeek on your own GPUs versus paying per token, cover the five scenarios where self-hosting wins, explain the hybrid approach smart teams are using, and show why an API gateway like Crazyrouter gives you the best of both worlds.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep013.mp3" length="6899565" type="audio/mpeg"/>
+      <guid>ep013-self-hosting-vs-api-gateway</guid>
+      <pubDate>Thu, 03 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>345</itunes:duration>
+      <itunes:episode>13</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+    <item>
       <title>EP012: Building AI Agents with Tool Calling — A Practical Guide</title>
       <description>Tool calling is what turns a chatbot into an agent. We break down how GPT-5, Claude, and Gemini handle function calling, walk through building your first agent in 30 lines of Python, cover multi-tool patterns for production, and share four hard-won lessons from building agents at scale. Plus why an API gateway is the secret weapon for agent development.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep012.mp3" length="7058880" type="audio/mpeg"/>
