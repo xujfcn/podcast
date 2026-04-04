@@ -23,6 +23,17 @@
 
 
     <item>
+      <title>EP014: Top 5 AI Coding Assistants in 2026</title>
+      <description>We rank the top five AI coding assistants in 2026 — from Amazon Q Developer and Windsurf at the bottom, through GitHub Copilot, all the way up to Cursor and Claude Code at the top. Plus the meta trend that's turning autocomplete into autonomous agents, and why API gateways are becoming a secret weapon for power developers.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep014.mp3" length="7565805" type="audio/mpeg"/>
+      <guid>ep014-top-5-ai-coding-assistants-2026</guid>
+      <pubDate>Sat, 04 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>378</itunes:duration>
+      <itunes:episode>14</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+
+    <item>
       <title>EP013: Self-Hosting vs API Gateway — The Real Cost of Running Your Own AI Models</title>
       <description>Should you self-host AI models or use an API gateway? We break down the true costs of running Llama 4 and DeepSeek on your own GPUs versus paying per token, cover the five scenarios where self-hosting wins, explain the hybrid approach smart teams are using, and show why an API gateway like Crazyrouter gives you the best of both worlds.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep013.mp3" length="6899565" type="audio/mpeg"/>
