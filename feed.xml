@@ -23,6 +23,17 @@
 
 
     <item>
+      <title>EP015: AI API Security Best Practices for Production Apps</title>
+      <description>Five essential security practices every developer needs when shipping AI-powered apps to production. We cover API key management, spending caps, prompt injection defense, data privacy, and monitoring — plus why an API gateway is your first line of defense.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep015.mp3" length="5478189" type="audio/mpeg"/>
+      <guid>ep015-ai-api-security-best-practices</guid>
+      <pubDate>Sat, 05 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>342</itunes:duration>
+      <itunes:episode>15</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+
+    <item>
       <title>EP014: Top 5 AI Coding Assistants in 2026</title>
       <description>We rank the top five AI coding assistants in 2026 — from Amazon Q Developer and Windsurf at the bottom, through GitHub Copilot, all the way up to Cursor and Claude Code at the top. Plus the meta trend that's turning autocomplete into autonomous agents, and why API gateways are becoming a secret weapon for power developers.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep014.mp3" length="7565805" type="audio/mpeg"/>
