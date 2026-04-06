@@ -1,0 +1,59 @@
+Hey everyone, welcome back to The Crazyrouter Podcast — your go-to show for AI developer tools and API insights. I'm your host, and today we're diving into a question every developer building with LLMs faces at some point: should you use streaming or non-streaming API calls?
+
+This might sound like a minor implementation detail, but the choice has real implications for user experience, cost, and even reliability. Let's break it all down.
+
+First, let's clarify what we're talking about.
+
+With a standard, non-streaming API call, you send your prompt to the model and wait. The model processes everything, generates the complete response, and sends it back as one chunk. Simple. Clean. One request, one response.
+
+With streaming, you send the same request, but the response comes back in small pieces — token by token or chunk by chunk — as the model generates them. Technically, this uses Server-Sent Events, or SSE. Your application receives a continuous flow of data, displaying each piece as it arrives.
+
+Think of it like ordering food. Non-streaming is like ordering takeout — you wait, and everything arrives at once. Streaming is like sitting at a sushi conveyor belt — pieces arrive as they're ready.
+
+Here's where it gets interesting for performance.
+
+The total generation time is roughly the same whether you stream or not. The model still has to generate every token either way. But there are two key metrics that differ dramatically.
+
+Time to First Token — or TTFT — is how quickly the user sees the first piece of the response. With streaming, this can be as fast as 200 to 500 milliseconds. With non-streaming, users stare at a loading spinner for the entire generation time, which could be 3, 5, even 15 seconds for longer responses.
+
+Then there's perceived latency. This is the psychological factor. When users see text appearing word by word, the experience feels fast and responsive, even if the total time is identical. Studies consistently show that progressive loading feels 40 to 60 percent faster to users than waiting for a complete response.
+
+Streaming shines in several scenarios.
+
+Chatbots and conversational interfaces are the obvious one. Any time a human is watching the screen waiting for a response, streaming creates a dramatically better experience. This is why ChatGPT, Claude, and every major AI chat interface streams by default.
+
+Real-time dashboards and monitoring tools benefit too. If you're processing data or generating reports, showing partial results keeps users engaged.
+
+Long-form content generation is another sweet spot. When you're generating articles, code, or analysis that might take 10 to 20 seconds, streaming prevents users from thinking the app has frozen.
+
+But streaming isn't always the right choice.
+
+Backend processing and pipelines are the prime example. If no human is watching — you're running batch jobs, preprocessing data, or chaining multiple API calls — there's no benefit to streaming. Non-streaming is simpler to implement, easier to handle errors for, and you get the complete response in one clean package.
+
+Structured output is another case. When you need JSON responses, function calling results, or any formatted output that needs to be complete before you can parse it, non-streaming makes more sense. Yes, you can buffer a stream and parse at the end, but why add that complexity?
+
+Rate-limited environments also favor non-streaming. Each streaming connection holds an open connection for the entire generation time. If you're managing hundreds of concurrent requests, those persistent connections add up in terms of server resources.
+
+Here's something developers often overlook: the token cost is identical. Whether you stream or not, you're sending the same prompt and getting the same response. The billing is per token, not per connection method.
+
+However, there are indirect cost differences. Streaming connections hold server resources longer. If you're running through a gateway or proxy, persistent connections may affect throughput. And if your infrastructure charges for connection time or concurrent connections, streaming could cost more at the infrastructure level.
+
+On the flip side, streaming can actually save costs in some scenarios. If a user sees the first few tokens of a response and realizes it's going in the wrong direction, they can cancel early — saving the tokens that would have been generated for the rest of an unwanted response.
+
+A few practical tips for implementation.
+
+First, always set a reasonable timeout for both approaches. Non-streaming calls should have a generous timeout since you're waiting for the full response. Streaming calls need both a connection timeout and a chunk timeout — if you haven't received data in a while, something might be wrong.
+
+Second, handle streaming errors gracefully. The connection can drop mid-stream. Build retry logic that can resume or restart cleanly.
+
+Third, consider hybrid approaches. Start with streaming for the user-facing layer, but use non-streaming for backend chains. Many AI gateways, including Crazyrouter, let you toggle streaming with a single parameter — just set stream to true or false in your request body.
+
+And fourth, test both modes with your specific models. Different models have different streaming characteristics. Some models start generating tokens almost instantly, while others have a longer initial processing phase before the first token appears.
+
+So there you have it — streaming versus non-streaming isn't about which one is better. It's about matching the approach to your use case. User-facing? Stream it. Backend pipeline? Keep it simple with non-streaming.
+
+The beauty of using an API gateway like Crazyrouter is that switching between modes is trivial — one boolean parameter — and you get consistent behavior across all 627 plus models. No need to worry about provider-specific streaming implementations.
+
+If you want to experiment with both approaches, head to crazyrouter.com, grab your API key, and start testing. The documentation has code examples for streaming in Python, JavaScript, and curl.
+
+Thanks for listening, and I'll catch you in the next episode. Until then, keep building!

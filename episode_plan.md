@@ -11,23 +11,25 @@
 - EP008 (2026-03-29): The Hidden Costs of Using Multiple AI Providers
 - EP009 (2026-03-30): OpenRouter vs Crazyrouter — An Honest Comparison
 - EP010 (2026-03-31): How to Migrate from OpenAI to a Multi-Model Gateway
+- EP011 (2026-04-01): AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux
+- EP012 (2026-04-02): Building AI Agents with Tool Calling — A Practical Guide
+- EP013 (2026-04-03): Self-Hosting vs API Gateway — When Does Each Make Sense?
+- EP011 (2026-04-01): AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux
+- EP012 (2026-04-02): Building AI Agents with Tool Calling — A Practical Guide
+- EP013 (2026-04-03): Self-Hosting vs API Gateway — When Does Each Make Sense?
+- EP011 (2026-04-01): AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux
+- EP012 (2026-04-02): Building AI Agents with Tool Calling — A Practical Guide
+- EP013 (2026-04-03): Self-Hosting vs API Gateway — When Does Each Make Sense?
+- EP011 (2026-04-01): AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux
+- EP012 (2026-04-02): Building AI Agents with Tool Calling — A Practical Guide
+- EP013 (2026-04-03): Self-Hosting vs API Gateway — When Does Each Make Sense?
+- EP014 (2026-04-04): Top 5 AI Coding Assistants in 2026
+- EP015 (2026-04-05): AI API Security Best Practices for Production Apps
+- EP016 (2026-04-06): Streaming vs Non-Streaming API Calls — Performance Deep Dive
 
 ## 待发布话题队列
 
-### Week 1 (Mar 12-18) — DONE
-- EP008: The Hidden Costs of Using Multiple AI Providers
-
-### Week 2 (Mar 19-25)
-- EP009: OpenRouter vs Crazyrouter — Honest Comparison
-- EP010: How to Migrate from OpenAI to a Multi-Model Gateway
-- EP011: AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux
-- EP012: Token Pricing Explained — Why You're Probably Overpaying
-- EP013: Self-Hosting vs API Gateway — When Does Each Make Sense?
-- EP014: Top 5 AI Coding Assistants in 2026
-- EP015: AI API Security Best Practices for Production Apps
-
-### Week 3 (Mar 26-Apr 1)
-- EP016: Streaming vs Non-Streaming API Calls — Performance Deep Dive
+### Next Up
 - EP017: LangChain + Crazyrouter — Build Agents with 627 Models
 - EP018: AI Model Benchmarks That Actually Matter
 - EP019: Function Calling Across Different AI Models

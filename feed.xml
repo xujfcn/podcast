@@ -23,6 +23,17 @@
 
 
     <item>
+      <title>EP016: Streaming vs Non-Streaming API Calls — Performance Deep Dive</title>
+      <description>Should you stream your LLM API responses or wait for the full result? We break down Time to First Token, perceived latency, the real cost implications, when streaming shines for chatbots and long-form generation, when non-streaming wins for backend pipelines and structured output, and practical implementation tips for both approaches.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep016.mp3" length="7674240" type="audio/mpeg"/>
+      <guid>ep016-streaming-vs-non-streaming-api-calls</guid>
+      <pubDate>Mon, 06 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>479</itunes:duration>
+      <itunes:episode>16</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+    </item>
+
+    <item>
       <title>EP015: AI API Security Best Practices for Production Apps</title>
       <description>Five essential security practices every developer needs when shipping AI-powered apps to production. We cover API key management, spending caps, prompt injection defense, data privacy, and monitoring — plus why an API gateway is your first line of defense.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep015.mp3" length="5478189" type="audio/mpeg"/>
