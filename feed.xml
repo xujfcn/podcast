@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP018: AI Model Benchmarks That Actually Matter</title>
+      <description>Most AI benchmarks — MMLU, HumanEval, GSM8K — don't predict real-world performance. We break down why benchmark scores mislead developers, and reveal the five metrics that actually matter: task-specific accuracy on your own data, p95/p99 latency, cost per successful output, consistency, and instruction following fidelity. Then we apply this framework to the April 2026 model landscape: Claude Opus 4, GPT-4o, DeepSeek V3, and Gemini Flash 2.0.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep018.mp3" length="4569120" type="audio/mpeg"/>
+      <guid>ep018-ai-model-benchmarks-that-actually-matter</guid>
+      <pubDate>Tue, 07 Apr 2026 13:00:00 +0000</pubDate>
+      <itunes:duration>476</itunes:duration>
+      <itunes:episode>18</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP017: LangChain + Crazyrouter — Build Agents with 627 Models</title>
       <description>How to combine LangChain with Crazyrouter for multi-model AI agents. We cover zero-migration setup with ChatOpenAI, cost optimization through per-step model routing, tool calling across providers, and real-world savings of 70-80% — all with one API key and 627+ models.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep017.mp3" length="1885680" type="audio/mpeg"/>
