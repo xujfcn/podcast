@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP019: Function Calling Across Different AI Models</title>
+      <description>Every major AI model supports function calling now — but the implementations vary wildly. We compare GPT-4o, GPT-4.1, Claude Opus 4, Gemini 2.5 Pro, and DeepSeek V3 on tool-use format, parallel calling, JSON schema reliability, and edge cases. Plus: why an API gateway that normalizes function calling across providers saves you from writing four different integration layers.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep019.mp3" length="8188845" type="audio/mpeg"/>
+      <guid>ep019-function-calling-across-different-ai-models</guid>
+      <pubDate>Wed, 08 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>409</itunes:duration>
+      <itunes:episode>19</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP018: AI Model Benchmarks That Actually Matter</title>
       <description>Most AI benchmarks — MMLU, HumanEval, GSM8K — don't predict real-world performance. We break down why benchmark scores mislead developers, and reveal the five metrics that actually matter: task-specific accuracy on your own data, p95/p99 latency, cost per successful output, consistency, and instruction following fidelity. Then we apply this framework to the April 2026 model landscape: Claude Opus 4, GPT-4o, DeepSeek V3, and Gemini Flash 2.0.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep018.mp3" length="4569120" type="audio/mpeg"/>
