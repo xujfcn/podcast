@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP020: The Future of AI APIs — Predictions for 2026-2027</title>
+      <description>Five bold predictions for where AI APIs are heading: model prices drop 80-90%, context windows hit 1M tokens standard, multimodal becomes default, MCP emerges as the universal tool protocol, and intelligent routing replaces the "best model" question. Plus: where the real opportunities are for developers building in 2026-2027.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep020.mp3" length="7624845" type="audio/mpeg"/>
+      <guid>ep020-the-future-of-ai-apis-predictions-2026-2027</guid>
+      <pubDate>Thu, 09 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>381</itunes:duration>
+      <itunes:episode>20</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP019: Function Calling Across Different AI Models</title>
       <description>Every major AI model supports function calling now — but the implementations vary wildly. We compare GPT-4o, GPT-4.1, Claude Opus 4, Gemini 2.5 Pro, and DeepSeek V3 on tool-use format, parallel calling, JSON schema reliability, and edge cases. Plus: why an API gateway that normalizes function calling across providers saves you from writing four different integration layers.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep019.mp3" length="8188845" type="audio/mpeg"/>
