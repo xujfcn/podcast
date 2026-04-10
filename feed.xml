@@ -23,6 +23,18 @@
 
 
     <item>
+      <title>EP021: How Small Teams Use AI Gateways to Ship Faster</title>
+      <description>Five patterns small teams (2–10 engineers) use to ship AI products faster with an API gateway: unified key management, instant model switching without code changes, day-one cost visibility, automatic fallback chains for reliability, and rapid model experimentation. Real patterns from real teams building production AI apps in 2026.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep021.mp3" length="1340205" type="audio/mpeg"/>
+      <guid>ep021-how-small-teams-use-ai-gateways-to-ship-faster</guid>
+      <pubDate>Fri, 10 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>335</itunes:duration>
+      <itunes:episode>21</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+
+    <item>
       <title>EP020: The Future of AI APIs — Predictions for 2026-2027</title>
       <description>Five bold predictions for where AI APIs are heading: model prices drop 80-90%, context windows hit 1M tokens standard, multimodal becomes default, MCP emerges as the universal tool protocol, and intelligent routing replaces the "best model" question. Plus: where the real opportunities are for developers building in 2026-2027.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep020.mp3" length="7624845" type="audio/mpeg"/>
