@@ -17,6 +17,12 @@
 - EP014 (2026-04-04): Top 5 AI Coding Assistants in 2026
 - EP015 (2026-04-05): AI API Security Best Practices for Production Apps
 - EP016 (2026-04-06): Streaming vs Non-Streaming API Calls — Performance Deep Dive
+- EP017 (2026-04-07): ...
+- EP018 (2026-04-07): ...
+- EP019 (2026-04-08): ...
+- EP020 (2026-04-09): The Future of AI APIs — Predictions for 2026-2027
+- EP021 (2026-04-10): How Small Teams Use AI Gateways to Ship Faster
+- EP022 (2026-04-11): Whisper vs Gemini vs DeepSeek for Speech-to-Text ✅
 
 ## 待发布话题队列
 

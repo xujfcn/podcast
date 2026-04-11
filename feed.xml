@@ -25,10 +25,10 @@
     <item>
       <title>EP022: Whisper vs Gemini vs DeepSeek for Speech-to-Text</title>
       <description>A practical comparison of three speech-to-text approaches in 2026: Whisper for raw transcription accuracy, Gemini for integrated audio understanding plus summarization, and DeepSeek for budget-conscious multilingual workflows. Learn which one to use for batch transcription, meeting notes, customer call analysis, and Chinese-English audio pipelines.</description>
-      <enclosure url="https://xujfcn.github.io/podcast/audio/ep022.mp3" length="7363200" type="audio/mpeg"/>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep022.mp3" length="7330560" type="audio/mpeg"/>
       <guid>ep022-whisper-vs-gemini-vs-deepseek-for-speech-to-text</guid>
       <pubDate>Sat, 11 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>368</itunes:duration>
+      <itunes:duration>305</itunes:duration>
       <itunes:episode>22</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
