@@ -21,12 +21,12 @@
 ## 待发布话题队列
 
 ### Next Up
-- EP017: LangChain + Crazyrouter — Build Agents with 627 Models
-- EP018: AI Model Benchmarks That Actually Matter
-- EP019: Function Calling Across Different AI Models
-- EP020: The Future of AI APIs — Predictions for 2026-2027
-- EP021: How Small Teams Use AI Gateways to Ship Faster
-- EP022: Whisper vs Gemini vs DeepSeek for Speech-to-Text
+- EP023: Embedding Models Compared
+- EP024: AI for Non-English Languages
+- EP025: Building RAG Pipelines with Multiple Models
+- EP026: AI API Monitoring and Observability
+- EP027: Claude vs GPT for Code Generation
+- EP028: Vision Models Compared — GPT-4V vs Gemini vs Claude
 
 ### Week 4+ (备用话题)
 - Embedding Models Compared

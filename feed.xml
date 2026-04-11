@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP022: Whisper vs Gemini vs DeepSeek for Speech-to-Text</title>
+      <description>A practical comparison of three speech-to-text approaches in 2026: Whisper for raw transcription accuracy, Gemini for integrated audio understanding plus summarization, and DeepSeek for budget-conscious multilingual workflows. Learn which one to use for batch transcription, meeting notes, customer call analysis, and Chinese-English audio pipelines.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep022.mp3" length="7363200" type="audio/mpeg"/>
+      <guid>ep022-whisper-vs-gemini-vs-deepseek-for-speech-to-text</guid>
+      <pubDate>Sat, 11 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>368</itunes:duration>
+      <itunes:episode>22</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP021: How Small Teams Use AI Gateways to Ship Faster</title>
       <description>Five patterns small teams (2–10 engineers) use to ship AI products faster with an API gateway: unified key management, instant model switching without code changes, day-one cost visibility, automatic fallback chains for reliability, and rapid model experimentation. Real patterns from real teams building production AI apps in 2026.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep021.mp3" length="1340205" type="audio/mpeg"/>
