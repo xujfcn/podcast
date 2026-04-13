@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP024: AI for Non-English Languages — Why Multilingual Support Is the Next Frontier</title>
+      <description>Over 60% of the world's internet users don't speak English as their first language — so how well do AI models actually perform in Chinese, Japanese, Arabic, Hindi, and more? We break down multilingual performance across GPT-4o, Claude Opus 4, and Gemini 2.5 Pro, expose the hidden tokenization costs that inflate your API bills for non-English text, and give four practical strategies for building AI products that work globally. Plus: why DeepSeek V3 is the smart choice for Chinese-language workloads.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep024.mp3" length="1325520" type="audio/mpeg"/>
+      <guid>ep024-ai-for-non-english-languages-multilingual-support</guid>
+      <pubDate>Mon, 13 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>331</itunes:duration>
+      <itunes:episode>24</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP023: Embedding Models Compared — Which One Should You Actually Use?</title>
       <description>A practical comparison of five embedding models developers are using in production: OpenAI text-embedding-3, Cohere embed-v4, Google Gemini embedding, Voyage AI voyage-3, and open-source BGE-M3. We cover retrieval quality, dimension size and storage cost, latency, and multilingual support — plus why your chunking strategy matters more than your model choice.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep023.mp3" length="6666720" type="audio/mpeg"/>
@@ -155,6 +168,7 @@
       <itunes:episode>13</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
     </item>
+
     <item>
       <title>EP012: Building AI Agents with Tool Calling — A Practical Guide</title>
       <description>Tool calling is what turns a chatbot into an agent. We break down how GPT-5, Claude, and Gemini handle function calling, walk through building your first agent in 30 lines of Python, cover multi-tool patterns for production, and share four hard-won lessons from building agents at scale. Plus why an API gateway is the secret weapon for agent development.</description>
