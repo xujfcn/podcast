@@ -23,6 +23,19 @@
 
 
     <item>
+      <title>EP026: AI Video Generation APIs in 2026 — Kling, Runway, Veo, and Wan Compared</title>
+      <description>A practical comparison of four AI video generation APIs developers are integrating in 2026: Kling for best quality-to-cost ratio, Runway Gen-4 for premium stylistic control, Google Veo 3 for native audio generation, and Wan for budget-friendly high-volume use. We cover generation time, consistency, resolution limits, real cost analysis, and the smart multi-provider strategy for building video features into your product.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep026.mp3" length="7685805" type="audio/mpeg"/>
+      <guid>ep026-ai-video-generation-apis-kling-runway-veo-wan-compared</guid>
+      <pubDate>Tue, 15 Apr 2026 08:00:00 +0000</pubDate>
+      <itunes:duration>384</itunes:duration>
+      <itunes:episode>26</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP025: Prompt Caching Deep Dive — How to Save 80% on Repeated API Calls</title>
       <description>If you're making repeated API calls with large system prompts, you're throwing money away. We go deep on prompt caching across OpenAI, Anthropic Claude, Google Gemini, and DeepSeek — how each implementation works, the real pricing differences (from 50% to 90% off), and five concrete patterns for maximizing cache efficiency in production. Plus the gotchas around cache invalidation and why an API gateway lets you route to the best cache pricing for your workload.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep025.mp3" length="2676477" type="audio/mpeg"/>
