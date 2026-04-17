@@ -1,0 +1,11 @@
+Three — reliability. If a provider has frequent outages, you need a fallback. Running two providers costs more than one, but less than downtime.
+When you factor in rate limits, latency, and reliability, the true cost of using AI APIs is often two to three times the raw token price.
+Here's something most people haven't noticed — providers are experimenting with completely different pricing structures.
+OpenAI still charges per token. Anthropic charges per token but with aggressive prompt caching discounts. Google offers a free tier up to a certain rate limit and then charges per token. DeepSeek has different pricing for cache hits versus misses.
+Some providers are moving toward subscription models for API access. Others are experimenting with commitment-based discounts — commit to a certain spend level and get a lower rate.
+This divergence makes it even harder to do apples-to-apples comparisons. Which is exactly why having a unified gateway that normalizes pricing across providers is becoming essential infrastructure.
+Prices will keep falling, but not uniformly. Frontier models — the absolute best performers — will maintain premium pricing. But the tier just below frontier will become nearly free.
+We're heading toward a world where basic AI capabilities — summarization, classification, simple Q&A — cost essentially nothing. The premium will be on reasoning, long-context, and specialized capabilities.
+For developers, the strategy is clear: don't lock into one provider, don't optimize for today's prices, and build your architecture to route between models as the landscape shifts.
+The AI pricing war is great for developers. But navigating it requires staying on top of a constantly shifting landscape. The winners will be teams that can dynamically route to the best model for each task at the best price — without rewriting their code every time a provider changes their pricing.
+That's it for today. If you want one API key that automatically gives you access to six hundred plus models at competitive pricing, check out crazyrouter.com. See you next episode.

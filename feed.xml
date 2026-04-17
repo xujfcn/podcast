@@ -19,6 +19,19 @@
 
 
     <item>
+      <title>EP030: The AI Pricing War — Why Model Costs Dropped 90% in One Year</title>
+      <description>AI API pricing has collapsed over the past twelve months — GPT-4 went from $30/M to $2.50/M, DeepSeek came in at $0.27/M. We break down what's driving the price war (competition, inference efficiency, open source pressure), the hidden costs most developers miss (rate limits, latency, reliability), and why the smart strategy is dynamic model routing instead of locking into one provider.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep030.mp3" length="6140640" type="audio/mpeg" />
+      <guid>ep030-ai-pricing-war-why-model-costs-dropped-90-percent</guid>
+      <pubDate>Thu, 17 Apr 2026 21:00:00 +0000</pubDate>
+      <ns1:duration>307</ns1:duration>
+      <ns1:episode>30</ns1:episode>
+      <ns1:episodeType>full</ns1:episodeType>
+      <ns1:explicit>false</ns1:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP029: AI Gateway Architecture — How It Works Under the Hood</title>
       <description>What actually happens between your API request and the model provider? We break down the six layers of an AI API gateway: request normalization, key management, smart routing and failover, streaming relay, observability, and cost controls. Plus: when you need a gateway and when you don't.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep029.mp3" length="6127725" type="audio/mpeg" />
