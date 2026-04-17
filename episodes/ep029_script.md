@@ -1,0 +1,79 @@
+# EP029: AI Gateway Architecture — How It Works Under the Hood
+
+Welcome back to AI Dev Tools, the Crazyrouter Podcast. Today we're going behind the scenes to talk about something most developers use but rarely think about — how an AI API gateway actually works under the hood.
+
+If you've ever used an API gateway to access GPT, Claude, Gemini, or DeepSeek through a single endpoint, you might wonder: what's actually happening between your request and the model provider? Is it just a proxy? A load balancer? Something more?
+
+Let's break it down.
+
+## What is an AI API gateway?
+
+At its simplest, an AI API gateway sits between your application and multiple AI model providers. You send one request using a standard format — usually OpenAI-compatible — and the gateway routes it to the right provider, handles authentication, and returns the response.
+
+But a good gateway does a lot more than just forwarding requests.
+
+## Layer one: Request normalization
+
+The first thing a gateway does is normalize your request. Different providers have slightly different API formats. OpenAI uses one schema, Anthropic uses another, Google has its own.
+
+A gateway translates your single request format into whatever the target provider expects. You write your code once, and the gateway handles the translation layer. That's why you can switch from GPT to Claude to Gemini without changing a single line of application code.
+
+This sounds simple, but the edge cases are brutal. Streaming formats differ. Tool calling schemas differ. Image input handling differs. A well-built gateway smooths all of that out.
+
+## Layer two: Authentication and key management
+
+Instead of managing API keys for five different providers, you use one key from the gateway. The gateway holds the provider keys securely and injects them into outbound requests.
+
+This is a bigger deal than it sounds. In production, you might have different keys for different rate limit tiers, backup keys for failover, and keys that rotate on a schedule. The gateway manages all of that so your application code stays clean.
+
+## Layer three: Routing and load balancing
+
+This is where it gets interesting. A smart gateway doesn't just forward to one provider — it makes routing decisions.
+
+Maybe you want the cheapest model for simple tasks and the most capable model for complex ones. Maybe you want to route to a specific region for latency. Maybe you want automatic failover — if OpenAI returns a 500, retry on Anthropic.
+
+The routing layer handles model selection, provider failover, rate limit management, and cost optimization. Some gateways let you define routing rules. Others do it automatically based on the model you request.
+
+## Layer four: Streaming and response handling
+
+Most modern AI applications use streaming — tokens arrive one at a time instead of waiting for the full response. The gateway needs to handle streaming connections from the provider and relay them back to your client in real time.
+
+This means maintaining long-lived connections, handling backpressure when the client reads slowly, and gracefully recovering if the provider stream drops mid-response.
+
+For non-streaming requests, the gateway can also do post-processing — logging token usage, calculating costs, and adding metadata to the response.
+
+## Layer five: Observability
+
+A production gateway logs every request. Not just success or failure, but latency, token counts, cost, which model was used, and whether any retries happened.
+
+This gives you a single dashboard for all your AI usage across every provider. You can see which models are fastest, which are cheapest for your workload, and where errors are happening.
+
+Without a gateway, you'd need to build this observability layer separately for each provider. With a gateway, it comes built in.
+
+## Layer six: Cost controls
+
+AI API costs can surprise you. A gateway can enforce spending limits, track per-user or per-project budgets, and alert you before you blow through your monthly allocation.
+
+Some gateways also optimize costs automatically — caching identical requests, routing to cheaper models when quality requirements allow, and batching where possible.
+
+## The performance question
+
+Developers always ask: doesn't adding a gateway add latency?
+
+The honest answer is yes, but less than you'd think. A well-built gateway adds single-digit milliseconds of overhead. For a typical LLM request that takes one to ten seconds, that's noise.
+
+And the gateway often saves time in other ways — faster failover means fewer total failures, and smart routing can actually reduce average latency by picking the fastest available provider.
+
+## When you don't need a gateway
+
+If you're using exactly one model from exactly one provider and you never plan to change, a gateway adds complexity you don't need. Just call the API directly.
+
+But the moment you use two providers, or want failover, or need cost tracking, or plan to experiment with new models — a gateway pays for itself immediately.
+
+## Bottom line
+
+An AI API gateway is not just a proxy. It's a normalization layer, a key manager, a router, a streaming relay, an observability platform, and a cost controller — all in one.
+
+The best part is you don't have to build any of this yourself.
+
+That's it for today. If you want to try a gateway that handles all six layers through one API key, check out crazyrouter.com. See you next episode.
