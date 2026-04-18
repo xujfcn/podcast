@@ -19,6 +19,19 @@
 
 
     <item>
+      <title>EP031: Claude Opus 4.7 Is Here — What Developers Need to Know</title>
+      <description>Claude Opus 4.7 is now live and stable on Crazyrouter with a 15% price reduction, bringing it in line with Opus 4.6 pricing. We cover the key improvements in extended thinking, coding accuracy, and instruction following — plus when to use Opus vs Sonnet, and why dynamic model routing is the smart strategy for 2026.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep031.mp3" length="5262720" type="audio/mpeg" />
+      <guid>ep031-claude-opus-47-is-here-what-developers-need-to-know</guid>
+      <pubDate>Fri, 18 Apr 2026 14:00:00 +0000</pubDate>
+      <ns1:duration>263</ns1:duration>
+      <ns1:episode>31</ns1:episode>
+      <ns1:episodeType>full</ns1:episodeType>
+      <ns1:explicit>false</ns1:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP030: The AI Pricing War — Why Model Costs Dropped 90% in One Year</title>
       <description>AI API pricing has collapsed over the past twelve months — GPT-4 went from $30/M to $2.50/M, DeepSeek came in at $0.27/M. We break down what's driving the price war (competition, inference efficiency, open source pressure), the hidden costs most developers miss (rate limits, latency, reliability), and why the smart strategy is dynamic model routing instead of locking into one provider.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep030.mp3" length="6140640" type="audio/mpeg" />
