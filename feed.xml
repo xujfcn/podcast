@@ -19,6 +19,19 @@
 
 
     <item>
+      <title>EP032: MCP — The Protocol That's Connecting AI to Everything</title>
+      <description>MCP — the Model Context Protocol — is the hottest topic in AI developer tooling right now. We break down what MCP actually is, why developers are excited about composable tool integrations, how it works in practice with coding assistants and AI agents, and what it means for API gateways like Crazyrouter. Plus: when to adopt MCP and how to get started.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep032.mp3" length="6721965" type="audio/mpeg" />
+      <guid>ep032-mcp-the-protocol-thats-connecting-ai-to-everything</guid>
+      <pubDate>Sat, 19 Apr 2026 08:00:00 +0000</pubDate>
+      <ns1:duration>336</ns1:duration>
+      <ns1:episode>32</ns1:episode>
+      <ns1:episodeType>full</ns1:episodeType>
+      <ns1:explicit>false</ns1:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+    <item>
       <title>EP031: Claude Opus 4.7 Is Here — What Developers Need to Know</title>
       <description>Claude Opus 4.7 is now live and stable on Crazyrouter with a 15% price reduction, bringing it in line with Opus 4.6 pricing. We cover the key improvements in extended thinking, coding accuracy, and instruction following — plus when to use Opus vs Sonnet, and why dynamic model routing is the smart strategy for 2026.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep031.mp3" length="5262720" type="audio/mpeg" />

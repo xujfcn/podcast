@@ -1,0 +1,13 @@
+EP032: MCP — The Protocol That's Connecting AI to Everything
+Welcome back to AI Dev Tools, the Crazyrouter Podcast. I'm your host, and today we're diving into one of the hottest topics in the AI developer ecosystem right now — MCP, the Model Context Protocol.
+If you've been paying attention to AI tooling in 2026, you've probably seen MCP mentioned everywhere — on GitHub, in dev communities, in product launches. But there's still a lot of confusion about what it actually is, why it matters, and whether you should care. Let's clear that up.
+What Is MCP?
+MCP stands for Model Context Protocol. It's an open standard originally introduced by Anthropic that defines how AI models connect to external tools and data sources. Think of it as a universal adapter — instead of writing custom integration code for every tool your AI agent needs to use, MCP gives you a standardized way to plug things in.
+Before MCP, if you wanted your AI agent to search the web, read files, query a database, and call an API, you had to write separate tool definitions and handlers for each one. Every framework did it differently. LangChain had its own tool format. OpenAI had function calling. Anthropic had tool use. They were all slightly different, and none of them talked to each other.
+MCP changes that by providing a single protocol that any AI model can use to discover and interact with external capabilities. An MCP server exposes tools, resources, and prompts in a standardized format. An MCP client — which could be Claude, GPT, or any other model — connects to that server and can immediately use whatever it offers.
+Why Developers Are Excited
+The reason MCP has gained so much traction is composability. Once a tool is wrapped as an MCP server, any AI client can use it. Build a Slack MCP server once, and it works with Claude Code, with OpenClaw, with Cursor, with any MCP-compatible agent framework.
+This is a huge deal for the ecosystem. Instead of every AI tool reinventing integrations, we're moving toward a world where integrations are write-once, use-everywhere. The MCP server registry is growing fast — there are already servers for GitHub, databases, file systems, web browsing, email, calendar, and hundreds more.
+For AI agent builders, this means you can focus on the agent logic — the reasoning, the planning, the decision-making — and let MCP handle the plumbing of connecting to external services.
+How MCP Works in Practice
+Let me give you a concrete example. Say you're building an AI coding assistant. Without MCP, you'd need to implement file reading, terminal access, git operations, and code search as custom tools — probably a few hundred lines of integration code per tool.
