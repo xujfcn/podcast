@@ -393,5 +393,20 @@
       <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
     </item>
 
-  <item><title>EP027: Claude vs GPT for Code Generation — Which One Should You Use in 2026?</title><description>Claude or GPT for code generation? We compare strengths, weaknesses, and the smart routing strategy that lets you use both through one API. Plus: what Claude 5 and GPT-6 mean for code generation.</description><pubDate>Thu, 16 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep027.mp3" length="4337280" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep027.mp3</guid><ns1:duration>4:31</ns1:duration><ns1:episode>27</ns1:episode></item><item><title>EP028: Vision Models Compared — GPT-4V vs Gemini vs Claude</title><description>A practical comparison of GPT vision models, Gemini vision, and Claude vision for screenshots, documents, diagrams, and multimodal developer workflows.</description><pubDate>Thu, 16 Apr 2026 10:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep028.mp3" length="5473005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep028.mp3</guid><ns1:duration>5:42</ns1:duration><ns1:episode>28</ns1:episode></item></channel>
+  <item><title>EP027: Claude vs GPT for Code Generation — Which One Should You Use in 2026?</title><description>Claude or GPT for code generation? We compare strengths, weaknesses, and the smart routing strategy that lets you use both through one API. Plus: what Claude 5 and GPT-6 mean for code generation.</description><pubDate>Thu, 16 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep027.mp3" length="4337280" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep027.mp3</guid><ns1:duration>4:31</ns1:duration><ns1:episode>27</ns1:episode></item><item><title>EP028: Vision Models Compared — GPT-4V vs Gemini vs Claude</title><description>A practical comparison of GPT vision models, Gemini vision, and Claude vision for screenshots, documents, diagrams, and multimodal developer workflows.</description><pubDate>Thu, 16 Apr 2026 10:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep028.mp3" length="5473005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep028.mp3</guid><ns1:duration>5:42</ns1:duration><ns1:episode>28</ns1:episode></item>
+
+    <item>
+      <title>EP033: AI Agents in Production — Lessons from the First Wave</title>
+      <description>The gap between a cool agent demo and a reliable production agent is enormous. We share the five hardest lessons from the first wave of production AI agents: designing for non-determinism, controlling cost explosion with model routing, building error recovery before features, making observability non-negotiable, and earning user trust gradually through progressive autonomy.</description>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep033.mp3" length="6217965" type="audio/mpeg" />
+      <guid>ep033-ai-agents-in-production-lessons-from-the-first-wave</guid>
+      <pubDate>Sun, 20 Apr 2026 08:00:00 +0000</pubDate>
+      <ns1:duration>311</ns1:duration>
+      <ns1:episode>33</ns1:episode>
+      <ns1:episodeType>full</ns1:episodeType>
+      <ns1:explicit>false</ns1:explicit>
+      <link>https://crazyrouter.com?utm_source=podcast&amp;utm_medium=audio&amp;utm_campaign=dev_community</link>
+    </item>
+
+  </channel>
 </rss>

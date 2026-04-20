@@ -1,0 +1,14 @@
+Lesson Three: Error Recovery Is the Whole Game
+In demos, agents succeed on the happy path. In production, they fail constantly — API timeouts, malformed tool responses, rate limits, unexpected data formats, ambiguous user instructions. The difference between a toy agent and a production agent is entirely in how it handles failure.
+The best pattern we've seen is what some teams call graceful degradation with human escalation. The agent retries with backoff. If that fails, it tries an alternative approach. If that fails, it asks the user for clarification or hands off to a human. At no point does it silently fail or hallucinate a result.
+Build your error handling before your features. Seriously. The agent that handles ten tools with robust error recovery beats the agent that handles fifty tools but crashes on edge cases.
+Lesson Four: Observability Is Non-Negotiable
+You cannot debug an agent in production without traces. Every tool call, every LLM request, every decision point needs to be logged with enough context to replay the session. When a user reports the agent did something weird, you need to see exactly what happened — what the model saw, what it decided, what tools it called, and what came back.
+The good news is the tooling is catching up. OpenTelemetry traces for LLM calls, structured logging for tool interactions, and cost tracking per session are becoming standard. If your API gateway already tracks requests and costs — like Crazyrouter does — you're halfway there. Layer agent-level tracing on top and you have full visibility.
+Lesson Five: Users Don't Trust Agents Yet
+This is the most underrated lesson. Even when your agent works perfectly, users are skeptical. They've been burned by chatbots that hallucinate, by automations that go wrong, by AI that confidently does the wrong thing.
+The winning pattern is progressive trust. Start with the agent suggesting actions, not executing them. Let users approve before the agent acts. Show your work — display the reasoning, the sources, the confidence level. Over time, as users build trust, you can increase autonomy. But starting with full autonomy is a recipe for support tickets and churn.
+The Bottom Line
+Production AI agents are real and they're delivering value. But they require a different engineering mindset than traditional software. Design for non-determinism. Control costs with model routing. Invest heavily in error recovery and observability. And earn user trust gradually.
+The teams getting this right are shipping agents that actually work — not just in demos, but in the messy, unpredictable real world. And the infrastructure layer — model routing, cost control, reliability — is what makes it possible.
+That's the wrap for today. If you're building agents and want access to every model through one endpoint, check out crazyrouter.com — one API key, all the models, lower than official pricing. See you next episode.

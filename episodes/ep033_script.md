@@ -1,0 +1,45 @@
+# EP033: AI Agents in Production — Lessons from the First Wave
+
+Welcome back to AI Dev Tools, the Crazyrouter Podcast. I'm your host, and today we're talking about something every AI developer is grappling with right now — taking AI agents from demo to production.
+
+2026 has been the year of AI agents. Every framework, every startup, every big tech company is shipping agent capabilities. But here's the thing most people don't talk about: the gap between a cool agent demo and a reliable production agent is enormous. Today I'm sharing the five hardest lessons from the first wave of production AI agents.
+
+## Lesson One: Determinism Is a Spectrum
+
+The first thing that hits you in production is that agents are non-deterministic. The same input can produce different tool call sequences, different reasoning paths, different outputs. In a demo, that's fine. In production, when you need consistent behavior for billing, compliance, or user expectations — it's a problem.
+
+The practical solution isn't to force determinism. It's to design for non-determinism. That means building guardrails around outputs rather than trying to control the reasoning path. Validate the result, not the process. Use structured output schemas. Set temperature to zero for critical steps. And always have a fallback path when the agent goes off-script.
+
+## Lesson Two: Cost Explodes with Autonomy
+
+Here's a number that surprises people: a single autonomous agent session can easily burn through fifty to a hundred thousand tokens. If your agent is doing research, planning, executing tools, and self-correcting — that's multiple LLM calls per task, each with a growing context window.
+
+The teams that survive this use model routing aggressively. Planning steps go to a powerful model like Claude Opus or GPT-5. Simple tool calls and formatting go to a fast, cheap model like GPT-4o-mini or DeepSeek. Summarization and compression happen between steps to keep context windows manageable. This is exactly where an API gateway pays for itself — you route each step to the right model at the right price, through one API key.
+
+## Lesson Three: Error Recovery Is the Whole Game
+
+In demos, agents succeed on the happy path. In production, they fail constantly — API timeouts, malformed tool responses, rate limits, unexpected data formats, ambiguous user instructions. The difference between a toy agent and a production agent is entirely in how it handles failure.
+
+The best pattern we've seen is what some teams call "graceful degradation with human escalation." The agent retries with backoff. If that fails, it tries an alternative approach. If that fails, it asks the user for clarification or hands off to a human. At no point does it silently fail or hallucinate a result.
+
+Build your error handling before your features. Seriously. The agent that handles ten tools with robust error recovery beats the agent that handles fifty tools but crashes on edge cases.
+
+## Lesson Four: Observability Is Non-Negotiable
+
+You cannot debug an agent in production without traces. Every tool call, every LLM request, every decision point needs to be logged with enough context to replay the session. When a user reports "the agent did something weird," you need to see exactly what happened — what the model saw, what it decided, what tools it called, and what came back.
+
+The good news is the tooling is catching up. OpenTelemetry traces for LLM calls, structured logging for tool interactions, and cost tracking per session are becoming standard. If your API gateway already tracks requests and costs — like Crazyrouter does — you're halfway there. Layer agent-level tracing on top and you have full visibility.
+
+## Lesson Five: Users Don't Trust Agents Yet
+
+This is the most underrated lesson. Even when your agent works perfectly, users are skeptical. They've been burned by chatbots that hallucinate, by automations that go wrong, by AI that confidently does the wrong thing.
+
+The winning pattern is progressive trust. Start with the agent suggesting actions, not executing them. Let users approve before the agent acts. Show your work — display the reasoning, the sources, the confidence level. Over time, as users build trust, you can increase autonomy. But starting with full autonomy is a recipe for support tickets and churn.
+
+## The Bottom Line
+
+Production AI agents are real and they're delivering value. But they require a different engineering mindset than traditional software. Design for non-determinism. Control costs with model routing. Invest heavily in error recovery and observability. And earn user trust gradually.
+
+The teams getting this right are shipping agents that actually work — not just in demos, but in the messy, unpredictable real world. And the infrastructure layer — model routing, cost control, reliability — is what makes it possible.
+
+That's the wrap for today. If you're building agents and want access to every model through one endpoint, check out crazyrouter.com — one API key, all the models, lower than official pricing. See you next episode.
