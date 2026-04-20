@@ -400,7 +400,7 @@
       <description>The gap between a cool agent demo and a reliable production agent is enormous. We share the five hardest lessons from the first wave of production AI agents: designing for non-determinism, controlling cost explosion with model routing, building error recovery before features, making observability non-negotiable, and earning user trust gradually through progressive autonomy.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep033.mp3" length="6217965" type="audio/mpeg" />
       <guid>ep033-ai-agents-in-production-lessons-from-the-first-wave</guid>
-      <pubDate>Sun, 20 Apr 2026 08:00:00 +0000</pubDate>
+      <pubDate>Mon, 20 Apr 2026 08:00:00 +0000</pubDate>
       <ns1:duration>311</ns1:duration>
       <ns1:episode>33</ns1:episode>
       <ns1:episodeType>full</ns1:episodeType>
