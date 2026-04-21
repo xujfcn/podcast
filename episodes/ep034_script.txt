@@ -1,0 +1,34 @@
+EP034: Qwen 3.6 Max Preview — China's AI Models Are Catching Up Fast
+
+[INTRO]
+Hey everyone, welcome back to AI Dev Tools — The Crazyrouter Podcast. I'm your host, and today we're talking about something that just dropped and is already making waves on Hacker News with over 600 upvotes: Qwen 3.6 Max Preview from Alibaba Cloud.
+
+[SEGMENT 1: What Is Qwen 3.6 Max?]
+So Qwen — that's Alibaba's large language model family — just released a preview of their 3.6 Max model. And the benchmarks are turning heads. We're talking performance that's competitive with Claude Sonnet and GPT-4o on reasoning, coding, and math tasks. Not just close — in some benchmarks, it's actually ahead.
+
+This matters because for a long time, the narrative was simple: OpenAI leads, Anthropic is the thoughtful alternative, and everyone else is playing catch-up. But that story is changing fast. Qwen, DeepSeek, and other Chinese AI labs are shipping models that genuinely compete at the frontier.
+
+[SEGMENT 2: Why Developers Should Care]
+Here's the practical angle. If you're building AI-powered applications, model diversity is your friend. Why? Three reasons.
+
+First, cost. Chinese models tend to be significantly cheaper per token. We're talking 50 to 70 percent less than GPT-4o for comparable quality on many tasks.
+
+Second, latency. Different models have different speed profiles. Qwen models are often faster on certain workloads, especially multilingual tasks and structured data extraction.
+
+Third, redundancy. If your app depends on a single model provider and they have an outage — which happens more than you'd think — you're dead in the water. Having Qwen as a fallback alongside Claude and GPT means your app stays up.
+
+[SEGMENT 3: The Model Routing Advantage]
+This is exactly why model routing through an API gateway matters. With Crazyrouter, you don't have to choose one model. You set up routing rules: send coding tasks to Claude, send multilingual tasks to Qwen, send general chat to GPT-4o, and let the gateway handle the switching.
+
+When Qwen 3.6 Max goes from preview to stable, you flip one config line and your app is using it. No SDK changes, no new API keys, no deployment. That's the power of having 200-plus models behind one API key.
+
+[SEGMENT 4: The Bigger Picture]
+We're also seeing interesting developments in model verification. Kimi just launched a vendor verifier tool that lets you check whether inference providers are actually running the model they claim to be running. This is a real problem — some providers quietly swap in smaller, cheaper models and charge you for the premium one.
+
+At Crazyrouter, we route to official endpoints and verified providers, so you know you're getting what you're paying for. But the fact that verification tools are now needed tells you how fast this market is growing and how important trust is.
+
+[SEGMENT 5: What's Next]
+Looking ahead, expect Qwen 3.6 Max to go stable within weeks. We'll have it available on Crazyrouter as soon as it does. We're also watching the 1.58-bit quantization research — imagine running frontier-quality models at a fraction of the compute cost. That's not science fiction anymore; it's active research shipping real results.
+
+[OUTRO]
+That's it for today. If you're building with AI APIs and want to try Qwen alongside Claude and GPT without managing three different integrations, check out crazyrouter.com. One API key, 200-plus models, and you can switch between them in one line of code. See you next episode.
