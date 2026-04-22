@@ -1,0 +1,2 @@
+If you've been waiting to integrate Claude into your product, there's no better time. And if you're already using it, switching to 4.7 is a free upgrade.
+That's the wrap for today. Claude Opus 4.7 is live, it's stable, and it's now priced the same as 4.6 on Crazyrouter. Try it at crazyrouter.com — one API key, all the models. See you next episode.

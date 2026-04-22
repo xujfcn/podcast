@@ -1,0 +1,15 @@
+Welcome back to AI Dev Tools, the Crazyrouter Podcast. Today we're going behind the scenes to talk about something most developers use but rarely think about — how an AI API gateway actually works under the hood.
+If you've ever used an API gateway to access GPT, Claude, Gemini, or DeepSeek through a single endpoint, you might wonder: what's actually happening between your request and the model provider? Is it just a proxy? A load balancer? Something more?
+Let's break it down.
+At its simplest, an AI API gateway sits between your application and multiple AI model providers. You send one request using a standard format — usually OpenAI-compatible — and the gateway routes it to the right provider, handles authentication, and returns the response.
+But a good gateway does a lot more than just forwarding requests.
+The first thing a gateway does is normalize your request. Different providers have slightly different API formats. OpenAI uses one schema, Anthropic uses another, Google has its own.
+A gateway translates your single request format into whatever the target provider expects. You write your code once, and the gateway handles the translation layer. That's why you can switch from GPT to Claude to Gemini without changing a single line of application code.
+This sounds simple, but the edge cases are brutal. Streaming formats differ. Tool calling schemas differ. Image input handling differs. A well-built gateway smooths all of that out.
+Instead of managing API keys for five different providers, you use one key from the gateway. The gateway holds the provider keys securely and injects them into outbound requests.
+This is a bigger deal than it sounds. In production, you might have different keys for different rate limit tiers, backup keys for failover, and keys that rotate on a schedule. The gateway manages all of that so your application code stays clean.
+This is where it gets interesting. A smart gateway doesn't just forward to one provider — it makes routing decisions.
+Maybe you want the cheapest model for simple tasks and the most capable model for complex ones. Maybe you want to route to a specific region for latency. Maybe you want automatic failover — if OpenAI returns a 500, retry on Anthropic.
+The routing layer handles model selection, provider failover, rate limit management, and cost optimization. Some gateways let you define routing rules. Others do it automatically based on the model you request.
+Most modern AI applications use streaming — tokens arrive one at a time instead of waiting for the full response. The gateway needs to handle streaming connections from the provider and relay them back to your client in real time.
+This means maintaining long-lived connections, handling backpressure when the client reads slowly, and gracefully recovering if the provider stream drops mid-response.

@@ -1,0 +1,14 @@
+For non-streaming requests, the gateway can also do post-processing — logging token usage, calculating costs, and adding metadata to the response.
+A production gateway logs every request. Not just success or failure, but latency, token counts, cost, which model was used, and whether any retries happened.
+This gives you a single dashboard for all your AI usage across every provider. You can see which models are fastest, which are cheapest for your workload, and where errors are happening.
+Without a gateway, you'd need to build this observability layer separately for each provider. With a gateway, it comes built in.
+AI API costs can surprise you. A gateway can enforce spending limits, track per-user or per-project budgets, and alert you before you blow through your monthly allocation.
+Some gateways also optimize costs automatically — caching identical requests, routing to cheaper models when quality requirements allow, and batching where possible.
+Developers always ask: doesn't adding a gateway add latency?
+The honest answer is yes, but less than you'd think. A well-built gateway adds single-digit milliseconds of overhead. For a typical LLM request that takes one to ten seconds, that's noise.
+And the gateway often saves time in other ways — faster failover means fewer total failures, and smart routing can actually reduce average latency by picking the fastest available provider.
+If you're using exactly one model from exactly one provider and you never plan to change, a gateway adds complexity you don't need. Just call the API directly.
+But the moment you use two providers, or want failover, or need cost tracking, or plan to experiment with new models — a gateway pays for itself immediately.
+An AI API gateway is not just a proxy. It's a normalization layer, a key manager, a router, a streaming relay, an observability platform, and a cost controller — all in one.
+The best part is you don't have to build any of this yourself.
+That's it for today. If you want to try a gateway that handles all six layers through one API key, check out crazyrouter.com. See you next episode.
