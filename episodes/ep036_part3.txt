@@ -1,0 +1,7 @@
+With Crazyrouter, you set this up once. One API key, one endpoint, and your routing rules handle the rest. We've seen teams cut their AI API bills by 40 to 60 percent just by routing intelligently — no quality loss, just smarter allocation.
+And here's a bonus: because we aggregate volume across customers, our per-token prices are already below what you'd pay going direct to most providers. Stack that with intelligent routing and you're looking at serious savings.
+Where is pricing headed? Three predictions.
+First, the floor keeps dropping. Open-source models running on optimized inference are pushing hosted API prices down. Expect another 30 to 50 percent drop by end of year for mid-tier models.
+Second, pricing will get more complex. Expect more providers to adopt cached pricing, batch pricing, and priority tiers. The simple "dollars per million tokens" comparison is becoming obsolete.
+Third, the winners will be developers who treat model selection as a dynamic optimization problem, not a one-time decision. The best model today might not be the best model next month. Build your stack to be flexible.
+That's your AI pricing update for April 2026. The bottom line: don't overpay, don't lock in, and benchmark on your actual workloads. If you want to try multi-model routing with built-in cost optimization, check out crazyrouter.com — one API key, 600-plus models, lower than official pricing. See you next episode.

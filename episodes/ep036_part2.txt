@@ -1,0 +1,8 @@
+When you multiply tokens by price, the ranking shifts completely. DeepSeek V3 was cheapest overall despite not having the lowest per-token price. Claude was second. GPT-4o-mini, despite being the cheapest per token, ended up mid-pack because it needed more rounds.
+The lesson: benchmark on your actual workloads, not on pricing pages.
+Something interesting is happening with pricing tiers in 2026. Providers are moving away from simple per-token pricing toward more nuanced models.
+OpenAI now has standard, batch, and cached pricing. Batch API calls are 50 percent cheaper but asynchronous. Cached prompts — where the system prompt stays the same across calls — get significant discounts. If your app sends the same system prompt thousands of times a day, cached pricing alone can cut your bill by 30 to 40 percent.
+Anthropic introduced prompt caching too, and it's even more aggressive. Cache hits on Claude are 90 percent cheaper than fresh tokens. For apps with long system prompts or repeated context, this is massive.
+Google's Gemini models have a generous free tier that's actually usable for prototyping and low-traffic apps. And their paid tier is competitive, especially for multimodal tasks where you're sending images alongside text.
+This is where routing gets interesting. The optimal model isn't the same for every request. A smart setup routes different types of requests to different models based on complexity, latency requirements, and cost.
+Simple classification tasks? Send those to GPT-4o-mini or DeepSeek at pennies per thousand requests. Complex reasoning or code generation? Route to Claude Sonnet or GPT-4o. Multilingual content? Qwen or Gemini often outperform at lower cost.
