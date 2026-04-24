@@ -1,0 +1,52 @@
+EP037: AI Coding Agents in 2026 — Cursor, Windsurf, Kiro, and the New Dev Workflow
+
+[INTRO]
+Hey everyone, welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we're diving into something every developer is talking about — AI coding agents. Not just autocomplete, not just chat. Full-blown agents that can plan, write, test, and iterate on code autonomously. Let's break down what's out there and what actually works.
+
+[SEGMENT 1: The Agent Era Is Here]
+If you're still thinking of AI coding tools as fancy autocomplete, you're about two years behind. The landscape has shifted dramatically. We've gone from "suggest the next line" to "here's a full feature implementation with tests."
+
+Cursor kicked this off by embedding AI deeply into the editor experience. Then Windsurf came along with Cascade, their agentic workflow that can handle multi-file changes. GitHub Copilot evolved from suggestions to a full agent mode. And now we've got newer players like Kiro from Amazon, Augment Code, and others pushing the boundaries even further.
+
+The key shift is autonomy. These tools don't just respond to prompts — they plan, execute, verify, and iterate. They read your codebase, understand your patterns, and make changes across multiple files in a single flow.
+
+[SEGMENT 2: Cursor vs Windsurf vs Copilot]
+Let's do a quick comparison of the big three.
+
+Cursor is the most mature agentic IDE. It has deep context awareness, can read your entire project, and its composer mode lets you describe a feature and watch it build across files. The tab completion is still best in class. Pricing is 20 dollars a month for Pro.
+
+Windsurf, from Codeium, takes a different approach with Cascade. It's more conversational — you describe what you want, and it creates a step-by-step plan before executing. It's particularly good at understanding project structure and making coordinated changes. Their free tier is generous, and Pro is 15 dollars a month.
+
+GitHub Copilot has the largest user base by far. The new agent mode in VS Code can handle multi-step tasks, run terminal commands, and iterate on errors. It's tightly integrated with the GitHub ecosystem, which is a huge advantage for teams. At 10 dollars a month, it's the cheapest option.
+
+Each has strengths. Cursor for power users who want maximum control. Windsurf for developers who prefer a guided workflow. Copilot for teams already deep in the GitHub ecosystem.
+
+[SEGMENT 3: The New Players]
+But the interesting action is happening with newer entrants.
+
+Kiro, Amazon's new AI IDE, takes a spec-driven approach. Instead of jumping straight to code, it generates requirements and design documents first, then implements against those specs. It's a fundamentally different philosophy — plan first, code second. Early reviews suggest it produces more maintainable code because the intent is documented before implementation.
+
+Augment Code focuses on enterprise codebases. It can understand millions of lines of code and make changes that respect existing patterns and conventions. For large teams, this context awareness is critical.
+
+Then there's the open-source side. Aider continues to be the best terminal-based coding agent. It works with any model — GPT-4o, Claude, DeepSeek — and integrates directly with git. No vendor lock-in, no subscription. Just point it at your repo and go.
+
+[SEGMENT 4: The Model Behind the Agent Matters]
+Here's what most people miss: the agent is only as good as the model powering it. And you have choices.
+
+Cursor defaults to their own model routing but supports Claude, GPT-4o, and others. Windsurf uses their own fine-tuned models plus Claude. Copilot runs on GPT-4o and Claude Sonnet.
+
+But if you're using Aider or building your own agent workflow, model selection is entirely up to you. And this is where cost optimization gets interesting. You don't need the most expensive model for every task. Simple refactors? Use GPT-4o-mini or DeepSeek. Complex architecture decisions? Route to Claude Opus or GPT-4o.
+
+With a service like Crazyrouter, you can set up one API key and route different types of coding tasks to different models based on complexity. Your agent gets the best model for each job, and you're not overpaying for simple tasks. We've seen developers cut their AI coding costs by 40 percent just by routing intelligently.
+
+[SEGMENT 5: What's Next]
+Where is this heading? Three predictions.
+
+First, the IDE becomes optional. Agents that work from the terminal, from CI/CD pipelines, from Slack — they're coming. The code editor is just one interface. Expect agents that can receive a Jira ticket and ship a pull request without anyone opening an IDE.
+
+Second, multi-agent workflows become standard. One agent writes the code, another reviews it, a third writes tests. This is already happening in research and will hit production tooling this year.
+
+Third, model costs for coding will drop dramatically. Competition between Claude, GPT, DeepSeek, and Qwen is fierce. By end of 2026, expect coding-quality inference at a fraction of today's prices.
+
+[OUTRO]
+That's your AI coding agents update for April 2026. The bottom line: pick the tool that fits your workflow, but don't sleep on model selection — it's the hidden lever for both quality and cost. If you want to experiment with different models for your coding agent, check out crazyrouter.com — one API key, 600-plus models, and pricing that makes experimentation affordable. See you next episode.

@@ -1,0 +1,8 @@
+GitHub Copilot has the largest user base by far. The new agent mode in VS Code can handle multi-step tasks, run terminal commands, and iterate on errors. It's tightly integrated with the GitHub ecosystem, which is a huge advantage for teams. At 10 dollars a month, it's the cheapest option.
+Each has strengths. Cursor for power users who want maximum control. Windsurf for developers who prefer a guided workflow. Copilot for teams already deep in the GitHub ecosystem.
+But the interesting action is happening with newer entrants.
+Kiro, Amazon's new AI IDE, takes a spec-driven approach. Instead of jumping straight to code, it generates requirements and design documents first, then implements against those specs. It's a fundamentally different philosophy — plan first, code second. Early reviews suggest it produces more maintainable code because the intent is documented before implementation.
+Augment Code focuses on enterprise codebases. It can understand millions of lines of code and make changes that respect existing patterns and conventions. For large teams, this context awareness is critical.
+Then there's the open-source side. Aider continues to be the best terminal-based coding agent. It works with any model — GPT-4o, Claude, DeepSeek — and integrates directly with git. No vendor lock-in, no subscription. Just point it at your repo and go.
+Here's what most people miss: the agent is only as good as the model powering it. And you have choices.
+Cursor defaults to their own model routing but supports Claude, GPT-4o, and others. Windsurf uses their own fine-tuned models plus Claude. Copilot runs on GPT-4o and Claude Sonnet.
