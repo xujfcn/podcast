@@ -1,0 +1,46 @@
+EP040: The Real Cost of AI APIs in 2026 — Who's Cheapest, Who's Worth It, and Where the Hidden Fees Are
+
+[INTRO]
+Hey everyone, welcome back to AI Dev Tools — The Crazyrouter Podcast. I'm your host, and today we're doing something a little different. Instead of chasing headlines, we're going deep on the one thing every AI developer deals with but rarely talks about honestly — how much these APIs actually cost. Not the marketing page prices. The real, in-production, after-caching, after-batch-discounts numbers. We just published a comprehensive pricing guide covering eighteen models across five providers, and the results are genuinely surprising. Let's break it down.
+
+[SEGMENT 1: The Pricing Landscape Has Fractured]
+A year ago, AI API pricing was simple. You had expensive models and cheap models. Now it's a maze. OpenAI alone has six tiers — GPT-5 at one twenty-five per million input tokens, GPT-5.4 at two fifty, GPT-5.2 at a dollar fifty, GPT-5-mini at thirty cents, GPT-5-nano at seven and a half cents, and GPT-4o still hanging around at two fifty. That's a thirty-three X spread within a single provider.
+
+Anthropic has a similar spread. Claude Opus 4.7 at fifteen dollars per million input tokens down to Sonnet 4.5 at two dollars. Google ranges from Gemini 3.1 Pro at two fifty down to Flash Lite at three and a half cents. And xAI's Grok 4.1 sits at two dollars input, eight output — competitive but not cheap.
+
+The point is: picking the wrong model for your workload isn't a rounding error anymore. It can be a ten X cost difference for similar quality on your specific task.
+
+[SEGMENT 2: Caching Is the Biggest Cost Lever Most Developers Ignore]
+Here's what surprised us most when we ran the numbers. Caching discounts are massive, but they work completely differently across providers.
+
+Anthropic gives you two tiers of prompt caching. A five-minute cache at ninety percent off, and a one-hour extended cache at twenty-five percent off the write cost. If your app sends the same system prompt or context repeatedly — and most apps do — you're looking at paying ten percent of the base input price on cache hits. That turns Claude Sonnet 4.6's three dollar input price into thirty cents.
+
+OpenAI does automatic caching. No opt-in required. Any repeated prefix in your prompts gets cached at ninety percent off. GPT-5's one twenty-five input becomes twelve and a half cents on cache hits. The catch? You don't control the cache duration, and it's best-effort.
+
+Google's approach is explicit. You create cached content objects, pay a reduced storage fee, and get seventy-five percent off on cache hits. Gemini 3.1 Pro drops from two fifty to sixty-two and a half cents.
+
+The takeaway: if you're not designing your prompts for cache hits, you're probably overpaying by three to five X. Structure your prompts with static content first, dynamic content last. That one change can cut your bill dramatically.
+
+[SEGMENT 3: Batch API — The Overnight Money Saver]
+Both OpenAI and xAI offer Batch APIs at fifty percent off. Half price. The trade-off is latency — you submit jobs and get results within twenty-four hours instead of real-time.
+
+For a lot of workloads, that's perfectly fine. Document processing, content generation, data extraction, evaluation pipelines — none of these need sub-second responses. A coding team running nightly code reviews with GPT-5.1 Codex Max could cut their sixteen dollar per million output cost to eight dollars. At scale, that's thousands of dollars a month.
+
+Anthropic offers a similar discount through their Message Batches API — also fifty percent off. So this isn't a niche feature. Every major provider is telling you the same thing: if you can wait, we'll charge you half.
+
+[SEGMENT 4: The Chinese Model Wild Card]
+Something most Western developers aren't paying attention to: Chinese AI models have gotten really good, and they're dramatically cheaper. GLM-5 from Zhipu AI comes in around thirty cents per million input tokens. MiniMax M2 is roughly fifty cents input, two dollars output. These aren't toy models — they're competitive on reasoning, coding, and especially multilingual tasks.
+
+The barrier has always been access. Separate accounts, different APIs, payment in RMB, documentation in Chinese. That's where a unified gateway changes the game. Same OpenAI-compatible API, same billing, just change the model string to glm-5 or minimax-m2 and you're running.
+
+For teams with multilingual workloads or cost-sensitive batch processing, these models are worth serious evaluation.
+
+[SEGMENT 5: What We Actually Recommend]
+After analyzing all eighteen models, here's our practical framework. For complex reasoning and research — Claude Opus 4.7 or GPT-5 with reasoning tokens. Expensive but unmatched. For everyday coding and analysis — Claude Sonnet 4.6 or GPT-5.4. Best quality-to-cost ratio in the mid-tier. For high-volume production — GPT-5-mini or Gemini 3 Flash. Sub-dollar input pricing with solid quality. For cost-sensitive batch work — GPT-5-nano or Gemini 2.5 Flash Lite. Pennies per million tokens.
+
+And across all of these, routing through Crazyrouter saves you forty-five to fifty-five percent off official pricing. That's not a coupon code — it's the standard rate. Claude Sonnet 4.6 goes from three dollars to a dollar sixty-five. GPT-5.4 goes from two fifty to a dollar thirty-seven. Stack that with caching and batch discounts, and you're looking at eighty to ninety percent savings compared to naive API usage.
+
+[OUTRO]
+We just published individual pricing guides for all eighteen models on the Crazyrouter blog — detailed breakdowns with code examples, cost scenarios, and comparison tables. Check them out at crazyrouter.com/blog. Whether you're optimizing an existing deployment or choosing models for a new project, the numbers are all there.
+
+That's it for today. The AI pricing landscape is more complex than ever, but that complexity is actually your advantage — if you know where to look. Thanks for listening, and I'll see you next episode.
