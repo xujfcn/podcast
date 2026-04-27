@@ -1,0 +1,9 @@
+The multi-document synthesizer. Load ten research papers and ask for a synthesis that identifies contradictions, common themes, and gaps. This is genuinely hard to do well with RAG because the model needs to see all documents simultaneously.
+
+For all of these patterns, routing through Crazyrouter gives you access to the cheapest large-context models — Grok 4.1 Fast, Gemini 3 Flash, Gemini 2.5 Flash Lite — through a single API endpoint. Switch between them with a model string change and find the best price-performance ratio for your specific workload.
+
+The two million token context window isn't just a bigger number on a spec sheet. It's a genuine architectural shift that simplifies applications, reduces infrastructure, and opens up use cases that weren't practical before. The cost has dropped to the point where the main question is no longer can I afford this much context — it's am I using enough context.
+
+If you want to experiment, head to crazyrouter.com, grab an API key, and try sending a large context to Grok 4.1 Fast or Gemini 3 Flash. You might be surprised how many of your RAG pipelines become optional.
+
+Thanks for listening, and I'll catch you in the next episode.

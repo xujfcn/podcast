@@ -1,0 +1,15 @@
+Third, document processing pipelines. Instead of splitting a long document across multiple API calls, reassembling results, and handling edge cases at chunk boundaries — one call. Done. The model sees the full document with all its cross-references intact.
+
+I'm not saying RAG is dead. If you have ten million documents, you still need retrieval. But for the surprisingly large number of applications where the total corpus is under a million tokens? The simplest architecture just became the best architecture.
+
+Here's where it gets really compelling. Grok 4.1 Fast charges twenty cents per million input tokens. Filling the entire two million token context window costs forty cents. That's it. Forty cents to process fifteen novels worth of text.
+
+With caching, it gets even better. If you're sending the same large context repeatedly — say, your entire codebase as context for a coding assistant — cached tokens drop to five cents per million. Your two million token context costs ten cents on cache hits.
+
+Compare that to the infrastructure cost of running a RAG pipeline. A managed vector database alone can run fifty to a hundred dollars a month. Embedding API calls add up. Engineering time to maintain the pipeline is the biggest cost of all. For many teams, the math clearly favors just using a bigger context window.
+
+Gemini 3 Flash is even cheaper for this pattern — three and a half cents per million input tokens. Two million tokens of context for seven cents. At that price, the question isn't whether you can afford large context — it's whether you can afford not to use it.
+
+Now, it's not all sunshine. There are real limitations that the marketing pages don't emphasize.
+
+Latency scales with context size. A two million token prompt takes meaningfully longer to process than a ten thousand token prompt. For real-time chat applications, that initial response delay can hurt user experience. You need to design around it — maybe pre-process and cache during off-peak times.

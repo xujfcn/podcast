@@ -23,11 +23,12 @@
 - EP020 (2026-04-09): The Future of AI APIs — Predictions for 2026-2027
 - EP021 (2026-04-10): How Small Teams Use AI Gateways to Ship Faster
 - EP022 (2026-04-11): Whisper vs Gemini vs DeepSeek for Speech-to-Text ✅
+- EP039 (2026-04-26): Google's $40B Anthropic Bet, OpenAI's Privacy Filter, and the AI Regulation Showdown ✅
 
 ## 待发布话题队列
 
 ### Next Up
-- EP023: Embedding Models Compared
+- EP040: TBD
 - EP024: AI for Non-English Languages
 - EP025: Building RAG Pipelines with Multiple Models
 - EP026: AI API Monitoring and Observability
