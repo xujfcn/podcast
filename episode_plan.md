@@ -24,11 +24,13 @@
 - EP021 (2026-04-10): How Small Teams Use AI Gateways to Ship Faster
 - EP022 (2026-04-11): Whisper vs Gemini vs DeepSeek for Speech-to-Text ✅
 - EP039 (2026-04-26): Google's $40B Anthropic Bet, OpenAI's Privacy Filter, and the AI Regulation Showdown ✅
+- EP040 (2026-04-27): The Real Cost of AI APIs in 2026 — Who's Cheapest, Who's Worth It, and Where the Hidden Fees Are ✅
+- EP041 (2026-04-27): The 2 Million Token Context Window Era — What It Actually Changes for Developers ✅
 
 ## 待发布话题队列
 
 ### Next Up
-- EP040: TBD
+- EP042: TBD
 - EP024: AI for Non-English Languages
 - EP025: Building RAG Pipelines with Multiple Models
 - EP026: AI API Monitoring and Observability
