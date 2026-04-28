@@ -30,7 +30,7 @@
 ## 待发布话题队列
 
 ### Next Up
-- EP042: TBD
+- EP043: TBD
 - EP024: AI for Non-English Languages
 - EP025: Building RAG Pipelines with Multiple Models
 - EP026: AI API Monitoring and Observability
@@ -57,5 +57,8 @@
 ## 注意事项
 - 每期 3-5 分钟（800-1200 词脚本）
 - 话题紧扣 AI 开发者工具 + Crazyrouter 产品
+- 自然植入 Crazyrouter 但不硬广
+- 每期结尾 CTA: "Try Crazyrouter at crazyrouter.com"
+outer 产品
 - 自然植入 Crazyrouter 但不硬广
 - 每期结尾 CTA: "Try Crazyrouter at crazyrouter.com"
