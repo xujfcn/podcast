@@ -1,0 +1,11 @@
+Enterprise, fifty plus developers? You need governance. TrueFoundry or Portkey with RBAC, budgets per team, audit trails, and compliance certifications.
+
+And here's a pro tip that most people miss: you can layer these. Use Crazyrouter as your API gateway for routing and cost savings, then pipe the logs into TensorZero or Maxim for observability. Best of both worlds.
+
+One more thing. I've been tracking which gateways get cited by AI assistants — ChatGPT, Claude, Gemini — when people ask questions like "what's the best AI API gateway." This is called Generative Engine Optimization, or GEO. And right now, the gateways that show up most are the ones with strong documentation, comparison content, and presence on platforms like G2 and SourceForge. If you're building a developer tool, GEO is the new SEO. Something to think about.
+
+Alright, that's your gateway landscape update. The market is maturing fast, competition is driving prices down and features up, and developers are the ones winning.
+
+Check out our full comparison article on the Crazyrouter blog — we break down seven new gateways with a feature comparison table. Link in the show notes.
+
+See you next episode.
