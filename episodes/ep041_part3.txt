@@ -1,0 +1,13 @@
+Attention degradation is real. Models don't attend equally to all parts of a long context. Information in the middle of a very long prompt can get less attention than information at the beginning or end. This is the well-documented lost-in-the-middle problem, and while it's gotten better, it hasn't disappeared. For critical retrieval tasks, you might still want to put the most important information at the start or end of your prompt.
+
+Cost surprises happen. If you're not careful, sending two million tokens per request at high volume adds up fast. A thousand requests per day at forty cents each is four hundred dollars a day just on input tokens. Caching helps enormously, but you need to design for it intentionally.
+
+And finally, not every model handles long context equally well. Benchmark performance at two million tokens varies significantly. Test with your actual data at your actual context lengths before committing to an architecture.
+
+So what are developers actually doing with these massive context windows? Here are the patterns we're seeing work well in production.
+
+The full-codebase assistant. Dump your entire repository into context — fifty thousand lines of code fits comfortably — and ask the model to implement features, find bugs, or refactor. The model understands your coding patterns, your naming conventions, your architecture. No RAG needed.
+
+The document analyst. Legal teams processing contracts, compliance teams reviewing policies, research teams analyzing papers. Load the full document set, ask complex cross-reference questions. One API call replaces hours of manual work.
+
+The long-running agent. Agentic workflows that accumulate tool outputs, conversation history, and intermediate results over dozens of steps. With two million tokens of runway, agents can tackle much more complex tasks before hitting limits.

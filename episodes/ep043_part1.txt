@@ -1,0 +1,33 @@
+Hey everyone, welcome back to AI Dev Tools — the Crazyrouter Podcast. Today we're talking about something I've been tracking closely: the AI API gateway market just got really crowded, really fast.
+
+Six months ago, if you wanted a unified API for multiple AI models, you had maybe three or four options. OpenRouter, LiteLLM if you wanted to self-host, Portkey for enterprise, and Crazyrouter for price and coverage. That was basically it.
+
+Fast forward to April 2026, and there are at least a dozen serious players. TrueFoundry, TensorZero, ZenMux, EvoLink, WaveSpeed, Maxim — new names are popping up every week. And that's actually great news for developers, but it also means you need a framework for choosing.
+
+So let me break down what's happening and how to think about it.
+
+First, why the explosion? Three reasons.
+
+One — the model layer commoditized faster than anyone expected. When GPT-5, Claude Opus, Gemini 3, DeepSeek R2, Qwen 3, and Llama 4 are all competitive, no single provider has a monopoly on quality. That creates demand for routing between them.
+
+Two — the Microsoft-OpenAI exclusivity breakup we covered last episode. When OpenAI models can run on any cloud, the infrastructure fragments. More fragmentation means more need for aggregation.
+
+Three — money. AI API spend is growing forty to fifty percent year over year. Where there's spend, there are startups trying to capture a slice.
+
+Now, here's my framework for picking a gateway. I call it the four Cs: Coverage, Cost, Complexity, and Control.
+
+Coverage. How many models can you access? This ranges wildly. Some gateways focus on just the top five providers. Others, like Crazyrouter, give you three hundred plus models including Western and Asian providers. If you only need GPT and Claude, coverage doesn't matter much. If you're experimenting across providers or need niche models, it matters a lot.
+
+Cost. There are three pricing models in the market right now. First, markup pricing — the gateway charges provider price plus a percentage. OpenRouter does this. Second, discount pricing — the gateway negotiates bulk rates and passes savings to you. Crazyrouter and EvoLink do this, typically thirty to fifty percent below direct. Third, platform fees — you pay a monthly subscription for the gateway features, then pay provider rates on top. TrueFoundry and ZenMux lean this way.
+
+For most developers, discount pricing is the obvious winner. You save money and get the aggregation benefits. Platform fees make sense when you need enterprise features like compliance and audit trails.
+
+Complexity. This is where gateways diverge the most. On one end, you have simple API proxies — drop in your base URL, change one line of code, done. On the other end, you have full LLMOps platforms like TensorZero that include observability, evaluation, optimization, and A/B testing. More features isn't always better. If you just need to call models cheaply, a simple gateway wins. If you're running a production ML pipeline with dozens of prompts, the extra tooling pays for itself.
+
+Control. Do you need to self-host? TensorZero and LiteLLM are open source. Do you need SOC 2 compliance? TrueFoundry and Portkey have that. Do you need to keep data in a specific region? Check which gateways have regional infrastructure.
+
+Here's my practical recommendation based on team size.
+
+Solo developer or small project? Use a simple, cheap gateway. Crazyrouter or EvoLink. One API key, save money, ship fast.
+
+Small team, five to twenty developers? Add observability. Use a gateway plus Maxim AI or TensorZero for monitoring. You need to know which models perform best for your use cases.
