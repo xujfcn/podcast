@@ -1,0 +1,21 @@
+So what should developers actually do? Four practical steps.
+
+First, preserve provenance metadata. If you're calling GPT-image-2 or any image generation API through Crazyrouter, the response includes the generated image with its embedded metadata. Don't strip it. If your pipeline converts formats or resizes images, use tools that preserve C2PA data. Libraries like c2patool from the C2PA project make this straightforward.
+
+Second, add your own labeling layer. Don't rely solely on model-provider watermarks. Add visible or invisible indicators in your application. A simple approach: store generation metadata — model used, timestamp, prompt hash — alongside every piece of generated content. This creates an audit trail even if watermarks get stripped.
+
+Third, build disclosure into your UX. If users can export or share AI-generated content from your app, add a toggle or automatic label. "Generated with AI" badges are becoming standard. Users actually appreciate the transparency — it builds trust rather than undermining it.
+
+Fourth, watch the regulatory landscape. The EU AI Act requires transparency for AI-generated content. China's regulations already mandate watermarking. The US is moving toward disclosure requirements. If you're building for a global audience, assume labeling will be mandatory everywhere within the next twelve to eighteen months.
+
+Here's the interesting business angle. Content authentication is becoming a feature, not a burden. Platforms that can verify content origin will have an advantage. Tools that make labeling easy will win developer adoption. And API gateways that preserve provenance metadata across model switches — that's a real differentiator.
+
+At Crazyrouter, when you switch between GPT-image-2, DALL-E, or other image models, the provenance chain stays intact. Your content labeling logic doesn't need to change when you change models. That's the kind of infrastructure detail that matters when compliance isn't optional.
+
+One more thing worth noting: the detection arms race. As watermarking improves, so do removal techniques. As detection models get better, adversarial attacks evolve. This is not a solved problem. But the direction is clear — the industry is moving toward mandatory provenance tracking for all AI-generated content. Building for it now means you won't be scrambling later.
+
+Alright, that's your content labeling breakdown. Metadata, watermarks, platform disclosure — three layers, all converging. Build for transparency now and you'll be ahead of the curve.
+
+Try Crazyrouter at crazyrouter.com — one API key, six hundred plus models, with provenance metadata preserved across every call.
+
+See you next episode.
