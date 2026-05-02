@@ -1,0 +1,29 @@
+EP051: OpenAI's Symphony — How Coding Agents Are Becoming Autonomous Dev Teams
+
+Hey everyone, welcome back to AI Dev Tools, the Crazyrouter Podcast. I'm your AI host, and today we're diving into something that just dropped from OpenAI that could fundamentally change how you ship code. It's called Symphony, and it's the open-source orchestration spec behind Codex. Let's break it down.
+
+So here's the context. OpenAI launched Codex as a cloud-based coding agent earlier this year. You give it a task, it spins up a sandboxed environment, writes code, runs tests, and hands you back a pull request. But the interesting part isn't Codex itself — it's the orchestration layer underneath it. That's Symphony.
+
+Symphony is now open source. It's a specification for how you coordinate multiple AI agents working on a codebase simultaneously. Think of it like a project manager for AI coders. You define tasks, Symphony breaks them into subtasks, assigns them to agent instances, manages dependencies between them, and merges the results.
+
+Why does this matter? Because we're moving from the era of "AI helps me write code" to "AI teams write code for me." That's a fundamentally different workflow. Instead of sitting in your IDE with Copilot suggesting lines, you're filing tickets — actual task descriptions — and an autonomous system goes and implements them.
+
+Let me give you the technical breakdown. Symphony uses a conductor-worker architecture. The conductor agent reads your task, analyzes the codebase, and creates a plan. It then spawns worker agents, each in their own sandboxed environment with a full copy of the repo. Workers execute independently — they can read files, write code, run tests, install dependencies. When they're done, the conductor reviews their output, resolves conflicts, and produces the final result.
+
+The key innovation here is the conflict resolution layer. When two agents edit the same file, Symphony doesn't just fail or pick one. It uses a semantic merge strategy — it understands what each change is trying to accomplish and combines them intelligently. That's way beyond git merge.
+
+Now here's the other big news that ties into this. OpenAI announced that its models, including the ones powering Codex, are now available on AWS through Amazon Bedrock. This is huge for enterprise adoption. Companies that are locked into AWS infrastructure can now access OpenAI models without routing traffic outside their cloud. Lower latency, better compliance, simpler billing.
+
+For developers using API gateways like Crazyrouter, this creates an interesting dynamic. You now have OpenAI models available through the OpenAI API directly, through Azure, and through AWS Bedrock. Three different endpoints, potentially different pricing, different latency profiles. A good API gateway abstracts all of that away — you pick the best route automatically.
+
+But let's zoom back out to the bigger picture. What Symphony really signals is that the unit of AI-assisted development is shifting from the line of code to the feature. You're not asking AI to complete a function anymore. You're asking it to implement an entire user story, complete with tests, documentation, and a clean PR.
+
+This has real implications for how dev teams are structured. If an AI system can handle the implementation of well-specified tasks, the premium skill becomes specification — writing clear, unambiguous descriptions of what you want built. Product managers and senior engineers who can decompose problems cleanly become even more valuable.
+
+There are limitations, of course. Symphony works best on well-defined, bounded tasks. It's not going to architect your system from scratch. It struggles with tasks that require deep understanding of business context or cross-system dependencies that aren't in the codebase. And the cost adds up — running multiple agent instances in parallel means multiple inference calls, multiple sandbox environments.
+
+But the trajectory is clear. We went from autocomplete to inline suggestions to chat-based coding to autonomous agents. Symphony is the infrastructure layer that makes that last step scalable and reliable.
+
+For developers listening, here's what I'd recommend. First, try Codex if you haven't — it's the easiest way to experience agent-driven development. Second, look at the Symphony spec on GitHub. Even if you don't use it directly, understanding the conductor-worker pattern will help you design your own agent workflows. Third, if you're building on AWS, check out the Bedrock integration — having OpenAI models in your VPC is a game changer for latency-sensitive applications.
+
+That's the show for today. The age of the AI dev team is here, and Symphony is the playbook. If you're building with AI APIs, check out crazyrouter.com — one key, all models, best prices. See you next episode.
