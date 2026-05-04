@@ -1,0 +1,23 @@
+Welcome back to AI Dev Tools, the Crazyrouter Podcast. I'm your host, and today is May 4th, 2026. Episode 53.
+
+Today we're talking about DeepClaude, an open-source project that's been blowing up on Hacker News. It takes the Claude Code agent loop and makes it seventeen times cheaper by splitting the thinking from the coding. Let's break down how it works and why it matters.
+
+So here's the core idea. When you run an AI coding agent like Claude Code, the model does two things. First, it reasons about the problem — planning what files to change, what approach to take, what the architecture should look like. Second, it actually writes the code and uses tools. DeepClaude separates these into two different models.
+
+For the thinking and planning phase, it uses DeepSeek V4 Pro. This model is excellent at reasoning and costs about fifty cents per million tokens. For the code generation and tool use phase, it keeps Claude, which costs three to fifteen dollars per million tokens depending on the variant.
+
+The math is straightforward. In a typical agent loop, sixty to seventy percent of tokens go to reasoning and planning. If you route those tokens to a model that's ten to thirty times cheaper, your overall cost drops dramatically. The project claims seventeen times cheaper for Sonnet-tier tasks, and the community benchmarks seem to back that up.
+
+Now, why does this work? Because reasoning and code generation are actually separable skills. You don't need the most expensive model to think through a problem. You need it to produce syntactically correct, idiomatic code that uses the right APIs. DeepSeek V4 Pro is remarkably good at the planning step — understanding codebases, identifying what needs to change, and structuring an approach.
+
+This is exactly the multi-model routing thesis that we've been talking about on this podcast. Not every token needs the same model. The smartest architecture routes different parts of a workflow to different models based on what each part actually requires.
+
+Here's what's interesting from a gateway perspective. If you're using an API gateway like Crazyrouter, you can implement this pattern today without any custom code. Set up a routing rule that sends system prompts and planning queries to DeepSeek, then routes code generation requests to Claude. The gateway handles the model switching transparently.
+
+But let's talk tradeoffs. First, latency. You're making two model calls instead of one, so there's added round-trip time. For interactive coding sessions, this might feel slower. Second, context coherence. When you split thinking across models, you need to pass the reasoning output as context to the coding model. That's extra tokens and potential information loss. Third, complexity. You now have two models to monitor, two sets of rate limits, two potential failure points.
+
+When should you NOT use this pattern? Simple, fast tasks. If you're doing a quick code completion or a one-shot function, the overhead of dual-model routing isn't worth it. Stick with a single fast model. But for complex agent loops that run for minutes and consume millions of tokens? Model splitting is a no-brainer for cost optimization.
+
+The broader trend here is clear. The era of one-model-fits-all is ending. The future is intelligent routing — picking the right model for each sub-task in a workflow. Whether you build it yourself like DeepClaude, or use a gateway that handles it for you, the economics are too compelling to ignore.
+
+That's episode 53. If you're spending more than you'd like on AI API calls, check out crazyrouter.com — one API key, six hundred plus models, and the routing intelligence to use them efficiently. See you next time.
