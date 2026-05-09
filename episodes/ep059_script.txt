@@ -1,0 +1,27 @@
+Hey everyone, welcome back to AI Dev Tools — The Crazyrouter Podcast. Today is May ninth, twenty twenty-six, and the theme is simple: the agent era is becoming an infrastructure problem.
+
+Over the last few weeks, every major AI platform has been racing to make agents more capable. OpenAI pushed GPT-5.5 with stronger coding and agentic task performance. Google moved Gemini 3.1 Ultra into the spotlight with a native two million token context window across text, image, audio, and video. Microsoft made Agent 365 generally available, bringing identity, security, and governance tools to enterprise AI agents.
+
+That last point matters more than it sounds. For a long time, developers talked about agents as features inside apps. A coding assistant here. A support bot there. A workflow automation tool somewhere else. But the market is now treating agents as a new class of users. They need identity. They need permissions. They need audit logs. They need spending limits. They need safe access to tools.
+
+In other words: agents are no longer just prompts. They are actors in your system.
+
+This changes how developers should think about architecture. If an AI agent can write code, call APIs, buy domains, deploy apps, query customer records, or trigger payments, then model quality is only one part of the stack. The control plane becomes just as important.
+
+You need to know which model was used, what it cost, what tools it called, whether the output was cached, whether the request fell back to another provider, and whether the agent stayed inside policy. This is where API gateways become much more than convenience wrappers.
+
+A good gateway gives you three things agents desperately need.
+
+First, routing. Different agent steps need different models. Planning might need a strong reasoning model. Code generation might need a coding-specialized model. Summarization can run on a cheaper fast model. Vision review might need a multimodal model. Hard-coding one provider across the whole workflow is expensive and brittle.
+
+Second, observability. Agent failures are rarely obvious. A task may look successful, but one bad tool call, one hallucinated assumption, or one silent fallback can break the final result. Logging prompts, responses, model IDs, token usage, latency, and errors is not optional anymore. It is how you debug the system.
+
+Third, cost control. Autonomous loops can get expensive fast. A human might make ten API calls. An agent can make five hundred before anyone notices. Spending caps, per-model budgets, and routing cheaper tasks away from frontier models are how you keep experiments from becoming surprise invoices.
+
+The important trend is that capability is spreading out. OpenAI, Google, Anthropic, Qwen, DeepSeek, xAI, and open-source models are all strong in different areas. There is no single best model for every task. The winning architecture is multi-model by default.
+
+So the practical advice for this week is: if you are building agents, design the control layer first. Before you add more tools, more memory, or more autonomy, make sure you can answer four questions. What model handled each step? What did it cost? What tools did it touch? And what happens when it fails?
+
+If you can answer those, you can scale agents safely. If you cannot, you are not really building an agent platform — you are just hoping a chatbot behaves.
+
+That is it for today. If you are building with AI APIs and want one gateway for hundreds of models, with routing, cost controls, and OpenAI-compatible access, check out Crazyrouter at crazyrouter.com. See you in the next episode.

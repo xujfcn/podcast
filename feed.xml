@@ -18,6 +18,8 @@
     <ns1:type>episodic</ns1:type>
 
 
+      <item><title>EP059: Agents Are Infrastructure Now — Why Control Planes Matter More Than Prompts</title><description>AI agents are no longer just chatbot features — they are becoming actors inside software systems. We break down why agent identity, permissions, audit logs, routing, observability, and cost controls are now core infrastructure, and why multi-model API gateways are becoming the control plane for safe autonomous workflows.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sat, 09 May 2026 08:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep059.mp3" length="4431360" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep059.mp3</guid><ns1:duration>3:42</ns1:duration><ns1:episode>59</ns1:episode></item>
+
       <item><title>EP058: Blitzy Raises $200M for Autonomous Software Dev + OpenAI Ships GPT-5.5 Instant as Default</title><description>Two big stories today: Blitzy, an autonomous software development startup, just raised $200M to build AI that writes entire enterprise applications end-to-end. Meanwhile, OpenAI quietly shipped GPT-5.5 Instant as the new default ChatGPT model, replacing GPT-5.3 Instant. We break down what both moves mean for developers, API pricing, and the future of AI-powered coding tools.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 07 May 2026 08:22:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep058.mp3" length="4436640" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep058.mp3</guid><ns1:duration>3:42</ns1:duration><ns1:episode>58</ns1:episode></item>
 
       <item><title>EP057: Cloudflare Just Let AI Agents Deploy Full Apps — The Infrastructure Layer Goes Agentic</title><description>Cloudflare announced that AI agents can now create accounts, buy domains via Stripe, and deploy applications — all programmatically with zero human intervention. We break down how it works, what it means for the future of autonomous development workflows, the security implications of giving agents spending authority, and why API gateways become your critical safety net when your agents go fully autonomous.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Tue, 06 May 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep057.mp3" length="1816509" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep057.mp3</guid><ns1:duration>5:02</ns1:duration><ns1:episode>57</ns1:episode></item>
@@ -448,8 +450,8 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804925" type="audio/mpeg"/>
       <guid>https://xujfcn.github.io/podcast/audio/ep041.mp3</guid>
       <pubDate>Mon, 27 Apr 2026 12:06:51 +0000</pubDate>
-      <itunes:duration>7:47</itunes:duration>
-      <itunes:episode>41</itunes:episode>
+      <ns1:duration>7:47</ns1:duration>
+      <ns1:episode>41</ns1:episode>
           <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
   </channel>
