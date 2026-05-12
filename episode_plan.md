@@ -28,6 +28,7 @@
 - EP041 (2026-04-27): The 2 Million Token Context Window Era — What It Actually Changes for Developers ✅
 - EP043 (2026-04-29): The AI API Gateway Market Just Got Crowded — How to Pick the Right One ✅
 - EP044 (2026-05-01): Claude Opus 4.7 Drops, and May's Model Avalanche Is Just Getting Started ✅
+- EP061 (2026-05-12): AI Image APIs Are Becoming Product Infrastructure ✅
 
 ## 待发布话题队列
 
