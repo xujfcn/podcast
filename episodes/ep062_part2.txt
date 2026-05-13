@@ -1,0 +1,17 @@
+In agent systems, fallback routing becomes even more important because failures compound. If one step fails silently, the agent may make a bad plan. If a tool times out, the agent may hallucinate the result. If a model changes behavior, the whole workflow may drift.
+
+So the production lesson is simple: do not wait for reliability problems before designing fallback.
+
+Start with a small routing table. Define the top five task types in your product. Pick a primary model for each. Pick a fallback model. Set a timeout. Add logging. Add a rule for when not to fallback. Then review the data weekly.
+
+You do not need a complicated system on day one. But you do need the abstraction.
+
+Because the future of AI applications is not one perfect model. It is many imperfect models coordinated well.
+
+And the apps that feel magical to users are usually the apps that handled failure quietly, quickly, and intelligently.
+
+That’s it for today. If you’re building production AI workflows and want one place to route across text, image, audio, video, and more, try Crazyrouter at crazyrouter.com.
+
+See you in the next episode.
+
+

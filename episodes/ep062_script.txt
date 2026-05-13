@@ -1,0 +1,63 @@
+EP062: Fallback Routing Is the Feature That Makes AI Apps Feel Reliable
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast.
+
+Today we’re talking about one of the least glamorous, most important features in production AI systems: fallback routing.
+
+Most AI demos assume the model works.
+
+You send a prompt. You get a response. Maybe the response is good, maybe it needs editing, but the API call itself succeeds.
+
+Production is not that clean.
+
+Models time out. Providers rate limit you. A region has an incident. A safety filter behaves differently than expected. A new model version changes latency. A long-context request suddenly becomes expensive. Or your best model is technically available, but too slow for the user experience you are trying to build.
+
+That is where fallback routing becomes infrastructure.
+
+A fallback is not just a backup model. It is a decision rule for what your application should do when the ideal path fails.
+
+For example, imagine you are building an AI coding assistant. Your first-choice model might be a high-end reasoning model for complex refactors. But if that model times out, you probably do not want to show the user an error after thirty seconds. You might route to a faster coding model, reduce the context, or return a partial analysis with a retry option.
+
+Now imagine an AI support bot. If the primary model is unavailable, you might fall back to a cheaper general model for simple classification, but avoid fallback for refund decisions or safety-sensitive cases. The right behavior depends on the task.
+
+That is the key point: fallback routing should be task-aware.
+
+A good fallback policy starts by classifying the request.
+
+Is this user-facing or background? Is it latency-sensitive? Is it high-risk? Is it creative, analytical, transactional, or internal? Can the answer be slightly lower quality, or does it need to be exact? Can the system retry silently, or does the user need transparency?
+
+Once you answer those questions, your routing strategy becomes much smarter.
+
+For low-risk summarization, fallback aggressively. For draft content, fallback to a cheaper model. For code generation, fallback within the same model family or to another model with strong coding benchmarks. For financial, medical, legal, or account actions, fallback more carefully — sometimes the correct fallback is to stop, log the issue, and ask for human review.
+
+This is why hard-coding one model name into your application is fragile.
+
+It works until the day it does not.
+
+The better pattern is to treat models like infrastructure resources. You define a primary route, one or more fallback routes, retry rules, budget limits, latency thresholds, and logging. Your application asks for a capability — coding, summarization, image generation, classification, translation — and the gateway decides which provider and model should handle it.
+
+This is also where observability matters.
+
+You cannot improve fallback routing if you do not know when it happens. Log the original model, fallback model, reason, latency, error code, token usage, and user outcome. Did the fallback answer get accepted? Did the user retry? Did the cost spike? Did one provider start failing more often than usual?
+
+Those logs turn fallback from a guess into an operating system.
+
+The same idea applies beyond text.
+
+Image generation needs fallback when one model fails text rendering or rejects a prompt. Speech generation needs fallback when a voice model is slow. Video generation needs fallback because long-running jobs fail often. Agent workflows need fallback not just for models, but for tools, browsers, and external APIs.
+
+In agent systems, fallback routing becomes even more important because failures compound. If one step fails silently, the agent may make a bad plan. If a tool times out, the agent may hallucinate the result. If a model changes behavior, the whole workflow may drift.
+
+So the production lesson is simple: do not wait for reliability problems before designing fallback.
+
+Start with a small routing table. Define the top five task types in your product. Pick a primary model for each. Pick a fallback model. Set a timeout. Add logging. Add a rule for when not to fallback. Then review the data weekly.
+
+You do not need a complicated system on day one. But you do need the abstraction.
+
+Because the future of AI applications is not one perfect model. It is many imperfect models coordinated well.
+
+And the apps that feel magical to users are usually the apps that handled failure quietly, quickly, and intelligently.
+
+That’s it for today. If you’re building production AI workflows and want one place to route across text, image, audio, video, and more, try Crazyrouter at crazyrouter.com.
+
+See you in the next episode.
