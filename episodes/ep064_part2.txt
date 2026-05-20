@@ -1,0 +1,17 @@
+Group tools by risk level. Separate read tools from write tools. Add audit logs from day one. Require approval for external actions. Limit which agents can see which tools. Set rate limits. Make secrets available only to the gateway layer, not scattered across agent prompts and scripts.
+
+This does not make agents less useful. It makes them deployable.
+
+The same pattern applies to model routing.
+
+In a real product, you probably do not want one model, one tool list, and one prompt doing everything. You want a routing layer that can choose the right model, expose the right tools, enforce the right policy, and record the outcome.
+
+That is the shape of production AI infrastructure in 2026.
+
+Models are the reasoning layer. Tools are the action layer. Gateways are the control layer.
+
+And the teams that understand that separation will build agents that are not just impressive in demos, but safe enough to run in real workflows.
+
+That is it for today. If you want one place to route across GPT, Claude, Gemini, DeepSeek, image, audio, video, and more, try Crazyrouter at crazyrouter.com.
+
+See you in the next episode.

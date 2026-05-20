@@ -1,0 +1,2 @@
+file '/root/.openclaw/workspace/podcast/episodes/ep064_part1.mp3'
+file '/root/.openclaw/workspace/podcast/episodes/ep064_part2.mp3'

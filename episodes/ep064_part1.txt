@@ -1,0 +1,63 @@
+EP064: MCP Gateways Are Becoming the Security Layer for AI Agents
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast.
+
+Today we are talking about MCP gateways, and why they are becoming much more than a convenient way to connect agents to tools.
+
+MCP, the Model Context Protocol, started as a cleaner interface between AI assistants and external systems. Instead of writing a different custom integration for every app, every database, every browser action, and every internal API, developers can expose tools through a common protocol.
+
+That is useful.
+
+But the more interesting shift is happening in production.
+
+Once agents can call tools, the hardest question is no longer, can the agent connect to something? The harder question is, should this agent be allowed to do this specific action, in this specific context, for this specific user, right now?
+
+That is where MCP gateways enter the picture.
+
+An MCP gateway sits between the agent and the tools it wants to use. It can manage authentication, permissions, rate limits, logging, approvals, tool discovery, and policy enforcement. In other words, it turns tool access from a pile of one-off integrations into an operating layer.
+
+And that matters because agent failures are different from normal software failures.
+
+If a normal API call fails, maybe a button does not load or a background job retries.
+
+If an agent has too much tool access, it can take the wrong action with confidence. It can call the wrong endpoint. It can send a message too early. It can read data it did not need. It can spend money, change state, or leak context across workflows.
+
+So the production question is not simply, how do we make agents more capable?
+
+The production question is, how do we make capability governable?
+
+A good MCP gateway helps with four things.
+
+First, identity.
+
+Every tool call should know who initiated it. Was it the end user? A support agent? A background automation? A scheduled workflow? A developer test? Without identity, audit logs are almost useless.
+
+Second, permissions.
+
+An agent that can read invoices should not automatically be able to issue refunds. An agent that can search a CRM should not automatically be able to export all contacts. An agent that can draft an email should not automatically be able to send it.
+
+Read, write, delete, purchase, publish, and message actions should be separated.
+
+Third, approvals.
+
+Some actions should require a human checkpoint. Sending a customer email, deleting data, changing billing, posting publicly, or pushing production changes should not be silently delegated just because a model produced a confident plan.
+
+A gateway can enforce those approval boundaries consistently, instead of relying on every prompt to remember them.
+
+Fourth, observability.
+
+If an agent workflow goes wrong, you need to reconstruct what happened. Which model made the decision? Which tool was called? What parameters were passed? What did the tool return? Was there a retry? Did a human approve the action?
+
+Without logs, debugging agent behavior becomes archaeology.
+
+This is why MCP gateways are starting to look similar to API gateways, but for agentic systems.
+
+Classic API gateways helped teams manage traffic between applications and services. MCP gateways help teams manage intent between models and tools.
+
+That distinction is important.
+
+Agents do not just call APIs. They interpret goals, choose tools, compose steps, and sometimes improvise. That means the control plane needs to understand more than HTTP routes. It needs to understand task type, user role, tool risk, context scope, and failure behavior.
+
+For developers, the practical takeaway is simple: do not wire every MCP server directly into every agent and call it done.
+
+Start with a gateway mindset.
