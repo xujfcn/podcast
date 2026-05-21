@@ -1,0 +1,288 @@
+1
+00:00:00,100 --> 00:00:04,519
+Welcome back to AI Dev Tools — the Crazyrouter Podcast.
+
+2
+00:00:04,469 --> 00:00:16,167
+Today we are talking about a question that sounds simple, but matters a lot in production: where does a fast model like Gemini 3.5 Flash actually fit when you compare it with Claude-style response tiers?
+
+3
+00:00:16,167 --> 00:00:19,445
+A lot of teams still compare models by brand.
+
+4
+00:00:19,445 --> 00:00:21,650
+Gemini versus Claude.
+
+5
+00:00:21,650 --> 00:00:24,233
+OpenAI versus Anthropic.
+
+6
+00:00:24,233 --> 00:00:26,650
+Google versus everyone else.
+
+7
+00:00:26,650 --> 00:00:30,707
+But that is usually the wrong abstraction for engineering teams.
+
+8
+00:00:30,707 --> 00:00:35,235
+In production, the better question is not: which provider is smarter?
+
+9
+00:00:35,235 --> 00:00:39,669
+The better question is: which response tier should handle this task?
+
+10
+00:00:39,669 --> 00:00:41,780
+Think about three tiers.
+
+11
+00:00:41,780 --> 00:00:44,080
+First, the fast tier.
+
+12
+00:00:44,080 --> 00:00:53,926
+This is for summaries, classification, extraction, support drafts, simple chat, and high-volume workflows where latency and cost matter more than deep reasoning.
+
+13
+00:00:53,926 --> 00:00:56,344
+Second, the balanced tier.
+
+14
+00:00:56,344 --> 00:01:04,834
+This is where you put harder writing, coding explanations, medium-complexity reasoning, and agent steps where mistakes are more expensive.
+
+15
+00:01:04,834 --> 00:01:07,382
+Third, the deep reasoning tier.
+
+16
+00:01:07,382 --> 00:01:16,580
+This is where you use the strongest and most expensive models for long planning, complex codebase analysis, difficult debugging, or high-risk decisions.
+
+17
+00:01:16,580 --> 00:01:24,044
+Gemini 3.5 Flash is best understood as a strong fast-tier model that can sometimes reach into the lower balanced tier.
+
+18
+00:01:24,044 --> 00:01:27,747
+It is not trying to replace Claude Opus-style models.
+
+19
+00:01:27,747 --> 00:01:36,415
+But it can compete very seriously with Claude Haiku-style routes, and on some tasks it can even be a good first pass before escalating to Sonnet.
+
+20
+00:01:36,415 --> 00:01:47,500
+We recently tested this through an OpenAI-compatible endpoint using three models: gemini-3.5-flash, claude-haiku-4-5, and claude-sonnet-4-5.
+
+21
+00:01:47,500 --> 00:01:54,433
+The endpoint was the China route at cn.crazyrouter.com slash v1 slash chat completions.
+
+22
+00:01:54,433 --> 00:02:05,601
+The tasks were intentionally practical: strict bullet summaries, a small constraint reasoning problem, a Python bug fix, a token cost calculation, and a strict JSON output task.
+
+23
+00:02:05,601 --> 00:02:09,127
+And the most useful finding was not just the leaderboard.
+
+24
+00:02:09,127 --> 00:02:11,556
+It was an integration pitfall.
+
+25
+00:02:11,556 --> 00:02:21,886
+When max tokens was set too low, Gemini 3.5 Flash sometimes returned HTTP 200, with finish reason set to length, but with empty content.
+
+26
+00:02:21,886 --> 00:02:27,936
+That is the kind of bug that can look like success in your logs while your application gets nothing useful back.
+
+27
+00:02:27,936 --> 00:02:33,195
+Once the token budget was raised to a safer value, the result changed dramatically.
+
+28
+00:02:33,195 --> 00:02:43,018
+Gemini 3.5 Flash averaged about 5.65 seconds, with a median around 4.93 seconds, and passed the full small test set.
+
+29
+00:02:43,018 --> 00:02:50,554
+Claude Haiku averaged around 9.13 seconds, and Claude Sonnet around 10.47 seconds in that run.
+
+30
+00:02:50,554 --> 00:02:56,568
+Now, this does not mean Gemini 3.5 Flash is universally better than Claude Sonnet.
+
+31
+00:02:56,568 --> 00:02:58,985
+That would be the wrong conclusion.
+
+32
+00:02:58,985 --> 00:03:07,511
+Claude-style models are often stronger when you need polished writing, long-form nuance, complex coding, or careful multi-step agent planning.
+
+33
+00:03:07,511 --> 00:03:16,757
+But the test does show something important: for fast, structured, API-driven work, Gemini 3.5 Flash can be a very strong first route.
+
+34
+00:03:16,757 --> 00:03:21,202
+The production lesson is simple: route by task, not by brand.
+
+35
+00:03:21,202 --> 00:03:25,424
+For support ticket classification, use a fast model first.
+
+36
+00:03:25,424 --> 00:03:33,219
+For JSON extraction, use the model that obeys your schema most reliably, then validate output before it touches your database.
+
+37
+00:03:33,219 --> 00:03:37,594
+For simple code fixes, test both fast and balanced routes.
+
+38
+00:03:37,594 --> 00:03:42,853
+For complex architecture review, escalate to a stronger Claude or reasoning model.
+
+39
+00:03:42,853 --> 00:03:46,721
+This is where API gateways become real infrastructure.
+
+40
+00:03:46,721 --> 00:03:55,625
+If your application hard-codes one provider and one model, every pricing change, latency spike, or quality regression becomes a product problem.
+
+41
+00:03:55,625 --> 00:04:02,193
+But if your application routes through one compatible API layer, model choice becomes a runtime decision.
+
+42
+00:04:02,193 --> 00:04:06,674
+You can start with Gemini 3.5 Flash for low-risk tasks.
+
+43
+00:04:06,674 --> 00:04:11,261
+You can fall back to Claude Haiku when latency or availability changes.
+
+44
+00:04:11,261 --> 00:04:14,634
+You can escalate to Sonnet when the task gets harder.
+
+45
+00:04:14,634 --> 00:04:20,176
+And you can reserve the strongest models for the small percentage of requests that actually need them.
+
+46
+00:04:20,308 --> 00:04:23,866
+The metrics to watch are not only average latency.
+
+47
+00:04:23,816 --> 00:04:26,458
+Watch p95 latency.
+
+48
+00:04:26,458 --> 00:04:28,486
+Watch finish reason.
+
+49
+00:04:28,486 --> 00:04:30,573
+Watch empty content.
+
+50
+00:04:30,573 --> 00:04:32,849
+Watch JSON validity.
+
+51
+00:04:32,849 --> 00:04:34,889
+Watch retry rate.
+
+52
+00:04:34,889 --> 00:04:39,075
+Watch cost per successful task, not just cost per token.
+
+53
+00:04:39,075 --> 00:04:41,269
+That last point matters.
+
+54
+00:04:41,269 --> 00:04:46,953
+A cheap model that fails twice may be more expensive than a stronger model that succeeds once.
+
+55
+00:04:46,953 --> 00:04:51,929
+A fast model that returns invalid JSON may create hidden cleanup costs.
+
+56
+00:04:51,929 --> 00:04:57,601
+A slow model may be acceptable for background jobs but unacceptable for user-facing chat.
+
+57
+00:04:57,601 --> 00:05:02,106
+So the real model strategy in 2026 is not picking a winner.
+
+58
+00:05:02,106 --> 00:05:04,087
+It is building a ladder.
+
+59
+00:05:04,087 --> 00:05:06,068
+Fast route first.
+
+60
+00:05:06,068 --> 00:05:08,156
+Validate the output.
+
+61
+00:05:08,156 --> 00:05:10,750
+Retry or fallback when needed.
+
+62
+00:05:10,750 --> 00:05:13,509
+Escalate when the task is complex.
+
+63
+00:05:13,509 --> 00:05:15,290
+Log the reason.
+
+64
+00:05:15,290 --> 00:05:17,200
+Measure the outcome.
+
+65
+00:05:17,200 --> 00:05:22,766
+Gemini 3.5 Flash is exciting because it makes that first rung of the ladder stronger.
+
+66
+00:05:22,766 --> 00:05:26,623
+Claude remains valuable because the higher rungs still matter.
+
+67
+00:05:26,623 --> 00:05:31,693
+And the teams that win will not be the ones arguing about which model is best in general.
+
+68
+00:05:31,693 --> 00:05:36,564
+They will be the ones measuring which model is best for each task in their own product.
+
+69
+00:05:36,564 --> 00:05:38,509
+That is it for today.
+
+70
+00:05:38,509 --> 00:05:47,377
+If you are building AI products, keep your model layer flexible, monitor the weird edge cases, and never trust HTTP 200 alone.
+
+71
+00:05:47,377 --> 00:05:51,611
+This has been AI Dev Tools — the Crazyrouter Podcast.
+
+72
+00:05:51,611 --> 00:05:53,450
+See you next time.
+
