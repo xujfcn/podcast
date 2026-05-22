@@ -1,474 +1,745 @@
 <?xml version='1.0' encoding='utf-8'?>
-<rss xmlns:ns0="http://www.w3.org/2005/Atom" xmlns:ns1="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
   <channel>
     <title>AI Dev Tools — The Crazyrouter Podcast</title>
     <link>https://crazyrouter.com</link>
     <description>Your weekly breakdown of AI development tools, API gateways, model pricing, and building with GPT, Claude, Gemini, and DeepSeek. Hosted by Crazyrouter — one API key for 627+ AI models.</description>
     <language>en</language>
     <copyright>© 2026 Crazyrouter</copyright>
-    <ns0:link href="https://xujfcn.github.io/podcast/feed.xml" rel="self" type="application/rss+xml" />
-    <ns1:author>Crazyrouter</ns1:author>
-    <ns1:owner>
-      <ns1:name>Crazyrouter</ns1:name>
-      <ns1:email>support@crazyrouter.com</ns1:email>
-    </ns1:owner>
-    <ns1:image href="https://xujfcn.github.io/podcast/cover.jpg" />
-    <ns1:category text="Technology" />
-    <ns1:explicit>false</ns1:explicit>
-    <ns1:type>episodic</ns1:type>
-
-
-
-
-
-      <item><title>EP065: Gemini 3.5 Flash vs Claude — Why Response Tiers Matter</title><description>Gemini 3.5 Flash is best understood as a strong fast-tier production model, not a direct Claude Opus replacement. We break down real API test results against Claude Haiku and Sonnet-style routes, the max_tokens pitfall that can return HTTP 200 with empty content, and how developers should design model routing, fallback, validation, and escalation by task instead of by brand.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 21 May 2026 09:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep065.mp3" length="2120976" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep065.mp3</guid><ns1:duration>5:53</ns1:duration><ns1:episode>65</ns1:episode></item>
-
-      <item><title>EP064: MCP Gateways Are Becoming the Security Layer for AI Agents</title><description>MCP gateways are becoming the control layer for production AI agents. We break down why tool access needs identity, permissions, approvals, and observability, and how gateway thinking helps teams make agents capable without making them reckless.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Wed, 20 May 2026 13:30:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep064.mp3" length="5880045" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep064.mp3</guid><ns1:duration>4:54</ns1:duration><ns1:episode>64</ns1:episode></item>
-
-      <item><title>EP063: GPT Pricing Changes and Why API Cost Strategy Matters</title><description>GPT-series pricing is changing, and that is a reminder that model pricing is product infrastructure. We break down Crazyrouter's GPT discount adjustment, why upstream cost changes happen, and how developers can design AI apps with routing layers, value-based model tiers, fallback options, and cost-per-outcome tracking so pricing changes do not break the product.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Fri, 15 May 2026 09:45:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep063.mp3" length="5086125" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep063.mp3</guid><ns1:duration>4:14</ns1:duration><ns1:episode>63</ns1:episode></item>
-
-      <item><title>EP062: Fallback Routing Is the Feature That Makes AI Apps Feel Reliable</title><description>Fallback routing is the reliability layer that makes production AI apps feel dependable. We break down why fallback is not just a backup model, how to design task-aware routing rules, when not to fallback, and why logging fallback reasons, latency, errors, and user outcomes turns model routing into real infrastructure.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Wed, 13 May 2026 09:50:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep062.mp3" length="5837805" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep062.mp3</guid><ns1:duration>4:52</ns1:duration><ns1:episode>62</ns1:episode></item>
-
-
-      <item><title>EP061: AI Image APIs Are Becoming Product Infrastructure</title><description>AI image generation is moving from novelty to product infrastructure. We break down why developers should evaluate image models by use case, not hype: text rendering, product accuracy, latency, edit support, routing, fallback, logging, and observability — and why image generation now needs the same gateway pattern as LLMs.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Tue, 12 May 2026 10:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep061.mp3" length="5222925" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep061.mp3</guid><ns1:duration>4:21</ns1:duration><ns1:episode>61</ns1:episode></item>
-
-      <item><title>EP060: MCP Gateways Are the New Control Plane for AI Agents</title><description>MCP is moving from integration convenience to production governance. We break down why MCP gateways are becoming the control layer between AI agents and external tools, how they mirror the API gateway pattern for microservices, and why model routing plus tool routing need to be observed together for safe agent platforms.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sun, 10 May 2026 12:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep060.mp3" length="4208640" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep060.mp3</guid><ns1:duration>3:30</ns1:duration><ns1:episode>60</ns1:episode></item>
-
-      <item><title>EP059: Agents Are Infrastructure Now — Why Control Planes Matter More Than Prompts</title><description>AI agents are no longer just chatbot features — they are becoming actors inside software systems. We break down why agent identity, permissions, audit logs, routing, observability, and cost controls are now core infrastructure, and why multi-model API gateways are becoming the control plane for safe autonomous workflows.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sat, 09 May 2026 08:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep059.mp3" length="4431360" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep059.mp3</guid><ns1:duration>3:42</ns1:duration><ns1:episode>59</ns1:episode></item>
-
-      <item><title>EP058: Blitzy Raises $200M for Autonomous Software Dev + OpenAI Ships GPT-5.5 Instant as Default</title><description>Two big stories today: Blitzy, an autonomous software development startup, just raised $200M to build AI that writes entire enterprise applications end-to-end. Meanwhile, OpenAI quietly shipped GPT-5.5 Instant as the new default ChatGPT model, replacing GPT-5.3 Instant. We break down what both moves mean for developers, API pricing, and the future of AI-powered coding tools.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 07 May 2026 08:22:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep058.mp3" length="4436640" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep058.mp3</guid><ns1:duration>3:42</ns1:duration><ns1:episode>58</ns1:episode></item>
-
-      <item><title>EP057: Cloudflare Just Let AI Agents Deploy Full Apps — The Infrastructure Layer Goes Agentic</title><description>Cloudflare announced that AI agents can now create accounts, buy domains via Stripe, and deploy applications — all programmatically with zero human intervention. We break down how it works, what it means for the future of autonomous development workflows, the security implications of giving agents spending authority, and why API gateways become your critical safety net when your agents go fully autonomous.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Tue, 06 May 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep057.mp3" length="1816509" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep057.mp3</guid><ns1:duration>5:02</ns1:duration><ns1:episode>57</ns1:episode></item>
-      <item><title>EP056: The Celebrity AI Gateway Wars — When Crypto Kings and Tech CEOs Enter Your Market</title><description>Justin Sun launched b.ai with "every model, half off" and Fu Sheng brought EasyRouter.io with "zero platform fee." Two massive internet celebrities just entered the AI API gateway space. We break down what this means for the market, why celebrity-driven platforms have a specific playbook (and specific weaknesses), and how developer-focused gateways can actually benefit from the attention flood.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Mon, 05 May 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep056.mp3" length="5180685" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep056.mp3</guid><ns1:duration>4:19</ns1:duration><ns1:episode>56</ns1:episode></item>
-      <item><title>EP055: AI-Powered Code Review — From Bottleneck to Superpower</title><description>Code review has always been a necessary bottleneck in software development. In 2026, AI-powered code review tools have matured to the point where they catch real bugs, security vulnerabilities, and performance issues — not just lint errors. We break down what's working, how to build your own review pipeline with an API gateway, the two-pass workflow that cuts review cycle time by 50-60%, and the gotchas to watch out for.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sun, 04 May 2026 09:13:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep055.mp3" length="7648320" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep055.mp3</guid><ns1:duration>6:22</ns1:duration><ns1:episode>55</ns1:episode></item>
-      <item><title>EP054: The Hybrid AI Coding Stack — Why Developers Are Running Local and Cloud LLMs Side by Side</title><description>More developers are building hybrid AI coding stacks that combine local open-weight models like Qwen3 Coder and DeepSeek V3.2 with cloud models like Claude Opus and GPT-5. We break down why this pattern is taking off, how to set it up with a local inference server and an API gateway, and why the economics, privacy benefits, and reliability gains make it the default architecture for serious AI-powered development in 2026.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sun, 04 May 2026 07:39:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep054.mp3" length="5624160" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep054.mp3</guid><ns1:duration>4:41</ns1:duration><ns1:episode>54</ns1:episode></item>
-      <item><title>EP053: DeepClaude — 17x Cheaper Agent Loops by Splitting Thinking from Coding</title><description>A new open-source project called DeepClaude is turning heads by splitting the AI coding agent loop into two models: DeepSeek V4 Pro for reasoning and planning, Claude for code generation and tool use. The result? 17x cheaper than running Claude end-to-end, with comparable output quality. We break down how model-splitting architectures work, why this validates the multi-model routing thesis, the tradeoffs developers should know about, and how to implement similar patterns with any gateway today.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sun, 04 May 2026 03:46:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep053.mp3" length="1465344" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep053.mp3</guid><ns1:duration>4:04</ns1:duration><ns1:episode>53</ns1:episode></item>
-      <item><title>EP052: Palo Alto Networks Just Bought an AI Gateway — What It Means for Every Developer</title><description>Palo Alto Networks acquires Portkey, one of the most prominent AI gateway startups, folding it into Prisma AIRS as a mission-critical control plane for autonomous agents. We break down what this 120-billion-dollar cybersecurity company buying a gateway means for the category: validation that AI gateways are infrastructure, the enterprise security angle that changes everything, and why the acquisition creates a wide-open lane for developer-focused gateways. Plus: what the rise of autonomous AI agents means for gateway architecture and why lightweight tools like Crazyrouter are more relevant than ever.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sat, 03 May 2026 07:36:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep052.mp3" length="6114285" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep052.mp3</guid><ns1:duration>5:06</ns1:duration><ns1:episode>52</ns1:episode></item>
-      <item><title>EP051: OpenAI's Symphony — How Coding Agents Are Becoming Autonomous Dev Teams</title><description>OpenAI open-sourced Symphony, the orchestration spec behind Codex. We break down the conductor-worker architecture that lets multiple AI agents collaborate on a codebase simultaneously — writing code, running tests, and submitting PRs autonomously. Plus: the Bedrock integration bringing OpenAI models into AWS VPCs, why specification skills are becoming more valuable than implementation skills, and practical steps to start building with agent-driven development today.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Fri, 02 May 2026 10:43:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep051.mp3" length="1895328" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep051.mp3</guid><ns1:duration>5:16</ns1:duration><ns1:episode>51</ns1:episode></item>
-      <item><title>EP050: The AI Agent Protocol Wars — MCP vs A2A and Why Developers Need a Strategy Now</title><description>Episode fifty dives into the agent protocol wars reshaping AI development. We break down Anthropic's Model Context Protocol (MCP) — the USB-C of AI tool integration — and Google's Agent-to-Agent protocol (A2A) for multi-agent collaboration. MCP solves the N-times-M integration problem with a client-server model for connecting AI apps to external tools. A2A enables peer-to-peer agent discovery and coordination for complex workflows. They're not competing — they're complementary layers. Plus: a practical four-step strategy for adopting both protocols, and a concrete architecture for building modular, provider-independent agent systems.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sat, 02 May 2026 10:30:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep050.mp3" length="7349805" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep050.mp3</guid><ns1:duration>6:07</ns1:duration><ns1:episode>50</ns1:episode></item>
-      <item><title>EP049: OpenAI's For-Profit Pivot — What It Really Means for API Pricing and Developers</title><description>OpenAI's transition from nonprofit to for-profit is under the spotlight as the Musk vs Altman trial unfolds. We break down what this corporate restructuring means for API pricing, model availability, and vendor lock-in. Expect price segmentation to increase, exclusive model windows to expand, and switching costs to rise. The developer playbook: abstract your dependencies, use multi-provider routing, and match models to tasks for 30-50% cost savings. Don't bet your architecture on any single provider's pricing staying stable.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sat, 02 May 2026 09:06:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep049.mp3" length="5258445" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep049.mp3</guid><ns1:duration>4:23</ns1:duration><ns1:episode>49</ns1:episode></item>
-      <item><title>EP048: The AI Robotics SDK Moment — Why Every Developer Should Be Paying Attention</title><description>AI-powered robotics just crossed a major threshold. Eka Robotics demonstrated human-level dexterity, but the real story is the software stack underneath. We break down the new three-layer robotics developer stack — foundation models for perception, LLMs for task planning, and specialized models for motion execution — and explain why the barrier to entry just dropped from a PhD to an API key. Plus: practical steps to start building with NVIDIA Isaac, LeRobot, and MuJoCo today.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Fri, 02 May 2026 00:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep048.mp3" length="5808525" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep048.mp3</guid><ns1:duration>4:50</ns1:duration><ns1:episode>48</ns1:episode></item>
-      <item><title>EP047: The Hidden Cost of AI — Water, Energy, and Why Your Model Choice Matters</title><description>Every token you generate has a physical footprint — water, electricity, carbon. A single large data center can consume over ten million gallons of water per day for cooling. We break down the real environmental cost of AI inference, why model selection is green engineering, and three levers developers control today: choosing efficient models, writing better prompts, and picking providers with sustainable infrastructure. Plus: a practical tiered workload framework to cut your resource consumption across every dimension.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 01 May 2026 23:34:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep047.mp3" length="1670349" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep047.mp3</guid><ns1:duration>4:38</ns1:duration><ns1:episode>47</ns1:episode></item>
-      <item><title>EP046: The AI Content Labeling Era — Watermarks, Verified Badges, and What Developers Need to Build For</title><description>Platforms are now requiring developers to answer "is this AI or human?" programmatically. Spotify is rolling out verified human badges, YouTube requires AI content disclosure, Meta labels AI images, and the EU AI Act's transparency requirements kick in this year. We break down three layers every developer needs: C2PA metadata for provenance, invisible watermarking with SynthID and similar tools, and platform-specific disclosure APIs. Plus: practical code patterns for adding content labeling to your AI pipeline today.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 01 May 2026 20:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep046.mp3" length="6602925" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep046.mp3</guid><ns1:duration>5:30</ns1:duration><ns1:episode>46</ns1:episode></item>
-      <item><title>EP045: GPT-image-2 Is a Money Machine — 6 Viral Use Cases Developers Are Building Right Now</title><description>GPT-image-2's killer feature is text rendering — and developers are turning it into real products. We break down six viral use cases: AI palm reading infographics, face reading and color analysis, action figure generators, Ghibli-style photo transformation, future baby prediction, and AI meme and coloring book creators. Each one is a single API call, costs 4-8 cents per generation, and can be monetized at 90%+ margins. Full code examples available on the Crazyrouter blog in English, Chinese, and Russian.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 01 May 2026 19:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep045.mp3" length="7261005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep045.mp3</guid><ns1:duration>6:03</ns1:duration><ns1:episode>45</ns1:episode></item>
-  <item><title>EP044: Claude Opus 4.7 Drops, and May's Model Avalanche Is Just Getting Started</title><description>Anthropic just released Claude Opus 4.7 with a 13% coding benchmark improvement over Opus 4.6, better vision, and same pricing. Meanwhile, Claude Mythos sits in restricted preview with jaw-dropping benchmarks, GPT-5.5-Cyber is rolling out, DeepSeek V4 full release is imminent, and Meta's Avocado model targets May or June. We break down what each release means for developers, why model switching is no longer optional, and how the cybersecurity gating trend signals a new era of capability-based API access.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 01 May 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep044.mp3" length="4693005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep044.mp3</guid><ns1:duration>3:54</ns1:duration><ns1:episode>44</ns1:episode></item>
-  <item><title>EP043: The AI API Gateway Market Just Got Crowded — How to Pick the Right One</title><description>The AI API gateway market exploded in 2026 with new players like TrueFoundry, TensorZero, ZenMux, and EvoLink. We break down why the market is growing so fast, introduce a four-C framework for choosing the right gateway (Coverage, Cost, Complexity, Control), compare pricing models, and give practical recommendations by team size. Plus: why Generative Engine Optimization is the new SEO for developer tools.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Tue, 29 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep043.mp3" length="5919885" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep043.mp3</guid><ns1:duration>4:55</ns1:duration><ns1:episode>43</ns1:episode></item>
-  <item><title>EP042: Microsoft and OpenAI Break Up Their Exclusive Deal — What It Means for Developers</title><description>Microsoft and OpenAI just ended their exclusive partnership. OpenAI can now serve models on any cloud provider, not just Azure. We break down the new non-exclusive license through 2032, the flipped revenue sharing structure, what this means for multi-cloud deployment, why the AI model layer is becoming commoditized, and how API gateways become even more critical in a fragmented infrastructure world.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Mon, 28 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep042.mp3" length="3932640" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep042.mp3</guid><ns1:duration>4:05</ns1:duration><ns1:episode>42</ns1:episode></item>
-  <item><title>EP041: The 2 Million Token Context Window Era — What It Actually Changes for Developers</title><description>Two million tokens in a single API call — that's 1.5 million words, 20 novels, or an entire codebase. We break down what massive context windows from Grok 4.1 and Gemini actually change for developers: the RAG pipelines you can skip, the real cost math (40 cents for 2M tokens), the gotchas nobody mentions (latency, attention degradation, cost surprises), and four practical patterns that work in production. Plus: why the simplest architecture just became the best architecture.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Mon, 27 Apr 2026 12:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804688" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep041.mp3</guid><ns1:duration>7:47</ns1:duration><ns1:episode>41</ns1:episode></item>
-  <item><title>EP040: The Real Cost of AI APIs in 2026 — Who's Cheapest, Who's Worth It, and Where the Hidden Fees Are</title><description>We go deep on what AI APIs actually cost in production. Covering 18 models across 5 providers — OpenAI, Anthropic, Google, xAI, and Chinese providers — we break down base pricing, caching mechanics (and why they differ), Batch API discounts, the Chinese model wild card, and a practical framework for picking the right model for your workload. Plus: how stacking Crazyrouter discounts with caching can save you 80-90%.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sun, 27 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep040.mp3" length="2422605" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep040.mp3</guid><ns1:duration>6:44</ns1:duration><ns1:episode>40</ns1:episode></item>
-  <item><title>EP039: Google's $40B Anthropic Bet, OpenAI's Privacy Filter, and the AI Regulation Showdown</title><description>Three big stories this week: Google is investing up to $40 billion in Anthropic, reshaping the competitive landscape for Claude and Gemini. OpenAI open-sources Privacy Filter, a local PII detection model that could change how developers handle user data. And the US DOJ joins a lawsuit against Colorado's AI regulation law. We break down what each means for API developers.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Sat, 26 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep039.mp3" length="6431565" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep039.mp3</guid><ns1:duration>5:21</ns1:duration><ns1:episode>39</ns1:episode></item>
-  <item><title>EP038: Open Source AI Models Are Eating the API Market</title><description>Open-weight models like Llama 4, Qwen 3, and DeepSeek V3 aren't research toys anymore — they're production-grade and forcing the entire API market to rethink pricing and lock-in. We break down the open source wave, what it means for API costs, the self-hosting tradeoff, how to avoid vendor lock-in, and three trends to watch for the rest of 2026.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Fri, 25 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep038.mp3" length="6266925" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep038.mp3</guid><ns1:duration>5:13</ns1:duration><ns1:episode>38</ns1:episode></item>
-  <item><title>EP037: AI Coding Agents in 2026 — Cursor, Windsurf, Kiro, and the New Dev Workflow</title><description>AI coding agents have gone way beyond autocomplete. We compare Cursor, Windsurf, GitHub Copilot, Kiro, Augment Code, and Aider — breaking down what each does best, how the model behind the agent matters more than the IDE, and why intelligent model routing can cut your AI coding costs by 40 percent.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 24 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep037.mp3" length="6424845" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep037.mp3</guid><ns1:duration>5:21</ns1:duration><ns1:episode>37</ns1:episode></item>
-  <item><title>EP036: AI Model Pricing Wars — Who's Winning in April 2026?</title><description>AI API pricing is in freefall — and that's great news for developers. We break down the real cost of GPT-4o, Claude Sonnet, DeepSeek V3, and Qwen across actual workloads, explain why per-token price isn't your real cost, cover the new pricing tiers (batch, cached, priority), and show how intelligent multi-model routing can cut your AI bill by 40-60 percent.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Wed, 23 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep036.mp3" length="6144525" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep036.mp3</guid><ns1:duration>5:07</ns1:duration><ns1:episode>36</ns1:episode></item>
-  <item><title>EP035: ChatGPT Images 2.0, GitHub Copilot Changes, and the Vercel OAuth Breach</title><description>Three stories every AI developer needs to know this week: OpenAI launches ChatGPT Images 2.0 with major quality upgrades, GitHub restructures Copilot individual plans as the AI coding market heats up, and a Vercel OAuth breach exposes environment variables — a wake-up call for API key security. Plus: why flexibility and spending controls matter more than ever.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Tue, 22 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep035.mp3" length="5284365" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep035.mp3</guid><ns1:duration>4:24</ns1:duration><ns1:episode>35</ns1:episode></item>
-  <item><title>EP034: Qwen 3.6 Max Preview — China's AI Models Are Catching Up Fast</title><description>Qwen 3.6 Max Preview just dropped with benchmark scores rivaling Claude and GPT-4o. We break down what this means for developers, why model diversity matters for cost, latency, and redundancy, and how API gateway routing lets you use the best model for each task without changing your code.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Mon, 21 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep034.mp3" length="4440000" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep034.mp3</guid><ns1:duration>4:37</ns1:duration><ns1:episode>34</ns1:episode></item>
-  <item>
+    <atom:link href="https://xujfcn.github.io/podcast/feed.xml" rel="self" type="application/rss+xml" />
+    <itunes:author>Crazyrouter</itunes:author>
+    <itunes:owner>
+      <itunes:name>Crazyrouter</itunes:name>
+      <itunes:email>support@crazyrouter.com</itunes:email>
+    </itunes:owner>
+    <itunes:image href="https://xujfcn.github.io/podcast/cover.jpg" />
+    <itunes:category text="Technology" />
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+    <item>
+      <title>EP066: Model Orchestration — The Missing Layer in Production AI Apps</title>
+      <description>Model orchestration is the practical layer between a prompt and a production AI system. This episode explains how to route by task instead of brand, validate outputs beyond HTTP 200, design fallbacks based on failure type, escalate only when needed, and measure cost per successful task instead of raw token spend.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Fri, 22 May 2026 16:20:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep066.mp3" length="6551565" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep066.mp3</guid>
+      <itunes:duration>5:28</itunes:duration>
+      <itunes:episode>66</itunes:episode>
+    </item>
+    <item>
+      <title>EP065: Gemini 3.5 Flash vs Claude — Why Response Tiers Matter</title>
+      <description>Gemini 3.5 Flash is best understood as a strong fast-tier production model, not a direct Claude Opus replacement. We break down real API test results against Claude Haiku and Sonnet-style routes, the max_tokens pitfall that can return HTTP 200 with empty content, and how developers should design model routing, fallback, validation, and escalation by task instead of by brand.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 21 May 2026 09:20:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep065.mp3" length="2120976" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep065.mp3</guid>
+      <itunes:duration>5:53</itunes:duration>
+      <itunes:episode>65</itunes:episode>
+    </item>
+    <item>
+      <title>EP064: MCP Gateways Are Becoming the Security Layer for AI Agents</title>
+      <description>MCP gateways are becoming the control layer for production AI agents. We break down why tool access needs identity, permissions, approvals, and observability, and how gateway thinking helps teams make agents capable without making them reckless.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Wed, 20 May 2026 13:30:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep064.mp3" length="5880045" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep064.mp3</guid>
+      <itunes:duration>4:54</itunes:duration>
+      <itunes:episode>64</itunes:episode>
+    </item>
+    <item>
+      <title>EP063: GPT Pricing Changes and Why API Cost Strategy Matters</title>
+      <description>GPT-series pricing is changing, and that is a reminder that model pricing is product infrastructure. We break down Crazyrouter's GPT discount adjustment, why upstream cost changes happen, and how developers can design AI apps with routing layers, value-based model tiers, fallback options, and cost-per-outcome tracking so pricing changes do not break the product.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Fri, 15 May 2026 09:45:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep063.mp3" length="5086125" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep063.mp3</guid>
+      <itunes:duration>4:14</itunes:duration>
+      <itunes:episode>63</itunes:episode>
+    </item>
+    <item>
+      <title>EP062: Fallback Routing Is the Feature That Makes AI Apps Feel Reliable</title>
+      <description>Fallback routing is the reliability layer that makes production AI apps feel dependable. We break down why fallback is not just a backup model, how to design task-aware routing rules, when not to fallback, and why logging fallback reasons, latency, errors, and user outcomes turns model routing into real infrastructure.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Wed, 13 May 2026 09:50:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep062.mp3" length="5837805" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep062.mp3</guid>
+      <itunes:duration>4:52</itunes:duration>
+      <itunes:episode>62</itunes:episode>
+    </item>
+    <item>
+      <title>EP061: AI Image APIs Are Becoming Product Infrastructure</title>
+      <description>AI image generation is moving from novelty to product infrastructure. We break down why developers should evaluate image models by use case, not hype: text rendering, product accuracy, latency, edit support, routing, fallback, logging, and observability — and why image generation now needs the same gateway pattern as LLMs.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Tue, 12 May 2026 10:15:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep061.mp3" length="5222925" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep061.mp3</guid>
+      <itunes:duration>4:21</itunes:duration>
+      <itunes:episode>61</itunes:episode>
+    </item>
+    <item>
+      <title>EP060: MCP Gateways Are the New Control Plane for AI Agents</title>
+      <description>MCP is moving from integration convenience to production governance. We break down why MCP gateways are becoming the control layer between AI agents and external tools, how they mirror the API gateway pattern for microservices, and why model routing plus tool routing need to be observed together for safe agent platforms.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sun, 10 May 2026 12:20:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep060.mp3" length="4208640" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep060.mp3</guid>
+      <itunes:duration>3:30</itunes:duration>
+      <itunes:episode>60</itunes:episode>
+    </item>
+    <item>
+      <title>EP059: Agents Are Infrastructure Now — Why Control Planes Matter More Than Prompts</title>
+      <description>AI agents are no longer just chatbot features — they are becoming actors inside software systems. We break down why agent identity, permissions, audit logs, routing, observability, and cost controls are now core infrastructure, and why multi-model API gateways are becoming the control plane for safe autonomous workflows.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sat, 09 May 2026 08:15:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep059.mp3" length="4431360" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep059.mp3</guid>
+      <itunes:duration>3:42</itunes:duration>
+      <itunes:episode>59</itunes:episode>
+    </item>
+    <item>
+      <title>EP058: Blitzy Raises $200M for Autonomous Software Dev + OpenAI Ships GPT-5.5 Instant as Default</title>
+      <description>Two big stories today: Blitzy, an autonomous software development startup, just raised $200M to build AI that writes entire enterprise applications end-to-end. Meanwhile, OpenAI quietly shipped GPT-5.5 Instant as the new default ChatGPT model, replacing GPT-5.3 Instant. We break down what both moves mean for developers, API pricing, and the future of AI-powered coding tools.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 07 May 2026 08:22:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep058.mp3" length="4436640" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep058.mp3</guid>
+      <itunes:duration>3:42</itunes:duration>
+      <itunes:episode>58</itunes:episode>
+    </item>
+    <item>
+      <title>EP057: Cloudflare Just Let AI Agents Deploy Full Apps — The Infrastructure Layer Goes Agentic</title>
+      <description>Cloudflare announced that AI agents can now create accounts, buy domains via Stripe, and deploy applications — all programmatically with zero human intervention. We break down how it works, what it means for the future of autonomous development workflows, the security implications of giving agents spending authority, and why API gateways become your critical safety net when your agents go fully autonomous.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Tue, 06 May 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep057.mp3" length="1816509" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep057.mp3</guid>
+      <itunes:duration>5:02</itunes:duration>
+      <itunes:episode>57</itunes:episode>
+    </item>
+    <item>
+      <title>EP056: The Celebrity AI Gateway Wars — When Crypto Kings and Tech CEOs Enter Your Market</title>
+      <description>Justin Sun launched b.ai with "every model, half off" and Fu Sheng brought EasyRouter.io with "zero platform fee." Two massive internet celebrities just entered the AI API gateway space. We break down what this means for the market, why celebrity-driven platforms have a specific playbook (and specific weaknesses), and how developer-focused gateways can actually benefit from the attention flood.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Mon, 05 May 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep056.mp3" length="5180685" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep056.mp3</guid>
+      <itunes:duration>4:19</itunes:duration>
+      <itunes:episode>56</itunes:episode>
+    </item>
+    <item>
+      <title>EP055: AI-Powered Code Review — From Bottleneck to Superpower</title>
+      <description>Code review has always been a necessary bottleneck in software development. In 2026, AI-powered code review tools have matured to the point where they catch real bugs, security vulnerabilities, and performance issues — not just lint errors. We break down what's working, how to build your own review pipeline with an API gateway, the two-pass workflow that cuts review cycle time by 50-60%, and the gotchas to watch out for.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sun, 04 May 2026 09:13:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep055.mp3" length="7648320" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep055.mp3</guid>
+      <itunes:duration>6:22</itunes:duration>
+      <itunes:episode>55</itunes:episode>
+    </item>
+    <item>
+      <title>EP054: The Hybrid AI Coding Stack — Why Developers Are Running Local and Cloud LLMs Side by Side</title>
+      <description>More developers are building hybrid AI coding stacks that combine local open-weight models like Qwen3 Coder and DeepSeek V3.2 with cloud models like Claude Opus and GPT-5. We break down why this pattern is taking off, how to set it up with a local inference server and an API gateway, and why the economics, privacy benefits, and reliability gains make it the default architecture for serious AI-powered development in 2026.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sun, 04 May 2026 07:39:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep054.mp3" length="5624160" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep054.mp3</guid>
+      <itunes:duration>4:41</itunes:duration>
+      <itunes:episode>54</itunes:episode>
+    </item>
+    <item>
+      <title>EP053: DeepClaude — 17x Cheaper Agent Loops by Splitting Thinking from Coding</title>
+      <description>A new open-source project called DeepClaude is turning heads by splitting the AI coding agent loop into two models: DeepSeek V4 Pro for reasoning and planning, Claude for code generation and tool use. The result? 17x cheaper than running Claude end-to-end, with comparable output quality. We break down how model-splitting architectures work, why this validates the multi-model routing thesis, the tradeoffs developers should know about, and how to implement similar patterns with any gateway today.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sun, 04 May 2026 03:46:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep053.mp3" length="1465344" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep053.mp3</guid>
+      <itunes:duration>4:04</itunes:duration>
+      <itunes:episode>53</itunes:episode>
+    </item>
+    <item>
+      <title>EP052: Palo Alto Networks Just Bought an AI Gateway — What It Means for Every Developer</title>
+      <description>Palo Alto Networks acquires Portkey, one of the most prominent AI gateway startups, folding it into Prisma AIRS as a mission-critical control plane for autonomous agents. We break down what this 120-billion-dollar cybersecurity company buying a gateway means for the category: validation that AI gateways are infrastructure, the enterprise security angle that changes everything, and why the acquisition creates a wide-open lane for developer-focused gateways. Plus: what the rise of autonomous AI agents means for gateway architecture and why lightweight tools like Crazyrouter are more relevant than ever.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sat, 03 May 2026 07:36:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep052.mp3" length="6114285" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep052.mp3</guid>
+      <itunes:duration>5:06</itunes:duration>
+      <itunes:episode>52</itunes:episode>
+    </item>
+    <item>
+      <title>EP051: OpenAI's Symphony — How Coding Agents Are Becoming Autonomous Dev Teams</title>
+      <description>OpenAI open-sourced Symphony, the orchestration spec behind Codex. We break down the conductor-worker architecture that lets multiple AI agents collaborate on a codebase simultaneously — writing code, running tests, and submitting PRs autonomously. Plus: the Bedrock integration bringing OpenAI models into AWS VPCs, why specification skills are becoming more valuable than implementation skills, and practical steps to start building with agent-driven development today.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Fri, 02 May 2026 10:43:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep051.mp3" length="1895328" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep051.mp3</guid>
+      <itunes:duration>5:16</itunes:duration>
+      <itunes:episode>51</itunes:episode>
+    </item>
+    <item>
+      <title>EP050: The AI Agent Protocol Wars — MCP vs A2A and Why Developers Need a Strategy Now</title>
+      <description>Episode fifty dives into the agent protocol wars reshaping AI development. We break down Anthropic's Model Context Protocol (MCP) — the USB-C of AI tool integration — and Google's Agent-to-Agent protocol (A2A) for multi-agent collaboration. MCP solves the N-times-M integration problem with a client-server model for connecting AI apps to external tools. A2A enables peer-to-peer agent discovery and coordination for complex workflows. They're not competing — they're complementary layers. Plus: a practical four-step strategy for adopting both protocols, and a concrete architecture for building modular, provider-independent agent systems.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sat, 02 May 2026 10:30:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep050.mp3" length="7349805" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep050.mp3</guid>
+      <itunes:duration>6:07</itunes:duration>
+      <itunes:episode>50</itunes:episode>
+    </item>
+    <item>
+      <title>EP049: OpenAI's For-Profit Pivot — What It Really Means for API Pricing and Developers</title>
+      <description>OpenAI's transition from nonprofit to for-profit is under the spotlight as the Musk vs Altman trial unfolds. We break down what this corporate restructuring means for API pricing, model availability, and vendor lock-in. Expect price segmentation to increase, exclusive model windows to expand, and switching costs to rise. The developer playbook: abstract your dependencies, use multi-provider routing, and match models to tasks for 30-50% cost savings. Don't bet your architecture on any single provider's pricing staying stable.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sat, 02 May 2026 09:06:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep049.mp3" length="5258445" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep049.mp3</guid>
+      <itunes:duration>4:23</itunes:duration>
+      <itunes:episode>49</itunes:episode>
+    </item>
+    <item>
+      <title>EP048: The AI Robotics SDK Moment — Why Every Developer Should Be Paying Attention</title>
+      <description>AI-powered robotics just crossed a major threshold. Eka Robotics demonstrated human-level dexterity, but the real story is the software stack underneath. We break down the new three-layer robotics developer stack — foundation models for perception, LLMs for task planning, and specialized models for motion execution — and explain why the barrier to entry just dropped from a PhD to an API key. Plus: practical steps to start building with NVIDIA Isaac, LeRobot, and MuJoCo today.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Fri, 02 May 2026 00:25:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep048.mp3" length="5808525" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep048.mp3</guid>
+      <itunes:duration>4:50</itunes:duration>
+      <itunes:episode>48</itunes:episode>
+    </item>
+    <item>
+      <title>EP047: The Hidden Cost of AI — Water, Energy, and Why Your Model Choice Matters</title>
+      <description>Every token you generate has a physical footprint — water, electricity, carbon. A single large data center can consume over ten million gallons of water per day for cooling. We break down the real environmental cost of AI inference, why model selection is green engineering, and three levers developers control today: choosing efficient models, writing better prompts, and picking providers with sustainable infrastructure. Plus: a practical tiered workload framework to cut your resource consumption across every dimension.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 01 May 2026 23:34:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep047.mp3" length="1670349" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep047.mp3</guid>
+      <itunes:duration>4:38</itunes:duration>
+      <itunes:episode>47</itunes:episode>
+    </item>
+    <item>
+      <title>EP046: The AI Content Labeling Era — Watermarks, Verified Badges, and What Developers Need to Build For</title>
+      <description>Platforms are now requiring developers to answer "is this AI or human?" programmatically. Spotify is rolling out verified human badges, YouTube requires AI content disclosure, Meta labels AI images, and the EU AI Act's transparency requirements kick in this year. We break down three layers every developer needs: C2PA metadata for provenance, invisible watermarking with SynthID and similar tools, and platform-specific disclosure APIs. Plus: practical code patterns for adding content labeling to your AI pipeline today.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 01 May 2026 20:55:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep046.mp3" length="6602925" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep046.mp3</guid>
+      <itunes:duration>5:30</itunes:duration>
+      <itunes:episode>46</itunes:episode>
+    </item>
+    <item>
+      <title>EP045: GPT-image-2 Is a Money Machine — 6 Viral Use Cases Developers Are Building Right Now</title>
+      <description>GPT-image-2's killer feature is text rendering — and developers are turning it into real products. We break down six viral use cases: AI palm reading infographics, face reading and color analysis, action figure generators, Ghibli-style photo transformation, future baby prediction, and AI meme and coloring book creators. Each one is a single API call, costs 4-8 cents per generation, and can be monetized at 90%+ margins. Full code examples available on the Crazyrouter blog in English, Chinese, and Russian.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 01 May 2026 19:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep045.mp3" length="7261005" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep045.mp3</guid>
+      <itunes:duration>6:03</itunes:duration>
+      <itunes:episode>45</itunes:episode>
+    </item>
+    <item>
+      <title>EP044: Claude Opus 4.7 Drops, and May's Model Avalanche Is Just Getting Started</title>
+      <description>Anthropic just released Claude Opus 4.7 with a 13% coding benchmark improvement over Opus 4.6, better vision, and same pricing. Meanwhile, Claude Mythos sits in restricted preview with jaw-dropping benchmarks, GPT-5.5-Cyber is rolling out, DeepSeek V4 full release is imminent, and Meta's Avocado model targets May or June. We break down what each release means for developers, why model switching is no longer optional, and how the cybersecurity gating trend signals a new era of capability-based API access.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 01 May 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep044.mp3" length="4693005" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep044.mp3</guid>
+      <itunes:duration>3:54</itunes:duration>
+      <itunes:episode>44</itunes:episode>
+    </item>
+    <item>
+      <title>EP043: The AI API Gateway Market Just Got Crowded — How to Pick the Right One</title>
+      <description>The AI API gateway market exploded in 2026 with new players like TrueFoundry, TensorZero, ZenMux, and EvoLink. We break down why the market is growing so fast, introduce a four-C framework for choosing the right gateway (Coverage, Cost, Complexity, Control), compare pricing models, and give practical recommendations by team size. Plus: why Generative Engine Optimization is the new SEO for developer tools.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Tue, 29 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep043.mp3" length="5919885" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep043.mp3</guid>
+      <itunes:duration>4:55</itunes:duration>
+      <itunes:episode>43</itunes:episode>
+    </item>
+    <item>
+      <title>EP042: Microsoft and OpenAI Break Up Their Exclusive Deal — What It Means for Developers</title>
+      <description>Microsoft and OpenAI just ended their exclusive partnership. OpenAI can now serve models on any cloud provider, not just Azure. We break down the new non-exclusive license through 2032, the flipped revenue sharing structure, what this means for multi-cloud deployment, why the AI model layer is becoming commoditized, and how API gateways become even more critical in a fragmented infrastructure world.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Mon, 28 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep042.mp3" length="3932640" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep042.mp3</guid>
+      <itunes:duration>4:05</itunes:duration>
+      <itunes:episode>42</itunes:episode>
+    </item>
+    <item>
+      <title>EP041: The 2 Million Token Context Window Era — What It Actually Changes for Developers</title>
+      <description>Two million tokens in a single API call — that's 1.5 million words, 20 novels, or an entire codebase. We break down what massive context windows from Grok 4.1 and Gemini actually change for developers: the RAG pipelines you can skip, the real cost math (40 cents for 2M tokens), the gotchas nobody mentions (latency, attention degradation, cost surprises), and four practical patterns that work in production. Plus: why the simplest architecture just became the best architecture.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Mon, 27 Apr 2026 12:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804688" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep041.mp3</guid>
+      <itunes:duration>7:47</itunes:duration>
+      <itunes:episode>41</itunes:episode>
+    </item>
+    <item>
+      <title>EP040: The Real Cost of AI APIs in 2026 — Who's Cheapest, Who's Worth It, and Where the Hidden Fees Are</title>
+      <description>We go deep on what AI APIs actually cost in production. Covering 18 models across 5 providers — OpenAI, Anthropic, Google, xAI, and Chinese providers — we break down base pricing, caching mechanics (and why they differ), Batch API discounts, the Chinese model wild card, and a practical framework for picking the right model for your workload. Plus: how stacking Crazyrouter discounts with caching can save you 80-90%.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sun, 27 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep040.mp3" length="2422605" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep040.mp3</guid>
+      <itunes:duration>6:44</itunes:duration>
+      <itunes:episode>40</itunes:episode>
+    </item>
+    <item>
+      <title>EP039: Google's $40B Anthropic Bet, OpenAI's Privacy Filter, and the AI Regulation Showdown</title>
+      <description>Three big stories this week: Google is investing up to $40 billion in Anthropic, reshaping the competitive landscape for Claude and Gemini. OpenAI open-sources Privacy Filter, a local PII detection model that could change how developers handle user data. And the US DOJ joins a lawsuit against Colorado's AI regulation law. We break down what each means for API developers.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Sat, 26 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep039.mp3" length="6431565" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep039.mp3</guid>
+      <itunes:duration>5:21</itunes:duration>
+      <itunes:episode>39</itunes:episode>
+    </item>
+    <item>
+      <title>EP038: Open Source AI Models Are Eating the API Market</title>
+      <description>Open-weight models like Llama 4, Qwen 3, and DeepSeek V3 aren't research toys anymore — they're production-grade and forcing the entire API market to rethink pricing and lock-in. We break down the open source wave, what it means for API costs, the self-hosting tradeoff, how to avoid vendor lock-in, and three trends to watch for the rest of 2026.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Fri, 25 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep038.mp3" length="6266925" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep038.mp3</guid>
+      <itunes:duration>5:13</itunes:duration>
+      <itunes:episode>38</itunes:episode>
+    </item>
+    <item>
+      <title>EP037: AI Coding Agents in 2026 — Cursor, Windsurf, Kiro, and the New Dev Workflow</title>
+      <description>AI coding agents have gone way beyond autocomplete. We compare Cursor, Windsurf, GitHub Copilot, Kiro, Augment Code, and Aider — breaking down what each does best, how the model behind the agent matters more than the IDE, and why intelligent model routing can cut your AI coding costs by 40 percent.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 24 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep037.mp3" length="6424845" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep037.mp3</guid>
+      <itunes:duration>5:21</itunes:duration>
+      <itunes:episode>37</itunes:episode>
+    </item>
+    <item>
+      <title>EP036: AI Model Pricing Wars — Who's Winning in April 2026?</title>
+      <description>AI API pricing is in freefall — and that's great news for developers. We break down the real cost of GPT-4o, Claude Sonnet, DeepSeek V3, and Qwen across actual workloads, explain why per-token price isn't your real cost, cover the new pricing tiers (batch, cached, priority), and show how intelligent multi-model routing can cut your AI bill by 40-60 percent.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Wed, 23 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep036.mp3" length="6144525" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep036.mp3</guid>
+      <itunes:duration>5:07</itunes:duration>
+      <itunes:episode>36</itunes:episode>
+    </item>
+    <item>
+      <title>EP035: ChatGPT Images 2.0, GitHub Copilot Changes, and the Vercel OAuth Breach</title>
+      <description>Three stories every AI developer needs to know this week: OpenAI launches ChatGPT Images 2.0 with major quality upgrades, GitHub restructures Copilot individual plans as the AI coding market heats up, and a Vercel OAuth breach exposes environment variables — a wake-up call for API key security. Plus: why flexibility and spending controls matter more than ever.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Tue, 22 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep035.mp3" length="5284365" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep035.mp3</guid>
+      <itunes:duration>4:24</itunes:duration>
+      <itunes:episode>35</itunes:episode>
+    </item>
+    <item>
+      <title>EP034: Qwen 3.6 Max Preview — China's AI Models Are Catching Up Fast</title>
+      <description>Qwen 3.6 Max Preview just dropped with benchmark scores rivaling Claude and GPT-4o. We break down what this means for developers, why model diversity matters for cost, latency, and redundancy, and how API gateway routing lets you use the best model for each task without changing your code.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Mon, 21 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep034.mp3" length="4440000" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep034.mp3</guid>
+      <itunes:duration>4:37</itunes:duration>
+      <itunes:episode>34</itunes:episode>
+    </item>
+    <item>
       <title>EP032: MCP — The Protocol That's Connecting AI to Everything</title>
       <description>MCP — the Model Context Protocol — is the hottest topic in AI developer tooling right now. We break down what MCP actually is, why developers are excited about composable tool integrations, how it works in practice with coding assistants and AI agents, and what it means for API gateways like Crazyrouter. Plus: when to adopt MCP and how to get started.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep032.mp3" length="6721965" type="audio/mpeg" />
       <guid>ep032-mcp-the-protocol-thats-connecting-ai-to-everything</guid>
       <pubDate>Sat, 19 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>336</ns1:duration>
-      <ns1:episode>32</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>336</itunes:duration>
+      <itunes:episode>32</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP031: Claude Opus 4.7 Is Here — What Developers Need to Know</title>
       <description>Claude Opus 4.7 is now live and stable on Crazyrouter with a 15% price reduction, bringing it in line with Opus 4.6 pricing. We cover the key improvements in extended thinking, coding accuracy, and instruction following — plus when to use Opus vs Sonnet, and why dynamic model routing is the smart strategy for 2026.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep031.mp3" length="5262720" type="audio/mpeg" />
       <guid>ep031-claude-opus-47-is-here-what-developers-need-to-know</guid>
       <pubDate>Fri, 18 Apr 2026 14:00:00 +0000</pubDate>
-      <ns1:duration>263</ns1:duration>
-      <ns1:episode>31</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>263</itunes:duration>
+      <itunes:episode>31</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP030: The AI Pricing War — Why Model Costs Dropped 90% in One Year</title>
       <description>AI API pricing has collapsed over the past twelve months — GPT-4 went from $30/M to $2.50/M, DeepSeek came in at $0.27/M. We break down what's driving the price war (competition, inference efficiency, open source pressure), the hidden costs most developers miss (rate limits, latency, reliability), and why the smart strategy is dynamic model routing instead of locking into one provider.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep030.mp3" length="6140640" type="audio/mpeg" />
       <guid>ep030-ai-pricing-war-why-model-costs-dropped-90-percent</guid>
       <pubDate>Thu, 17 Apr 2026 21:00:00 +0000</pubDate>
-      <ns1:duration>307</ns1:duration>
-      <ns1:episode>30</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>307</itunes:duration>
+      <itunes:episode>30</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP029: AI Gateway Architecture — How It Works Under the Hood</title>
       <description>What actually happens between your API request and the model provider? We break down the six layers of an AI API gateway: request normalization, key management, smart routing and failover, streaming relay, observability, and cost controls. Plus: when you need a gateway and when you don't.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep029.mp3" length="6127725" type="audio/mpeg" />
       <guid>ep029-ai-gateway-architecture-how-it-works-under-the-hood</guid>
       <pubDate>Thu, 17 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>306</ns1:duration>
-      <ns1:episode>29</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>306</itunes:duration>
+      <itunes:episode>29</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP026: AI Video Generation APIs in 2026 — Kling, Runway, Veo, and Wan Compared</title>
       <description>A practical comparison of four AI video generation APIs developers are integrating in 2026: Kling for best quality-to-cost ratio, Runway Gen-4 for premium stylistic control, Google Veo 3 for native audio generation, and Wan for budget-friendly high-volume use. We cover generation time, consistency, resolution limits, real cost analysis, and the smart multi-provider strategy for building video features into your product.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep026.mp3" length="7685805" type="audio/mpeg" />
       <guid>ep026-ai-video-generation-apis-kling-runway-veo-wan-compared</guid>
       <pubDate>Tue, 15 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>384</ns1:duration>
-      <ns1:episode>26</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>384</itunes:duration>
+      <itunes:episode>26</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP025: Prompt Caching Deep Dive — How to Save 80% on Repeated API Calls</title>
       <description>If you're making repeated API calls with large system prompts, you're throwing money away. We go deep on prompt caching across OpenAI, Anthropic Claude, Google Gemini, and DeepSeek — how each implementation works, the real pricing differences (from 50% to 90% off), and five concrete patterns for maximizing cache efficiency in production. Plus the gotchas around cache invalidation and why an API gateway lets you route to the best cache pricing for your workload.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep025.mp3" length="2676477" type="audio/mpeg" />
       <guid>ep025-prompt-caching-deep-dive-save-80-percent</guid>
       <pubDate>Tue, 14 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>446</ns1:duration>
-      <ns1:episode>25</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>446</itunes:duration>
+      <itunes:episode>25</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP024: AI for Non-English Languages — Why Multilingual Support Is the Next Frontier</title>
       <description>Over 60% of the world's internet users don't speak English as their first language — so how well do AI models actually perform in Chinese, Japanese, Arabic, Hindi, and more? We break down multilingual performance across GPT-4o, Claude Opus 4, and Gemini 2.5 Pro, expose the hidden tokenization costs that inflate your API bills for non-English text, and give four practical strategies for building AI products that work globally. Plus: why DeepSeek V3 is the smart choice for Chinese-language workloads.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep024.mp3" length="1325520" type="audio/mpeg" />
       <guid>ep024-ai-for-non-english-languages-multilingual-support</guid>
       <pubDate>Mon, 13 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>331</ns1:duration>
-      <ns1:episode>24</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>331</itunes:duration>
+      <itunes:episode>24</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP023: Embedding Models Compared — Which One Should You Actually Use?</title>
       <description>A practical comparison of five embedding models developers are using in production: OpenAI text-embedding-3, Cohere embed-v4, Google Gemini embedding, Voyage AI voyage-3, and open-source BGE-M3. We cover retrieval quality, dimension size and storage cost, latency, and multilingual support — plus why your chunking strategy matters more than your model choice.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep023.mp3" length="6666720" type="audio/mpeg" />
       <guid>ep023-embedding-models-compared-which-one-should-you-use</guid>
       <pubDate>Sat, 12 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>333</ns1:duration>
-      <ns1:episode>23</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>333</itunes:duration>
+      <itunes:episode>23</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP022: Whisper vs Gemini vs DeepSeek for Speech-to-Text</title>
       <description>A practical comparison of three speech-to-text approaches in 2026: Whisper for raw transcription accuracy, Gemini for integrated audio understanding plus summarization, and DeepSeek for budget-conscious multilingual workflows. Learn which one to use for batch transcription, meeting notes, customer call analysis, and Chinese-English audio pipelines.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep022.mp3" length="7330560" type="audio/mpeg" />
       <guid>ep022-whisper-vs-gemini-vs-deepseek-for-speech-to-text</guid>
       <pubDate>Sat, 11 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>305</ns1:duration>
-      <ns1:episode>22</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>305</itunes:duration>
+      <itunes:episode>22</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP021: How Small Teams Use AI Gateways to Ship Faster</title>
       <description>Five patterns small teams (2–10 engineers) use to ship AI products faster with an API gateway: unified key management, instant model switching without code changes, day-one cost visibility, automatic fallback chains for reliability, and rapid model experimentation. Real patterns from real teams building production AI apps in 2026.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep021.mp3" length="1340205" type="audio/mpeg" />
       <guid>ep021-how-small-teams-use-ai-gateways-to-ship-faster</guid>
       <pubDate>Fri, 10 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>335</ns1:duration>
-      <ns1:episode>21</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>335</itunes:duration>
+      <itunes:episode>21</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP020: The Future of AI APIs — Predictions for 2026-2027</title>
       <description>Five bold predictions for where AI APIs are heading: model prices drop 80-90%, context windows hit 1M tokens standard, multimodal becomes default, MCP emerges as the universal tool protocol, and intelligent routing replaces the "best model" question. Plus: where the real opportunities are for developers building in 2026-2027.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep020.mp3" length="7624845" type="audio/mpeg" />
       <guid>ep020-the-future-of-ai-apis-predictions-2026-2027</guid>
       <pubDate>Thu, 09 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>381</ns1:duration>
-      <ns1:episode>20</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>381</itunes:duration>
+      <itunes:episode>20</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP019: Function Calling Across Different AI Models</title>
       <description>Every major AI model supports function calling now — but the implementations vary wildly. We compare GPT-4o, GPT-4.1, Claude Opus 4, Gemini 2.5 Pro, and DeepSeek V3 on tool-use format, parallel calling, JSON schema reliability, and edge cases. Plus: why an API gateway that normalizes function calling across providers saves you from writing four different integration layers.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep019.mp3" length="8188845" type="audio/mpeg" />
       <guid>ep019-function-calling-across-different-ai-models</guid>
       <pubDate>Wed, 08 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>409</ns1:duration>
-      <ns1:episode>19</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>409</itunes:duration>
+      <itunes:episode>19</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP018: AI Model Benchmarks That Actually Matter</title>
       <description>Most AI benchmarks — MMLU, HumanEval, GSM8K — don't predict real-world performance. We break down why benchmark scores mislead developers, and reveal the five metrics that actually matter: task-specific accuracy on your own data, p95/p99 latency, cost per successful output, consistency, and instruction following fidelity. Then we apply this framework to the April 2026 model landscape: Claude Opus 4, GPT-4o, DeepSeek V3, and Gemini Flash 2.0.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep018.mp3" length="4569120" type="audio/mpeg" />
       <guid>ep018-ai-model-benchmarks-that-actually-matter</guid>
       <pubDate>Tue, 07 Apr 2026 13:00:00 +0000</pubDate>
-      <ns1:duration>476</ns1:duration>
-      <ns1:episode>18</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>476</itunes:duration>
+      <itunes:episode>18</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP017: LangChain + Crazyrouter — Build Agents with 627 Models</title>
       <description>How to combine LangChain with Crazyrouter for multi-model AI agents. We cover zero-migration setup with ChatOpenAI, cost optimization through per-step model routing, tool calling across providers, and real-world savings of 70-80% — all with one API key and 627+ models.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep017.mp3" length="1885680" type="audio/mpeg" />
       <guid>ep017-langchain-crazyrouter-build-agents</guid>
       <pubDate>Tue, 07 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>314</ns1:duration>
-      <ns1:episode>17</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>314</itunes:duration>
+      <itunes:episode>17</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP016: Streaming vs Non-Streaming API Calls — Performance Deep Dive</title>
       <description>Should you stream your LLM API responses or wait for the full result? We break down Time to First Token, perceived latency, the real cost implications, when streaming shines for chatbots and long-form generation, when non-streaming wins for backend pipelines and structured output, and practical implementation tips for both approaches.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep016.mp3" length="7674240" type="audio/mpeg" />
       <guid>ep016-streaming-vs-non-streaming-api-calls</guid>
       <pubDate>Mon, 06 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>479</ns1:duration>
-      <ns1:episode>16</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>479</itunes:duration>
+      <itunes:episode>16</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP015: AI API Security Best Practices for Production Apps</title>
       <description>Five essential security practices every developer needs when shipping AI-powered apps to production. We cover API key management, spending caps, prompt injection defense, data privacy, and monitoring — plus why an API gateway is your first line of defense.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep015.mp3" length="5478189" type="audio/mpeg" />
       <guid>ep015-ai-api-security-best-practices</guid>
       <pubDate>Sat, 05 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>342</ns1:duration>
-      <ns1:episode>15</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>342</itunes:duration>
+      <itunes:episode>15</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP014: Top 5 AI Coding Assistants in 2026</title>
       <description>We rank the top five AI coding assistants in 2026 — from Amazon Q Developer and Windsurf at the bottom, through GitHub Copilot, all the way up to Cursor and Claude Code at the top. Plus the meta trend that's turning autocomplete into autonomous agents, and why API gateways are becoming a secret weapon for power developers.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep014.mp3" length="7565805" type="audio/mpeg" />
       <guid>ep014-top-5-ai-coding-assistants-2026</guid>
       <pubDate>Sat, 04 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>378</ns1:duration>
-      <ns1:episode>14</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>378</itunes:duration>
+      <itunes:episode>14</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP013: Self-Hosting vs API Gateway — The Real Cost of Running Your Own AI Models</title>
       <description>Should you self-host AI models or use an API gateway? We break down the true costs of running Llama 4 and DeepSeek on your own GPUs versus paying per token, cover the five scenarios where self-hosting wins, explain the hybrid approach smart teams are using, and show why an API gateway like Crazyrouter gives you the best of both worlds.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep013.mp3" length="6899565" type="audio/mpeg" />
       <guid>ep013-self-hosting-vs-api-gateway</guid>
       <pubDate>Thu, 03 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>345</ns1:duration>
-      <ns1:episode>13</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>345</itunes:duration>
+      <itunes:episode>13</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP012: Building AI Agents with Tool Calling — A Practical Guide</title>
       <description>Tool calling is what turns a chatbot into an agent. We break down how GPT-5, Claude, and Gemini handle function calling, walk through building your first agent in 30 lines of Python, cover multi-tool patterns for production, and share four hard-won lessons from building agents at scale. Plus why an API gateway is the secret weapon for agent development.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep012.mp3" length="7058880" type="audio/mpeg" />
       <guid>ep012-building-ai-agents-tool-calling</guid>
       <pubDate>Thu, 02 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>441</ns1:duration>
-      <ns1:episode>12</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>441</itunes:duration>
+      <itunes:episode>12</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP011: AI Image Generation APIs Compared — DALL-E 3 vs Midjourney vs Flux</title>
       <description>We compare the three biggest AI image generation APIs head-to-head: DALL-E 3, Midjourney, and Flux from Black Forest Labs. Quality, pricing, developer experience, and when to use each one. Plus how an API gateway lets you use all three through a single endpoint.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep011.mp3" length="2205648" type="audio/mpeg" />
       <guid>ep011-ai-image-generation-apis-compared</guid>
       <pubDate>Tue, 01 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>275</ns1:duration>
-      <ns1:episode>11</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>275</itunes:duration>
+      <itunes:episode>11</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP010: How to Migrate from OpenAI to a Multi-Model Gateway</title>
       <description>You built your app on OpenAI's API — now you want Claude, Gemini, DeepSeek, and hundreds more without rewriting everything. Good news: migration takes about sixty seconds. We walk through the step-by-step process, address the three biggest concerns developers have, and share the multi-model strategy that typically cuts costs by thirty to fifty percent.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep010.mp3" length="5739360" type="audio/mpeg" />
       <guid>ep010-migrate-openai-to-multi-model-gateway</guid>
       <pubDate>Mon, 31 Mar 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>240</ns1:duration>
-      <ns1:episode>10</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>240</itunes:duration>
+      <itunes:episode>10</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP009: OpenRouter vs Crazyrouter — An Honest Comparison</title>
       <description>We compare ourselves with our biggest competitor — OpenRouter. Pricing differences, model selection, developer experience, reliability, and trust. Where OpenRouter wins, where Crazyrouter wins, and why a surprising number of teams use both. No marketing fluff — just an honest breakdown to help you choose.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep009.mp3" length="7640205" type="audio/mpeg" />
       <guid>ep009-openrouter-vs-crazyrouter-honest-comparison</guid>
       <pubDate>Mon, 30 Mar 2026 15:00:00 +0000</pubDate>
-      <ns1:duration>382</ns1:duration>
-      <ns1:episode>9</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>382</itunes:duration>
+      <itunes:episode>9</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP008: The Hidden Costs of Using Multiple AI Providers</title>
       <description>Most teams use multiple AI providers — GPT for chat, Claude for reasoning, DeepSeek for cheap summarization. Smart strategy, right? Not so fast. We break down the four hidden costs nobody talks about: integration overhead that costs $7,200/year in engineering time, billing chaos across three dashboards, failover logic that takes months to build, and inconsistent model behavior that multiplies your QA burden. Plus the one-line fix that eliminates all of them.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep008.mp3" length="6710445" type="audio/mpeg" />
       <guid>ep008-hidden-costs-multiple-ai-providers</guid>
       <pubDate>Sun, 29 Mar 2026 15:00:00 +0000</pubDate>
-      <ns1:duration>335</ns1:duration>
-      <ns1:episode>8</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>335</itunes:duration>
+      <itunes:episode>8</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP007: AI API Rate Limits — What Every Developer Needs to Know</title>
       <description>You're building your app, everything works in dev, then production hits and you're drowning in 429 errors. Today we break down rate limits across OpenAI, Anthropic, and Google — what they are, why they bite, and five battle-tested strategies to handle them. Plus the multi-provider trick that effectively triples your capacity.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep007.mp3" length="6137325" type="audio/mpeg" />
       <guid>ep007-ai-api-rate-limits-developer-guide</guid>
       <pubDate>Sat, 28 Mar 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>307</ns1:duration>
-      <ns1:episode>7</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>307</itunes:duration>
+      <itunes:episode>7</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP006: Building an AI Chatbot in 10 Minutes with One API Key</title>
       <description>Building an AI chatbot is easier than most tutorials make it look. In this episode, we break down the simplest architecture: a tiny backend, one API key, one OpenAI-compatible endpoint, and the freedom to switch between models without rewriting your app. Perfect for developers shipping their first chat product fast.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep006.mp3" length="4825920" type="audio/mpeg" />
       <guid>ep006-build-ai-chatbot-one-api-key</guid>
       <pubDate>Sun, 15 Mar 2026 10:00:00 +0000</pubDate>
-      <ns1:duration>290</ns1:duration>
-      <ns1:episode>6</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>290</itunes:duration>
+      <itunes:episode>6</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP005: DeepSeek V3.2 Deep Dive — Is It Really Better Than GPT-4o?</title>
       <description>DeepSeek V3.2 is making waves with 88% on HumanEval and 35x cheaper pricing than GPT-4o. But is it actually better? We break down the benchmarks, real-world performance, where it excels (coding, reasoning, Chinese), where it falls short (creative writing, censorship), and when to use each model. Plus the multi-model strategy that saves you money.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep005.mp3" length="4300000" type="audio/mpeg" />
       <guid>ep005-deepseek-v32-vs-gpt4o</guid>
       <pubDate>Fri, 13 Mar 2026 09:00:00 +0000</pubDate>
-      <ns1:duration>240</ns1:duration>
-      <ns1:episode>5</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>240</itunes:duration>
+      <itunes:episode>5</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP004: AI Agent Skills — Build Smarter Agents with One Command</title>
       <description>Everyone's building AI agents, but everyone's writing the same boilerplate. What if you could install pre-built skills with one command? We introduce npx crazyrouter-skills — 8 ready-to-use agent capabilities from chat to image gen to video. Plus how it fits into MCP and why composability is the future of agent development.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep004.mp3" length="1277136" type="audio/mpeg" />
       <guid>ep004-ai-agent-skills-one-command</guid>
       <pubDate>Thu, 12 Mar 2026 09:00:00 +0000</pubDate>
-      <ns1:duration>160</ns1:duration>
-      <ns1:episode>4</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>160</itunes:duration>
+      <itunes:episode>4</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP003: How to Cut Your AI API Costs by 60% Without Switching Models</title>
       <description>Most teams overpay for AI APIs by 40-60%. We break down the three biggest cost killers: model routing (use cheap models for simple tasks), prompt caching (save 50-90% on repeated tokens), and provider price optimization. Real examples, real numbers, one line of code to switch.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep003.mp3" length="4284000" type="audio/mpeg" />
       <guid>ep003-cut-ai-api-costs-60-percent</guid>
       <pubDate>Thu, 13 Mar 2026 09:00:00 +0000</pubDate>
-      <ns1:duration>268</ns1:duration>
-      <ns1:episode>3</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>268</itunes:duration>
+      <itunes:episode>3</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP002: GPT-5 vs Claude Opus 4.6 vs Gemini 3 — Which Model Should You Use?</title>
       <description>Comparing the big three AI models for developers. GPT-5 for reliable tool calling, Claude Opus 4.6 for deep reasoning and clean code, Gemini 3 for massive context and multimodal. We break down when to use each — and why the smartest teams use all three with a single API gateway.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep002.mp3" length="4880640" type="audio/mpeg" />
       <guid>ep002-gpt5-vs-claude-vs-gemini</guid>
       <pubDate>Wed, 12 Mar 2026 09:00:00 +0000</pubDate>
-      <ns1:duration>305</ns1:duration>
-      <ns1:episode>2</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>305</itunes:duration>
+      <itunes:episode>2</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP001: AI API Gateway Explained — Your Questions Answered</title>
       <description>What is an AI API gateway? How many models does Crazyrouter support? Is it cheaper than going direct? How hard is migration? We answer the 9 most common questions about using a unified API gateway for GPT-5, Claude Sonnet 4.6, Gemini 3, DeepSeek V3.2, and 627+ other models.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep001.mp3" length="3737853" type="audio/mpeg" />
       <guid>ep001-ai-api-gateway-faq</guid>
       <pubDate>Tue, 11 Mar 2026 09:00:00 +0000</pubDate>
-      <ns1:duration>233</ns1:duration>
-      <ns1:episode>1</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>233</itunes:duration>
+      <itunes:episode>1</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
-  <item><title>EP027: Claude vs GPT for Code Generation — Which One Should You Use in 2026?</title><description>Claude or GPT for code generation? We compare strengths, weaknesses, and the smart routing strategy that lets you use both through one API. Plus: what Claude 5 and GPT-6 mean for code generation.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 16 Apr 2026 08:00:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep027.mp3" length="4337280" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep027.mp3</guid><ns1:duration>4:31</ns1:duration><ns1:episode>27</ns1:episode></item><item><title>EP028: Vision Models Compared — GPT-4V vs Gemini vs Claude</title><description>A practical comparison of GPT vision models, Gemini vision, and Claude vision for screenshots, documents, diagrams, and multimodal developer workflows.</description><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link><pubDate>Thu, 16 Apr 2026 10:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep028.mp3" length="5473005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep028.mp3</guid><ns1:duration>5:42</ns1:duration><ns1:episode>28</ns1:episode></item>
-
+    <item>
+      <title>EP027: Claude vs GPT for Code Generation — Which One Should You Use in 2026?</title>
+      <description>Claude or GPT for code generation? We compare strengths, weaknesses, and the smart routing strategy that lets you use both through one API. Plus: what Claude 5 and GPT-6 mean for code generation.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 16 Apr 2026 08:00:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep027.mp3" length="4337280" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep027.mp3</guid>
+      <itunes:duration>4:31</itunes:duration>
+      <itunes:episode>27</itunes:episode>
+    </item>
+    <item>
+      <title>EP028: Vision Models Compared — GPT-4V vs Gemini vs Claude</title>
+      <description>A practical comparison of GPT vision models, Gemini vision, and Claude vision for screenshots, documents, diagrams, and multimodal developer workflows.</description>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <pubDate>Thu, 16 Apr 2026 10:20:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep028.mp3" length="5473005" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep028.mp3</guid>
+      <itunes:duration>5:42</itunes:duration>
+      <itunes:episode>28</itunes:episode>
+    </item>
     <item>
       <title>EP033: AI Agents in Production — Lessons from the First Wave</title>
       <description>The gap between a cool agent demo and a reliable production agent is enormous. We share the five hardest lessons from the first wave of production AI agents: designing for non-determinism, controlling cost explosion with model routing, building error recovery before features, making observability non-negotiable, and earning user trust gradually through progressive autonomy.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep033.mp3" length="6217965" type="audio/mpeg" />
       <guid>ep033-ai-agents-in-production-lessons-from-the-first-wave</guid>
       <pubDate>Mon, 20 Apr 2026 08:00:00 +0000</pubDate>
-      <ns1:duration>311</ns1:duration>
-      <ns1:episode>33</ns1:episode>
-      <ns1:episodeType>full</ns1:episodeType>
-      <ns1:explicit>false</ns1:explicit>
+      <itunes:duration>311</itunes:duration>
+      <itunes:episode>33</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
-
     <item>
       <title>EP041: The 2 Million Token Context Window Era — What It Actually Changes for Developers</title>
       <description>We explore how 2M token context windows from Grok 4.1 and Gemini are reshaping application architecture. From eliminating RAG pipelines to enabling full-codebase coding assistants, we break down the real impact, the gotchas, and the cost math that makes massive context surprisingly affordable.</description>
-      <enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804925" type="audio/mpeg"/>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804925" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep041.mp3</guid>
       <pubDate>Mon, 27 Apr 2026 12:06:51 +0000</pubDate>
-      <ns1:duration>7:47</ns1:duration>
-      <ns1:episode>41</ns1:episode>
-          <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+      <itunes:duration>7:47</itunes:duration>
+      <itunes:episode>41</itunes:episode>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
   </channel>
 </rss>

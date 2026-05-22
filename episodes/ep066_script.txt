@@ -1,0 +1,73 @@
+Welcome back to AI Dev Tools — the Crazyrouter Podcast.
+
+Today we are talking about a pattern that every AI product team eventually runs into: your model is good, your prompt is fine, but your production workflow still breaks because you treated the model call as the whole system.
+
+The better way to think about this is model orchestration.
+
+Not orchestration as a buzzword. I mean the practical engineering layer that decides which model handles which task, what happens when output is incomplete, when to retry, when to fall back, when to escalate, and how to measure whether the final answer actually helped.
+
+In 2026, most teams no longer have a single model problem. They have a routing problem.
+
+A customer support app might need a cheap classifier, a fast summarizer, a careful policy checker, and a stronger writing model for the final reply. A coding agent might use one model to inspect files, another to propose a patch, and a stronger one only when tests fail. A data extraction pipeline might start with a fast model, validate JSON, and retry with a stricter prompt or a different provider if the schema is invalid.
+
+That is orchestration. It is the difference between calling an AI API and operating an AI system.
+
+The first principle is simple: separate task type from model brand.
+
+Do not write product logic that says, use Provider A for everything. Write product logic that says, this is a classification task, this is extraction, this is long reasoning, this is user-facing writing, this is background cleanup.
+
+Once you have those categories, you can assign model tiers.
+
+Fast tier for high-volume, low-risk jobs. Balanced tier for tasks where accuracy and nuance matter more. Deep reasoning tier for the small percentage of work where failure is expensive.
+
+This matters because the cheapest model is not always the cheapest system. If a low-cost model returns invalid JSON 20 percent of the time, you pay in retries, cleanup, support tickets, and hidden latency. If a stronger model succeeds once, it can be cheaper per successful task.
+
+The second principle is validation.
+
+Never trust a model response just because the HTTP status code is 200. Check finish reason. Check whether content is empty. Check whether the JSON parses. Check whether required fields exist. Check whether citations, IDs, prices, or dates match what your application expected.
+
+A model can fail softly. It can return partial output. It can hit a token limit. It can produce a beautiful answer in the wrong format. Your orchestration layer needs to catch that before the result reaches the user or your database.
+
+The third principle is fallback with intent.
+
+A fallback should not just mean: try another random model. It should answer the question: why did the first attempt fail?
+
+If the output was too long, raise the token budget or ask for a shorter response. If JSON was invalid, retry with stricter formatting and fewer degrees of freedom. If reasoning was weak, escalate to a stronger model. If latency spiked, switch to a faster route. If the provider is unavailable, use a compatible backup.
+
+This is where an API gateway becomes useful infrastructure. With one OpenAI-compatible endpoint, your application can keep the same client code while the routing strategy evolves underneath.
+
+You can start with a fast model for simple work. You can validate the response. You can retry once with a tighter prompt. You can fall back to another provider if needed. You can escalate to a stronger model only when the task deserves it.
+
+That is how you control cost without making the product feel unreliable.
+
+The fourth principle is logging outcomes, not just requests.
+
+A dashboard that only shows token usage is not enough. Track cost per successful task. Track retry rate. Track fallback rate. Track p95 latency. Track empty responses. Track invalid JSON. Track user corrections. Track whether a human had to step in.
+
+Those are the metrics that tell you whether your model strategy is actually working.
+
+And here is the important cultural shift: model orchestration is not only for big companies. Small teams need it even more, because they cannot afford to manually fix every weird edge case.
+
+A simple orchestration ladder can be enough.
+
+Step one: classify the task.
+
+Step two: choose the cheapest reliable model tier.
+
+Step three: validate the output.
+
+Step four: retry or fallback based on the failure type.
+
+Step five: escalate only when necessary.
+
+Step six: log the result so tomorrow's routing decision gets smarter.
+
+This is the practical future of AI apps. Not one magical model. Not endless benchmark arguments. A flexible model layer that treats AI calls like production infrastructure.
+
+That is also why we keep talking about gateways on this podcast. Crazyrouter is useful because it gives developers one compatible layer for many models, so they can build this ladder without rewriting their app every time pricing, latency, or model quality changes.
+
+Try Crazyrouter at crazyrouter.com if you want one API key for multiple model routes and a cleaner way to experiment with orchestration.
+
+That is it for today. Build the ladder, validate every rung, and measure success by outcomes — not by model hype.
+
+This has been AI Dev Tools — the Crazyrouter Podcast. See you next time.
