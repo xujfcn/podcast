@@ -1,6 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
   <channel>
+    <item>
+      <title>EP067: Cost per Successful Task — The AI Metric That Actually Matters</title>
+      <description>Token price is only the beginning of AI cost. This episode explains why production teams should optimize for cost per successful task, including retries, invalid outputs, fallback calls, latency, and user completion — and how an API gateway helps route by task, risk, and validation result instead of hard-coding one model for everything.</description>
+      <pubDate>Mon, 25 May 2026 08:48:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep067.mp3" length="2567520" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep067.mp3</guid>
+      <itunes:duration>7:08</itunes:duration>
+    </item>
+
     <title>AI Dev Tools — The Crazyrouter Podcast</title>
     <link>https://crazyrouter.com</link>
     <description>Your weekly breakdown of AI development tools, API gateways, model pricing, and building with GPT, Claude, Gemini, and DeepSeek. Hosted by Crazyrouter — one API key for 627+ AI models.</description>
