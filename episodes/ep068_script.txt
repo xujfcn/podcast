@@ -1,0 +1,109 @@
+Welcome back to AI Dev Tools — the Crazyrouter Podcast.
+
+Today we are talking about a part of AI product growth that developers often underestimate: distribution infrastructure.
+
+When people hear infrastructure, they usually think about servers, databases, queues, observability, and API gateways. Those things matter. But if you are building an AI product in 2026, distribution is also infrastructure.
+
+Because the best technical product does not win simply because it exists. It wins when the right developers discover it, understand it, trust it, and see it appear again and again in the places where they already look for answers.
+
+That is especially true for AI developer tools.
+
+A developer searching for an API gateway, model routing, cheaper Claude access, OpenAI-compatible endpoints, or fallback routing might not start on your homepage. They might start on Google. Or Dev.to. Or Hashnode. Or GitLab. Or SourceForge. Or a GitHub README. Or a podcast app. Or a LinkedIn post. Increasingly, they might ask an AI search engine, which then decides which sources are credible enough to cite.
+
+So the question is no longer: where should we publish a blog post?
+
+The better question is: what is our content distribution graph?
+
+A content distribution graph is the network of places where your ideas, tutorials, product explanations, and proof points live. Some nodes are owned media, like your main blog. Some are developer communities, like Dev.to and Hashnode. Some are open source platforms, like GitLab, Codeberg, and SourceForge. Some are social surfaces, like LinkedIn, X, Mastodon, and Bluesky. Some are audio surfaces, like Spotify and Apple Podcasts. And some are high-authority directories or review sites.
+
+Each node has a different job.
+
+Your main blog is the canonical source. It should be complete, structured, and optimized for search.
+
+Developer communities are for practical trust. A good Dev.to article or Hashnode guide should feel like something a developer can copy, test, and use today.
+
+Git-based pages are for durability. A GitLab Pages or Codeberg Pages mirror can act like a documentation layer that is versioned, linkable, and friendly to technical readers.
+
+SourceForge is old, but old does not mean useless. High-authority open source platforms can still create useful trust signals, especially for project pages, wiki pages, and historical credibility.
+
+Blogger, WordPress, and Tumblr are not your core developer audience, but they expand the long tail. They give your content additional public surfaces, additional links, and additional chances to be indexed or cited.
+
+Social platforms are not where the full argument lives. They are where the hook lives. LinkedIn wants the business implication. X wants the sharp insight. Mastodon wants the technical summary. Bluesky wants something compact and human.
+
+And podcasts do something different again. Audio builds familiarity. It lets a product explain its worldview repeatedly without asking the listener to read a long page every time.
+
+This is why distribution infrastructure should be automated.
+
+Not because every platform deserves the same content. It does not.
+
+Automation is useful because the base workflow is repetitive: take one core idea, adapt it into platform-specific formats, add tracking links, publish safely, and record where it went.
+
+The mistake is blasting the same raw article everywhere with no adaptation.
+
+The better approach is controlled syndication.
+
+Start with one canonical article. Then produce variations.
+
+For Dev.to, keep the code examples and practical steps.
+
+For Hashnode, keep the essay structure and add canonical links.
+
+For GitLab Pages, turn it into documentation or a guide.
+
+For SourceForge, make it a project wiki page or technical note.
+
+For Blogger and WordPress, publish a clean mirror with source attribution.
+
+For Tumblr, publish a short summary and link.
+
+For LinkedIn, explain why the topic matters to product teams.
+
+For X, write the most interesting claim as a thread.
+
+For Mastodon and Bluesky, make the post concise and useful.
+
+That is not spam. That is format-aware distribution.
+
+But once you do this, measurement becomes important.
+
+Every public link should carry UTM parameters. Not the API endpoints inside code examples — those must stay clean. But human-facing links should tell you where the reader came from.
+
+If an article links to Crazyrouter from Dev.to, that link should say Dev.to. If a podcast description links to the site, it should say podcast. If a SourceForge wiki page drives signups, you should know it was SourceForge, not just “direct traffic.”
+
+This matters because distribution without measurement becomes noise.
+
+After a few weeks, you want to answer simple questions.
+
+Which platforms send real developers?
+
+Which platforms get indexed fastest?
+
+Which topics travel best on social?
+
+Which mirrors help AI search engines cite you?
+
+Which channels create signups, not just views?
+
+That is how content becomes an operating system instead of a collection of random posts.
+
+For an AI API gateway, this is especially valuable because the product itself is about routing. The same philosophy applies to growth.
+
+Do not hard-code one channel.
+
+Route content by audience and format.
+
+Use the main blog for authority. Use developer communities for practical proof. Use open source platforms for credibility. Use social platforms for reach. Use podcasting for repetition and trust. Use analytics to decide what deserves more effort.
+
+The practical takeaway is this.
+
+If you are building an AI developer product, treat distribution like infrastructure. Build the pipeline once. Keep the canonical content high quality. Adapt the output for each surface. Track every human-facing link. And review the data regularly.
+
+The teams that win are not only the teams with the best model access or the lowest token price. They are the teams that can explain their value clearly, repeatedly, and credibly across the places developers already trust.
+
+Crazyrouter is built around this same idea of control layers: one compatible API surface, many model options, better routing, fallback, and cost visibility.
+
+And now the same control-layer thinking applies to content and growth: one strong idea, many distribution routes, measurable outcomes.
+
+That is it for today. Build your product infrastructure, but do not forget your distribution infrastructure.
+
+This has been AI Dev Tools — the Crazyrouter Podcast. See you next time.

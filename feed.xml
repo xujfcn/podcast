@@ -2,6 +2,19 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
   <channel>
     <item>
+      <title>EP068: Distribution Infrastructure for AI Developer Products</title>
+      <description>Distribution is infrastructure for AI developer products. This episode explains how to build a content distribution graph across your main blog, developer communities, Git-based pages, open source platforms, social networks, and podcasts — with platform-aware syndication, UTM tracking, and measurable outcomes instead of random posting.</description>
+      <pubDate>Tue, 26 May 2026 08:45:00 +0000</pubDate>
+      <enclosure url="https://xujfcn.github.io/podcast/audio/ep068.mp3" length="7898925" type="audio/mpeg" />
+      <guid>https://xujfcn.github.io/podcast/audio/ep068.mp3</guid>
+      <itunes:duration>6:35</itunes:duration>
+      <itunes:episode>68</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
+    </item>
+
+    <item>
       <title>EP067: Cost per Successful Task — The AI Metric That Actually Matters</title>
       <description>Token price is only the beginning of AI cost. This episode explains why production teams should optimize for cost per successful task, including retries, invalid outputs, fallback calls, latency, and user completion — and how an API gateway helps route by task, risk, and validation result instead of hard-coding one model for everything.</description>
       <pubDate>Mon, 25 May 2026 08:48:00 +0000</pubDate>
