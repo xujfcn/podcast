@@ -1,0 +1,151 @@
+EP071: The Quiet Problem With AI Pricing Pages
+
+If you build with AI models today, you probably know the feeling.
+
+You open a pricing page, look for the model you want, compare input tokens, output tokens, maybe cached tokens, maybe batch discounts, maybe tool-call behavior, maybe image tokens, maybe audio minutes, maybe regional availability, and then you realize something uncomfortable.
+
+The pricing page is not really telling you what your application will cost.
+
+It is telling you the unit price of one component in a much larger system.
+
+That difference sounds small. In production, it is huge.
+
+Today I want to talk about the quiet problem with AI pricing pages — and why AI teams increasingly need their own pricing intelligence layer, not just a bookmarked list of vendor docs.
+
+Let's start with the obvious part.
+
+Model prices change all the time. A provider launches a new flash model. Another provider cuts input token prices. A third provider adds a cheaper batch API. Someone changes context window tiers. A multimodal model gets a new audio or image rate. A preview model becomes stable, or a stable model becomes deprecated.
+
+If you only use one provider and one model, maybe this is annoying but manageable.
+
+But most production teams are not really using one model anymore.
+
+They use a fast model for classification. A stronger model for reasoning. A cheap model for extraction. A vision model for screenshots. An embedding model for retrieval. Maybe a separate reranker. Maybe a fallback route for outages. Maybe a premium route for paid users and a cheaper route for free users.
+
+At that point, the pricing page stops being a simple reference. It becomes operational data.
+
+And operational data has to be normalized.
+
+One provider prices per million tokens. Another uses per thousand. One separates input and output. Another has cached input. Another has prompt caching rules that only apply after a minimum size. One model supports tool calls well. Another technically supports them, but requires a different payload shape. One provider has low token cost but high failure cost because outputs need retries.
+
+If you compare only the headline token price, you can make very bad decisions.
+
+A model that is ten percent cheaper per token may be more expensive per successful task if it needs twenty percent more retries.
+
+A model with a higher output price may still be cheaper for a workflow if it follows instructions better and emits valid JSON on the first try.
+
+A model with a beautiful benchmark score may be a poor automation model if it is slow, inconsistent, or incompatible with your exact request payload.
+
+So the real question is not, which model is cheapest?
+
+The real question is, which route produces the lowest cost per successful task, under the latency and quality constraints of this specific workflow?
+
+That is a very different question.
+
+And it requires more than a pricing page.
+
+It requires a living catalog.
+
+A useful AI pricing catalog should include four layers.
+
+Layer one is the basic public price: input, output, cached input, batch price, image price, audio price, embedding price, and any special tier rules.
+
+Layer two is capability metadata: context window, tool support, JSON reliability, multimodal support, streaming behavior, rate limits, and whether the model is stable or preview.
+
+Layer three is runtime behavior: latency, error rate, timeout rate, retry rate, and compatibility with the actual payloads your application sends.
+
+Layer four is business logic: which users, products, features, or geographies are allowed to use which model, at what budget, with what fallback policy.
+
+Once you combine those layers, pricing becomes routing.
+
+This is where API gateways become important.
+
+A gateway should not just hide API keys or proxy requests. That is useful, but it is not enough.
+
+A serious AI gateway should help teams route by economics.
+
+If a request is simple classification, send it to a lightweight model. If confidence is low, escalate. If the output fails validation, retry with a stronger model. If a provider is rate limited, switch routes. If a customer is on a lower plan, use a lower-cost policy. If a task is high value, spend more to reduce failure risk.
+
+That is not just cost optimization. It is product design.
+
+Because every AI product has a hidden margin model.
+
+If your app charges users a fixed monthly price, but your model route spends unpredictably, your margin can disappear quietly.
+
+If your free tier uses the same expensive model as your paid tier, you may be subsidizing low-intent traffic.
+
+If your support bot retries three times behind the scenes, the pricing page will never show you the real cost. Your invoice will.
+
+This is why teams need observability at the task level.
+
+Not just total token spend.
+
+You want to know: how much did summarization cost today? How much did document extraction cost? Which model route had the best first-pass success rate? Which route had the highest invalid JSON rate? Which customer segment is driving output token growth? Which fallback path is becoming too common?
+
+Without those answers, model selection becomes vibes.
+
+And vibes are expensive.
+
+There is also another trap: static pricing assumptions inside code.
+
+Many teams start by hard-coding a model name and a cost estimate in a spreadsheet. That works for a prototype. It fails as soon as the product grows.
+
+The model list changes. The provider changes. The workload changes. The average output length changes. The fallback policy changes. Suddenly the spreadsheet is wrong, the code is stale, and nobody knows which assumptions are still true.
+
+The better pattern is to separate model selection from application logic.
+
+Your app should say: I need a route for fast extraction, or high-quality reasoning, or low-cost classification, or multimodal analysis.
+
+The routing layer should decide which model fits that policy today.
+
+That gives you the freedom to update prices, test new models, shift traffic gradually, and protect margins without redeploying the whole application.
+
+In practice, this also makes experimentation safer.
+
+You can run a small percentage of traffic through a new cheaper model and measure success rate, latency, retry behavior, and total cost. If it wins, increase traffic. If it fails, roll back.
+
+This is how mature infrastructure teams think about databases, CDNs, payments, and search systems.
+
+AI model routing is moving in the same direction.
+
+The funny thing is that pricing pages are still useful. They are just not enough.
+
+They are the raw material.
+
+The real product advantage comes from turning that raw material into decisions.
+
+For developers, the takeaway is simple.
+
+Do not ask only, what is the cheapest model?
+
+Ask: what is the cheapest reliable route for this task?
+
+Do not track only tokens.
+
+Track successful outcomes.
+
+Do not hard-code model economics inside your app.
+
+Put them behind a routing policy that you can update.
+
+And do not treat AI pricing as a finance-only problem.
+
+It is an engineering problem, a product problem, and a growth problem at the same time.
+
+Because in AI software, cost is not something that happens after the product is built.
+
+Cost is part of the architecture.
+
+That is the quiet problem with AI pricing pages.
+
+They show you numbers.
+
+But your system needs decisions.
+
+And the teams that build that decision layer early will have a real advantage: faster experiments, safer fallbacks, cleaner margins, and fewer surprises when the invoice arrives.
+
+This has been AI Dev Tools — The Crazyrouter Podcast.
+
+Crazyrouter gives developers one API key for hundreds of AI models, with routing flexibility, transparent pricing, and fewer vendor lock-in headaches.
+
+Thanks for listening, and see you in the next episode.
