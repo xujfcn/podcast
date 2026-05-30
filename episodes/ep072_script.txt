@@ -1,0 +1,151 @@
+EP072: Why MCP Needs the Same Gateway Discipline as APIs
+
+Model Context Protocol has become one of the most important ideas in AI developer tooling.
+
+At first, MCP looked like a cleaner way to connect an AI assistant to tools and data.
+
+Instead of every app inventing its own plugin format, MCP gives agents a standard way to discover tools, call them, read resources, and work with external systems.
+
+That is valuable by itself.
+
+But in production, the most interesting question is no longer, can my agent call a tool?
+
+The real question is, should this agent call this tool, right now, for this user, with this input, under this budget, with this approval policy, and with enough logging to debug what happened later?
+
+That question is why MCP needs the same gateway discipline that APIs needed.
+
+Let's rewind for a second.
+
+In the early days of web services, teams often connected applications directly to backend services. It worked when the system was small. Then the number of services grew. Authentication became messy. Rate limits were inconsistent. Logs were scattered. Some services were internal, some external, some high risk, some low risk.
+
+So API gateways became a standard pattern.
+
+A gateway gave teams one place to manage identity, routing, rate limits, keys, transformations, policies, observability, and fallbacks.
+
+It did not make services less powerful. It made them safer to use at scale.
+
+MCP is going through a similar transition.
+
+A local demo can connect an assistant directly to a filesystem server, a GitHub server, a database server, a Slack server, or an internal admin tool.
+
+That feels magical.
+
+But production systems do not get to stop at magical.
+
+They have to be accountable.
+
+If an agent can read files, which files? If it can write tickets, which projects? If it can query a database, which tables? If it can send messages, does it need human approval? If it can call billing tools, is that allowed for every user? If it fails, do we know whether the failure came from the model, the MCP server, the tool API, permissions, or a malformed argument?
+
+This is where direct tool wiring starts to break down.
+
+Every MCP server becomes a tiny island of policy.
+
+One server handles auth one way. Another has different logs. Another supports a broad tool that should really be split into safer sub-tools. Another returns errors that the model cannot interpret well. Another exposes too much power because it was built for trusted developers, not semi-autonomous agents.
+
+A gateway layer helps normalize that mess.
+
+For MCP, a gateway should do several jobs.
+
+First: identity.
+
+The gateway should know who the user is, which agent is acting, which workspace is involved, and whether the request is interactive, automated, or background work.
+
+That matters because agent permissions should not be a single static token sitting in a config file.
+
+An agent acting for a developer in a private repo is different from an agent acting in a customer support channel. An internal automation job is different from a public chatbot. A read-only research agent is different from a deployment agent.
+
+Second: policy.
+
+Not every tool call should be allowed just because the tool exists.
+
+Some calls can be auto-approved. Some need confirmation. Some should be blocked. Some should be allowed only below a cost threshold, only during business hours, only for specific projects, or only after a safer dry run.
+
+This sounds boring until the first time an agent has write access to production systems.
+
+Then it becomes very interesting.
+
+Third: shaping.
+
+Many tools were designed for humans or scripts, not for models.
+
+A good gateway can expose safer, narrower versions of tools.
+
+Instead of giving an agent a generic SQL execution tool, expose a report query tool. Instead of giving it arbitrary shell access, expose a deployment status tool, a log search tool, or a restart request workflow with approval.
+
+The goal is not to make agents weak.
+
+The goal is to make their power legible and bounded.
+
+Fourth: observability.
+
+When an AI workflow fails, the question is rarely just, did the HTTP request return 200?
+
+You need to know which model planned the call, which tool was selected, what arguments were passed, what policy decision was applied, how long the tool took, whether the result was valid, whether the agent retried, and what user-visible outcome followed.
+
+Without that trace, debugging agent systems becomes archaeology.
+
+With that trace, you can improve prompts, tools, policies, models, and routing rules based on evidence.
+
+Fifth: economics.
+
+Tool use has cost, even when the tool itself is free.
+
+A slow tool increases latency. A noisy tool increases context size. A failed tool call triggers retries. A broad retrieval tool can dump too much data into the model and inflate token spend. A better tool design can reduce both cost and error rate.
+
+So MCP governance is also cost governance.
+
+This is where AI API gateways and MCP gateways start to converge.
+
+The model route decides how reasoning happens.
+
+The tool route decides how action happens.
+
+In production, those two routes cannot be managed separately forever.
+
+Imagine an agent handling a customer issue.
+
+It might use a cheap model to classify the request, a stronger model to reason about account history, an MCP tool to fetch usage data, another tool to check payments, and maybe a message tool to draft a reply.
+
+The right infrastructure sees all of that as one workflow.
+
+It can ask: what did this task cost end to end? Which step failed? Which tool creates the most retries? Which model uses tools most reliably? Which approval policies slow down resolution? Which routes are safe enough to automate more aggressively?
+
+That is the level where agent platforms become real systems instead of clever demos.
+
+For developers building with MCP today, my recommendation is simple.
+
+Treat MCP servers like powerful APIs, not like harmless plugins.
+
+Start with least privilege. Separate read tools from write tools. Make dangerous actions explicit. Add dry-run modes. Log arguments and outcomes. Put approval gates around irreversible actions. Measure tool latency and failure rate. Prefer small, task-specific tools over giant do-anything tools.
+
+And most importantly, do not hard-code trust into the agent.
+
+Trust should live in policy.
+
+The agent can propose. The gateway can decide. The human can approve when the risk is high.
+
+That division of responsibility is what lets teams move faster without becoming reckless.
+
+MCP is exciting because it gives AI systems hands.
+
+But once a system has hands, infrastructure matters more, not less.
+
+The next wave of AI developer tooling will not just be about more models or more tools.
+
+It will be about control planes: model gateways, MCP gateways, observability, policy, approvals, and cost-aware routing across the entire agent workflow.
+
+That may sound less glamorous than a viral demo.
+
+But it is exactly what makes the demo safe enough to become a product.
+
+If you are building with AI agents, do not wait for the tool graph to become chaotic before adding discipline.
+
+Design the gateway layer early.
+
+Your future incident reviews will be much shorter.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast.
+
+If you are building production AI systems and want one OpenAI-compatible endpoint for many models, routing options, and cost control, check out Crazyrouter at crazyrouter.com.
+
+See you in the next episode.
