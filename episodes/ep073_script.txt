@@ -1,0 +1,173 @@
+EP073: Why AI Gateway Reliability Is More Than Uptime
+
+When teams talk about reliability in AI infrastructure, they often start with uptime.
+
+Is the endpoint available? Is the provider online? Did the request return an HTTP 200?
+
+Those questions matter.
+
+But for production AI applications, uptime is only the outer shell of reliability.
+
+A model can be online and still fail the task.
+
+A provider can return 200 and still send an empty answer.
+
+A request can finish quickly and still violate the expected schema.
+
+A fallback can rescue the user experience but silently double the cost.
+
+And a system can look healthy on a dashboard while users are seeing vague answers, broken JSON, missing tool calls, or inconsistent behavior across regions.
+
+That is why AI gateway reliability has to be measured differently from traditional API reliability.
+
+Traditional APIs are usually deterministic.
+
+If you call a payment API with valid parameters, you expect a specific kind of response. If you call a storage API, you expect a file. If you call a database, you expect rows, an error, or a timeout.
+
+AI APIs are probabilistic interfaces wrapped in normal-looking HTTP.
+
+They return text, images, audio, embeddings, tool calls, or structured output. The transport layer may succeed while the task layer fails.
+
+So the real question is not only, did the API respond?
+
+The real question is, did the AI step produce a valid, useful, policy-compliant result for this task?
+
+That is a much richer reliability problem.
+
+For an AI gateway, there are at least five layers of reliability.
+
+The first layer is provider availability.
+
+This is the familiar one: upstream status, timeout rate, error rate, regional connectivity, and rate limit behavior.
+
+If a provider is down, slow, overloaded, or returning 429s, the gateway should know quickly and route around it when possible.
+
+But provider availability is only the beginning.
+
+The second layer is payload compatibility.
+
+Different models and providers support different parameters, limits, modalities, tool schemas, system message formats, image inputs, streaming behavior, and safety controls.
+
+A payload that works perfectly on one model may fail on another.
+
+Worse, it may appear to succeed but degrade the output.
+
+That is why production routing cannot be just a model name swap.
+
+A good gateway needs model-aware request shaping.
+
+It should know when to remove unsupported parameters, adjust max tokens, transform tool schemas, normalize image inputs, or select a compatible fallback instead of blindly replaying the same request.
+
+The third layer is output validity.
+
+For many applications, the response is only useful if it satisfies a contract.
+
+Maybe it must be valid JSON. Maybe it must include citations. Maybe it must choose exactly one category. Maybe it must call a tool. Maybe it must avoid unsupported claims. Maybe it must produce code that compiles.
+
+If the model returns fluent nonsense, that is not a success.
+
+If the JSON is malformed, that is not a success.
+
+If the model ignores a required field, that is not a success.
+
+The gateway should help developers validate outputs, retry intelligently, fallback when needed, and log the reason for the failure.
+
+The fourth layer is task success.
+
+Output validity is still not the whole story.
+
+A valid answer can be unhelpful.
+
+A summarized support ticket can miss the real complaint.
+
+A code patch can compile but not fix the bug.
+
+A classification result can satisfy the schema but send the user to the wrong workflow.
+
+This is where AI reliability starts connecting to product metrics.
+
+Did the user complete the task? Did the support ticket resolve faster? Did the agent avoid escalation? Did the generated query return the expected data? Did the downstream workflow succeed?
+
+The best AI gateways will increasingly connect model routing to these outcome signals.
+
+The fifth layer is cost stability.
+
+Reliability is not only about successful responses.
+
+It is also about predictable economics.
+
+If a route frequently fails and retries, its apparent token price is misleading.
+
+If a cheap model produces outputs that need human correction, the real cost is higher.
+
+If a fallback chain saves the task but calls three expensive models, the user experience may be reliable while the margin is not.
+
+This is why cost per successful task is a better metric than raw token price.
+
+A gateway can observe the whole chain: initial model, validation result, retry reason, fallback path, latency, final outcome, and total cost.
+
+That turns reliability from a provider status page into an engineering discipline.
+
+So what should developers do today?
+
+Start by separating transport success from task success.
+
+Do not treat HTTP 200 as done.
+
+Define what a valid result means for each important AI step.
+
+Add lightweight validators.
+
+Track empty responses, malformed structured outputs, tool-call failures, refused requests, long latency, and fallback usage.
+
+Keep a small test suite of real prompts and payloads that represent your production workload.
+
+Run those tests across candidate models before changing routes.
+
+When you add fallback, log why it happened.
+
+Timeout fallback is different from schema fallback. Rate-limit fallback is different from quality fallback. Policy fallback is different from payload compatibility fallback.
+
+Those differences matter because they lead to different fixes.
+
+If the issue is provider availability, you need routing.
+
+If the issue is payload compatibility, you need request shaping.
+
+If the issue is output validity, you need validation and maybe a different model.
+
+If the issue is task success, you need better evaluation data.
+
+If the issue is cost instability, you need routing rules that include economics, not just intelligence.
+
+This is the real job of an AI API gateway.
+
+It is not just a proxy in front of models.
+
+It is the reliability layer between unpredictable model behavior and real user expectations.
+
+As AI systems become more agentic, this matters even more.
+
+An agent may call multiple models, use tools, retrieve context, write files, query databases, send messages, and ask for approvals.
+
+Every step has its own reliability surface.
+
+A single provider dashboard cannot explain that workflow.
+
+A gateway with end-to-end traces can.
+
+That is where the market is going.
+
+AI infrastructure teams will not only ask, which model is smartest?
+
+They will ask, which route succeeds most often for this task, under this latency target, under this budget, with this safety policy, and with enough observability to debug it tomorrow?
+
+That is a better question.
+
+And it is the question that turns AI from an impressive demo into dependable software.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast.
+
+If you are building production AI systems and want one OpenAI-compatible endpoint for many models, routing options, and cost control, check out Crazyrouter at crazyrouter.com.
+
+See you in the next episode.
