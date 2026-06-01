@@ -1,0 +1,229 @@
+EP074: API Key Hygiene Is Part of AI Reliability
+
+When developers talk about AI reliability, they usually talk about models.
+
+Which model is smarter?
+
+Which one has lower latency?
+
+Which provider has better uptime?
+
+Which fallback should we use when a request fails?
+
+Those are important questions.
+
+But there is a quieter reliability problem that shows up before the model ever gets a chance to answer.
+
+Authentication.
+
+API keys.
+
+Authorization headers.
+
+Rotated credentials.
+
+Old environment variables.
+
+Deleted tokens that are still sitting inside a worker, a cron job, a serverless function, a notebook, or a staging deployment nobody remembers.
+
+It sounds boring.
+
+But in production AI systems, boring infrastructure failures are often the ones that create the most confusion.
+
+A user sees the app fail.
+
+A developer checks the model status page and everything is green.
+
+The provider is online.
+
+The gateway is online.
+
+The request never reached the model.
+
+It was rejected at the authentication layer.
+
+That is not a model quality issue.
+
+It is not a prompt issue.
+
+It is not a context window issue.
+
+It is a credential hygiene issue.
+
+And if you are running AI in production, credential hygiene belongs inside your reliability strategy.
+
+Here is why.
+
+AI applications now depend on many execution environments.
+
+You may have a web app, a backend API, a queue worker, a scheduled job, a vector indexing pipeline, a support bot, a developer script, and a few experimental notebooks.
+
+Each one may have its own environment variables.
+
+Each one may call the same AI gateway.
+
+Each one may cache configuration differently.
+
+When an API key is rotated, all of those environments need to update.
+
+If one does not, it can keep sending bad requests for hours or days.
+
+The result is a strange kind of failure.
+
+The main product may work.
+
+The dashboard may look normal.
+
+But one background process is hammering the API with unauthorized requests.
+
+Those requests cost attention, create noisy logs, and hide real issues.
+
+They can also trigger alerts that look like provider instability even though the root cause is local configuration drift.
+
+This is especially common with AI systems because developers move fast.
+
+A team tries a new model.
+
+A contractor tests a script.
+
+A staging server gets copied from production.
+
+A notebook is saved with an old key.
+
+A CI job uses a secret from last month.
+
+A local proxy sends requests without the Authorization header because one middleware path forgot to attach it.
+
+None of these mistakes are dramatic.
+
+But at scale, they become reliability incidents.
+
+So what should a serious AI team do?
+
+First, classify authentication failures separately from model failures.
+
+A 401 invalid token is not the same as a 500 from an upstream provider.
+
+It is not the same as a rate limit.
+
+It is not the same as malformed JSON.
+
+It deserves its own alert category, its own dashboard, and its own remediation path.
+
+Second, track failures by account, key, source IP, endpoint, and deployment environment when possible.
+
+If thousands of invalid token requests are coming from one IP address and one endpoint, that is a clue.
+
+If they are coming from a scheduled job every minute, that is a different clue.
+
+If they are coming from a front-end client, that may indicate a serious security mistake.
+
+The goal is not just to say authentication failed.
+
+The goal is to say where it failed and what owner should fix it.
+
+Third, make API key rotation boring and documented.
+
+Every key should have an owner.
+
+Every production key should have a purpose.
+
+Old keys should be deleted intentionally, not left forever because nobody knows what they power.
+
+Rotation should include a checklist: backend, workers, cron jobs, serverless functions, CI secrets, staging, local developer docs, monitoring jobs, and any third-party automation.
+
+Fourth, avoid shipping long-lived production keys into places where they do not belong.
+
+Do not put privileged API keys in browser code.
+
+Do not paste them into public notebooks.
+
+Do not store them in random scripts without ownership.
+
+Use server-side proxies, scoped keys, environment-specific keys, and secret managers when the stack supports it.
+
+Fifth, build helpful error messages.
+
+A generic failed request message is not enough.
+
+If the token is invalid or missing, tell the developer that the Authorization header should look like: Authorization: Bearer sk-your-key.
+
+Do not expose secrets.
+
+Do not echo the full token.
+
+But do explain the likely causes: old key, deleted key, incomplete copy, missing Bearer prefix, wrong environment variable, or middleware not attaching the header.
+
+This is a small developer experience detail that saves real support time.
+
+Sixth, separate authentication metrics from usage metrics.
+
+Requests rejected at the auth layer are generally not model invocations.
+
+They should not be interpreted as model failure volume.
+
+They should not distort model quality analysis.
+
+And in most systems, they should not be counted the same way as successful model calls.
+
+This matters for customer support too.
+
+When a customer says the model is down, the answer may be: the model never received the request.
+
+That distinction is not pedantic.
+
+It changes the fix.
+
+If the model failed, you investigate routing, provider health, payload compatibility, or fallback behavior.
+
+If authentication failed, you inspect the key, the header, the deployment environment, and the source of the request.
+
+Different layer, different solution.
+
+This is one of the reasons API gateways are useful for AI infrastructure.
+
+A gateway can make these failure modes visible.
+
+It can show which requests failed before routing.
+
+It can group errors by source.
+
+It can distinguish invalid token from insufficient balance, rate limit, bad payload, upstream timeout, safety refusal, schema failure, and model error.
+
+That kind of observability turns support from guesswork into diagnosis.
+
+The bigger lesson is simple.
+
+AI reliability is not only about intelligence.
+
+It is about the whole path from application code to useful result.
+
+That path includes DNS, network, TLS, authentication, authorization, payload normalization, routing, model execution, streaming, validation, fallback, logging, billing, and user experience.
+
+If any layer fails, the user experiences failure.
+
+So yes, keep evaluating models.
+
+Keep testing prompt quality.
+
+Keep measuring latency, cost, context handling, and output validity.
+
+But also look at the unglamorous layer where many incidents begin.
+
+Are your API keys owned?
+
+Are your environments consistent?
+
+Can you rotate credentials without breaking forgotten workers?
+
+Can you tell the difference between a model failure and an authentication failure in five minutes?
+
+If the answer is no, that is not a small operational detail.
+
+That is part of your AI reliability roadmap.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast.
+
+If you are building production AI systems and want one OpenAI-compatible endpoint with routing, observability, and cost control across many models, check out Crazyrouter at crazyrouter.com.
+
+See you in the next episode.
