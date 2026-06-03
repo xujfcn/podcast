@@ -1,0 +1,85 @@
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today’s episode is about a phrase that is starting to matter a lot in AI coding: dynamic workflows.
+
+You may have seen builders talking about Claude Code workflows, ultracode, Codex review loops, background agents, subagents, or multi-agent coding systems. The names change quickly. The underlying idea is more durable: one prompt should not always become one long, messy agent session. For complex work, the system should create a workflow.
+
+A workflow means the task gets split into roles. One step plans. One step implements. One step reviews. One step verifies. And if the system is mature, every step leaves evidence.
+
+That is a very different model from the early days of AI coding assistants.
+
+The first generation was autocomplete. The second generation was chat inside the IDE. The third generation was agents that could inspect files and run commands. Now we are entering the orchestration phase, where the question is not just “can the model write code?” The question is “can the system coordinate work?”
+
+That shift matters because serious software work is not one activity. It is a loop.
+
+A developer takes a vague request, turns it into requirements, identifies affected files, thinks about edge cases, writes a patch, runs tests, reviews the diff, fixes regressions, checks security, and decides whether the change is safe to merge. When we ask one AI agent to do all of that in one continuous conversation, we are asking it to be planner, implementer, reviewer, and verifier at the same time.
+
+Sometimes that works. Often, it becomes fragile.
+
+The agent starts with a plan, but then forgets part of the plan. It edits more files than necessary. It claims that tests pass, but the evidence is unclear. It reviews its own assumptions too gently. Or it spends a large amount of tokens exploring paths that do not matter.
+
+Dynamic workflows try to fix that by making the structure explicit.
+
+Imagine a coding request: “Add CSV export for billing history.” A dynamic workflow should not immediately edit files. It should first create a planner packet. That packet asks: what is the expected output? Which files are likely affected? What permissions matter? What tests should exist? What could break? What is the rollback path?
+
+Only after that should an implementer packet apply the smallest safe patch.
+
+Then a reviewer packet should challenge the work. Not politely summarize it. Challenge it. Are there missing tests? Is the CSV escaping correct? Could a user export someone else’s data? Are time zones handled? Does the code leak secrets? Did the patch modify unrelated files?
+
+Finally, a verifier packet should run or inspect evidence: test output, build logs, screenshots, curl responses, or direct file inspection. The result should be a go or no-go, not a vague “looks good.”
+
+That is the heart of dynamic workflows.
+
+The exciting part is that this pattern is not tied to a single product. Claude Code may have one implementation. Codex may have another. Cursor background agents may represent a different version of the same direction. But the engineering primitive is portable: split the task, assign roles, route models, verify evidence, and log the trace.
+
+This is also where model routing becomes important.
+
+If every step uses the most expensive model, dynamic workflows can become expensive very quickly. A single high-level request can fan out into many model calls: planning, file inspection, implementation, review, test fixing, final summary, and maybe several retries. That is powerful, but it needs cost control.
+
+A better pattern is route by step.
+
+Use a strong reasoning model for planning. Use a coding-optimized model for implementation. Use a different model for adversarial review, because you do not want the same assumptions reviewing themselves. Use a faster or cheaper model for summarizing verification evidence, as long as the actual tests already ran.
+
+This is exactly the kind of thing an API gateway is good at.
+
+With an OpenAI-compatible gateway, your workflow code can keep one base URL while changing the model for each step. The planner can use one model. The reviewer can use another. The verifier can use a third. Your application does not need provider-specific logic scattered everywhere.
+
+More importantly, the gateway can become the place where you observe the workflow.
+
+For each step, you want to know: role, model, latency, input tokens, output tokens, retry count, result, and evidence. Without that trace, dynamic workflows become stories. With that trace, they become operations.
+
+This is the difference between “I used an agent and it felt good” and “the planner used 1,800 tokens, the reviewer caught two missing edge cases, the verifier ran the build, and the final patch was approved.”
+
+That second version can be improved. The first version can only be retold.
+
+There is also a human factor here. Dynamic workflows should not remove the developer from the loop. They should make the developer’s decision easier.
+
+A good workflow should make it obvious where the risk is. It should show which files changed. It should explain which assumptions were made. It should show tests or direct evidence. It should say when it is blocked. It should ask for approval before high-risk changes.
+
+The best AI coding workflows will not be the ones that pretend humans are unnecessary. They will be the ones that make humans more effective reviewers and system designers.
+
+So what should teams do now?
+
+First, stop treating every AI coding task as a single chat. For small edits, a single agent is fine. For migrations, billing changes, security-sensitive work, refactors, data exports, or multi-file changes, use packets.
+
+Second, separate implementation from review. Even if you use the same tool interface, try to use a different model or a different role prompt for review.
+
+Third, log the workflow. A simple JSONL trace is enough to start: task ID, role, model, latency, tokens, result, and evidence path.
+
+Fourth, measure cost per successful task. Token price matters, but a cheap model that fails twice may cost more than a stronger model that succeeds once. Dynamic workflows make this even more important because the cost unit is no longer one model call. The cost unit is the entire workflow.
+
+Fifth, keep your API integration flexible. If you hard-code one provider and one model everywhere, workflow routing becomes painful. If you put model choice behind a gateway, you can change routes without rewriting the product.
+
+The main lesson is simple: the future of AI coding is not just stronger models. It is better orchestration.
+
+A model can write code. A workflow can coordinate work.
+
+A model can produce an answer. A workflow can produce evidence.
+
+A model can make a patch. A workflow can decide whether that patch is safe enough to ship.
+
+That is why dynamic workflows are worth watching. Not because every new mode name will last, but because the pattern is real.
+
+Plan, implement, review, verify, log. Route each step to the right model. Keep the human in charge. Measure the outcome.
+
+That is how AI coding becomes engineering infrastructure instead of a very impressive autocomplete demo.
+
+That’s it for today. If you are building with Claude, Codex, Cursor, OpenClaw, or your own agent stack, start thinking in workflows, not just prompts. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast.
