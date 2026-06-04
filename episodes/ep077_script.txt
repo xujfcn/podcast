@@ -1,0 +1,105 @@
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today’s episode is about one of the least glamorous, most common, and most expensive bugs in AI infrastructure: the API Base URL.
+
+That sounds too small to deserve a full episode. It is not.
+
+If you run support for an AI API product, or if you help developers configure tools like Codex CLI, Cursor, LiteLLM, FastGPT, Hermes, custom OpenAI SDK clients, or internal automation scripts, you see the same pattern again and again.
+
+The user has an API key. They have a model name. They have a tool that says it supports OpenAI-compatible APIs. Everything should work. But the request fails.
+
+Then you look closer and the problem is not the model. It is not the prompt. It is not the provider. It is the Base URL.
+
+Sometimes the URL is missing slash v one. Sometimes the user copied the official OpenAI endpoint but pasted a gateway key. Sometimes the API endpoint has a tracking parameter attached, because someone treated an API URL like a marketing link. Sometimes the user is in a region where one route is unstable, but they never try the region endpoint. Sometimes the tool uses OPENAI_BASE_URL, while another uses OPENAI_API_BASE, and the wrong variable is silently ignored.
+
+These are small configuration errors, but they create a large amount of operational noise.
+
+The reason is that modern AI development has become tool-heavy. A developer might use the OpenAI SDK in one project, Cursor in another, Codex CLI in a terminal, LiteLLM as a proxy, FastGPT for workflows, and a custom service in production. Each tool has slightly different settings. But the core values are the same: API key, Base URL, model name.
+
+That is why Base URL education is not just documentation. It is onboarding infrastructure.
+
+Let’s define the term clearly.
+
+An API Base URL is the root endpoint your client uses before it appends the specific API path. If the Base URL is https://crazyrouter.com slash v one, then a chat completion request goes to slash chat slash completions under that endpoint. The SDK usually builds the full URL for you.
+
+This is why the slash v one matters. To a human, https://example.com and https://example.com slash v one look almost the same. To an SDK, they are different routing surfaces.
+
+For OpenAI-compatible clients, a clean Base URL usually ends with slash v one. For Crazyrouter, the standard endpoint is https://crazyrouter.com slash v one. For the region route, it is https://cn.crazyrouter.com slash v one. API endpoints should stay clean. Do not add UTM parameters to them.
+
+That last point is worth repeating because it is a surprisingly common mistake.
+
+UTM parameters are for human-facing links. A blog link can include utm source equals blog. A GitHub README link can include utm source equals github. But an API endpoint should not become https://cn.crazyrouter.com slash v one question mark utm source equals github. That is not a marketing click. That is infrastructure.
+
+This distinction becomes more important as more AI tools support custom OpenAI-compatible providers.
+
+A tool might ask for an API key. Another asks for Base URL. Another asks for API endpoint. Another asks for provider URL. Another hides the provider config in a TOML file. Another reads environment variables. Underneath, they are usually trying to answer the same question: where should this OpenAI-shaped request be sent?
+
+When that configuration is wrong, the error message can be misleading.
+
+A missing slash v one might look like a 404. A wrong key might look like unauthorized. A model that does not exist on the selected route might look like a provider failure. A long request sent to an unstable route might show up as a timeout. A gateway or upstream issue might show up as a 500 or 502.
+
+This is why support teams should not only answer individual tickets. They should turn repeated questions into assets.
+
+If users ask the same Base URL question ten times, write the guide. If they ask why 502 happens, write the troubleshooting page. If they keep pasting wrong endpoints into tools, build a config generator. If they ask whether to use the global endpoint or the region endpoint, make the decision table visible.
+
+That is the operational lesson: support conversations are search data.
+
+Every support ticket is a private search query. The user may not have typed it into Google, but they had the question. If enough users ask the same question in chat, many more users are probably searching it silently.
+
+For AI API products, the highest-intent content is often not broad thought leadership. It is practical setup and troubleshooting content.
+
+OpenAI-compatible Base URL explained. How to fix 500, 502, and 524 errors. How to use one API key across GPT, Claude, Gemini, and DeepSeek. How to request an invoice. How prompt caching changes cost. How RPM and TPM affect production throughput.
+
+These topics do not sound flashy, but they sit very close to conversion and retention. A user who is searching for a Base URL is not casually browsing. They are trying to make something work right now.
+
+That means the content should be direct.
+
+A good Base URL guide should show the exact endpoint. It should show Python, Node, and curl examples. It should explain region endpoints without overcomplicating the story. It should include wrong and right examples. It should mention environment variable names. It should link to the model list. It should tell users what information to send support if they are still stuck.
+
+A good troubleshooting guide should do the same for errors. It should not just say “try again later.” It should separate 500, 502, 524, 429, 401, and 403. It should explain which errors are retryable, which errors are configuration problems, and which errors require model fallback or request simplification.
+
+This is where API gateway thinking becomes practical.
+
+An AI gateway is not only a way to access more models. It is a way to standardize integration. One base URL. One key. Many model routes. Centralized cost tracking. A cleaner place to implement fallback and observability.
+
+But the gateway only helps if the first setup step is clear.
+
+That is why I like small developer tools that turn documentation into an interactive form. A Base URL config generator is not a complex product. It simply asks: what tool are you using? Python SDK, Node SDK, curl, Cursor, LiteLLM, FastGPT, Codex-style CLI? Which endpoint route do you want? Global or region? What model name? Then it outputs the snippet.
+
+That small tool removes ambiguity.
+
+It also reduces support load. Instead of writing the same answer again and again, support can send a link to the generator. Instead of hoping the user copies the correct endpoint, the tool produces it. Instead of explaining that API endpoints should not include tracking parameters, the page can say it right next to the snippet.
+
+The same idea applies to error handling.
+
+An error code explainer can ask for the status code, model, endpoint, and request type, then return likely causes and next steps. A 524 timeout on a long text request needs a different answer from a 401 auth error. A 502 on one model route needs a different answer from a 429 rate limit.
+
+The larger point is that good AI infrastructure is not only model routing. It is user routing.
+
+When a user is stuck, route them to the fastest path back to success. Sometimes that path is a code snippet. Sometimes it is a checklist. Sometimes it is a fallback model. Sometimes it is support, but with the right metadata: model name, Base URL, request time, error body, and whether streaming was enabled.
+
+If you are building with AI APIs, here is the practical checklist.
+
+First, keep your API endpoints clean. No UTM parameters. No extra query strings unless the API explicitly requires them.
+
+Second, include slash v one when the OpenAI-compatible client expects it.
+
+Third, separate human links from machine endpoints. Blog links can be tracked. API endpoints should be stable.
+
+Fourth, log the endpoint, model, error code, latency, and request time. Without logs, every support conversation starts from zero.
+
+Fifth, build fallback into production. Retry temporary failures with backoff. Do not blindly retry bad authentication or invalid payloads. Use model fallback when a route is unstable. Use endpoint fallback only deliberately, and log which endpoint worked.
+
+Sixth, treat support themes as a product roadmap. If users repeatedly ask the same configuration question, the product needs a page, a tool, or a better default.
+
+This may sound like basic plumbing. It is. But most production failures are not caused by futuristic problems. They are caused by small pieces of plumbing that nobody documented clearly.
+
+The AI industry talks a lot about bigger context windows, better reasoning, faster models, and agentic workflows. All of that matters. But if your Base URL is wrong, none of it matters.
+
+The request never reaches the right place.
+
+So today’s lesson is simple: configuration is part of developer experience. Developer experience is part of reliability. And reliability is part of growth.
+
+If you want users to adopt an AI gateway, make the first request easy. Make the error path understandable. Make the correct endpoint impossible to miss.
+
+That is how a support problem becomes a growth asset.
+
+That’s it for today. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast. If you are building with OpenAI-compatible APIs, check your Base URL, keep your endpoints clean, and turn your support questions into documentation before they become churn.
