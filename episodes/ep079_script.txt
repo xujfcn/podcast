@@ -1,0 +1,137 @@
+EP079: Cost per Accepted Image Is the Metric That Matters
+
+Most teams compare image generation models the wrong way.
+
+They look at the price per request. They look at one beautiful demo image. They look at a model card. Then they choose a provider and hard-code that model into their product.
+
+That is fine for a prototype. It is risky for production.
+
+In production, the real question is not: how much does one image request cost?
+
+The real question is: how much does one usable image cost?
+
+That is cost per accepted image.
+
+Here is the difference.
+
+Imagine Model A costs less per generation. It looks cheap on the pricing page. But when you run your real prompts, only one out of ten outputs is good enough to publish.
+
+Now imagine Model B costs more per generation. But five out of ten outputs are usable.
+
+Model B may be the cheaper production model, even though the sticker price is higher.
+
+This matters because image generation is not like a text completion where you can often parse, retry, or edit the output. For many image workflows, the output is either accepted or rejected by a human, a designer, a customer, or an automated quality gate.
+
+If the image has broken text, wrong product details, strange hands, fake logos, inconsistent lighting, or a style that does not fit your brand, it is not a partial success. It is waste.
+
+That is why image model selection should start with a test matrix.
+
+Take the same prompt and run it across several model families: GPT Image, Imagen, Qwen Image, FLUX, DALL-E style workflows, or whichever models your gateway exposes.
+
+Do not test with random prompts. Test with your real product needs.
+
+A good first set is simple.
+
+One product photo prompt.
+
+One SaaS hero image prompt.
+
+One text-heavy poster prompt.
+
+Those three prompts reveal different weaknesses.
+
+Product photos test realism, object consistency, shadows, reflections, and whether the model invents unwanted logos.
+
+SaaS hero images test layout, visual hierarchy, dashboard clarity, and whether the result feels like a real developer product instead of generic AI art.
+
+Text-heavy posters test typography. This is where many models still fail. If your requested headline is “One API Key, Many AI Models,” and the image says “One A P I Koy, Many Al Models,” that output is not usable.
+
+Now score each model with the same rubric.
+
+Prompt following.
+
+Visual quality.
+
+Text accuracy.
+
+Brand fit.
+
+Latency.
+
+Failure rate.
+
+And most importantly: accepted output rate.
+
+Then calculate the metric that actually matters.
+
+Total generation cost divided by accepted images.
+
+That number is more honest than the pricing page.
+
+This is also where API gateway design becomes useful.
+
+If your application talks directly to four separate providers, testing becomes operationally messy. You need multiple API keys, multiple request formats, multiple billing dashboards, and multiple error paths.
+
+If your application talks to one OpenAI-compatible endpoint, testing becomes much easier. You can keep the same base URL, the same client structure, and change the model ID while you compare outputs.
+
+For example, with Crazyrouter, a developer can use one API key and an endpoint like:
+
+https://crazyrouter.com/v1/images/generations
+
+The important thing is not the endpoint itself. The important thing is the workflow it enables.
+
+Explore models quickly.
+
+Score outputs consistently.
+
+Choose the model that wins for your task.
+
+Keep a fallback model ready.
+
+Monitor the accepted-image rate over time.
+
+Because image models change. Provider behavior changes. Pricing changes. A model that wins this month might not win next quarter.
+
+This is why hard-coding a single image model forever is a product risk.
+
+A better pattern is to treat image generation like routing infrastructure.
+
+Your app should know the task type. Product photo. Poster. UI asset. Social graphic. Avatar. Background image.
+
+Each task type can have a preferred model, a fallback model, and a quality threshold.
+
+For a product photo, you might prioritize realism and consistency.
+
+For a social poster, you might prioritize style and speed.
+
+For a text-heavy image, you might prioritize exact spelling.
+
+For bulk generation, you might prioritize accepted-output cost.
+
+That is not just a model choice. It is an operations policy.
+
+And it is the same lesson we have seen across AI infrastructure.
+
+Do not measure raw unit price only.
+
+Measure successful task cost.
+
+For text agents, that means cost per completed task.
+
+For coding agents, that means cost per verified change.
+
+For support automation, that means cost per resolved ticket.
+
+For image generation, that means cost per accepted image.
+
+The teams that win are not the teams that chase the cheapest model every week.
+
+They are the teams that build flexible evaluation loops, keep model assumptions loose, and route work based on evidence.
+
+So the next time you test an image API, do not ask only: which model is cheapest?
+
+Ask: which model gives me the most usable outputs for my real prompts?
+
+That is the number your product will feel.
+
+And that is the number your users will notice.
