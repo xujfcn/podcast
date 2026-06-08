@@ -1,0 +1,45 @@
+EP080: GPT-5 Parameters, Claude Code Setup, and the New API Hygiene
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast.
+
+Today’s episode is about a boring-sounding topic that quietly breaks production apps: API parameters.
+
+When developers move from older chat models to newer reasoning models, the prompt is usually not the first thing that fails. The request body fails first. A field that used to be harmless, like max_tokens, presence_penalty, frequency_penalty, logprobs, seed, or best_of, can become a strict upstream error when the model route changes.
+
+That is why API hygiene matters in 2026. If your application calls GPT-5-style models, Claude models, Gemini models, and fallback routes through the same client, you cannot simply send every old parameter to every new model. You need a normalization layer.
+
+The practical rule is simple: send the smallest payload that preserves intent.
+
+For GPT-5-style reasoning models, prefer max_completion_tokens instead of max_tokens. Keep reasoning_effort and verbosity when the model supports them. Strip low-value legacy fields like presence_penalty, frequency_penalty, logprobs, top_logprobs, best_of, and seed before routing to stricter providers.
+
+This is not just theoretical. In a recent validation pass, we tested multiple GPT-5-family model routes with a matrix of common parameters. The compatibility layer accepted many fields, which is good. But the engineering lesson is not “send everything.” The lesson is “do not depend on compatibility magic.” A route that accepts a parameter today may fail tomorrow when the upstream provider changes.
+
+A good gateway should normalize before it retries. It should know which model family it is sending to. It should convert max_tokens into max_completion_tokens where appropriate. It should keep a clean whitelist for reasoning models. And it should log the original request separately from the normalized request so debugging stays possible.
+
+There is another trend connected to this: developer tools are becoming more configuration-driven.
+
+Take Claude Code as an example. Many users already have Claude Code installed. They do not need another giant installer. They only need the right base URL and token. That means a useful setup flow should be simple: detect the claude command, ask for a Crazyrouter token, set ANTHROPIC_BASE_URL, set ANTHROPIC_AUTH_TOKEN, optionally set OpenAI-compatible variables, and let the user run claude normally.
+
+That tiny difference matters. A setup script that tries to install everything can be helpful for beginners, but annoying for advanced users. A config-only script respects the user’s existing environment.
+
+The same product principle applies to API gateways. Do not force developers to rebuild their app. Give them one base URL, one token, and a safe compatibility layer.
+
+For Claude-native tools, the endpoint can be an Anthropic-style base URL. For OpenAI-compatible tools, the endpoint usually ends with slash v1. The important detail is not to mix human tracking links with API endpoints. UTM parameters belong on website links, not inside base URLs used by SDKs.
+
+So what should teams do this week?
+
+First, audit your AI request payloads. Look for old defaults injected by SDK wrappers, agent frameworks, or copied examples. If every request sends penalties, logprobs, seed, n, stop, and max_tokens, you are carrying unnecessary breakage risk.
+
+Second, create a model-family normalizer. GPT-5-style reasoning models, Claude-native models, Gemini-native models, image models, and audio models do not need the same payload shape.
+
+Third, separate developer onboarding into two tracks. One track is full install. The other is config-only for users who already have the tool. Most experienced developers want the second path.
+
+Fourth, test with real requests, not only documentation. Docs tell you what should work. Production routing tells you what actually works today. You need both.
+
+Finally, write down the rules. If the safe parameter list lives only in one engineer’s head, the next integration will break it again.
+
+The bigger pattern is clear. AI infrastructure is moving from single-provider demos to multi-model operations. The winners will be the teams with boring, reliable request handling: clean payloads, clear retries, explicit routing, and simple setup.
+
+That is API hygiene. It is not glamorous. But it saves launches.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast. If you are building with Claude Code, GPT-5, Gemini, or multi-model agents, keep your request bodies clean and your routing layer boring. That is usually where production reliability starts.
