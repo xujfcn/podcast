@@ -1,0 +1,51 @@
+EP081: Turning Claude Code Guides into Developer Growth Infrastructure
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast.
+
+Today’s episode is about something many developer teams underestimate: a guide repository is not just documentation. Done well, it becomes growth infrastructure.
+
+A single blog post can answer one search query. A structured guide repository can answer an entire cluster of queries: Claude Code setup, Claude Code third-party API, Claude Code base URL, Claude Code with domestic model routes, Claude Code workflow, Claude Code with Figma, and Claude Code with Mermaid diagrams.
+
+That matters because developer search behavior is messy. One person searches for a quick command. Another searches for a Chinese tutorial. Another wants to know why their slash v1 endpoint breaks. Another wants a full product workflow from PRD to prototype. If all of those paths land in the same organized guide, the repository becomes a durable entry point.
+
+The first principle is to make the first screen useful.
+
+A GitHub README should not begin with a vague introduction. It should show the fastest working path. For Claude Code through Crazyrouter, that means showing the two environment variables clearly.
+
+For Claude-native clients, the base URL should be the root endpoint: https://cn.crazyrouter.com. Claude Code will append its own messages path. If users put slash v1 into that environment variable, they can create a slash v1 slash v1 error path.
+
+For OpenAI-compatible SDKs, the base URL is different. Those clients usually expect https://cn.crazyrouter.com/v1. Mixing these two rules is one of the easiest ways to turn onboarding into support load.
+
+So a good guide does not only say what to do. It says what not to do, and why.
+
+The second principle is to separate human links from API endpoints.
+
+Website links should use UTM tracking. That helps the team know whether GitHub, tutorials, articles, or podcast links are bringing in users. But API endpoints should never include UTM parameters. A tracking link is for a browser. A base URL is for an SDK. Confusing those two makes examples fragile.
+
+The third principle is to create a reading path, not only a list of files.
+
+If a repository has thirty-six articles, the raw directory is not enough. Readers need routes: start here for installation, go here for engineering practice, go here for Figma workflows, go here for architecture diagrams. That turns a content dump into a learning system.
+
+The fourth principle is to make the repository render like a site.
+
+GitHub is good, but a simple Docsify or VitePress entry turns the same Markdown files into a searchable documentation site. That gives the project two faces: a developer-friendly GitHub repository and a readable web guide. The source stays simple, but the user experience improves.
+
+The fifth principle is to connect each guide to a real tool.
+
+A Claude Code guide is stronger if it links to a one-click setup script. A setup script is stronger if it verifies configuration writes. A configuration guide is stronger if it explains base URL mistakes. Each asset reinforces the others.
+
+This is how developer growth compounds. One article becomes a repo. The repo becomes a docs site. The docs site links to a setup script. The setup script reduces support questions. The support questions become FAQ entries. The FAQ entries become search traffic.
+
+For AI API products, this loop is especially important because integration mistakes are common. Users do not only need model names and prices. They need correct environment variables, payload shape, routing behavior, token permissions, logs, and troubleshooting.
+
+A guide repository can also become a content pipeline. The Chinese tutorial can become a CSDN article. The practical version can become an iT邦 post. The English summary can become Dev.to and Hashnode. A shorter version can become LinkedIn, Mastodon, and Bluesky. The same validated source can feed multiple platforms without inventing the message from scratch each time.
+
+The important word is validated. Developer content that has not been tested becomes marketing copy. Developer content that includes working commands, known failure modes, and configuration verification becomes infrastructure.
+
+So if you are building an AI developer product this week, look at your docs and ask a simple question: is this just information, or is it reducing friction?
+
+If it reduces friction, track it. Add UTM to human links. Keep API endpoints clean. Put the fastest setup path at the top. Add a FAQ for the errors users actually hit. Link the guide to the script, the script to the docs, and the docs back to the product.
+
+That is how a guide turns into growth infrastructure.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast. If you are working on Claude Code, AI gateways, or multi-model developer tools, make your documentation executable, searchable, and connected to real onboarding. That is where developer trust starts.
