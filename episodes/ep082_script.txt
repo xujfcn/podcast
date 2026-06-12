@@ -1,0 +1,77 @@
+EP082: Payload Compatibility Is Part of Model Quality
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast.
+
+Today’s episode is about a quiet failure mode in AI systems: a model can look impressive on paper, yet still be awkward in production because it does not accept the payload shape your app actually sends.
+
+That sounds small. It is not.
+
+In real teams, the difference between a model that “generates good answers” and a model that “fits your application reliably” shows up in the boring places: request parameters, response formats, retry behavior, and how the model reacts when your code turns the knobs a little differently.
+
+A lot of AI buying decisions still start with benchmark headlines.
+
+That is understandable. Benchmarks are easy to compare. Screenshots are easy to share. Launch posts are easy to market. But production software does not care about launch posts. It cares about whether the model works with your exact request, your exact endpoint, and your exact workflow.
+
+If a model requires a slightly different payload than the one your library sends, you do not have a model quality problem alone. You have an integration problem. And integration problems turn into support load very quickly.
+
+This is why gateway testing matters.
+
+At Crazyrouter, the useful question is not just, “Which model is smartest?” The useful question is, “Which model succeeds most often on the tasks my app actually needs?” That means testing real calls, not just reading model cards. It also means recording failures, because a 400 response is not a theoretical inconvenience. It is a real production path.
+
+We saw this pattern again in a recent benchmark workflow: one model accepted a simple test payload cleanly, while another model rejected a parameter that looked normal to the caller. Same task. Same gateway. Different result.
+
+That is the kind of difference that changes routing decisions.
+
+The practical takeaway is simple: model quality has at least three layers.
+
+First is raw capability. Can the model solve the problem?
+
+Second is payload compatibility. Does it actually accept the request shape your system sends?
+
+Third is operational fit. Does it keep your workflow fast, cheap, and debuggable?
+
+If you ignore the second layer, you get a deceptive benchmark winner that fails in real code. If you ignore the third layer, you get a fancy model that is too expensive or too slow for the workload.
+
+This is also why “cost per token” is not enough.
+
+Production teams should care about cost per successful task. That includes retries, rejected payloads, fallback calls, and the time a developer spends debugging weird edge cases. The cheapest model on a pricing page can become the most expensive model in a broken workflow.
+
+Routing solves that problem better than loyalty does.
+
+Instead of hard-coding one model for everything, route by task type.
+
+Use a stricter or more capable model for long-context synthesis, high-risk review, or difficult reasoning.
+
+Use a lighter model for extraction, formatting, support drafting, or repetitive work.
+
+And keep a fallback route for when a model rejects a parameter, times out, or starts producing malformed output.
+
+That is not just good architecture. It is good economics.
+
+It also makes your benchmarks more honest.
+
+A useful benchmark does not only track latency and answer quality. It records whether the request succeeded, which payload was used, how many tokens were consumed, and whether the model behaved the way your application expected.
+
+In other words: benchmark the whole route, not just the completion.
+
+This matters even more as AI systems become more agentic.
+
+Once you have planner, implementer, reviewer, and verifier steps, compatibility starts to matter at every hop. A model that is excellent at writing prose may still be annoying in a verifier step if it changes JSON shape, ignores a parameter, or adds extra text where your parser expected silence.
+
+That is why production AI should be treated like a system of systems.
+
+Model choice, endpoint choice, prompt shape, and retry policy all interact.
+
+So if you are building with Crazyrouter this week, here is the simplest rule I can give you:
+
+Test the real payload. Log the real response. Route by real success.
+
+If a model is brilliant but fragile, it may still be useful.
+
+If a model is fast but incompatible, it may still cost you more.
+
+And if a model is both compatible and good enough for the task, that is usually the one you want in production.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast.
+
+If you are comparing models, do not stop at the benchmark chart. Check the payload, check the endpoint, and measure the whole workflow. That is where the real quality shows up.
