@@ -1,0 +1,85 @@
+EP083: Claude Code, World Cup Predictors, and Validated AI Workflows
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast.
+
+Today’s episode is about a practical question: what should an AI coding agent actually do when the task involves prediction?
+
+The wrong answer is simple. Ask the model who will win, trust the answer, and turn it into content.
+
+That is tempting. It is also fragile.
+
+A better answer is to let the coding agent build the workflow around the prediction: data files, deterministic calculations, API calls, validation, charts, and publishable artifacts.
+
+We used that pattern in a small World Cup 2026 match prediction demo built with Claude Code style workflows, Python, and Crazyrouter.
+
+The important part is not the sport. The important part is the architecture.
+
+The demo separates the job into two layers.
+
+Python handles the probability model. It reads fixture data, seed team ratings, host advantage, and a simple expected-goals calculation. Then it uses a Poisson-style score distribution to produce home win, draw, and away win probabilities.
+
+The language model does not invent the probability. It explains the probability.
+
+That difference matters.
+
+If the deterministic layer says USA versus Paraguay is roughly forty-eight percent home win, twenty-six percent draw, and twenty-six percent away win, the model’s job is to turn that into a structured preview, not to override it with vibes.
+
+That is a healthier pattern for AI applications: code calculates, models communicate, validators decide whether the output is safe to use.
+
+In the demo, Crazyrouter is used as the multi-model layer. One OpenAI-compatible base URL can call different models for the same structured output task. That lets the workflow compare not just answer quality, but operational behavior.
+
+And the results show why that matters.
+
+Several models returned valid JSON. One model returned HTTP 200, but the JSON was malformed or truncated.
+
+That is the kind of failure that does not show up if you only look at status codes.
+
+A successful API call is not the same thing as a usable result.
+
+For production AI systems, the real unit of value is not the completion. It is the accepted output.
+
+That means you need JSON parsing. You need schema validation. You need retries. You need fallback models. And you need raw response logging so you can debug failures later.
+
+This is where AI coding agents become useful.
+
+Claude Code, Codex-style agents, and similar tools are not most valuable when they generate one clever function in isolation. They are valuable when they assemble the whole workflow: folder structure, data files, scripts, tests, charts, API clients, documentation, and publishing assets.
+
+That is a very different mental model from “AI writes code.”
+
+It is closer to “AI executes a project plan under verification.”
+
+For a prediction demo, that means the agent should not just create a dramatic answer. It should create reproducible inputs, transparent assumptions, and artifacts someone else can inspect.
+
+The same idea applies outside sports.
+
+If you are building a pricing analyzer, a support classifier, a financial report assistant, or a developer dashboard, do not let the model become the invisible source of truth.
+
+Let code handle the parts that should be deterministic.
+
+Let the model handle language, synthesis, explanation, and flexible formatting.
+
+Then validate the boundary between them.
+
+That boundary is where a lot of real AI engineering lives.
+
+It is also where an API gateway helps.
+
+When you can route the same task through multiple models, you can measure which one produces valid JSON most often, which one is fast enough, which one is cheap enough, and which one fails gracefully.
+
+The best model for a workflow is not always the most impressive model on a leaderboard.
+
+Sometimes it is the model that returns boring, valid, parseable output every time.
+
+That is not glamorous. It is production.
+
+So the takeaway for today is simple.
+
+If you are using an AI coding agent, ask it to build the system, not just the answer.
+
+Use deterministic code for calculations. Use Crazyrouter or another routing layer to compare models. Validate every structured response. And measure cost per accepted output, not just cost per token.
+
+That is how a toy prediction demo becomes a useful engineering pattern.
+
+Thanks for listening to AI Dev Tools, the Crazyrouter podcast.
+
+If you are experimenting with coding agents this week, try giving them a workflow with data, validation, and a publishable result. That is where the real leverage starts to show up.
