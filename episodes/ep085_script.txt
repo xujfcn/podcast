@@ -1,0 +1,63 @@
+EP085: Service Accounts Beat Refresh Tokens for AI Ops Analytics
+
+If you run an AI developer product, your growth dashboard is not just a marketing artifact. It is part of your operating system.
+
+You need to know which pages are getting traffic, which docs are converting, which keywords are moving, which GitHub repos are sending qualified users, and which campaigns lead to registration, token creation, and payment.
+
+But there is a quiet reliability problem hiding underneath all of that: the credentials used to read your analytics.
+
+A dashboard that depends on a personal OAuth refresh token can fail at the worst time. The token expires. The Google app is still in testing mode. The user revokes access. The scopes change. A password or security event invalidates old grants. Suddenly, your daily growth report is blind.
+
+The symptom looks boring: invalid_grant, token expired or revoked.
+
+The impact is not boring at all.
+
+You lose GA4 overview. You lose Search Console keywords. You lose UTM attribution. You lose registration and purchase funnel visibility. You can still see server logs or Umami pageviews, but you lose the connection between traffic, intent, and revenue.
+
+For AI API products, that connection matters. The difference between a random pageview and a qualified developer session is often hidden in the path: pricing page, register page, token page, playground, top-up page, API logs. If the analytics layer is unstable, your operating decisions become guesswork.
+
+So the infrastructure lesson is simple: service accounts should be the default for machine-run analytics jobs.
+
+User OAuth is great for interactive setup. A human signs in, grants access, and the system can bootstrap quickly. But for scheduled reporting, cron jobs, dashboards, and agent-run operations, a service account is cleaner. It has a stable identity. It is not tied to one human browser session. It can be granted read-only access to GA4 and Search Console. It can be rotated, audited, and documented like any other production credential.
+
+The best setup is usually layered.
+
+First, grant a service account viewer or analyst access to the GA4 property. Then add that same service account as a Search Console user for the domain property. Then make your reporting script prefer the service account. Keep personal OAuth as a fallback only.
+
+That one change turns analytics from a fragile personal login into infrastructure.
+
+It also makes your AI operations cleaner. A daily agent can pull traffic overview, search visibility, page performance, funnel events, UTM breakdown, and paid-user source attribution without waking anyone up for a fresh login code. If the service account fails, that is a real permission or configuration issue, not a random personal token lifecycle problem.
+
+There is a second lesson here: monitoring should have a graceful fallback.
+
+If GA4 or Search Console fails, your report should not collapse into a wall of errors. It should fall back to another source, such as Umami, server logs, payment referrers, GitHub traffic, or internal registration events. The report should say exactly what is missing and what was used instead.
+
+That is the same reliability pattern we use for AI models.
+
+Do not treat HTTP 200 as success. Do not treat one provider as the whole system. Do not let a single token failure erase the operator's view. Validate the output, disclose the source, and degrade gracefully.
+
+There is also a product growth angle.
+
+When your analytics are reliable, your content machine becomes much smarter. You can see whether a Claude Code tutorial drives token creation, whether a WorkBuddy guide sends people to pricing, whether a Japanese article attracts real console usage, or whether a GitHub README produces better traffic than a social post.
+
+Without that visibility, you may keep publishing content that gets impressions but no activation. With it, you can focus on pages and repos that actually move users through the developer funnel.
+
+For an AI gateway, the most useful dashboard is not just pageviews. It is a chain:
+
+Search query, landing page, docs page, pricing page, registration, token creation, first API call, top-up, repeat usage.
+
+Every link in that chain needs trustworthy instrumentation.
+
+That is why credential hygiene belongs in growth operations. It sounds like a backend detail, but it decides whether your marketing loop can learn.
+
+The practical checklist is short.
+
+Use a service account for scheduled analytics. Grant only the permissions needed. Keep OAuth for manual fallback. Store credentials in a controlled file or secret manager. Add a health check that tests GA4 and Search Console separately. If one source fails, produce a partial report and label it clearly. And review whether your OAuth app is in production mode if you still rely on refresh tokens.
+
+The broader principle is even shorter.
+
+A growth report is only as reliable as the credentials behind it.
+
+And for AI developer tools, reliable analytics are not optional. They are how you decide what to build, what to write, what to fix, and where your best users are really coming from.
+
+That is it for this episode of AI Dev Tools, the Crazyrouter podcast. If you are building AI products, treat analytics credentials, model routing, and API reliability as the same kind of infrastructure. Because in production, they all decide whether your system can keep learning.
