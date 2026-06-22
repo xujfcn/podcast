@@ -1,0 +1,41 @@
+EP088: Vision Benchmarks Need User-Centric Metrics
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about vision model benchmarks, and specifically why most benchmark tables are useful, but incomplete.
+
+If you are a developer choosing a vision API, a simple leaderboard is not enough. You do not only need to know which model can identify a logo in a clean image. You need to know which model is the best default for your actual product: user uploads, screenshots, receipts, UI images, support tickets, document previews, agent workflows, or bulk classification jobs.
+
+That changes the benchmark.
+
+A production benchmark should start with accuracy, but not stop there. Accuracy means the model actually saw the image and answered the task correctly. HTTP 200 is not accuracy. A model can return a valid response while the image part was dropped, transformed incorrectly, blocked by a media policy, or ignored by the adapter. For vision routes, the first metric should be successful visual understanding, not successful HTTP responses.
+
+The second metric is latency, but average latency is only the beginning. Users feel tail latency. If five requests finish in two seconds and one request takes ten seconds, your average may look acceptable, but your product still feels broken for the unlucky user. A good comparison should show average latency, median latency, fastest request, slowest request, and ideally p95 latency once you have enough samples.
+
+The third metric is cost, but again, not just price per million tokens. For image tasks, teams should care about cost per successful image. If a cheap model needs retries, fallback calls, or manual review, the cheapest listed price may become more expensive in production. A slightly more expensive route can be better if it succeeds the first time, returns faster, and produces fewer ambiguous answers.
+
+The fourth metric is usage reliability. In text APIs, token usage is mostly accounting. In vision APIs, usage can also be a health signal. If a response says it analyzed an image, but prompt tokens look like only the text prompt arrived, that is suspicious. If image token fields are missing or zero on a route that should account for images, you should investigate. Usage is not perfect evidence, but it is a valuable smoke signal.
+
+The fifth metric is media handling. Does the route preserve image_url upstream? Does the gateway download the image and convert it to base64? Does it support private images? Does it reject local network URLs? Does token estimation prefetch the image? These details matter for bandwidth, privacy, SSRF safety, regional routing, and customer expectations.
+
+This is where benchmark writing should become more user-centric.
+
+For a real-time chat product, the best model is often the one with stable low latency and reliable visual input handling. For a batch classification pipeline, the best model may be the lowest cost route with high enough accuracy. For support automation, the best model may be the one that handles messy screenshots and UI images consistently. For document workflows, logo recognition is not enough; you need OCR, layout understanding, table extraction, and confidence handling.
+
+So a useful benchmark should translate raw numbers into scenarios.
+
+One section should say: if you need fastest interactive image recognition, pick this route. Another should say: if you need low-cost batch logo or icon classification, pick this route. Another should say: if you need stronger visual reasoning, do not rely only on lightweight models. Another should say: if you are routing image URLs through a gateway, watch media-fetch behavior and usage signals.
+
+Fallback strategy should also be part of the benchmark. Vision APIs fail in different ways. Some fail with explicit errors. Some return HTTP 200 but say no image was provided. Some hallucinate an unrelated logo. Some produce empty content. Your router should not treat these failures the same.
+
+A practical routing policy might look like this: start with a low-cost route for simple image classification, validate the answer against expected structure, retry only if the failure is transport-related, and escalate to a stronger model when the answer is uncertain, empty, or inconsistent with the task. Log the reason for every fallback, because fallback without observability is just hidden cost.
+
+The benchmark should also explain what not to conclude. If the test uses two clean logos, it is a smoke test, not a full evaluation of visual intelligence. It proves whether the route can receive image_url input and solve a basic recognition task. It does not prove document OCR quality, chart reasoning, object counting, handwriting recognition, or medical image suitability.
+
+That honesty makes the benchmark more valuable, not less. Developers trust benchmarks more when they clearly state the task boundary.
+
+For AI gateways like Crazyrouter, this style of benchmarking is especially important. A gateway is not only selling access to model names. It is helping developers choose routes by task, price, latency, failure mode, and operational behavior. That means the content should read less like model fan fiction and more like a production decision guide.
+
+The big takeaway is simple: benchmark dimensions should match user decisions. Accuracy matters. Latency matters. Cost matters. But production users also need failure behavior, media handling, usage signals, fallback policy, and scenario-specific recommendations.
+
+When a developer asks which vision model is better, the better answer is: better for which workflow? Real-time upload? Bulk tagging? Screenshot support? Document OCR? Gateway bandwidth control? Once you answer that, the benchmark becomes a tool for shipping, not just a table for reading.
+
+That is it for today. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast. See you in the next episode.
