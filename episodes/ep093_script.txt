@@ -1,0 +1,29 @@
+EP093: Fallbacks Are Product Features, Not Afterthoughts
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about fallbacks.
+
+In AI infrastructure, fallbacks are often treated like emergency plumbing. A model goes down, rate limits spike, a provider has a regional problem, and the gateway quietly sends the request somewhere else. That sounds simple, but in production a fallback is not just a technical escape hatch. It is part of the user experience.
+
+The first design question is compatibility. Two models may both support chat completions, but that does not mean they behave the same way. They may differ in tool calling, JSON mode, image input, context limits, safety behavior, reasoning traces, latency, and output style. If a fallback ignores those differences, the request may technically succeed while the application breaks in a more subtle way.
+
+That is why fallback rules should be explicit. A coding workload might fall back from one strong coding model to another, but not to a cheap general model. A vision workload should only fall back to another vision-capable model. A strict JSON workflow should only use models that have been tested against the schema behavior the application expects.
+
+The second design question is budget. Fallbacks can accidentally turn an outage into a billing surprise. If the primary model is cheap and the fallback is premium, every retry can become more expensive. A good gateway should let teams define retry budgets, maximum fallback price, maximum attempts, and whether a fallback is allowed at all for a given route.
+
+There is also a latency budget. Sometimes the right answer is not to retry forever. For an interactive product, a fast, clear failure can be better than a slow fallback that arrives too late. For a background job, waiting longer may be acceptable. Fallback policy should match the user experience, not just the infrastructure preference.
+
+The third design question is visibility. Silent fallbacks are convenient until someone needs to debug quality, cost, or correctness. Developers should be able to see when a fallback happened, which model handled the final request, how many attempts were made, and why the original route failed. Logs, usage records, and dashboards should use names that match the public model catalog.
+
+This is especially important for support. If a customer says, I sent this to model A but got behavior from model B, the answer should not be a mystery. The system should make the route decision explainable without exposing private provider internals.
+
+The fourth design question is control. Some teams want maximum availability. Some want deterministic behavior. Some want the lowest cost. Some want to avoid specific providers for compliance or procurement reasons. A useful fallback system should support different policies instead of assuming one global answer.
+
+For API gateway operators, the practical checklist is straightforward. Test fallback pairs before enabling them. Confirm endpoint compatibility. Confirm tool and JSON behavior. Confirm pricing. Confirm observability labels. Confirm user-facing documentation. Then roll out the policy gradually, starting with low-risk workloads.
+
+One underrated pattern is declaring fallback groups by intent. Instead of saying model A falls back to model B, define groups like fast chat, coding, long context, image understanding, or premium reasoning. Then the gateway can route within a group while preserving the intent of the workload. That makes policies easier to understand and easier to update as new models arrive.
+
+The larger point is that reliability is not only uptime. Reliability means the system behaves predictably when something goes wrong. Fallbacks can improve reliability, but only when they preserve compatibility, respect budgets, and leave a clear trail.
+
+So the takeaway for today is simple. Do not bolt fallbacks on at the end. Treat them as a product feature. Make the policy explicit, test the route, expose the decision, and give developers control. In a model market that changes every week, that discipline turns provider volatility into a manageable part of the platform.
+
+That is it for today. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast. See you in the next episode.
