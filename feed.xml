@@ -1,22 +1,22 @@
 <?xml version='1.0' encoding='utf-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+<rss xmlns:ns0="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:ns1="http://www.w3.org/2005/Atom" version="2.0">
   <channel>
-    <item><title>EP093: Fallbacks Are Product Features, Not Afterthoughts</title><description>A practical episode on designing AI API fallbacks as a first-class product feature: routing rules, compatibility checks, retry budgets, observability, cost controls, and user-visible behavior when a preferred model is unavailable.</description><pubDate>Mon, 13 Jul 2026 16:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep093.mp3" length="5304045" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep093.mp3</guid><itunes:duration>4:25</itunes:duration><itunes:episode>93</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep093</link></item><item><title>EP092: Model Catalogs Are Production Interfaces</title><description>A practical episode on why AI model catalogs need operational discipline: exact aliases, access rules, pricing visibility, endpoint examples, deprecation notes, and release checks that keep developer workflows from breaking as model lists change.</description><pubDate>Thu, 09 Jul 2026 10:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep092.mp3" length="5802765" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep092.mp3</guid><itunes:duration>4:50</itunes:duration><itunes:episode>92</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep092</link></item><item><title>EP091: Shipping New Claude Models Without Breaking Developer Workflows</title><description>A practical episode on launching new Claude-family models in an API gateway: model aliases, unified endpoints, token allowlists, docs language, test emails, request examples, and how to help developers try a new model without changing their whole stack.</description><pubDate>Wed, 01 Jul 2026 09:50:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep091.mp3" length="6548685" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep091.mp3</guid><itunes:duration>5:27</itunes:duration><itunes:episode>91</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep091</link></item><item><title>EP090: Video APIs Need Real Task Evidence, Not Just Model Lists</title><description>A practical episode about production video generation APIs: async task submission, polling, model availability, endpoint drift, archived video URLs, and why teams should test Wan, Veo, Seedance, and Kling with real calls before writing integration docs or choosing a provider.</description><pubDate>Tue, 30 Jun 2026 09:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep090.mp3" length="8014125" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep090.mp3</guid><itunes:duration>6:40</itunes:duration><itunes:episode>90</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep090</link></item><item><title>EP089: GLM-5.2 and the New Shape of Long-Horizon AI APIs</title><description>A practical episode about GLM-5.2, long-horizon coding models, 1M-token context, reasoning-token budgets, unlimited RPM promises, and what engineering teams should measure before moving agent workflows into production.</description><pubDate>Wed, 24 Jun 2026 10:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep089.mp3" length="8095245" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep089.mp3</guid><itunes:duration>6:44</itunes:duration><itunes:episode>89</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep089</link></item><item><title>EP088: Vision Benchmarks Need User-Centric Metrics</title><description>A practical episode about turning vision model benchmarks into production decisions: accuracy, latency, tail latency, cost per successful image, media handling, usage signals, failure modes, and user-facing routing strategy.</description><pubDate>Mon, 22 Jun 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep088.mp3" length="7338285" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep088.mp3</guid><itunes:duration>6:06</itunes:duration><itunes:episode>88</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep088</link></item><item><title>EP087: Vision Model Routing Is Really Media Routing</title><description>A practical episode about image understanding APIs, URL image inputs, Gemini and Claude inline media conversion, Qwen and OpenAI-style URL passthrough, and why production AI gateways need media-aware routing instead of just model-aware routing.</description><pubDate>Sun, 21 Jun 2026 11:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep087.mp3" length="8463405" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep087.mp3</guid><itunes:duration>7:03</itunes:duration><itunes:episode>87</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep087</link></item><item><title>EP086: DeepSeek Rate Limits Are Not One Number</title><description>A practical episode about DeepSeek official concurrency limits, cloud-provider TPM and RPM quotas, and why AI gateways need structured capacity routing instead of a single rate-limit number.</description><pubDate>Tue, 16 Jun 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep086.mp3" length="6669165" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep086.mp3</guid><itunes:duration>5:33</itunes:duration><itunes:episode>86</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep086</link></item><item><title>EP085: Service Accounts Beat Refresh Tokens for AI Ops Analytics</title><description>A practical episode about why AI operations dashboards should use service accounts for GA4 and Search Console, how expired OAuth refresh tokens break growth reports, and why analytics credentials are part of production infrastructure.</description><pubDate>Mon, 15 Jun 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep085.mp3" length="6674445" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep085.mp3</guid><itunes:duration>5:34</itunes:duration><itunes:episode>85</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep085</link></item><item><title>EP084: AI API Failovers, Regional Endpoints, and Hidden Reliability Work</title><description>A practical episode about the reliability work behind AI API products: regional base URLs, routing, failover policy, balance-related pauses, support clarity, and turning repeated support cases into better developer infrastructure.</description><pubDate>Sun, 14 Jun 2026 16:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep084.mp3" length="4907565" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep084.mp3</guid><itunes:duration>4:05</itunes:duration><itunes:episode>84</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep084</link></item><item><title>EP083: Claude Code, World Cup Predictors, and Validated AI Workflows</title><description>A practical episode about using coding agents for prediction workflows: deterministic probability models, model-written explanations, JSON validation, and why AI apps need evidence checks instead of vibe-based answers.</description><pubDate>Sat, 13 Jun 2026 12:50:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep083.mp3" length="5632845" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep083.mp3</guid><itunes:duration>4:42</itunes:duration><itunes:episode>83</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep083</link></item>    <item><title>EP082: Payload Compatibility Is Part of Model Quality</title><description>A practical episode about why model quality includes payload compatibility, endpoint fit, retries, and real workflow success rather than only benchmark headlines.</description><pubDate>Wed, 10 Jun 2026 08:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep082.mp3" length="5815725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep082.mp3</guid><itunes:duration>4:50</itunes:duration><itunes:episode>82</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep082</link></item><item><title>EP081: Turning Claude Code Guides into Developer Growth Infrastructure</title><description>A practical episode on how a Claude Code guide repository can become developer growth infrastructure: correct base URL rules, UTM discipline, searchable docs, setup scripts, FAQs, and multi-platform content distribution built from validated developer onboarding.</description><pubDate>Tue, 09 Jun 2026 11:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep081.mp3" length="6168045" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep081.mp3</guid><itunes:duration>5:08</itunes:duration><itunes:episode>81</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep081</link></item><item><title>EP080: GPT-5 Parameters, Claude Code Setup, and API Hygiene</title><description>A practical episode on why GPT-5-style reasoning models need cleaner request payloads, how to handle max_tokens versus max_completion_tokens, when to use reasoning_effort and verbosity, and why config-only Claude Code onboarding is better for users who already installed the CLI.</description><pubDate>Mon, 08 Jun 2026 11:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep080.mp3" length="5756205" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep080.mp3</guid><itunes:duration>4:47</itunes:duration><itunes:episode>80</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep080</link></item><item><title>EP079: Cost per Accepted Image Is the Metric That Matters</title><description>Image generation pricing is misleading if teams only compare cost per request. This episode explains cost per accepted image, why model demos are not enough, and how developers can use a repeatable test matrix across GPT Image, Imagen, Qwen Image, and FLUX-style models before choosing production routes.</description><pubDate>Sun, 07 Jun 2026 09:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep079.mp3" length="6211725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep079.mp3</guid><itunes:duration>5:10</itunes:duration><itunes:episode>79</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep079</link></item><item><title>EP078: One-Click Configuration Is Developer Onboarding Infrastructure</title><description>One-click setup scripts are more than convenience. This episode explains how WorkBuddy-style custom model configuration, local models.json files, Base URL normalization, backups, API key handling, and troubleshooting checklists turn fragile AI tool setup into repeatable developer onboarding infrastructure.</description><pubDate>Fri, 05 Jun 2026 12:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep078.mp3" length="10347885" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep078.mp3</guid><itunes:duration>8:37</itunes:duration><itunes:episode>78</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item><item><title>EP077: Base URL Bugs Are Developer Experience Bugs</title><description>API Base URL mistakes are one of the most common AI developer onboarding failures. This episode explains why missing /v1, wrong environment variables, UTM parameters in API endpoints, region endpoints, and unclear error paths turn small configuration details into support load — and how guides, generators, and troubleshooting pages convert support questions into growth assets.</description><pubDate>Thu, 04 Jun 2026 09:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep077.mp3" length="11929005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep077.mp3</guid><itunes:duration>9:56</itunes:duration><itunes:episode>77</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item><item><title>EP076: Dynamic Workflows for AI Coding Agents</title><description>Dynamic workflows are changing AI coding from one long agent chat into structured orchestration. This episode explains planner, implementer, adversarial reviewer, and verifier packets; why ultracode-style workflows can get expensive; and how model routing through an API gateway helps teams control cost, latency, and evidence.</description><pubDate>Wed, 03 Jun 2026 09:45:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep076.mp3" length="9091725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep076.mp3</guid><itunes:duration>7:34</itunes:duration><itunes:episode>76</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
-    <item><title>EP075: API Billing Is Product Infrastructure</title><description>API billing is no longer just an accounting detail. This episode explains why Anthropic and Claude API cost depends on payload design, long context, output length, retries, agent loops, and fallback strategy — and why production teams should measure cost per successful task instead of raw token price.</description><pubDate>Tue, 02 Jun 2026 10:30:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep075.mp3" length="8049165" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep075.mp3</guid><itunes:duration>6:42</itunes:duration><itunes:episode>75</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
-    <item><title>EP074: API Key Hygiene Is Part of AI Reliability</title><description>API key hygiene is a production AI reliability issue. This episode explains why invalid tokens, missing Authorization headers, rotated credentials, stale workers, and forgotten environment variables should be tracked separately from model failures — and how gateways make authentication problems easier to diagnose.</description><pubDate>Mon, 01 Jun 2026 09:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep074.mp3" length="8697165" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep074.mp3</guid><itunes:duration>7:15</itunes:duration><itunes:episode>74</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
-    <item><title>EP073: Why AI Gateway Reliability Is More Than Uptime</title><description>AI gateway reliability is more than uptime or HTTP 200s. This episode explains provider availability, payload compatibility, output validity, task success, and cost stability — and why production AI teams should measure cost per successful task instead of raw token price.</description><pubDate>Sun, 31 May 2026 15:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep073.mp3" length="8515725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep073.mp3</guid><itunes:duration>7:06</itunes:duration><itunes:episode>73</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
-    <item><title>EP072: Why MCP Needs the Same Gateway Discipline as APIs</title><description>MCP gives AI agents access to tools, but production teams need more than direct tool wiring. This episode explains why MCP needs gateway discipline: identity, policy, approvals, tool shaping, observability, and cost-aware routing across the full agent workflow.</description><pubDate>Sat, 30 May 2026 14:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep072.mp3" length="9136845" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep072.mp3</guid><itunes:duration>7:37</itunes:duration><itunes:episode>72</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
-    <item><title>EP071: The Quiet Problem With AI Pricing Pages</title><description>AI pricing pages show unit costs, but production teams need routing decisions. This episode explains why real AI cost depends on success rate, retries, latency, payload compatibility, and task-level economics — and why model pricing should become a living routing layer inside your AI infrastructure.</description><pubDate>Fri, 29 May 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep071.mp3" length="9504525" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep071.mp3</guid><itunes:duration>7:55</itunes:duration><itunes:episode>71</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
-    <item><title>EP070: Gemini 2.5 Flash Lite and the Automation Tier</title><description>Gemini 2.5 Flash Lite is best understood as a lightweight automation tier: fast, cheap, and useful for classification, extraction, summarization, routing, validation, and first-pass analysis before escalating harder tasks to stronger models. This episode explains how to use lightweight models in production without trusting them blindly.</description><pubDate>Thu, 28 May 2026 09:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep070.mp3" length="8723085" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep070.mp3</guid><itunes:duration>7:16</itunes:duration><itunes:episode>70</itunes:episode><itunes:episodeType>full</itunes:episodeType><itunes:explicit>false</itunes:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item><item>
+    <item><title>EP094: Kimi K3 vs Claude Fable 5 — Choosing Models by Workflow, Not Hype</title><description>A practical comparison of Kimi K3 and Claude Fable 5 for coding, long-context work, structured output, latency, and cost-aware AI application routing.</description><pubDate>Sat, 18 Jul 2026 16:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep094.mp3" length="2607213" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep094.mp3</guid><ns0:duration>5:25</ns0:duration><ns0:episode>94</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep094</link></item><item><title>EP093: Fallbacks Are Product Features, Not Afterthoughts</title><description>A practical episode on designing AI API fallbacks as a first-class product feature: routing rules, compatibility checks, retry budgets, observability, cost controls, and user-visible behavior when a preferred model is unavailable.</description><pubDate>Mon, 13 Jul 2026 16:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep093.mp3" length="5304045" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep093.mp3</guid><ns0:duration>4:25</ns0:duration><ns0:episode>93</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep093</link></item><item><title>EP092: Model Catalogs Are Production Interfaces</title><description>A practical episode on why AI model catalogs need operational discipline: exact aliases, access rules, pricing visibility, endpoint examples, deprecation notes, and release checks that keep developer workflows from breaking as model lists change.</description><pubDate>Thu, 09 Jul 2026 10:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep092.mp3" length="5802765" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep092.mp3</guid><ns0:duration>4:50</ns0:duration><ns0:episode>92</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep092</link></item><item><title>EP091: Shipping New Claude Models Without Breaking Developer Workflows</title><description>A practical episode on launching new Claude-family models in an API gateway: model aliases, unified endpoints, token allowlists, docs language, test emails, request examples, and how to help developers try a new model without changing their whole stack.</description><pubDate>Wed, 01 Jul 2026 09:50:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep091.mp3" length="6548685" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep091.mp3</guid><ns0:duration>5:27</ns0:duration><ns0:episode>91</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep091</link></item><item><title>EP090: Video APIs Need Real Task Evidence, Not Just Model Lists</title><description>A practical episode about production video generation APIs: async task submission, polling, model availability, endpoint drift, archived video URLs, and why teams should test Wan, Veo, Seedance, and Kling with real calls before writing integration docs or choosing a provider.</description><pubDate>Tue, 30 Jun 2026 09:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep090.mp3" length="8014125" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep090.mp3</guid><ns0:duration>6:40</ns0:duration><ns0:episode>90</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep090</link></item><item><title>EP089: GLM-5.2 and the New Shape of Long-Horizon AI APIs</title><description>A practical episode about GLM-5.2, long-horizon coding models, 1M-token context, reasoning-token budgets, unlimited RPM promises, and what engineering teams should measure before moving agent workflows into production.</description><pubDate>Wed, 24 Jun 2026 10:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep089.mp3" length="8095245" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep089.mp3</guid><ns0:duration>6:44</ns0:duration><ns0:episode>89</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep089</link></item><item><title>EP088: Vision Benchmarks Need User-Centric Metrics</title><description>A practical episode about turning vision model benchmarks into production decisions: accuracy, latency, tail latency, cost per successful image, media handling, usage signals, failure modes, and user-facing routing strategy.</description><pubDate>Mon, 22 Jun 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep088.mp3" length="7338285" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep088.mp3</guid><ns0:duration>6:06</ns0:duration><ns0:episode>88</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep088</link></item><item><title>EP087: Vision Model Routing Is Really Media Routing</title><description>A practical episode about image understanding APIs, URL image inputs, Gemini and Claude inline media conversion, Qwen and OpenAI-style URL passthrough, and why production AI gateways need media-aware routing instead of just model-aware routing.</description><pubDate>Sun, 21 Jun 2026 11:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep087.mp3" length="8463405" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep087.mp3</guid><ns0:duration>7:03</ns0:duration><ns0:episode>87</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep087</link></item><item><title>EP086: DeepSeek Rate Limits Are Not One Number</title><description>A practical episode about DeepSeek official concurrency limits, cloud-provider TPM and RPM quotas, and why AI gateways need structured capacity routing instead of a single rate-limit number.</description><pubDate>Tue, 16 Jun 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep086.mp3" length="6669165" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep086.mp3</guid><ns0:duration>5:33</ns0:duration><ns0:episode>86</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep086</link></item><item><title>EP085: Service Accounts Beat Refresh Tokens for AI Ops Analytics</title><description>A practical episode about why AI operations dashboards should use service accounts for GA4 and Search Console, how expired OAuth refresh tokens break growth reports, and why analytics credentials are part of production infrastructure.</description><pubDate>Mon, 15 Jun 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep085.mp3" length="6674445" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep085.mp3</guid><ns0:duration>5:34</ns0:duration><ns0:episode>85</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep085</link></item><item><title>EP084: AI API Failovers, Regional Endpoints, and Hidden Reliability Work</title><description>A practical episode about the reliability work behind AI API products: regional base URLs, routing, failover policy, balance-related pauses, support clarity, and turning repeated support cases into better developer infrastructure.</description><pubDate>Sun, 14 Jun 2026 16:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep084.mp3" length="4907565" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep084.mp3</guid><ns0:duration>4:05</ns0:duration><ns0:episode>84</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep084</link></item><item><title>EP083: Claude Code, World Cup Predictors, and Validated AI Workflows</title><description>A practical episode about using coding agents for prediction workflows: deterministic probability models, model-written explanations, JSON validation, and why AI apps need evidence checks instead of vibe-based answers.</description><pubDate>Sat, 13 Jun 2026 12:50:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep083.mp3" length="5632845" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep083.mp3</guid><ns0:duration>4:42</ns0:duration><ns0:episode>83</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep083</link></item>    <item><title>EP082: Payload Compatibility Is Part of Model Quality</title><description>A practical episode about why model quality includes payload compatibility, endpoint fit, retries, and real workflow success rather than only benchmark headlines.</description><pubDate>Wed, 10 Jun 2026 08:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep082.mp3" length="5815725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep082.mp3</guid><ns0:duration>4:50</ns0:duration><ns0:episode>82</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep082</link></item><item><title>EP081: Turning Claude Code Guides into Developer Growth Infrastructure</title><description>A practical episode on how a Claude Code guide repository can become developer growth infrastructure: correct base URL rules, UTM discipline, searchable docs, setup scripts, FAQs, and multi-platform content distribution built from validated developer onboarding.</description><pubDate>Tue, 09 Jun 2026 11:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep081.mp3" length="6168045" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep081.mp3</guid><ns0:duration>5:08</ns0:duration><ns0:episode>81</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep081</link></item><item><title>EP080: GPT-5 Parameters, Claude Code Setup, and API Hygiene</title><description>A practical episode on why GPT-5-style reasoning models need cleaner request payloads, how to handle max_tokens versus max_completion_tokens, when to use reasoning_effort and verbosity, and why config-only Claude Code onboarding is better for users who already installed the CLI.</description><pubDate>Mon, 08 Jun 2026 11:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep080.mp3" length="5756205" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep080.mp3</guid><ns0:duration>4:47</ns0:duration><ns0:episode>80</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep080</link></item><item><title>EP079: Cost per Accepted Image Is the Metric That Matters</title><description>Image generation pricing is misleading if teams only compare cost per request. This episode explains cost per accepted image, why model demos are not enough, and how developers can use a repeatable test matrix across GPT Image, Imagen, Qwen Image, and FLUX-style models before choosing production routes.</description><pubDate>Sun, 07 Jun 2026 09:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep079.mp3" length="6211725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep079.mp3</guid><ns0:duration>5:10</ns0:duration><ns0:episode>79</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast&amp;utm_campaign=ep079</link></item><item><title>EP078: One-Click Configuration Is Developer Onboarding Infrastructure</title><description>One-click setup scripts are more than convenience. This episode explains how WorkBuddy-style custom model configuration, local models.json files, Base URL normalization, backups, API key handling, and troubleshooting checklists turn fragile AI tool setup into repeatable developer onboarding infrastructure.</description><pubDate>Fri, 05 Jun 2026 12:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep078.mp3" length="10347885" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep078.mp3</guid><ns0:duration>8:37</ns0:duration><ns0:episode>78</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item><item><title>EP077: Base URL Bugs Are Developer Experience Bugs</title><description>API Base URL mistakes are one of the most common AI developer onboarding failures. This episode explains why missing /v1, wrong environment variables, UTM parameters in API endpoints, region endpoints, and unclear error paths turn small configuration details into support load — and how guides, generators, and troubleshooting pages convert support questions into growth assets.</description><pubDate>Thu, 04 Jun 2026 09:20:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep077.mp3" length="11929005" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep077.mp3</guid><ns0:duration>9:56</ns0:duration><ns0:episode>77</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item><item><title>EP076: Dynamic Workflows for AI Coding Agents</title><description>Dynamic workflows are changing AI coding from one long agent chat into structured orchestration. This episode explains planner, implementer, adversarial reviewer, and verifier packets; why ultracode-style workflows can get expensive; and how model routing through an API gateway helps teams control cost, latency, and evidence.</description><pubDate>Wed, 03 Jun 2026 09:45:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep076.mp3" length="9091725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep076.mp3</guid><ns0:duration>7:34</ns0:duration><ns0:episode>76</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
+    <item><title>EP075: API Billing Is Product Infrastructure</title><description>API billing is no longer just an accounting detail. This episode explains why Anthropic and Claude API cost depends on payload design, long context, output length, retries, agent loops, and fallback strategy — and why production teams should measure cost per successful task instead of raw token price.</description><pubDate>Tue, 02 Jun 2026 10:30:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep075.mp3" length="8049165" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep075.mp3</guid><ns0:duration>6:42</ns0:duration><ns0:episode>75</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
+    <item><title>EP074: API Key Hygiene Is Part of AI Reliability</title><description>API key hygiene is a production AI reliability issue. This episode explains why invalid tokens, missing Authorization headers, rotated credentials, stale workers, and forgotten environment variables should be tracked separately from model failures — and how gateways make authentication problems easier to diagnose.</description><pubDate>Mon, 01 Jun 2026 09:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep074.mp3" length="8697165" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep074.mp3</guid><ns0:duration>7:15</ns0:duration><ns0:episode>74</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
+    <item><title>EP073: Why AI Gateway Reliability Is More Than Uptime</title><description>AI gateway reliability is more than uptime or HTTP 200s. This episode explains provider availability, payload compatibility, output validity, task success, and cost stability — and why production AI teams should measure cost per successful task instead of raw token price.</description><pubDate>Sun, 31 May 2026 15:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep073.mp3" length="8515725" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep073.mp3</guid><ns0:duration>7:06</ns0:duration><ns0:episode>73</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
+    <item><title>EP072: Why MCP Needs the Same Gateway Discipline as APIs</title><description>MCP gives AI agents access to tools, but production teams need more than direct tool wiring. This episode explains why MCP needs gateway discipline: identity, policy, approvals, tool shaping, observability, and cost-aware routing across the full agent workflow.</description><pubDate>Sat, 30 May 2026 14:25:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep072.mp3" length="9136845" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep072.mp3</guid><ns0:duration>7:37</ns0:duration><ns0:episode>72</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
+    <item><title>EP071: The Quiet Problem With AI Pricing Pages</title><description>AI pricing pages show unit costs, but production teams need routing decisions. This episode explains why real AI cost depends on success rate, retries, latency, payload compatibility, and task-level economics — and why model pricing should become a living routing layer inside your AI infrastructure.</description><pubDate>Fri, 29 May 2026 08:55:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep071.mp3" length="9504525" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep071.mp3</guid><ns0:duration>7:55</ns0:duration><ns0:episode>71</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item>
+    <item><title>EP070: Gemini 2.5 Flash Lite and the Automation Tier</title><description>Gemini 2.5 Flash Lite is best understood as a lightweight automation tier: fast, cheap, and useful for classification, extraction, summarization, routing, validation, and first-pass analysis before escalating harder tasks to stronger models. This episode explains how to use lightweight models in production without trusting them blindly.</description><pubDate>Thu, 28 May 2026 09:15:00 +0000</pubDate><enclosure url="https://xujfcn.github.io/podcast/audio/ep070.mp3" length="8723085" type="audio/mpeg" /><guid>https://xujfcn.github.io/podcast/audio/ep070.mp3</guid><ns0:duration>7:16</ns0:duration><ns0:episode>70</ns0:episode><ns0:episodeType>full</ns0:episodeType><ns0:explicit>false</ns0:explicit><link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link></item><item>
       <title>EP069: Payload Compatibility Is Part of AI Model Quality</title>
       <description>A real Claude Jupiter v1-p vs GPT-5.5 benchmark showed that model quality is not just intelligence. Payload compatibility matters too: Jupiter failed with temperature=0 but passed once the payload was adjusted. This episode explains why exact-payload health checks, fallback routing, and cost per successful task are now core AI infrastructure.</description>
       <pubDate>Wed, 27 May 2026 15:25:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep069.mp3" length="8985165" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep069.mp3</guid>
-      <itunes:duration>7:29</itunes:duration>
-      <itunes:episode>69</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>7:29</ns0:duration>
+      <ns0:episode>69</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
 
@@ -26,10 +26,10 @@
       <pubDate>Tue, 26 May 2026 08:45:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep068.mp3" length="7898925" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep068.mp3</guid>
-      <itunes:duration>6:35</itunes:duration>
-      <itunes:episode>68</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>6:35</ns0:duration>
+      <ns0:episode>68</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
 
@@ -39,7 +39,7 @@
       <pubDate>Mon, 25 May 2026 08:48:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep067.mp3" length="2567520" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep067.mp3</guid>
-      <itunes:duration>7:08</itunes:duration>
+      <ns0:duration>7:08</ns0:duration>
     </item>
 
     <title>AI Dev Tools — The Crazyrouter Podcast</title>
@@ -47,16 +47,16 @@
     <description>Your weekly breakdown of AI development tools, API gateways, model pricing, and building with GPT, Claude, Gemini, and DeepSeek. Hosted by Crazyrouter — one API key for 627+ AI models.</description>
     <language>en</language>
     <copyright>© 2026 Crazyrouter</copyright>
-    <atom:link href="https://xujfcn.github.io/podcast/feed.xml" rel="self" type="application/rss+xml" />
-    <itunes:author>Crazyrouter</itunes:author>
-    <itunes:owner>
-      <itunes:name>Crazyrouter</itunes:name>
-      <itunes:email>support@crazyrouter.com</itunes:email>
-    </itunes:owner>
-    <itunes:image href="https://xujfcn.github.io/podcast/cover.jpg" />
-    <itunes:category text="Technology" />
-    <itunes:explicit>false</itunes:explicit>
-    <itunes:type>episodic</itunes:type>
+    <ns1:link href="https://xujfcn.github.io/podcast/feed.xml" rel="self" type="application/rss+xml" />
+    <ns0:author>Crazyrouter</ns0:author>
+    <ns0:owner>
+      <ns0:name>Crazyrouter</ns0:name>
+      <ns0:email>support@crazyrouter.com</ns0:email>
+    </ns0:owner>
+    <ns0:image href="https://xujfcn.github.io/podcast/cover.jpg" />
+    <ns0:category text="Technology" />
+    <ns0:explicit>false</ns0:explicit>
+    <ns0:type>episodic</ns0:type>
     <item>
       <title>EP066: Model Orchestration — The Missing Layer in Production AI Apps</title>
       <description>Model orchestration is the practical layer between a prompt and a production AI system. This episode explains how to route by task instead of brand, validate outputs beyond HTTP 200, design fallbacks based on failure type, escalate only when needed, and measure cost per successful task instead of raw token spend.</description>
@@ -64,8 +64,8 @@
       <pubDate>Fri, 22 May 2026 16:20:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep066.mp3" length="6551565" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep066.mp3</guid>
-      <itunes:duration>5:28</itunes:duration>
-      <itunes:episode>66</itunes:episode>
+      <ns0:duration>5:28</ns0:duration>
+      <ns0:episode>66</ns0:episode>
     </item>
     <item>
       <title>EP065: Gemini 3.5 Flash vs Claude — Why Response Tiers Matter</title>
@@ -74,8 +74,8 @@
       <pubDate>Thu, 21 May 2026 09:20:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep065.mp3" length="2120976" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep065.mp3</guid>
-      <itunes:duration>5:53</itunes:duration>
-      <itunes:episode>65</itunes:episode>
+      <ns0:duration>5:53</ns0:duration>
+      <ns0:episode>65</ns0:episode>
     </item>
     <item>
       <title>EP064: MCP Gateways Are Becoming the Security Layer for AI Agents</title>
@@ -84,8 +84,8 @@
       <pubDate>Wed, 20 May 2026 13:30:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep064.mp3" length="5880045" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep064.mp3</guid>
-      <itunes:duration>4:54</itunes:duration>
-      <itunes:episode>64</itunes:episode>
+      <ns0:duration>4:54</ns0:duration>
+      <ns0:episode>64</ns0:episode>
     </item>
     <item>
       <title>EP063: GPT Pricing Changes and Why API Cost Strategy Matters</title>
@@ -94,8 +94,8 @@
       <pubDate>Fri, 15 May 2026 09:45:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep063.mp3" length="5086125" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep063.mp3</guid>
-      <itunes:duration>4:14</itunes:duration>
-      <itunes:episode>63</itunes:episode>
+      <ns0:duration>4:14</ns0:duration>
+      <ns0:episode>63</ns0:episode>
     </item>
     <item>
       <title>EP062: Fallback Routing Is the Feature That Makes AI Apps Feel Reliable</title>
@@ -104,8 +104,8 @@
       <pubDate>Wed, 13 May 2026 09:50:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep062.mp3" length="5837805" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep062.mp3</guid>
-      <itunes:duration>4:52</itunes:duration>
-      <itunes:episode>62</itunes:episode>
+      <ns0:duration>4:52</ns0:duration>
+      <ns0:episode>62</ns0:episode>
     </item>
     <item>
       <title>EP061: AI Image APIs Are Becoming Product Infrastructure</title>
@@ -114,8 +114,8 @@
       <pubDate>Tue, 12 May 2026 10:15:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep061.mp3" length="5222925" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep061.mp3</guid>
-      <itunes:duration>4:21</itunes:duration>
-      <itunes:episode>61</itunes:episode>
+      <ns0:duration>4:21</ns0:duration>
+      <ns0:episode>61</ns0:episode>
     </item>
     <item>
       <title>EP060: MCP Gateways Are the New Control Plane for AI Agents</title>
@@ -124,8 +124,8 @@
       <pubDate>Sun, 10 May 2026 12:20:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep060.mp3" length="4208640" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep060.mp3</guid>
-      <itunes:duration>3:30</itunes:duration>
-      <itunes:episode>60</itunes:episode>
+      <ns0:duration>3:30</ns0:duration>
+      <ns0:episode>60</ns0:episode>
     </item>
     <item>
       <title>EP059: Agents Are Infrastructure Now — Why Control Planes Matter More Than Prompts</title>
@@ -134,8 +134,8 @@
       <pubDate>Sat, 09 May 2026 08:15:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep059.mp3" length="4431360" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep059.mp3</guid>
-      <itunes:duration>3:42</itunes:duration>
-      <itunes:episode>59</itunes:episode>
+      <ns0:duration>3:42</ns0:duration>
+      <ns0:episode>59</ns0:episode>
     </item>
     <item>
       <title>EP058: Blitzy Raises $200M for Autonomous Software Dev + OpenAI Ships GPT-5.5 Instant as Default</title>
@@ -144,8 +144,8 @@
       <pubDate>Thu, 07 May 2026 08:22:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep058.mp3" length="4436640" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep058.mp3</guid>
-      <itunes:duration>3:42</itunes:duration>
-      <itunes:episode>58</itunes:episode>
+      <ns0:duration>3:42</ns0:duration>
+      <ns0:episode>58</ns0:episode>
     </item>
     <item>
       <title>EP057: Cloudflare Just Let AI Agents Deploy Full Apps — The Infrastructure Layer Goes Agentic</title>
@@ -154,8 +154,8 @@
       <pubDate>Tue, 06 May 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep057.mp3" length="1816509" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep057.mp3</guid>
-      <itunes:duration>5:02</itunes:duration>
-      <itunes:episode>57</itunes:episode>
+      <ns0:duration>5:02</ns0:duration>
+      <ns0:episode>57</ns0:episode>
     </item>
     <item>
       <title>EP056: The Celebrity AI Gateway Wars — When Crypto Kings and Tech CEOs Enter Your Market</title>
@@ -164,8 +164,8 @@
       <pubDate>Mon, 05 May 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep056.mp3" length="5180685" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep056.mp3</guid>
-      <itunes:duration>4:19</itunes:duration>
-      <itunes:episode>56</itunes:episode>
+      <ns0:duration>4:19</ns0:duration>
+      <ns0:episode>56</ns0:episode>
     </item>
     <item>
       <title>EP055: AI-Powered Code Review — From Bottleneck to Superpower</title>
@@ -174,8 +174,8 @@
       <pubDate>Sun, 04 May 2026 09:13:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep055.mp3" length="7648320" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep055.mp3</guid>
-      <itunes:duration>6:22</itunes:duration>
-      <itunes:episode>55</itunes:episode>
+      <ns0:duration>6:22</ns0:duration>
+      <ns0:episode>55</ns0:episode>
     </item>
     <item>
       <title>EP054: The Hybrid AI Coding Stack — Why Developers Are Running Local and Cloud LLMs Side by Side</title>
@@ -184,8 +184,8 @@
       <pubDate>Sun, 04 May 2026 07:39:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep054.mp3" length="5624160" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep054.mp3</guid>
-      <itunes:duration>4:41</itunes:duration>
-      <itunes:episode>54</itunes:episode>
+      <ns0:duration>4:41</ns0:duration>
+      <ns0:episode>54</ns0:episode>
     </item>
     <item>
       <title>EP053: DeepClaude — 17x Cheaper Agent Loops by Splitting Thinking from Coding</title>
@@ -194,8 +194,8 @@
       <pubDate>Sun, 04 May 2026 03:46:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep053.mp3" length="1465344" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep053.mp3</guid>
-      <itunes:duration>4:04</itunes:duration>
-      <itunes:episode>53</itunes:episode>
+      <ns0:duration>4:04</ns0:duration>
+      <ns0:episode>53</ns0:episode>
     </item>
     <item>
       <title>EP052: Palo Alto Networks Just Bought an AI Gateway — What It Means for Every Developer</title>
@@ -204,8 +204,8 @@
       <pubDate>Sat, 03 May 2026 07:36:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep052.mp3" length="6114285" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep052.mp3</guid>
-      <itunes:duration>5:06</itunes:duration>
-      <itunes:episode>52</itunes:episode>
+      <ns0:duration>5:06</ns0:duration>
+      <ns0:episode>52</ns0:episode>
     </item>
     <item>
       <title>EP051: OpenAI's Symphony — How Coding Agents Are Becoming Autonomous Dev Teams</title>
@@ -214,8 +214,8 @@
       <pubDate>Fri, 02 May 2026 10:43:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep051.mp3" length="1895328" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep051.mp3</guid>
-      <itunes:duration>5:16</itunes:duration>
-      <itunes:episode>51</itunes:episode>
+      <ns0:duration>5:16</ns0:duration>
+      <ns0:episode>51</ns0:episode>
     </item>
     <item>
       <title>EP050: The AI Agent Protocol Wars — MCP vs A2A and Why Developers Need a Strategy Now</title>
@@ -224,8 +224,8 @@
       <pubDate>Sat, 02 May 2026 10:30:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep050.mp3" length="7349805" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep050.mp3</guid>
-      <itunes:duration>6:07</itunes:duration>
-      <itunes:episode>50</itunes:episode>
+      <ns0:duration>6:07</ns0:duration>
+      <ns0:episode>50</ns0:episode>
     </item>
     <item>
       <title>EP049: OpenAI's For-Profit Pivot — What It Really Means for API Pricing and Developers</title>
@@ -234,8 +234,8 @@
       <pubDate>Sat, 02 May 2026 09:06:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep049.mp3" length="5258445" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep049.mp3</guid>
-      <itunes:duration>4:23</itunes:duration>
-      <itunes:episode>49</itunes:episode>
+      <ns0:duration>4:23</ns0:duration>
+      <ns0:episode>49</ns0:episode>
     </item>
     <item>
       <title>EP048: The AI Robotics SDK Moment — Why Every Developer Should Be Paying Attention</title>
@@ -244,8 +244,8 @@
       <pubDate>Fri, 02 May 2026 00:25:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep048.mp3" length="5808525" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep048.mp3</guid>
-      <itunes:duration>4:50</itunes:duration>
-      <itunes:episode>48</itunes:episode>
+      <ns0:duration>4:50</ns0:duration>
+      <ns0:episode>48</ns0:episode>
     </item>
     <item>
       <title>EP047: The Hidden Cost of AI — Water, Energy, and Why Your Model Choice Matters</title>
@@ -254,8 +254,8 @@
       <pubDate>Thu, 01 May 2026 23:34:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep047.mp3" length="1670349" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep047.mp3</guid>
-      <itunes:duration>4:38</itunes:duration>
-      <itunes:episode>47</itunes:episode>
+      <ns0:duration>4:38</ns0:duration>
+      <ns0:episode>47</ns0:episode>
     </item>
     <item>
       <title>EP046: The AI Content Labeling Era — Watermarks, Verified Badges, and What Developers Need to Build For</title>
@@ -264,8 +264,8 @@
       <pubDate>Thu, 01 May 2026 20:55:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep046.mp3" length="6602925" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep046.mp3</guid>
-      <itunes:duration>5:30</itunes:duration>
-      <itunes:episode>46</itunes:episode>
+      <ns0:duration>5:30</ns0:duration>
+      <ns0:episode>46</ns0:episode>
     </item>
     <item>
       <title>EP045: GPT-image-2 Is a Money Machine — 6 Viral Use Cases Developers Are Building Right Now</title>
@@ -274,8 +274,8 @@
       <pubDate>Thu, 01 May 2026 19:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep045.mp3" length="7261005" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep045.mp3</guid>
-      <itunes:duration>6:03</itunes:duration>
-      <itunes:episode>45</itunes:episode>
+      <ns0:duration>6:03</ns0:duration>
+      <ns0:episode>45</ns0:episode>
     </item>
     <item>
       <title>EP044: Claude Opus 4.7 Drops, and May's Model Avalanche Is Just Getting Started</title>
@@ -284,8 +284,8 @@
       <pubDate>Thu, 01 May 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep044.mp3" length="4693005" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep044.mp3</guid>
-      <itunes:duration>3:54</itunes:duration>
-      <itunes:episode>44</itunes:episode>
+      <ns0:duration>3:54</ns0:duration>
+      <ns0:episode>44</ns0:episode>
     </item>
     <item>
       <title>EP043: The AI API Gateway Market Just Got Crowded — How to Pick the Right One</title>
@@ -294,8 +294,8 @@
       <pubDate>Tue, 29 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep043.mp3" length="5919885" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep043.mp3</guid>
-      <itunes:duration>4:55</itunes:duration>
-      <itunes:episode>43</itunes:episode>
+      <ns0:duration>4:55</ns0:duration>
+      <ns0:episode>43</ns0:episode>
     </item>
     <item>
       <title>EP042: Microsoft and OpenAI Break Up Their Exclusive Deal — What It Means for Developers</title>
@@ -304,8 +304,8 @@
       <pubDate>Mon, 28 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep042.mp3" length="3932640" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep042.mp3</guid>
-      <itunes:duration>4:05</itunes:duration>
-      <itunes:episode>42</itunes:episode>
+      <ns0:duration>4:05</ns0:duration>
+      <ns0:episode>42</ns0:episode>
     </item>
     <item>
       <title>EP041: The 2 Million Token Context Window Era — What It Actually Changes for Developers</title>
@@ -314,8 +314,8 @@
       <pubDate>Mon, 27 Apr 2026 12:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804688" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep041.mp3</guid>
-      <itunes:duration>7:47</itunes:duration>
-      <itunes:episode>41</itunes:episode>
+      <ns0:duration>7:47</ns0:duration>
+      <ns0:episode>41</ns0:episode>
     </item>
     <item>
       <title>EP040: The Real Cost of AI APIs in 2026 — Who's Cheapest, Who's Worth It, and Where the Hidden Fees Are</title>
@@ -324,8 +324,8 @@
       <pubDate>Sun, 27 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep040.mp3" length="2422605" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep040.mp3</guid>
-      <itunes:duration>6:44</itunes:duration>
-      <itunes:episode>40</itunes:episode>
+      <ns0:duration>6:44</ns0:duration>
+      <ns0:episode>40</ns0:episode>
     </item>
     <item>
       <title>EP039: Google's $40B Anthropic Bet, OpenAI's Privacy Filter, and the AI Regulation Showdown</title>
@@ -334,8 +334,8 @@
       <pubDate>Sat, 26 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep039.mp3" length="6431565" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep039.mp3</guid>
-      <itunes:duration>5:21</itunes:duration>
-      <itunes:episode>39</itunes:episode>
+      <ns0:duration>5:21</ns0:duration>
+      <ns0:episode>39</ns0:episode>
     </item>
     <item>
       <title>EP038: Open Source AI Models Are Eating the API Market</title>
@@ -344,8 +344,8 @@
       <pubDate>Fri, 25 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep038.mp3" length="6266925" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep038.mp3</guid>
-      <itunes:duration>5:13</itunes:duration>
-      <itunes:episode>38</itunes:episode>
+      <ns0:duration>5:13</ns0:duration>
+      <ns0:episode>38</ns0:episode>
     </item>
     <item>
       <title>EP037: AI Coding Agents in 2026 — Cursor, Windsurf, Kiro, and the New Dev Workflow</title>
@@ -354,8 +354,8 @@
       <pubDate>Thu, 24 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep037.mp3" length="6424845" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep037.mp3</guid>
-      <itunes:duration>5:21</itunes:duration>
-      <itunes:episode>37</itunes:episode>
+      <ns0:duration>5:21</ns0:duration>
+      <ns0:episode>37</ns0:episode>
     </item>
     <item>
       <title>EP036: AI Model Pricing Wars — Who's Winning in April 2026?</title>
@@ -364,8 +364,8 @@
       <pubDate>Wed, 23 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep036.mp3" length="6144525" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep036.mp3</guid>
-      <itunes:duration>5:07</itunes:duration>
-      <itunes:episode>36</itunes:episode>
+      <ns0:duration>5:07</ns0:duration>
+      <ns0:episode>36</ns0:episode>
     </item>
     <item>
       <title>EP035: ChatGPT Images 2.0, GitHub Copilot Changes, and the Vercel OAuth Breach</title>
@@ -374,8 +374,8 @@
       <pubDate>Tue, 22 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep035.mp3" length="5284365" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep035.mp3</guid>
-      <itunes:duration>4:24</itunes:duration>
-      <itunes:episode>35</itunes:episode>
+      <ns0:duration>4:24</ns0:duration>
+      <ns0:episode>35</ns0:episode>
     </item>
     <item>
       <title>EP034: Qwen 3.6 Max Preview — China's AI Models Are Catching Up Fast</title>
@@ -384,8 +384,8 @@
       <pubDate>Mon, 21 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep034.mp3" length="4440000" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep034.mp3</guid>
-      <itunes:duration>4:37</itunes:duration>
-      <itunes:episode>34</itunes:episode>
+      <ns0:duration>4:37</ns0:duration>
+      <ns0:episode>34</ns0:episode>
     </item>
     <item>
       <title>EP032: MCP — The Protocol That's Connecting AI to Everything</title>
@@ -393,10 +393,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep032.mp3" length="6721965" type="audio/mpeg" />
       <guid>ep032-mcp-the-protocol-thats-connecting-ai-to-everything</guid>
       <pubDate>Sat, 19 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>336</itunes:duration>
-      <itunes:episode>32</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>336</ns0:duration>
+      <ns0:episode>32</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -405,10 +405,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep031.mp3" length="5262720" type="audio/mpeg" />
       <guid>ep031-claude-opus-47-is-here-what-developers-need-to-know</guid>
       <pubDate>Fri, 18 Apr 2026 14:00:00 +0000</pubDate>
-      <itunes:duration>263</itunes:duration>
-      <itunes:episode>31</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>263</ns0:duration>
+      <ns0:episode>31</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -417,10 +417,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep030.mp3" length="6140640" type="audio/mpeg" />
       <guid>ep030-ai-pricing-war-why-model-costs-dropped-90-percent</guid>
       <pubDate>Thu, 17 Apr 2026 21:00:00 +0000</pubDate>
-      <itunes:duration>307</itunes:duration>
-      <itunes:episode>30</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>307</ns0:duration>
+      <ns0:episode>30</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -429,10 +429,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep029.mp3" length="6127725" type="audio/mpeg" />
       <guid>ep029-ai-gateway-architecture-how-it-works-under-the-hood</guid>
       <pubDate>Thu, 17 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>306</itunes:duration>
-      <itunes:episode>29</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>306</ns0:duration>
+      <ns0:episode>29</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -441,10 +441,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep026.mp3" length="7685805" type="audio/mpeg" />
       <guid>ep026-ai-video-generation-apis-kling-runway-veo-wan-compared</guid>
       <pubDate>Tue, 15 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>384</itunes:duration>
-      <itunes:episode>26</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>384</ns0:duration>
+      <ns0:episode>26</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -453,10 +453,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep025.mp3" length="2676477" type="audio/mpeg" />
       <guid>ep025-prompt-caching-deep-dive-save-80-percent</guid>
       <pubDate>Tue, 14 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>446</itunes:duration>
-      <itunes:episode>25</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>446</ns0:duration>
+      <ns0:episode>25</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -465,10 +465,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep024.mp3" length="1325520" type="audio/mpeg" />
       <guid>ep024-ai-for-non-english-languages-multilingual-support</guid>
       <pubDate>Mon, 13 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>331</itunes:duration>
-      <itunes:episode>24</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>331</ns0:duration>
+      <ns0:episode>24</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -477,10 +477,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep023.mp3" length="6666720" type="audio/mpeg" />
       <guid>ep023-embedding-models-compared-which-one-should-you-use</guid>
       <pubDate>Sat, 12 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>333</itunes:duration>
-      <itunes:episode>23</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>333</ns0:duration>
+      <ns0:episode>23</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -489,10 +489,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep022.mp3" length="7330560" type="audio/mpeg" />
       <guid>ep022-whisper-vs-gemini-vs-deepseek-for-speech-to-text</guid>
       <pubDate>Sat, 11 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>305</itunes:duration>
-      <itunes:episode>22</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>305</ns0:duration>
+      <ns0:episode>22</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -501,10 +501,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep021.mp3" length="1340205" type="audio/mpeg" />
       <guid>ep021-how-small-teams-use-ai-gateways-to-ship-faster</guid>
       <pubDate>Fri, 10 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>335</itunes:duration>
-      <itunes:episode>21</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>335</ns0:duration>
+      <ns0:episode>21</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -513,10 +513,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep020.mp3" length="7624845" type="audio/mpeg" />
       <guid>ep020-the-future-of-ai-apis-predictions-2026-2027</guid>
       <pubDate>Thu, 09 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>381</itunes:duration>
-      <itunes:episode>20</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>381</ns0:duration>
+      <ns0:episode>20</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -525,10 +525,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep019.mp3" length="8188845" type="audio/mpeg" />
       <guid>ep019-function-calling-across-different-ai-models</guid>
       <pubDate>Wed, 08 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>409</itunes:duration>
-      <itunes:episode>19</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>409</ns0:duration>
+      <ns0:episode>19</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -537,10 +537,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep018.mp3" length="4569120" type="audio/mpeg" />
       <guid>ep018-ai-model-benchmarks-that-actually-matter</guid>
       <pubDate>Tue, 07 Apr 2026 13:00:00 +0000</pubDate>
-      <itunes:duration>476</itunes:duration>
-      <itunes:episode>18</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>476</ns0:duration>
+      <ns0:episode>18</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -549,10 +549,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep017.mp3" length="1885680" type="audio/mpeg" />
       <guid>ep017-langchain-crazyrouter-build-agents</guid>
       <pubDate>Tue, 07 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>314</itunes:duration>
-      <itunes:episode>17</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>314</ns0:duration>
+      <ns0:episode>17</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -561,9 +561,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep016.mp3" length="7674240" type="audio/mpeg" />
       <guid>ep016-streaming-vs-non-streaming-api-calls</guid>
       <pubDate>Mon, 06 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>479</itunes:duration>
-      <itunes:episode>16</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>479</ns0:duration>
+      <ns0:episode>16</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -572,9 +572,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep015.mp3" length="5478189" type="audio/mpeg" />
       <guid>ep015-ai-api-security-best-practices</guid>
       <pubDate>Sat, 05 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>342</itunes:duration>
-      <itunes:episode>15</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>342</ns0:duration>
+      <ns0:episode>15</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -583,9 +583,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep014.mp3" length="7565805" type="audio/mpeg" />
       <guid>ep014-top-5-ai-coding-assistants-2026</guid>
       <pubDate>Sat, 04 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>378</itunes:duration>
-      <itunes:episode>14</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>378</ns0:duration>
+      <ns0:episode>14</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -594,9 +594,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep013.mp3" length="6899565" type="audio/mpeg" />
       <guid>ep013-self-hosting-vs-api-gateway</guid>
       <pubDate>Thu, 03 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>345</itunes:duration>
-      <itunes:episode>13</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>345</ns0:duration>
+      <ns0:episode>13</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -605,9 +605,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep012.mp3" length="7058880" type="audio/mpeg" />
       <guid>ep012-building-ai-agents-tool-calling</guid>
       <pubDate>Thu, 02 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>441</itunes:duration>
-      <itunes:episode>12</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>441</ns0:duration>
+      <ns0:episode>12</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -616,9 +616,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep011.mp3" length="2205648" type="audio/mpeg" />
       <guid>ep011-ai-image-generation-apis-compared</guid>
       <pubDate>Tue, 01 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>275</itunes:duration>
-      <itunes:episode>11</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>275</ns0:duration>
+      <ns0:episode>11</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -627,9 +627,9 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep010.mp3" length="5739360" type="audio/mpeg" />
       <guid>ep010-migrate-openai-to-multi-model-gateway</guid>
       <pubDate>Mon, 31 Mar 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>240</itunes:duration>
-      <itunes:episode>10</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
+      <ns0:duration>240</ns0:duration>
+      <ns0:episode>10</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -638,10 +638,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep009.mp3" length="7640205" type="audio/mpeg" />
       <guid>ep009-openrouter-vs-crazyrouter-honest-comparison</guid>
       <pubDate>Mon, 30 Mar 2026 15:00:00 +0000</pubDate>
-      <itunes:duration>382</itunes:duration>
-      <itunes:episode>9</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>382</ns0:duration>
+      <ns0:episode>9</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -650,10 +650,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep008.mp3" length="6710445" type="audio/mpeg" />
       <guid>ep008-hidden-costs-multiple-ai-providers</guid>
       <pubDate>Sun, 29 Mar 2026 15:00:00 +0000</pubDate>
-      <itunes:duration>335</itunes:duration>
-      <itunes:episode>8</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>335</ns0:duration>
+      <ns0:episode>8</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -662,10 +662,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep007.mp3" length="6137325" type="audio/mpeg" />
       <guid>ep007-ai-api-rate-limits-developer-guide</guid>
       <pubDate>Sat, 28 Mar 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>307</itunes:duration>
-      <itunes:episode>7</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>307</ns0:duration>
+      <ns0:episode>7</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -674,10 +674,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep006.mp3" length="4825920" type="audio/mpeg" />
       <guid>ep006-build-ai-chatbot-one-api-key</guid>
       <pubDate>Sun, 15 Mar 2026 10:00:00 +0000</pubDate>
-      <itunes:duration>290</itunes:duration>
-      <itunes:episode>6</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>290</ns0:duration>
+      <ns0:episode>6</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -686,10 +686,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep005.mp3" length="4300000" type="audio/mpeg" />
       <guid>ep005-deepseek-v32-vs-gpt4o</guid>
       <pubDate>Fri, 13 Mar 2026 09:00:00 +0000</pubDate>
-      <itunes:duration>240</itunes:duration>
-      <itunes:episode>5</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>240</ns0:duration>
+      <ns0:episode>5</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -698,10 +698,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep004.mp3" length="1277136" type="audio/mpeg" />
       <guid>ep004-ai-agent-skills-one-command</guid>
       <pubDate>Thu, 12 Mar 2026 09:00:00 +0000</pubDate>
-      <itunes:duration>160</itunes:duration>
-      <itunes:episode>4</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>160</ns0:duration>
+      <ns0:episode>4</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -710,10 +710,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep003.mp3" length="4284000" type="audio/mpeg" />
       <guid>ep003-cut-ai-api-costs-60-percent</guid>
       <pubDate>Thu, 13 Mar 2026 09:00:00 +0000</pubDate>
-      <itunes:duration>268</itunes:duration>
-      <itunes:episode>3</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>268</ns0:duration>
+      <ns0:episode>3</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -722,10 +722,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep002.mp3" length="4880640" type="audio/mpeg" />
       <guid>ep002-gpt5-vs-claude-vs-gemini</guid>
       <pubDate>Wed, 12 Mar 2026 09:00:00 +0000</pubDate>
-      <itunes:duration>305</itunes:duration>
-      <itunes:episode>2</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>305</ns0:duration>
+      <ns0:episode>2</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -734,10 +734,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep001.mp3" length="3737853" type="audio/mpeg" />
       <guid>ep001-ai-api-gateway-faq</guid>
       <pubDate>Tue, 11 Mar 2026 09:00:00 +0000</pubDate>
-      <itunes:duration>233</itunes:duration>
-      <itunes:episode>1</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>233</ns0:duration>
+      <ns0:episode>1</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -747,8 +747,8 @@
       <pubDate>Thu, 16 Apr 2026 08:00:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep027.mp3" length="4337280" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep027.mp3</guid>
-      <itunes:duration>4:31</itunes:duration>
-      <itunes:episode>27</itunes:episode>
+      <ns0:duration>4:31</ns0:duration>
+      <ns0:episode>27</ns0:episode>
     </item>
     <item>
       <title>EP028: Vision Models Compared — GPT-4V vs Gemini vs Claude</title>
@@ -757,8 +757,8 @@
       <pubDate>Thu, 16 Apr 2026 10:20:00 +0000</pubDate>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep028.mp3" length="5473005" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep028.mp3</guid>
-      <itunes:duration>5:42</itunes:duration>
-      <itunes:episode>28</itunes:episode>
+      <ns0:duration>5:42</ns0:duration>
+      <ns0:episode>28</ns0:episode>
     </item>
     <item>
       <title>EP033: AI Agents in Production — Lessons from the First Wave</title>
@@ -766,10 +766,10 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep033.mp3" length="6217965" type="audio/mpeg" />
       <guid>ep033-ai-agents-in-production-lessons-from-the-first-wave</guid>
       <pubDate>Mon, 20 Apr 2026 08:00:00 +0000</pubDate>
-      <itunes:duration>311</itunes:duration>
-      <itunes:episode>33</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:explicit>false</itunes:explicit>
+      <ns0:duration>311</ns0:duration>
+      <ns0:episode>33</ns0:episode>
+      <ns0:episodeType>full</ns0:episodeType>
+      <ns0:explicit>false</ns0:explicit>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
     <item>
@@ -778,8 +778,8 @@
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep041.mp3" length="2804925" type="audio/mpeg" />
       <guid>https://xujfcn.github.io/podcast/audio/ep041.mp3</guid>
       <pubDate>Mon, 27 Apr 2026 12:06:51 +0000</pubDate>
-      <itunes:duration>7:47</itunes:duration>
-      <itunes:episode>41</itunes:episode>
+      <ns0:duration>7:47</ns0:duration>
+      <ns0:episode>41</ns0:episode>
       <link>https://crazyrouter.com?utm_source=rss&amp;utm_medium=podcast</link>
     </item>
   </channel>
