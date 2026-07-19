@@ -1,0 +1,25 @@
+EP095: Kimi K3 vs GLM-5.2 — Why Output Completeness Beats Leaderboards
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are looking at a practical comparison between Kimi K3 and GLM-5.2, based on the kind of evaluation that matters after a model leaves a leaderboard: can it complete the task, survive verification, and fit a real workflow?
+
+The benchmark used three university-level tasks. The first was a probability problem involving the expected stopping time for the self-overlapping binary pattern 1011. The second was a mechanics problem with friction, an inelastic collision, a coefficient of restitution, a spring, and an energy ledger. The third was production Python for aggregating API logs, handling time zones, half-open time windows, retries, missing fields, and invalid statuses.
+
+The first lesson is that HTTP 200 is not the same as success. An API can return a successful HTTP status while the model answer ends with finish_reason equal to length. If the missing part contains the final formula, the energy check, or the runnable code, the request is not complete from the application’s point of view.
+
+On the math problem, both Kimi K3 and GLM-5.2 delivered complete solutions. The correct general result is one over p plus one over p cubed q, where q equals one minus p. For p equal to two thirds, the expected stopping time is 93 over 8, or 11.625. For a fair binary sequence, it is 18. The important detail is the prefix automaton: the pattern has a self-overlap, so a near miss does not always return to the zero state.
+
+The physics problem exposed a different engineering distinction. Kimi K3 calculated the speed before collision, solved momentum and restitution, checked that the two blocks separate, and handled the spring as a single-block compression problem. It also noticed that if the distance from the collision point to the spring is not specified, the compression cannot have one unique value. That is a strong sign of useful reasoning: the model did not silently invent a missing parameter.
+
+In the same long physics task, GLM-5.2 returned HTTP 200 but the visible response ended because of the length limit. That result should not be described as a clean physics failure, and it should not be counted as a complete pass either. The fair description is that the reasoning and output budget did not produce a complete deliverable under that prompt and configuration.
+
+The programming task made the difference even more concrete. A production answer has to define timestamp parsing, timezone requirements, the inclusive start and exclusive end boundary, duplicate request selection, retry precedence, missing cached tokens, success classification, deterministic sorting, summary statistics, and tests. Kimi K3 returned a full Python 3.11 implementation and a boundary-focused assertion set. GLM-5.2’s long response was again truncated before it could be treated as a complete implementation.
+
+This leads to a better benchmark scorecard. Track correctness, but also track finish reason, visible output completeness, executable-code pass rate, schema validity, latency, token use, retry count, and cost per accepted result. A model that is slightly cheaper per token can be more expensive per successful task if it needs extra turns, manual repair, or a second model to finish the answer.
+
+The result does not mean that Kimi K3 is universally better or that GLM-5.2 has no place in production. It means the routing decision depends on the unit of work. Kimi K3 looked stronger in this test for long, complete technical deliverables. GLM-5.2 may still be a good fit for shorter reasoning, structured intermediate steps, or workflows where the task is deliberately split into small calls and every response is validated.
+
+A practical production pattern is to make completeness a gateway-level signal. Reject or retry responses whose finish reason is length. For code, run a syntax check and tests. For JSON, validate against a schema. For numerical work, verify dimensions, boundary cases, or independent calculations. Then route only the failed step to another model instead of restarting the whole workflow.
+
+The broader point is simple: model selection is workflow design. Leaderboards tell you something about capability, but they do not tell you whether your exact prompt, output limit, tool schema, and verification process will produce an accepted result. Run a replay set from real work, keep the API interface stable, log the actual model and finish reason, and compare cost per successful task.
+
+That is it for today. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast. Try the unified API at crazyrouter.com, and see you in the next episode.
