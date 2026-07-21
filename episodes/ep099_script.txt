@@ -1,0 +1,27 @@
+EP099: Idempotency for AI APIs — Preventing Duplicate Work and Duplicate Charges
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about idempotency: the design property that keeps a retry from becoming duplicate work, a duplicate tool call, or a duplicate charge.
+
+AI API requests fail in uncomfortable ways. A client may time out even though the provider completed the generation. A stream may disconnect after a tool call was accepted. A gateway may retry after a network reset without knowing whether the first request reached the provider. If the operation has side effects, repeating it blindly is dangerous.
+
+The first building block is an idempotency key. The client creates a stable key for one logical operation and sends it with every retry. The gateway stores the key, request fingerprint, current state, and final result. A repeated request with the same key returns the existing result instead of starting new work.
+
+The key must describe the logical operation, not merely the transport attempt. A new HTTP connection or a new provider request should not create a new logical key. At the same time, the gateway must reject reuse of a key with a different request body. Otherwise a stale key can accidentally return the wrong result.
+
+Use explicit states: received, running, completed, failed, and expired. A second request that arrives while the first is running can wait, receive a polling response, or get a clear in-progress status. It should not start a second provider call unless the policy has a deliberate lease-recovery rule.
+
+Leases matter when workers crash. Store an owner, heartbeat, and expiration time. If a worker disappears, another worker can safely take over only after the lease expires. The recovery path should record the takeover and preserve the original idempotency key.
+
+Streaming needs special care. Persist completed chunks or a resumable cursor when the product requires recovery. If that is too expensive, define the stream as advisory and require a final fetch by request ID. The client should be able to ask whether the logical operation completed, rather than guessing from a broken connection.
+
+Tool calls are the hardest case. Reading data is usually easier to retry than sending an email, creating an order, or charging a card. Give every side-effecting tool call its own idempotency key and make the tool provider honor it. If the provider cannot guarantee this, place the action behind a durable command queue and reconcile the result before retrying.
+
+Billing must be reconciled separately from response delivery. A client timeout does not prove that usage was not incurred. Record provider request IDs, usage events, and customer-facing charge IDs. When a retry happens, link it to the same logical request and make the billing policy explicit.
+
+Idempotency keys should have a retention period. Keep them long enough to cover client retries, queue delays, and support investigations. Expiration must be visible: after a key expires, a repeated request may be treated as new work, but the API should return that behavior clearly.
+
+Test the failure matrix: timeout before send, timeout after send, gateway crash, worker crash, provider duplicate response, stream disconnect, tool success with lost acknowledgement, and billing event delayed. The happy path is the least interesting test.
+
+The result is a safer AI gateway. Retries can improve reliability without multiplying cost or side effects. Request IDs make the operation traceable, idempotency keys make it repeatable, and reconciliation makes uncertainty manageable.
+
+That is it for today. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast. Try the unified API at crazyrouter.com, and see you in the next episode.
