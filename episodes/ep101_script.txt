@@ -1,0 +1,25 @@
+EP101: The Metrics That Matter Before You Switch AI Models
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. After one hundred episodes about models, APIs, gateways, and developer workflows, today we are focusing on a question teams often ask too early: should we switch models?
+
+The answer should not begin with a leaderboard. It should begin with a measurement plan. A model is useful when it produces an accepted result for a real task, within the latency and budget that your product can tolerate.
+
+Start with accepted-result rate. Define what good means for each workflow. For extraction, the output may need to match a schema and pass field validation. For code generation, it may need to compile and pass a replayed test set. For customer support, it may need to follow policy and receive a positive review. HTTP 200 is only transport success; it is not task success.
+
+Next, measure latency by percentile rather than average. Averages hide the slow tail. Track p50, p95, and p99 time to first token and time to final result. A slightly slower model may be the better choice if it avoids retries, repairs, and fallbacks. Conversely, a fast model may be ideal for short classification or routing decisions.
+
+Measure retry amplification. If one accepted result requires 1.4 provider calls on average, your apparent token price is not your real cost. Include timeouts, malformed JSON, truncated answers, rate-limit retries, and fallback calls. The operational unit is cost per accepted result, not cost per million input tokens.
+
+Record fallback share as well. Fallbacks are valuable when they improve reliability, but a rising fallback rate can signal a provider problem, a bad route, an overloaded model, or an unrealistic prompt. Break the metric down by model, provider, region, task type, and time window.
+
+Do not forget consistency. A model that produces one excellent answer and one unusable answer may be less valuable than a slightly weaker model with stable behavior. Replay a fixed evaluation set, then sample real production requests with privacy controls. Compare schema validity, refusal behavior, tool-call correctness, and regression rates.
+
+Cost needs context. Include input and output tokens, caching, retries, validation calls, image or audio charges, and human review. If a model saves ten cents per request but creates a support ticket every hundred requests, the saving may be imaginary. Build a cost model around the complete workflow.
+
+Routing should follow task shape. Use cheaper and faster routes for predictable transformations. Reserve stronger models for ambiguity, long context, difficult code, or recovery from a failed first attempt. Keep the application interface stable so that routing policy can change without rewriting business logic.
+
+Finally, define a switch threshold before you run the comparison. For example: move traffic only if accepted-result rate improves by three percentage points, p95 latency stays below the product budget, and cost per accepted result falls by ten percent. Predefined thresholds protect teams from choosing a model because of one impressive demo.
+
+The practical workflow is simple: build a replay set, define acceptance tests, collect provider and route metadata, compare percentiles, calculate retry-adjusted cost, run a controlled rollout, and keep a rollback path. A model switch is an operational change, not just a configuration edit.
+
+That is it for today. Before switching models, measure what your users actually accept. Try the unified API at crazyrouter.com, and see you in the next episode.
