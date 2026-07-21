@@ -1,0 +1,29 @@
+EP098: Cost per Accepted Result — The Metric AI Teams Actually Need
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are replacing a familiar AI pricing metric with a more useful one: cost per accepted result.
+
+Most API comparisons begin with the price of input and output tokens. That is a good starting point, but production software does not create value by consuming tokens. It creates value by returning a result that passes the application’s checks.
+
+An accepted result is one that is complete, valid, and usable. For JSON, it parses and passes the schema. For code, it passes syntax checks and the relevant tests. For numerical work, it satisfies units, boundary conditions, and independent verification. For a tool call, it contains the required arguments and produces an observable successful action.
+
+The cost per accepted result includes more than the first model call. Count retries, validation calls, fallback models, token usage from failed attempts, network overhead, and, when it matters, human repair time. A model that costs less per token can be more expensive per accepted result if it frequently truncates or returns malformed output.
+
+The first measurement is acceptance rate. If a route produces accepted results on eighty percent of requests and costs ten cents per attempt, its expected model cost per accepted result is twelve and a half cents before retries. The exact number changes with retry policy, but the principle is stable: divide total workflow cost by successful deliverables, not by requests started.
+
+The second measurement is retry amplification. A route that needs 1.4 attempts on average is not merely a little slower. It consumes extra tokens, creates more provider load, increases latency, and can produce duplicate side effects if idempotency is not handled correctly.
+
+The third measurement is time to accepted result. Users experience the full workflow, including validation and fallback. Track p50 and p95 time from request start until the result is accepted. A cheap route that is unpredictable at the tail can be a poor fit for interactive products.
+
+Validation should be explicit. Give every result a status such as accepted, retryable, reroutable, or rejected. Attach a reason code: truncated, invalid JSON, schema mismatch, failed test, timeout, rate limit, or unsupported request. This makes improvement possible because the team can see which failure actually drives cost.
+
+Routing should be based on task shape. A fast model may be ideal for classification and extraction. A stronger model may be worth the cost for long code generation or difficult reasoning. A fallback model should not repeat the entire workflow when only one stage failed. Route the failed stage, preserve the request ID, and record the original failure.
+
+Benchmarks should use replay sets from real work. Include representative prompts, output limits, tool schemas, validation rules, and latency requirements. Measure accepted-result rate, cost, retries, failure categories, and time to completion. A public leaderboard can inform a shortlist, but it cannot replace a production-shaped replay set.
+
+There is also a quality frontier. Lowering cost is not always the goal if it reduces acceptance rate. The right target may be the cheapest route that stays above a required quality and latency threshold. Make that threshold explicit instead of optimizing a single number.
+
+The gateway can expose this metric directly. Add usage summaries for attempts, accepted results, retry count, validation outcome, and estimated workflow cost. Customers and internal teams can then compare routes using the same definition of success.
+
+The main lesson is simple: token price is an input; accepted results are the output. When you measure cost per accepted result, model selection becomes a workflow decision grounded in reliability, latency, and real business value.
+
+That is it for today. Thanks for listening to AI Dev Tools — The Crazyrouter Podcast. Try the unified API at crazyrouter.com, and see you in the next episode.
