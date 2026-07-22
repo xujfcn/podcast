@@ -1,0 +1,29 @@
+EP102: AI API Failover Drills — Test Recovery Before Production Breaks
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about failover drills: controlled tests that prove your AI application can recover when a model or provider stops behaving normally.
+
+Most teams add a fallback model and assume the reliability problem is solved. But a fallback that has never been tested is only a configuration value. Production recovery depends on detection, routing, request state, output validation, and the ability to avoid duplicate side effects.
+
+Start with a clear failure catalog. Test connection timeouts, slow first-token latency, rate limits, provider errors, authentication failures, malformed JSON, truncated output, empty responses, unsafe tool calls, and answers that are syntactically valid but fail the task. Each class needs a specific response. Some calls should be retried, some rerouted, and some rejected immediately.
+
+The first drill is a hard provider outage. Force the primary route to return an error and confirm that traffic moves to the approved fallback. Measure how long detection takes, how many requests fail before the route changes, and whether the fallback has enough capacity. Verify that alerts include the provider, model, region, error category, and affected request count.
+
+The second drill is a slow degradation. Add latency rather than returning a clean error. This is often more dangerous because requests remain open, consume concurrency, and trigger retries upstream. Define separate budgets for connection time, time to first token, and total completion time. A route should not wait forever merely because bytes are still arriving.
+
+The third drill is invalid output. Return malformed JSON, a missing required field, or code that does not compile. Your application should treat validation failure as a first-class result, not as success. Record the failed validation rule and decide whether repair, retry, or rerouting is appropriate for that task.
+
+The fourth drill covers rate limits. Confirm that exponential backoff includes jitter and respects provider retry guidance. Check that multiple workers do not create a retry storm. A shared queue or circuit breaker should reduce pressure rather than multiplying calls during an incident.
+
+The fifth drill is duplicate prevention. Simulate a timeout after a provider or tool has already completed the work. Stable idempotency keys and request state should stop a retry from charging a customer twice, sending two emails, creating two records, or executing the same tool action again.
+
+Test fallback compatibility as well. Models differ in context limits, tool-call formats, structured output support, safety behavior, and parameter handling. The fallback route must receive a request it actually supports. Normalize the interface at the gateway, but still validate model-specific capabilities before routing.
+
+During every drill, collect operational metrics: accepted-result rate, p95 latency, time to detection, time to recovery, retry amplification, fallback share, validation failures, and cost per accepted result. A successful failover is not simply one that returns HTTP 200. It must preserve useful output, budget, and side-effect safety.
+
+Run drills with a replay set before testing live traffic. Then use a small canary percentage in production, with a rollback switch and clear ownership. Schedule these exercises after major routing changes, provider migrations, SDK upgrades, and new tool integrations.
+
+The final deliverable should be a short runbook. List the trigger, expected route, timeout budget, retry policy, fallback order, validation gate, alert destination, rollback step, and person responsible. Keep it close to the system that executes the policy so documentation and behavior do not drift apart.
+
+Reliable AI systems are not those that never fail. They are systems that recognize failure quickly, contain it, recover predictably, and preserve enough evidence to explain what happened.
+
+That is it for today. Test your fallback before you need it. Try the unified API at crazyrouter.com, and see you in the next episode.
