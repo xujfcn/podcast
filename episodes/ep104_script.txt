@@ -1,0 +1,25 @@
+EP104: AI API Cost Guardrails — Keep Production Spend Predictable
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about cost guardrails: the controls that let an AI product stay useful without allowing a traffic spike, prompt bug, or model change to turn into an unexpected bill.
+
+Cost control starts with visibility. Every request should record the model, provider, input tokens, output tokens, cache status, retries, latency, route, tenant, feature, and final outcome. Without this data, a monthly invoice can tell you that spending rose, but not which workflow or customer caused it.
+
+Set budgets at more than one level. A company-wide budget catches a catastrophic increase. A workspace budget protects against one customer consuming the shared pool. Feature budgets reveal expensive experiments. Per-request limits prevent a single long prompt or agent loop from doing disproportionate damage.
+
+Use both token and currency limits. Token ceilings protect context and output size, while currency estimates account for differences between models. Reserve a maximum completion allowance before sending a request, then reconcile the actual usage after it finishes. A budget that is checked only after the charge is too late.
+
+Choose model defaults deliberately. Route ordinary chat, classification, extraction, and summaries to models that meet the quality target at the lowest reliable cost. Escalate only when the task requires deeper reasoning, vision, a larger context window, or a specific capability. Expensive models should be an intentional exception, not a hidden default.
+
+Treat retries as a cost multiplier. A timeout can mean the provider already did the work even when the caller did not receive the response. Use idempotency keys, cap retry counts, and track retry cost separately. If a route fails repeatedly, open a circuit breaker instead of allowing every worker to keep buying failed attempts.
+
+Streaming needs a hard stop as well. Users may abandon a page while generation continues, or an agent may keep receiving tokens after it has enough information. Cancel disconnected requests, set maximum output tokens, and stop tool loops when their step or spending budget is reached.
+
+Build quotas around real product behavior. A daily request quota is simple, but a weighted credit system is often fairer because a small model classification and a long-context reasoning task should not consume the same allowance. Make quota responses clear so users can understand whether to wait, upgrade, or reduce usage.
+
+Alerts should be early and actionable. Notify operators when spend rate exceeds the expected baseline, when a model's unit cost changes, when fallback traffic becomes expensive, or when one tenant grows abnormally. Include the responsible route and the next control to use, such as lowering a cap or disabling a feature.
+
+Test these controls with failure drills. Simulate an accidental large context, a recursive agent, a provider outage that triggers costly fallback, and a traffic burst. Verify that limits block the right requests, preserve essential traffic, and leave enough logs to explain the decision.
+
+Cost guardrails are not about making AI products restrictive. They create room to ship useful capabilities with confidence, because each layer limits the blast radius of a mistake while keeping normal work moving.
+
+That is it for today. Measure every request, set limits before the charge, and make expensive behavior deliberate. Try the unified API at crazyrouter.com, and see you in the next episode.
