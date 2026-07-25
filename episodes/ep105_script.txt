@@ -1,0 +1,25 @@
+EP105: Claude Opus 5 Is Live — A Practical Evaluation Plan for Developers
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Claude Opus 5 is now available on Crazyrouter. A major model launch is exciting, but the useful question for a development team is not whether the model is new. It is whether the model improves your real workload enough to justify changing production traffic.
+
+Start with a representative evaluation set. Collect actual prompts from coding, analysis, support, extraction, planning, and agent workflows. Remove private data, preserve the difficult edge cases, and include examples where the current model succeeds as well as where it fails. A benchmark made only from failures can exaggerate the value of switching.
+
+Define success before running the test. For code, that may mean passing tests, following repository conventions, and producing a minimal patch. For analysis, it may mean factual accuracy, complete evidence, and a useful recommendation. For agents, measure tool selection, argument correctness, recovery from errors, and the number of steps required to finish.
+
+Use blind comparisons where possible. Show reviewers two outputs without model names and ask which one better satisfies the rubric. Model reputation can influence judgment, especially around a flagship launch. Blind scoring makes the result about the work instead of the label.
+
+Test reliability, not just the best answer. Run important cases more than once. A model that produces one brilliant response and four inconsistent ones may be less useful than a model with slightly lower peak quality but dependable behavior. Track variance, malformed outputs, refusals, tool errors, and incomplete responses.
+
+Measure latency by workflow stage. Time to first token affects chat experiences, while total completion time matters for background jobs. Agent workflows also need step-level timing because a small delay repeated across many tool calls can dominate the user experience.
+
+Evaluate cost with the prompts you actually send. Record input tokens, output tokens, retries, cache behavior, and any increase in agent steps. A stronger model can sometimes reduce total cost by solving a task in fewer attempts, while a longer or more elaborate response can move cost in the other direction.
+
+Check operational compatibility. Validate structured output, streaming, tool calls, cancellation, timeout handling, and retry behavior. Confirm that logs and usage records identify the model correctly. These details often decide whether a model is ready for production even when response quality is excellent.
+
+Roll out gradually. Start with internal traffic, then a small percentage of low-risk production requests. Compare success rate, latency, cost, and user feedback against the current route. Keep a fallback available and define the threshold that will pause or reverse the rollout.
+
+Use routing instead of treating migration as all or nothing. Claude Opus 5 may become the preferred choice for the hardest reasoning or coding tasks while faster or lower-cost models continue handling routine work. The right result is a portfolio that matches model capability to task value.
+
+Finally, save the evaluation set and rerun it when prompts, tools, or models change. A one-time launch test becomes much more valuable when it turns into a repeatable decision process.
+
+Claude Opus 5 is live on Crazyrouter. Try it on your own difficult cases, measure the full workflow, and move production traffic based on evidence. Visit crazyrouter.com, and see you in the next episode.
