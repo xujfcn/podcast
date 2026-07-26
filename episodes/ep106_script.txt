@@ -1,0 +1,27 @@
+EP106: Prompt Caching in Production — Lower Cost Without Stale Behavior
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are looking at prompt caching: a useful way to reduce repeated input processing when AI applications send the same large instructions, documents, or tool definitions across many requests.
+
+The basic opportunity is simple. Production prompts often contain a stable prefix and a small changing suffix. The stable part may include a system prompt, policy manual, repository context, product catalog, or tool schema. If the provider can reuse work for that prefix, later requests may become cheaper or faster.
+
+Start by identifying genuinely stable content. Separate global instructions from user-specific state, current events, temporary permissions, and request data. A cache works best when the beginning of the prompt remains byte-for-byte consistent. Small changes near the front can prevent reuse even when most of the content is identical.
+
+Prompt construction therefore becomes an engineering interface. Keep stable sections in a deterministic order. Normalize generated schemas. Avoid timestamps, random identifiers, and request-specific metadata inside the reusable prefix. Put volatile context as late as the model and provider format allow.
+
+Measure cache behavior explicitly. Record cache creation tokens, cache read tokens, ordinary input tokens, output tokens, model, provider, route, latency, and final task result. A lower input bill is useful only if the response remains correct and the overall workflow still succeeds.
+
+Routing consistency matters. A cache created on one provider, model version, or region may not exist on another. Aggressive load balancing can reduce cache hits, while strict route affinity can reduce resilience. Choose the tradeoff deliberately and keep fallback behavior correct when a cached route is unavailable.
+
+Do not assume every request deserves caching. A short prompt with low repetition may gain nothing. Large shared instructions used many times are stronger candidates. Estimate the break-even point using real traffic frequency, cache lifetime, write cost, read discount, and the probability that the prefix changes.
+
+Treat invalidation as a product requirement. When a policy, tool schema, price, permission, or knowledge document changes, the application must stop relying on the old prefix. Version cacheable content and include the version in observability so operators can connect an unexpected answer to the exact prompt state.
+
+Privacy boundaries must remain intact. Never let cache design mix tenant-specific data across users unless the provider contract and your own access model make that explicitly safe. Shared prefixes should contain only content intended to be shared, and sensitive material should follow the same retention and logging rules as uncached prompts.
+
+Test output stability before rollout. Compare cached and uncached requests on a representative evaluation set. Check structured output, tool selection, citations, instruction following, latency, and accepted-result rate. Caching should be an optimization below the application contract, not a source of different behavior.
+
+Roll out with a small traffic slice. Watch cache hit rate, cost per accepted result, tail latency, fallback frequency, and error rate. A high hit rate can still be misleading if requests become harder to debug or route failures create expensive retries.
+
+Prompt caching works best when prompts are already well structured. Stable instructions, versioned context, deterministic serialization, and clear tenant boundaries improve the system even before savings appear. The cache then rewards good prompt architecture instead of hiding weak design.
+
+That is it for today. Find the repeated prefixes, measure the full workflow, and make invalidation and privacy part of the implementation from day one. Build with the unified API at crazyrouter.com, and see you in the next episode.
