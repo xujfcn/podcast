@@ -1,0 +1,27 @@
+EP107: AI API Versioning — Deprecate Models Without Breaking Customers
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about a quiet part of AI infrastructure that becomes urgent the moment a model changes: versioning. Models improve quickly, but developers need stable contracts, predictable migrations, and enough notice to change production systems safely.
+
+Start by separating the model name from the application contract. A provider model identifier can change, disappear, or gain different defaults. Your gateway should expose a clear route and document what that route promises: context limits, tool support, structured output, streaming, latency expectations, and pricing behavior.
+
+Aliases are useful, but they need honest semantics. An alias such as fast, balanced, or reasoning can point to a recommended model while allowing the implementation to evolve. If an application depends on exact behavior, it should be able to pin a dated or immutable version. The more important the workflow, the less it should rely on an undocumented moving target.
+
+Versioning is not only about syntax. A new model may accept the same JSON request while changing output style, tool selection, refusal behavior, token usage, or latency. Compatibility tests should therefore exercise real prompts and real workflows, not only check whether the endpoint returns HTTP 200.
+
+Build a capability registry. Record whether each model supports vision, tools, JSON schema, streaming, reasoning controls, long context, image generation, audio, and provider-specific parameters. Include limits and known incompatibilities. Routing decisions should use this registry instead of assuming that similar model names provide identical capabilities.
+
+Plan deprecation as a lifecycle. Announce the replacement, publish the differences, set a retirement date, and show migration examples. During the compatibility window, keep the old route available when practical and measure how much traffic still depends on it. A warning that nobody can see is not a migration plan.
+
+Make notices actionable. Identify the affected route, the replacement route, the deadline, the behavior differences, and the test a developer should run. Put this information in the model catalog, API responses where appropriate, documentation, and direct customer communication for high-impact changes.
+
+Use shadow traffic or replay tests before switching defaults. Send a safe sample of representative requests to the candidate route, compare accepted-result rate, structured output, tool calls, latency, token usage, and cost. Do not copy sensitive production data into an evaluation system without the right privacy controls.
+
+Keep rollback possible. A migration should be a configuration change with a clear previous target, not an irreversible code rewrite. Record which alias pointed to which version, when it changed, and what metrics would trigger a rollback. This makes an incident diagnosable instead of turning it into a debate about which change happened first.
+
+Be careful with automatic upgrades. They are convenient for low-risk classification or summarization, but dangerous for workflows with strict schemas, financial decisions, code changes, or customer-visible wording. Route by risk and allow teams to choose between a maintained alias and a pinned version.
+
+Pricing changes belong in the same release process. A model that is technically compatible may still change the economics of a workflow. Track cost per accepted result, not just the advertised token price, and notify users when a recommended route changes its cost or fallback behavior.
+
+Finally, treat documentation as part of the API. Keep model IDs, examples, limits, deprecation dates, and migration guides synchronized with the live catalog. A stale page can be as damaging as a broken endpoint because developers build integrations from what they can read.
+
+That is it for today. Give every model route a contract, every deprecation a deadline, and every migration a test and rollback path. Build stable AI integrations with the unified API at crazyrouter.com, and see you in the next episode.
