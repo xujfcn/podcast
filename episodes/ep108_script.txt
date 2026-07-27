@@ -1,0 +1,29 @@
+EP108: AI Gateway Observability — Measure Latency, Cost, Quality, and Failover
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are building an observability system for an AI API gateway. Traditional service monitoring is necessary, but it is not enough. An AI request can return HTTP 200 and still be slow, expensive, malformed, routed to the wrong model, or useless to the customer.
+
+Start with one trace identifier that follows the request through authentication, routing, provider calls, retries, fallbacks, streaming, and billing. Return that identifier to the client and include it in support tooling. When a developer reports a bad response, your team should be able to find the exact route and sequence without asking them to send sensitive prompts over email.
+
+Measure latency in stages. Record queue time, provider connection time, time to first token, streaming duration, and total duration. Time to first token shapes how responsive a chat application feels, while total duration matters for batch jobs. A single average latency number hides both experiences.
+
+Use percentiles instead of relying on averages. Track the median, p ninety-five, and p ninety-nine by model, provider, region, and route. Averages can look healthy while a small but important group of users waits thirty seconds. Compare percentiles over time and against a known service objective.
+
+Cost needs request-level attribution. Capture input tokens, output tokens, cached tokens, reasoning tokens where available, provider price, customer price, and any retry cost. Then aggregate by customer, API key, model, application, and feature. Cost per successful result is usually more useful than cost per raw request.
+
+Make routing visible. Record the requested model, selected provider, actual upstream model, routing rule, and fallback reason. A fallback that saves availability can also change latency, capability, or price. Operators and customers need to know when that happened, especially for pinned or compliance-sensitive workloads.
+
+Separate transport success from application success. Validate structured output, tool-call arguments, content policy outcomes, truncation, empty responses, and application-specific acceptance checks. An endpoint that returns valid JSON with the wrong schema is not healthy from the user's perspective.
+
+Quality monitoring requires care. Use deterministic checks where possible, such as schema validity, citation presence, tool execution success, or exact task completion. For subjective tasks, sample outputs into a controlled evaluation pipeline. Do not treat an uncalibrated model judge as objective truth.
+
+Protect customer data by default. Logs should store metadata and hashes rather than full prompts and responses unless a customer explicitly enables content logging. Redact secrets, personal information, authorization headers, and uploaded document contents. Set clear retention periods and access controls for every telemetry store.
+
+Build dashboards around decisions. An operations view should show error rate, throttling, time to first token, fallback rate, provider health, and spend velocity. A product view should show completion success, feature usage, and cost per accepted result. A customer view should expose their usage and request identifiers without revealing internal credentials or other tenants.
+
+Alerts should map to user impact. Page someone for sustained failure, extreme latency, exhausted provider capacity, broken billing, or runaway spend. Lower-priority changes belong in tickets or daily reports. Too many alerts train the team to ignore the one that matters.
+
+Test the observability path itself. Simulate provider timeouts, malformed streaming events, rate limits, billing mismatches, and fallback exhaustion. Confirm that traces remain connected and alerts include the request identifiers, affected models, start time, and mitigation options.
+
+Finally, use the data to improve routing. Compare providers by accepted-result rate, latency percentile, and effective cost for each workload. Observability is not only for incident response. It is the evidence that turns model routing from guesswork into an engineering system.
+
+That is it for today. Trace the whole request, measure the experience the user actually sees, and protect the content behind the metrics. Build observable multi-model applications with the unified API at crazyrouter.com, and see you in the next episode.
