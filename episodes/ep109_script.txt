@@ -1,0 +1,29 @@
+EP109: AI API Rate Limits — Survive 429s Without Creating a Retry Storm
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about rate limits. A provider returning HTTP 429 is not unusual. The real incident begins when every client retries at once, fills the queue, triggers more limits, and turns a temporary capacity problem into a system-wide outage.
+
+First, learn what is being limited. Providers may enforce requests per minute, tokens per minute, concurrent requests, daily quotas, or separate limits for each model and account. A gateway should model these dimensions independently. Counting only requests is misleading when one prompt uses five hundred tokens and another uses one hundred thousand.
+
+Set an explicit concurrency budget for every upstream route. Do not allow application traffic to create an unlimited number of in-flight provider calls. Use a semaphore or admission controller, and leave headroom for retries, health checks, and high-priority workloads. A full budget should create backpressure before it creates upstream chaos.
+
+Honor Retry-After whenever the provider sends it. Otherwise, use exponential backoff with random jitter. Jitter matters because identical retry schedules synchronize clients into another traffic spike. Put a hard limit on attempts and total elapsed time. A request should never retry forever just because each individual wait looks reasonable.
+
+Retries need a budget, not just a policy. Track the ratio of retry traffic to original traffic and stop retrying when the system is overloaded. Reserve retry capacity separately so failed work cannot consume every available slot. For interactive requests, one fast fallback may be better than three slow attempts against the same provider.
+
+Build a token-aware queue. Estimate input size before dispatch and reserve expected output capacity when practical. Update the estimate from actual usage after completion. It will not be perfect, but it is much better than treating every request as equal while a few large-context jobs consume the entire token allowance.
+
+Use fair scheduling between customers and workloads. Without it, one batch job can starve every chat request. Apply per-tenant limits, weighted queues, or separate capacity pools for interactive, background, and administrative traffic. Fairness is part of reliability in a multi-tenant gateway.
+
+Fallbacks must respect capabilities and economics. A substitute model should support the required context length, tools, structured output, and policy constraints. It should also stay within the customer's price and latency boundaries. A fallback that returns an incompatible answer is not recovery.
+
+Expose useful limit information to clients. Return a stable error code, request identifier, whether the failure is retryable, and an appropriate Retry-After value. If you publish remaining quota headers, define their scope clearly. Ambiguous quota numbers encourage clients to build incorrect retry logic.
+
+Protect long-running streams. Once output has started, blindly replaying the request can duplicate text, tool calls, or charges. Track whether a response is safe to retry and use idempotency keys for operations that can trigger external effects. Streaming failures need different recovery logic from failures before the first token.
+
+Monitor saturation before 429 volume becomes high. Watch queue depth, queue wait time, active concurrency, token consumption velocity, retry amplification, and rejection rate by route. Alert on sustained user impact rather than every individual rate-limit response.
+
+Test overload deliberately. Replay bursts, large prompts, slow streams, provider throttling, and partial regional failures in a controlled environment. Confirm that the queue remains bounded, high-priority traffic keeps moving, retries stay within budget, and recovery does not cause a second spike.
+
+Finally, coordinate limits across providers. A gateway can smooth temporary capacity problems by routing eligible work elsewhere, but shared fallback capacity can also become the next bottleneck. Admission control should understand the whole route graph, not only the provider that failed first.
+
+That is it for today. Bound concurrency, honor provider signals, add jitter, schedule fairly, and test overload before customers do it for you. Build resilient multi-model applications with the unified API at crazyrouter.com, and see you in the next episode.
