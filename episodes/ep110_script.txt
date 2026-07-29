@@ -1,0 +1,31 @@
+EP110: AI API Key Security — Protect Multi-Tenant Gateways from Credential Leaks
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about API key security for multi-model applications. A leaked AI credential can create unexpected charges, expose customer data, and give an attacker access to powerful tools. The safest design assumes that some credentials will eventually be copied, logged, or committed by mistake.
+
+Start by separating credentials by environment and purpose. Production, staging, local development, background jobs, and customer-facing applications should not share one master key. A compromise should affect the smallest possible area, and every key should have a clear owner and workload.
+
+Apply least privilege even when a provider offers broad credentials. At the gateway layer, restrict which models, endpoints, features, spending limits, and source applications each key can access. A key used for text classification should not automatically be able to generate video, call expensive reasoning models, or administer an account.
+
+Never ship a reusable secret inside browser or mobile application code. Client applications should call a trusted backend or obtain a short-lived, narrowly scoped token. Anything delivered to an end-user device must be treated as recoverable by that user.
+
+Store secrets in a dedicated secret manager or protected runtime environment. Do not place them in source files, container images, shell history, support tickets, or shared documents. Encrypt secrets at rest, restrict who can retrieve them, and record access to the secret store.
+
+Design logs so credentials cannot appear in the first place. Redact authorization headers, signed URLs, cookies, query parameters, and provider responses that may echo sensitive values. Test the redaction rules with malformed headers and unusual casing. A dashboard is not a safe secret vault.
+
+Use key fingerprints for operations. Store and display a short irreversible identifier so support teams can identify a key without seeing the credential itself. Audit records should include the fingerprint, tenant, action, source, and time, but never the full secret.
+
+Make rotation routine rather than exceptional. Support two active credentials during a transition, allow applications to verify the replacement, and then revoke the old key. Rotation that requires downtime will be postponed until after a leak, which is the worst time to discover the process is fragile.
+
+Detect misuse from behavior, not only from known leaked strings. Watch for sudden spend, new regions, unusual models, abnormal request volume, repeated authorization failures, and access outside expected hours. Combine these signals carefully because legitimate deployments can also change traffic patterns.
+
+Enforce strong tenant isolation throughout the gateway. Authentication should establish a tenant once, and every database query, cache key, usage record, trace, file, and billing event must preserve that boundary. Never trust a tenant identifier supplied in the request body when it can be derived from the authenticated credential.
+
+Prepare emergency revocation. Operators need a fast way to disable one key, one tenant, one upstream provider credential, or an entire compromised route. Revocation should propagate quickly across caches and workers. Document who can trigger it and how affected customers will be notified.
+
+Protect provider master credentials behind the gateway. Customers should never receive the upstream key, and internal services should access only the provider credentials they need. If one routing worker is compromised, it should not reveal every credential in the platform.
+
+Test the controls. Commit a fake secret to a test repository, send a credential through logging paths, rotate a production-like key, and simulate a compromised tenant. Confirm that detection, revocation, audit records, and customer impact all behave as designed.
+
+Finally, make secure behavior easy for developers. Provide clear environment variable examples, secret scanning guidance, scoped keys, usage alerts, and one-click revocation. Security improves when the safe path is also the fastest path.
+
+That is it for today. Scope every key, keep secrets out of clients and logs, isolate every tenant, and practice rotation before an incident. Build secure multi-model applications with the unified API at crazyrouter.com, and see you in the next episode.
