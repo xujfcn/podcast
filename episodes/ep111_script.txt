@@ -1,0 +1,33 @@
+EP111: AI API Data Retention — Keep Prompts, Outputs, and Traces Under Control
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about data retention in AI applications. Prompts and model outputs can contain customer records, source code, contracts, support conversations, and personal information. Keeping everything forever may feel useful for debugging, but it creates security, privacy, and operational risk.
+
+Start by mapping the full data path. A request may pass through an application server, an AI gateway, an upstream provider, a tracing platform, a cache, an evaluation pipeline, and a support dashboard. A retention policy is incomplete if it covers only the primary database.
+
+Classify data before choosing how long to keep it. Separate authentication metadata, request metadata, prompt content, model output, tool arguments, uploaded files, and billing records. These categories have different operational value and different exposure if compromised.
+
+Default to collecting less. Most reliability questions can be answered with model name, latency, token usage, status, route, retry count, and an anonymous request identifier. Full prompt and response bodies should be an explicit feature with a defined purpose, not an accidental side effect of verbose logging.
+
+Use short retention windows for sensitive content. Raw prompts and outputs may need only hours or days for debugging, while aggregated usage metrics can remain useful for months. Make the window configurable by environment, tenant, and data category instead of applying one global number.
+
+Keep billing evidence separate from conversational content. You usually need durable records of time, model, token counts, price, and transaction identifiers. You usually do not need the customer's entire prompt to prove how much a request cost.
+
+Treat traces as sensitive production data. Distributed traces often capture request bodies, authorization headers, tool calls, database queries, and provider responses. Configure field allowlists, redact secrets before export, and review sampling rules so a debugging tool does not become a shadow archive.
+
+Design caches with deletion in mind. Prompt caches, semantic caches, CDN objects, local worker disks, and temporary files can outlive the database record that created them. Use bounded time-to-live values, tenant-aware cache keys, and a way to invalidate related objects when a deletion request arrives.
+
+Preserve tenant isolation in every storage layer. A tenant identifier should be attached to logs, traces, objects, evaluations, and backups. Access controls must use the authenticated tenant context, not a user-supplied filter that could expose another customer's retained data.
+
+Make deletion a workflow, not a single database statement. A reliable deletion job finds primary records, replicas, search indexes, caches, object storage, derived datasets, and queued exports. It records what was removed without copying the sensitive content into the deletion audit itself.
+
+Backups need an explicit policy too. Immediate removal from immutable backups may be impractical, but deleted data should not silently return during a restore. Maintain tombstones or replay deletion events after recovery, limit backup lifetime, and document the maximum time until expired backups disappear.
+
+Give customers clear controls. Explain what content is stored, why it is stored, how long it remains, and whether logging can be disabled. Enterprise teams may need zero-retention routes, regional storage, or tenant-specific windows. These should be enforceable product settings rather than support promises.
+
+Verify provider behavior. Upstream AI providers differ in abuse monitoring, training policies, enterprise retention, and zero-data-retention eligibility. Record the policy attached to each route and do not claim end-to-end zero retention unless every component in that route supports it.
+
+Test the policy continuously. Send a marked synthetic prompt through the production-like pipeline, wait for its retention window, and search every storage and observability system. Also test deletion during retries, failed exports, provider outages, and backup restoration.
+
+Finally, monitor retention itself. Alert when deletion jobs fail, storage grows unexpectedly, logging settings change, or a new integration starts receiving content. Data minimization is not a document written once. It is a production control that can drift.
+
+That is it for today. Map every copy, collect only what you need, separate billing metadata from content, and prove that expiration and deletion work. Build privacy-aware multi-model applications with the unified API at crazyrouter.com, and see you in the next episode.
