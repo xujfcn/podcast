@@ -1,0 +1,35 @@
+EP112: AI API Data Residency — Control Where Prompts and Outputs Are Processed
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about data residency in multi-model AI systems. Teams often ask where prompts, outputs, uploaded files, and traces are stored. The harder question is where that data is processed at every step of the request path.
+
+Start by separating data residency from data sovereignty and data localization. Residency describes where data is stored or processed. Sovereignty describes which laws and authorities apply. Localization is a legal or contractual requirement to keep certain data inside a defined region. These terms overlap, but they are not interchangeable.
+
+Map the complete route. A request may begin in a browser, pass through an edge network, enter your application region, cross an AI gateway, reach a provider endpoint, call tools, write traces, and return through a cache. Choosing a regional database does not create regional AI processing if the model call leaves that geography.
+
+Classify workloads before building regional policy. Public marketing copy, internal source code, customer support records, healthcare documents, and identity data do not carry the same risk. Attach a data class to each workload so routing decisions can be enforced automatically instead of relying on developers to remember a compliance checklist.
+
+Build a provider and model capability registry. For each route, record supported regions, processing locations, storage behavior, retention terms, subprocessors, and zero-data-retention eligibility. Treat these facts as versioned operational metadata because providers can change infrastructure and policy over time.
+
+Use policy-based routing. A request marked European Union only should be eligible only for routes that satisfy the full policy. If the preferred model is unavailable, the gateway must choose another compliant route or fail clearly. A silent fallback to a non-compliant region is not graceful degradation. It is a policy violation.
+
+Keep control-plane data separate from content. Global dashboards may need model names, token counts, latency, status codes, and billing totals. They usually do not need raw prompts or outputs. Regional content processing can coexist with centralized aggregate operations when telemetry is minimized and identifiers are carefully designed.
+
+Watch the observability layer. Logs, traces, error trackers, session replay, and analytics frequently export data to a different region than the application. Redact content before export, use field allowlists, disable request-body capture by default, and verify where the observability vendor stores replicas and backups.
+
+Tool calls extend the residency boundary. An agent may use a compliant model endpoint and then send extracted content to search, email, CRM, vector database, or document-processing tools in another jurisdiction. Evaluate the complete agent workflow, not just the language model provider.
+
+Design regional caches and queues deliberately. Message queues, dead-letter topics, prompt caches, object stores, and temporary worker disks can preserve content outside the intended region. Use region-scoped resources, bounded retention, tenant-aware encryption, and explicit cleanup for failed jobs.
+
+Encryption is necessary, but it does not decide jurisdiction. Encrypt data in transit and at rest, isolate tenant keys, and rotate credentials. Still, do not claim that encryption alone satisfies a residency requirement. Processing location, operator access, backups, and legal control remain relevant.
+
+Make regional guarantees visible in product configuration. Customers should be able to select an allowed region or policy profile, understand which models are available under that profile, and see why a requested route was rejected. Compliance should be an enforceable setting with auditable evidence, not a sentence hidden in documentation.
+
+Test failover and disaster recovery. Regional incidents create pressure to bypass policy. Run exercises where the primary region or provider is unavailable and verify that the system selects only approved fallbacks. Restore backups into the correct geography and confirm that routing policy survives configuration recovery.
+
+Audit with synthetic markers. Send non-sensitive test prompts carrying unique identifiers through every regional route. Search logs, traces, caches, storage, and downstream tools for those markers. This gives concrete evidence of where data traveled and reveals hidden copies that architecture diagrams missed.
+
+Monitor policy drift. Alert when a route changes region metadata, a new provider becomes eligible, a fallback crosses a boundary, or telemetry begins exporting new fields. Revalidate vendor claims periodically and preserve the policy version attached to each request for later investigation.
+
+The practical lesson is simple. Data residency is an end-to-end routing property, not a database setting. Map the path, classify workloads, maintain regional capabilities, enforce policy at the gateway, and test every fallback and tool call.
+
+That is it for today. Build region-aware multi-model applications with clear routing controls through the unified API at crazyrouter.com, and see you in the next episode.
