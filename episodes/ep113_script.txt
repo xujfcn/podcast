@@ -1,0 +1,33 @@
+EP113: AI API Disaster Recovery — Restore Model Access Without Losing Control
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about disaster recovery for AI API systems. A provider outage is inconvenient, but the harder incident is losing the routing rules, queues, usage records, prompts, and operational context that let a team recover safely.
+
+Start with recovery objectives. Define how much data the system can lose, how quickly each workload must return, and which features are allowed to be degraded. A chat assistant, an image batch pipeline, and a payment-linked coding workflow should not all have the same recovery target.
+
+Map the dependencies. An AI application depends on model providers, gateway configuration, credentials, databases, object storage, queues, caches, vector indexes, observability systems, DNS, and billing reconciliation. A backup of the application repository is not a recovery plan if the model allowlist and provider credentials are missing.
+
+Keep routing policy in versioned configuration. Store model capabilities, region restrictions, fallback order, token limits, payload transformations, and budget rules in a form that can be reviewed and restored. Do not reconstruct this policy from memory during an incident.
+
+Separate secrets from recoverable configuration. Back up the identifiers and references needed to restore routes, but keep API keys in a dedicated secret manager with rotation and access logs. A disaster-recovery copy that contains unrestricted production credentials creates a second security incident.
+
+Design for provider substitution. A fallback model is useful only when its payload format, context limit, tool support, output schema, and safety behavior are compatible with the workload. Keep a capability matrix and run exact-payload smoke tests before declaring a route ready.
+
+Use queues to absorb partial failure. When a provider or region is unavailable, durable queues can hold retryable work while interactive requests receive a clear degraded response. Every queued task needs an idempotency key, an expiration policy, and a limit on retry attempts.
+
+Reconcile after recovery. Requests may be accepted by a provider while the local response is lost. They may also be retried after a timeout and produce duplicate work or duplicate charges. Reconcile provider receipts, local request states, usage records, and customer-visible results before declaring the incident closed.
+
+Protect data during restoration. Restoring a database or object store into a temporary region can violate residency or tenant-isolation policy. Document the approved recovery regions, encryption keys, access roles, retention behavior, and deletion process for every recovery copy.
+
+Test the control plane, not only uptime. A health check that receives HTTP 200 proves little if the restored system routes a restricted tenant to the wrong provider, loses spend limits, or emits raw prompts into a debug log. Recovery tests should verify policy, identity, billing, observability, and user-visible behavior.
+
+Run failure drills with realistic scenarios. Test a provider outage, a regional network partition, expired credentials, corrupted routing configuration, a stuck queue, a broken webhook, and a delayed billing event. Measure detection time, decision time, restoration time, and the number of requests requiring manual repair.
+
+Make degraded behavior explicit. If a premium model is unavailable, the product should say whether it will use a slower model, a cheaper model, a queued response, or no response. Silent quality changes are difficult to debug and can damage trust even when availability numbers look good.
+
+Keep customer support evidence. During an incident, operators need request IDs, route decisions, timestamps, retry counts, and billing references. They usually do not need unrestricted access to full customer prompts. Build support views around minimized evidence and tenant-scoped permissions.
+
+Review recovery after every incident. Record which assumptions failed, which fallback was actually used, which alerts arrived late, and which customer records needed correction. Turn those findings into configuration tests, runbooks, and product improvements rather than leaving them in a postmortem document.
+
+The practical lesson is simple. AI disaster recovery is not just restoring servers. It is restoring compliant model access, routing intent, queue state, billing truth, and safe operational controls. Version the policy, isolate secrets, test exact fallbacks, and rehearse reconciliation before a real outage forces the decision.
+
+That is it for today. Build resilient multi-model applications with clear routing and fallback controls through the unified API at crazyrouter.com, and see you in the next episode.
