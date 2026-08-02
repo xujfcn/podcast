@@ -1,0 +1,31 @@
+EP114: AI API Monitoring and Observability — Find the Failure Before Users Do
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about monitoring and observability for AI API applications. A green uptime check does not mean an AI product is healthy. The endpoint may return HTTP 200 while latency doubles, output quality drops, tool calls fail, or the wrong model is selected for a tenant.
+
+Start with the request journey. Capture a correlation ID from the application through the gateway, provider route, response, billing record, and user-visible result. Without one trace identifier, an operator has to guess whether a slow response came from the client, the gateway, the provider, a queue, or a retry.
+
+Measure more than latency. Track time to first token, total response time, tokens per second, input and output tokens, payload size, queue delay, retry count, timeout rate, and cancellation rate. Streaming applications need both time to first token and time to completion. A fast first token can still hide a response that takes too long to finish.
+
+Break metrics down by route. Aggregate numbers can look normal while one model, region, customer tier, or feature is failing. Dimensions should include model, provider, endpoint type, region, status class, application, and tenant policy where allowed. Keep cardinality under control by using stable labels and putting request-specific details in traces.
+
+Watch for silent quality failures. A response can be valid JSON and still be unusable. Monitor schema validation, tool-call completion, citation presence, refusal rates, empty outputs, language mismatches, and task-specific evaluation scores. For important workflows, sample completed requests for offline review instead of pretending that availability is a proxy for quality.
+
+Separate provider failure from application failure. Record the selected route, fallback decision, upstream status, normalized error code, and whether the request was retried. This lets a team answer a practical question quickly: did the provider fail, or did our own timeout, payload transformation, authentication, or rate-limit policy cause the failure?
+
+Cost deserves first-class monitoring. Track spend by model, feature, tenant, route, and successful outcome. A cheaper model that requires three retries may cost more than a reliable model. Alert on sudden changes in token usage, unusually large prompts, duplicate requests, and cost per successful task rather than only total daily spend.
+
+Build alerts around user impact. Alert on error-budget burn, time-to-first-token, failed tool calls, queue age, schema failures, and cost anomalies. Avoid paging on every transient provider error. A good alert includes the affected route, likely cause, current fallback, sample request IDs, and a link to the relevant trace or dashboard.
+
+Use synthetic checks carefully. A scheduled request can confirm that authentication, routing, and a basic model response work. It cannot prove that production prompts, tools, large contexts, regional policies, or billing reconciliation work. Maintain a small set of synthetic scenarios that represent the real product, and mark their spend clearly.
+
+Protect sensitive data in telemetry. Do not put full prompts, completions, API keys, or customer documents into ordinary logs. Redact secrets, hash or tokenize identifiers, sample payloads selectively, and apply tenant-scoped access. Observability is part of the security boundary, not an exception to it.
+
+Keep traces useful for streaming and asynchronous jobs. Record when a request enters a queue, when a provider accepts it, when the first token arrives, when the final result is persisted, and when the user receives it. For background jobs, link retries and callbacks to the original trace rather than creating unrelated records.
+
+Create a dashboard that supports decisions. The first view should show current availability, latency, quality signals, spend, provider health, and fallback volume. The next view should allow comparison by model and region. Operators should be able to move from an aggregate anomaly to a handful of representative request IDs without searching through raw logs.
+
+Test observability during incidents. Deliberately expire a test credential, force a provider timeout, send an invalid tool schema, and route a workload to a fallback. Confirm that the right metric changes, the alert fires, the trace is complete, and the support view contains enough evidence without exposing customer content.
+
+The practical lesson is simple. AI monitoring must connect infrastructure health to model behavior and business outcomes. Trace every request, measure streaming and quality signals, monitor cost per successful task, isolate sensitive telemetry, and make alerts actionable. When those pieces are in place, the team can investigate before users have to explain what went wrong.
+
+That is it for today. Build observable multi-model applications with a unified API and clear routing data through Crazyrouter at crazyrouter.com, and see you in the next episode.
