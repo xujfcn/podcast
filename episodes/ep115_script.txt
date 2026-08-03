@@ -1,0 +1,33 @@
+EP115: AI API Cost Attribution — Know What Every Feature Actually Costs
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about cost attribution for AI API products. A monthly provider bill tells you how much money left the account. It does not tell you which feature created the cost, which customer received value, or which route wasted tokens on retries.
+
+Start with a stable request identity. Every model call should carry a request ID that connects the application event, gateway route, provider response, usage record, and billing entry. For workflows with several model calls, add a parent operation ID so the team can calculate the full cost of one user action.
+
+Define the dimensions that matter before collecting data. Useful labels include product, feature, environment, tenant, model, provider, region, endpoint type, and workload class. Avoid putting email addresses, raw prompts, or arbitrary user input into metric labels. Use internal identifiers and keep sensitive mappings in controlled systems.
+
+Attribute both input and output usage. Input tokens may include system instructions, retrieved documents, tool schemas, conversation history, and user content. Output tokens may include reasoning, visible text, tool arguments, or structured data. If the provider reports cached tokens or separate reasoning usage, preserve those fields instead of reducing everything to one total.
+
+Track the complete workflow cost. A support answer might require embedding, retrieval, reranking, a chat completion, and a follow-up tool call. Looking only at the final chat request understates the real cost. Aggregate every child operation under the user-visible outcome and record whether that outcome succeeded.
+
+Retries and fallbacks need special treatment. A timeout can produce provider usage even when the application receives no answer. A retry can then create a second charge. Record each attempt separately, but attribute all attempts to the same parent operation. This exposes the cost of unreliability rather than hiding it inside average token spend.
+
+Use actual route pricing. Model aliases can point to different providers or pricing tiers over time. Store the selected route, price version, currency, and timestamp with the usage record. Recalculating historical cost using today's price table can make reports disagree with invoices and hide the impact of routing changes.
+
+Measure cost per successful outcome. Cost per request is useful, but it can reward cheap failures. Better metrics include cost per resolved support ticket, accepted code change, completed document, qualified lead, or successful agent task. Pair spend with latency and quality so optimization does not quietly damage the product.
+
+Create budgets at several levels. Set organization, team, feature, tenant, and experiment budgets where appropriate. Use soft alerts before hard limits. A sudden cost spike may come from growth, a bug, a prompt expansion, or an attack. The response should depend on the cause, not only the number.
+
+Detect common leakage patterns. Watch for duplicated requests, unbounded conversation history, repeated retrieval context, oversized tool schemas, accidental use of premium models, retry storms, abandoned streaming responses, and test traffic hitting production. These problems often save more money than negotiating a small price reduction.
+
+Handle shared infrastructure fairly. Gateway fees, storage, vector databases, observability, and background evaluation may not map perfectly to one request. Separate direct model cost from allocated platform cost. Document the allocation rule so finance and engineering can understand why a feature's reported margin changed.
+
+Give product teams useful views. A good dashboard shows daily spend, cost per successful outcome, model mix, retry cost, cache savings, and the largest changes by feature. It should let a team move from an anomaly to representative operation IDs without exposing customer content.
+
+Reconcile estimates with provider records and invoices. Usage events can be delayed, duplicated, or missing after an incident. Compare internal totals with provider exports, gateway records, credits, and invoice adjustments. Keep the difference visible rather than silently forcing the numbers to match.
+
+Turn attribution into routing decisions. Once cost and quality are linked to each workload, teams can use smaller models for routine tasks, premium models for difficult cases, and fallbacks only where the expected value justifies them. This is more reliable than choosing one model for the entire product.
+
+The practical lesson is simple. AI cost control begins with attribution, not with a cheaper price list. Connect every attempt to a user-visible outcome, preserve route and price history, expose retry waste, and optimize cost per successful result. Then engineering, product, and finance can make decisions from the same evidence.
+
+That is it for today. Track and route multi-model workloads through one unified API with Crazyrouter at crazyrouter.com, and see you in the next episode.
