@@ -1,0 +1,33 @@
+EP116: AI API SLOs and Error Budgets — Reliability You Can Actually Operate
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about service-level objectives and error budgets for AI API products. Most teams say they want high reliability. Fewer teams define what reliability means for a streamed model response, a tool call, a background generation job, or a fallback that returns lower-quality output.
+
+Start with the user journey, not the provider dashboard. A provider can report healthy availability while your users see authentication failures, queue delays, malformed output, or a model that cannot complete the requested tool call. Your service-level indicators should measure the experience your product is responsible for.
+
+Define success precisely. For a chat request, success might mean the first token arrives within three seconds and the response completes without an application error. For a structured extraction workflow, success may require valid schema output. For an agent task, the final tool action and user-visible result may matter more than the initial model response.
+
+Use separate objectives for different workload classes. Interactive chat, batch summarization, image generation, coding agents, and payment-linked operations have different latency and correctness needs. A single availability target across every endpoint produces a number that is easy to publish but difficult to operate.
+
+Measure latency with percentiles. Average latency hides the users waiting the longest. Track time to first token and total completion time at the fiftieth, ninety-fifth, and ninety-ninth percentiles. For asynchronous jobs, track queue age and time to final artifact instead of pretending that request acceptance equals completion.
+
+Include quality-related failure where it is measurable. Empty responses, invalid JSON, missing citations, failed tool calls, language mismatches, and unusable media can all be user-visible failures even when the HTTP status is two hundred. Not every quality issue belongs in a pager alert, but important product contracts should appear in the objective.
+
+An error budget converts the objective into an operating allowance. If the target permits a small fraction of failed or excessively slow requests, that allowance can guide decisions. When the budget is healthy, teams can ship faster and test new routes. When it burns too quickly, reliability work should take priority over risky changes.
+
+Use burn-rate alerts instead of waiting for the monthly target to fail. A fast burn rate detects a severe outage quickly. A slower window catches gradual degradation such as rising tail latency or repeated fallback use. Combining short and long windows reduces noise while still identifying urgent incidents.
+
+Attribute budget consumption to the responsible layer. Separate application errors, gateway policy failures, provider failures, queue timeouts, schema failures, and customer cancellations. This helps the team choose the correct response rather than blaming the upstream provider for every unsuccessful request.
+
+Treat fallbacks honestly. A fallback can preserve availability, but it may change latency, context limits, tool support, safety behavior, or output quality. Decide whether a fallback result counts as full success, degraded success, or failure for each workload. Otherwise the dashboard can stay green while the product quietly becomes worse.
+
+Connect SLOs to cost. An aggressive retry policy may improve apparent availability while doubling spend and tail latency. A premium fallback may rescue important requests but be wasteful for low-value batch jobs. Monitor cost per successful outcome alongside reliability so the team can see the economic price of each objective.
+
+Protect tenant and regional policy during recovery. A response is not successful if it violates data residency, model allowlists, or customer routing rules. Include policy enforcement in synthetic tests and incident reviews. Reliability cannot mean bypassing the controls that make the service safe to use.
+
+Build dashboards around decisions. Show current objective compliance, remaining error budget, burn rate, affected workloads, fallback volume, latency percentiles, and representative trace IDs. Operators should be able to move from a budget alert to the routes and failure modes consuming it.
+
+Review objectives as the product changes. A target designed for a simple chatbot may not fit an agent that performs financial actions. Revisit indicators after major model changes, new regions, new tools, and significant shifts in traffic. Keep historical definitions so trend reports remain understandable.
+
+The practical lesson is simple. An AI reliability target should describe a successful user outcome, not merely an available endpoint. Define indicators by workload, measure latency and correctness, account for degraded fallbacks, and use error-budget burn to decide when to ship and when to stabilize.
+
+That is it for today. Build reliable multi-model applications with unified routing and clear operational signals through Crazyrouter at crazyrouter.com, and see you in the next episode.
