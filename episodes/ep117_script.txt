@@ -1,0 +1,31 @@
+EP117: AI API Capacity Planning — Prepare for Traffic Before It Becomes an Incident
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about capacity planning for AI API applications. Traditional systems plan around requests per second, CPU, memory, and database connections. AI workloads add token volume, context size, output length, model-specific limits, queue time, and provider quotas. A simple request count is no longer enough.
+
+Start by classifying workloads. Interactive chat, coding agents, document extraction, image generation, embeddings, and batch summarization behave differently. Record arrival rate, input size, expected output, latency target, concurrency, and retry behavior for each class. Planning from one global average will underestimate the peaks that actually cause incidents.
+
+Translate traffic into model demand. For language models, estimate input and output tokens per minute, concurrent streams, and requests per minute. For image or video generation, measure jobs in flight and completion time. Providers may enforce several limits simultaneously, so spare request capacity does not help when the token quota is exhausted.
+
+Plan for bursts, not only daily totals. Product launches, cron jobs, customer imports, and regional traffic patterns can compress a day's work into a few minutes. Use historical peak windows and realistic growth scenarios. Separate predictable bursts from unexpected ones so scheduled jobs can be moved away from interactive traffic.
+
+Concurrency is often the hidden constraint. Streaming responses hold connections open, agents make multiple sequential calls, and retries overlap with new traffic. Measure the full lifetime of an operation rather than counting only the initial request. A workflow with five model calls can consume far more capacity than its user action count suggests.
+
+Build queues with explicit policies. Batch and asynchronous work should have priority, expiration, maximum retry count, and idempotency keys. Monitor queue age, not just queue length. A short queue of long-running video jobs may represent more delay than thousands of fast embedding tasks.
+
+Reserve capacity for failure. If normal operation consumes nearly every quota, there is no room for retries or provider failover. Keep headroom for traffic growth, regional outages, and slower fallback models. The required margin depends on workload importance and how quickly additional quota can be obtained.
+
+Treat fallback capacity as a real dependency. A secondary provider is not useful if its quota supports only a small fraction of production traffic. Test exact payloads and estimate how much load each fallback route can absorb. Decide which workloads keep full service, which degrade, and which wait in a queue during a failover.
+
+Control demand before dropping requests. Limit maximum context, cap output tokens, trim conversation history, cache repeated results, deduplicate jobs, and use smaller models for routine tasks. These controls reduce both cost and capacity pressure. Apply them by workload rather than imposing one crude global limit.
+
+Use admission control for overload. When capacity is exhausted, reject or defer low-priority work early with a clear response. Allowing every request to enter the system can create retry storms, longer queues, and timeouts that waste capacity without producing useful outcomes.
+
+Watch the right indicators. Track quota utilization, tokens per minute, concurrent streams, queue age, retry volume, fallback use, provider throttling, and latency percentiles. Add cost per successful outcome because an overloaded system may spend more while completing less work.
+
+Run load tests with representative prompts and workflows. Tiny synthetic requests will not reveal problems caused by large contexts, tool schemas, streaming, or agent loops. Test gradual growth, sudden bursts, provider throttling, and partial failover. Confirm that limits protect important traffic and that recovery does not release a queue all at once.
+
+Review forecasts regularly. Compare predicted demand with actual usage by model, feature, tenant, and region. Update assumptions after launches, pricing changes, model migrations, and new agent behavior. Capacity planning is a feedback loop, not a spreadsheet created once before production.
+
+The practical lesson is simple. Plan AI capacity in tokens, concurrency, queue time, and successful workflows—not just requests per second. Classify demand, keep failure headroom, validate fallback quotas, control overload early, and test with realistic payloads.
+
+That is it for today. Route and monitor multi-model workloads through one unified API with Crazyrouter at crazyrouter.com, and see you in the next episode.
