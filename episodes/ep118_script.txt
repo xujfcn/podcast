@@ -1,0 +1,31 @@
+EP118: AI API Context Window Management — More Tokens Are Not Always Better
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about context window management for AI applications. Modern models can accept very large prompts, but sending everything on every request is rarely the best design. Large contexts increase cost, latency, and failure risk, while important instructions can become harder for the model to identify.
+
+Start by treating context as a budget. The window must hold system instructions, conversation history, retrieved documents, tool schemas, user input, and enough space for the answer. Reserve output capacity before constructing the prompt. If the application fills the entire window with input, the model may truncate the response or reject the request.
+
+Measure context by tokens, not characters. Token density varies by language, code, formatting, and data structure. Count tokens with the tokenizer or estimation method appropriate for the selected model. Add a safety margin because gateways, providers, and tool wrappers may introduce additional tokens.
+
+Prioritize information by purpose. System policy and current user intent normally matter more than old conversation turns. Retrieved evidence should be relevant to the current task. Tool definitions should include only tools the model can actually use. Give each context component a priority so trimming behavior is deterministic rather than accidental.
+
+Do not keep unlimited conversation history. Summarize older turns, preserve durable facts separately, and retain recent exchanges verbatim where nuance matters. A summary should record decisions, unresolved questions, constraints, and identifiers—not every sentence. When accuracy is critical, link the summary back to source records that can be retrieved again.
+
+Retrieval should reduce context, not flood it. Search a larger candidate set, rerank it, remove duplicates, and include only the passages needed for the answer. Preserve source metadata so citations remain possible. More documents can lower quality when irrelevant text competes with the evidence that actually matters.
+
+Tool schemas are another hidden cost. Agent platforms may attach dozens of verbose tool definitions to every request. Select tools by task, shorten descriptions without losing constraints, and avoid sending unavailable tools. Tool selection can save thousands of tokens before the user writes a single word.
+
+Use prompt caching where supported. Stable system instructions, reference material, and tool schemas can often be placed in a reusable prefix. Track cached and uncached token usage separately. Caching reduces repeated processing cost, but it does not remove the need to keep context relevant and within model limits.
+
+Handle model switching explicitly. Different models have different context limits, tokenizers, tool formats, and output caps. A prompt that fits one route may overflow its fallback. The gateway or application should calculate against the selected route and keep enough headroom for fallback models that may have smaller windows.
+
+Choose a clear overflow policy. Options include trimming low-priority history, summarizing, retrieving fewer passages, splitting the task, asking the user to narrow the request, or routing to a larger-context model. Silent truncation is usually the worst option because it makes failures difficult to explain.
+
+Long-context models still need structure. Use clear sections, stable delimiters, document identifiers, and explicit instructions about which sources control the answer. Put critical constraints where the model can find them reliably, and test whether performance changes when evidence appears near the beginning, middle, or end.
+
+Monitor the right signals. Track input tokens, output reservation, context utilization, truncation events, summarization frequency, retrieval count, cache hits, latency, and cost per successful outcome. Compare these metrics by feature and model so one oversized workflow does not hide inside a platform average.
+
+Test with realistic worst cases. Include long conversations, multilingual text, code, large tool schemas, duplicated documents, and fallback routes. Confirm that the application preserves current intent and safety constraints after trimming. A context manager is successful only if the final answer remains useful.
+
+The practical lesson is simple. A larger context window is capacity, not permission to send everything. Budget tokens, rank information, summarize history, retrieve selectively, reserve output space, and define overflow behavior before the request reaches the model.
+
+That is it for today. Manage and route multi-model workloads through one unified API with Crazyrouter at crazyrouter.com, and see you in the next episode.
