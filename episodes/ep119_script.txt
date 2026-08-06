@@ -1,0 +1,29 @@
+EP119: AI API Data Privacy by Design — Build Useful Systems Without Oversharing
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about privacy by design for AI API applications. Sending a prompt to a model is not only a product decision. It is also a decision about data classification, retention, access, location, logging, and what happens when a request is retried or routed to a fallback.
+
+Start with data inventory. Identify what enters the system: user messages, uploaded files, retrieved documents, tool arguments, account identifiers, and generated outputs. Classify each category by sensitivity and purpose. If the team does not know what data is present, it cannot choose an appropriate route or retention policy.
+
+Minimize before sending. Remove fields the model does not need, replace direct identifiers with short-lived references, and redact secrets from logs and prompts. A support assistant may need an order status but not a full payment card number. A document workflow may need selected clauses rather than an entire customer archive.
+
+Separate tenant data by policy. Retrieval indexes, caches, prompt templates, traces, and evaluation datasets should carry tenant identity and access controls. Never assume that a shared cache is safe simply because the model provider is trusted. A cached answer containing one customer's context can become another customer's data leak.
+
+Make routing privacy-aware. Model selection should consider region, provider terms, data residency, retention behavior, and whether a workload is allowed to use a particular route. A cheaper or faster model is not an acceptable fallback if it violates the tenant's policy.
+
+Control retention in every layer. Review application logs, gateway traces, provider records, object storage, queues, backups, and analytics exports. Set different retention periods for operational metadata and prompt content. Deleting the primary record is not deletion if a copy remains in an evaluation bucket or debug archive.
+
+Treat observability as sensitive. Store request IDs, route decisions, status codes, latency, token counts, and normalized errors by default. Keep full prompts and completions out of ordinary logs. When content is necessary for debugging, use sampling, redaction, approval, encryption, and a short expiration time.
+
+Protect tools and connectors. An agent can expose more data through a tool call than through its original prompt. Validate arguments, enforce tenant-scoped permissions, limit returned fields, and record the authorization decision. Tool access should be independent of what the model asks for.
+
+Handle retries and fallbacks carefully. A timeout may cause the same sensitive payload to be sent twice, possibly to different providers. Use idempotency keys where possible, record the route for every attempt, and make fallback eligibility explicit. Privacy policy must survive an outage, not disappear when the primary route is unavailable.
+
+Give users meaningful controls. Explain what data is processed, why it is needed, how long it is retained, and whether it is used for improvement where relevant. Provide deletion and export paths that cover stored prompts, generated files, embeddings, and derived evaluation records.
+
+Test privacy like functionality. Create cases for cross-tenant retrieval, secret leakage, region-ineligible routing, unauthorized tools, cache collisions, verbose error messages, and deletion gaps. Confirm that the system fails closed and that the resulting evidence is visible to operators without exposing the protected content.
+
+Keep a data-flow diagram current. Show the application, gateway, providers, queues, storage, observability, and support systems. Mark trust boundaries and data transformations. A diagram that reflects the production route is more useful than a policy document that describes an older architecture.
+
+The practical lesson is simple. Privacy is not a final filter around an AI API. Minimize data, classify routes, isolate tenants, limit retention, protect telemetry, validate tools, and test fallbacks under the same policy. The safest useful system is one that sends less data and can prove where the rest went.
+
+That is it for today. Build privacy-aware multi-model applications through the unified API at crazyrouter.com, and see you in the next episode.
