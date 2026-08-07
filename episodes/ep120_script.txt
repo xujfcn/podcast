@@ -1,0 +1,31 @@
+EP120: AI API Governance — Turn Model Access Into an Operable System
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about governance for AI API applications. Governance is not a committee document that sits beside the product. It is the set of rules, approvals, identities, logs, and automated checks that determine which workloads can use which models and what happens when something changes.
+
+Start with an inventory. Record every application, model route, provider, owner, environment, data class, region, and business purpose. Unknown routes are difficult to secure and even harder to retire. Give each route a clear owner and an expiration or review date.
+
+Define access by workload. A development experiment should not automatically receive production credentials or access to sensitive customer data. Use separate projects, keys, scopes, quotas, and environments. Give agents only the tools and models required for their task, and make high-impact actions require explicit authorization.
+
+Put model selection under policy. Rules can cover approved providers, regions, data residency, maximum spend, context limits, safety requirements, and fallback eligibility. Keep these rules versioned so an operator can explain why a request took a particular route at a particular time.
+
+Use approvals for meaningful changes. Adding a provider, enabling a premium model, changing retention, increasing a tenant quota, or modifying a fallback can affect security, cost, and user experience. Automate low-risk changes, but require review for changes that cross a trust or spending boundary.
+
+Separate policy from secrets. Configuration should identify the route and required credential scope without embedding raw keys in repositories, prompts, logs, or tickets. Rotate secrets, audit access, and make emergency revocation fast. A governance system that cannot revoke a compromised key is mostly paperwork.
+
+Make audit records useful. Capture who changed the policy, what changed, when it became active, which version handled a request, and whether an approval was required. Store request IDs and route decisions, but avoid putting full customer prompts into general audit logs.
+
+Govern data movement. Track where prompts, files, embeddings, traces, backups, and generated outputs are processed and retained. A fallback provider, evaluation dataset, or debugging export can cross a data boundary even when the primary application does not.
+
+Control third-party tools. Model output should not be enough to authorize a payment, delete a record, publish content, or access another tenant. Use server-side authorization, allowlists, input validation, confirmation steps, and idempotency keys around consequential actions.
+
+Set spending guardrails. Budgets, rate limits, model allowlists, and anomaly alerts should exist at organization, team, application, and tenant levels where needed. Pair a hard limit with a graceful degraded path so an exhausted budget does not create an uncontrolled retry storm.
+
+Test policy continuously. Use automated checks for unapproved models, missing owners, expired credentials, wrong-region routes, excessive permissions, logging of secrets, and fallback paths that violate policy. Run these checks in CI and periodically against live configuration.
+
+Plan for incidents and exceptions. Operators may need an emergency route during an outage, but emergency access should be time-limited, scoped, logged, and reviewed afterward. An exception that never expires becomes the new undocumented architecture.
+
+Give developers a paved road. Provide approved SDK configuration, standard headers, trace propagation, safe defaults, usage reporting, and examples for common workloads. Governance works better when the compliant path is also the easiest path.
+
+The practical lesson is simple. AI governance becomes real when it is encoded in identity, routing policy, approvals, quotas, audit trails, and automated tests. Inventory what exists, constrain what can happen, record why it happened, and make exceptions expire.
+
+That is it for today. Build governed multi-model applications through the unified API at crazyrouter.com, and see you in the next episode.
