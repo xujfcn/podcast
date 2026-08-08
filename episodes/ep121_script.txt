@@ -1,0 +1,31 @@
+EP121: AI API Evaluation in Production — Measure What Users Actually Need
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about evaluating AI API systems in production. A model can score well on a benchmark and still fail your users. Production evaluation connects model behavior to the tasks, constraints, latency, cost, and safety requirements that matter in your application.
+
+Start with a task taxonomy. Separate summarization, extraction, classification, coding, search answers, tool use, and creative generation. Each task needs different evidence of success. A single overall quality score hides useful differences and can encourage teams to optimize the wrong workload.
+
+Define the outcome before choosing the metric. For extraction, measure schema validity and field accuracy. For retrieval answers, measure groundedness and citation coverage. For agents, measure successful task completion and tool-call correctness. For customer support, combine resolution, escalation, policy compliance, and user feedback.
+
+Build a representative evaluation set. Include common cases, difficult cases, multilingual inputs, long contexts, ambiguous requests, adversarial inputs, and recent production failures. Remove unnecessary personal data and record why each example exists. A small, carefully maintained set is more useful than a huge collection nobody reviews.
+
+Use multiple evaluators. Deterministic checks work well for JSON validity, required fields, exact labels, latency, and token budgets. Human review helps with usefulness, tone, and subtle factual errors. Model-based judges can scale comparisons, but calibrate them against human decisions and watch for systematic preferences.
+
+Evaluate the whole route. The model is only one part of the system. Include prompt templates, retrieval, tool definitions, transformations, retries, fallbacks, and post-processing. A route that looks good in isolation may fail after a gateway changes the context or a fallback receives a different payload shape.
+
+Track production slices. Compare quality by model, provider, region, language, tenant tier, prompt version, and application feature. Aggregate scores can remain stable while one important customer segment degrades. Keep dimensions stable enough to compare releases without creating unmanageable reporting noise.
+
+Add online signals carefully. User corrections, re-prompts, abandonments, escalations, thumbs-down events, and successful tool actions can reveal quality problems. They are not perfect labels, so interpret them with context. A user may re-prompt because they changed their mind, not because the first answer failed.
+
+Use canary releases and shadow tests. Send a small percentage of traffic to a new model or prompt, or evaluate the candidate on copied inputs without showing its output to users. Compare quality, tail latency, cost, refusal behavior, and tool reliability before expanding the rollout.
+
+Watch for evaluation drift. Models, provider behavior, prompts, user traffic, and business requirements change. A benchmark that was useful six months ago may no longer represent current risk. Review the evaluation set after incidents, product changes, and major model updates.
+
+Keep quality tied to economics. Report cost per successful outcome, not only tokens or requests. A slightly more expensive model may be cheaper overall if it prevents retries, escalations, or manual correction. Conversely, a premium model may be wasteful for routine tasks that a smaller route handles reliably.
+
+Make failures actionable. Every failed example should identify a likely class: missing context, wrong route, instruction conflict, tool error, hallucination, formatting failure, policy refusal, or latency timeout. Link these classes to engineering owners and regression tests so evaluation changes production behavior.
+
+Protect evaluation data. Store datasets, traces, labels, and judge outputs with appropriate access controls. Redact sensitive content, separate tenant data, and record retention. Evaluation systems can become a shadow data warehouse if teams copy production prompts without governance.
+
+The practical lesson is simple. Production evaluation is not a leaderboard. Define success by task, test the entire route, combine deterministic and human evidence, slice results by real workloads, and connect quality to cost and reliability. Then model routing becomes an evidence-based engineering decision.
+
+That is it for today. Evaluate and route multi-model applications through one unified API with Crazyrouter at crazyrouter.com, and see you in the next episode.
