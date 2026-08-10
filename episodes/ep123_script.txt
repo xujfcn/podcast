@@ -1,0 +1,25 @@
+EP123: Choosing AI Models by Task — A Practical Routing Playbook
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about choosing AI models by task. Teams often ask which model is best, but production systems rarely have one universal winner. The better question is: which route gives this task the required quality, speed, reliability, and cost?
+
+Start with a workload map. Separate chat, extraction, classification, coding, retrieval answers, tool use, image generation, speech, and long-form reasoning. Record the input size, output shape, latency target, safety requirements, and acceptable failure modes for each category. This turns model selection from a vague preference into an engineering decision.
+
+Define minimum quality gates before comparing prices. An extraction route may need valid JSON and accurate fields. A coding route may need tests to pass. A support route may need policy compliance and successful resolution. A model that is cheaper but fails the task contract is not cheaper in practice.
+
+Use a tiered route. Put routine, high-volume work on an economical model when it meets the quality gate. Escalate ambiguous, long-context, or high-impact requests to a stronger model. Keep a fallback with compatible capabilities. The goal is not to send everything to the most powerful model; it is to spend premium inference where it changes the outcome.
+
+Routing signals can be simple. Use task type, estimated complexity, language, context length, required tools, customer tier, and a confidence score from a lightweight classifier. Avoid building a complicated router before you have enough examples. A clear ruleset with good logging is often the fastest way to learn.
+
+Measure the route, not just the model. Compare cost per successful task, latency percentiles, retry rate, fallback rate, structured-output validity, human correction, and user feedback. Aggregate averages hide important failures, so slice by language, tenant, product feature, and prompt version.
+
+Create a representative evaluation set from real work. Include common requests, edge cases, recent incidents, multilingual examples, long contexts, and adversarial inputs. Remove unnecessary personal data. Re-run the set after changing prompts, providers, models, or routing rules.
+
+Treat model availability as part of the decision. Price is only one variable. Check rate limits, regional access, context windows, streaming behavior, tool-call formats, image or audio support, and provider reliability. A route that looks excellent on paper can be a poor production choice if it frequently throttles or changes response behavior.
+
+Use canaries before broad rollout. Send a small percentage of traffic to a candidate route, or shadow-evaluate it without showing its output to users. Compare quality and cost against the current route. Define rollback thresholds in advance so a few exciting examples do not override production evidence.
+
+Keep the router explainable. Log why a request was routed, which constraints were applied, whether a fallback occurred, and what the final outcome was. Explainability makes debugging faster and helps teams remove rules that no longer reflect reality.
+
+The practical lesson is simple. Choose models by task, define quality gates, route routine work economically, reserve premium models for requests that need them, and measure successful outcomes continuously. With a unified API gateway such as Crazyrouter, you can centralize model access and routing while keeping your application flexible.
+
+That is it for today. Build a model portfolio instead of betting on one model, visit crazyrouter.com, and see you in the next episode.
