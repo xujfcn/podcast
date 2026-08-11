@@ -1,0 +1,27 @@
+EP125: Building a Multi-Model AI Stack — Architecture, Governance, and Cost
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about building a multi-model AI stack. Using several models is not only about having more choices. Done well, it separates application behavior from provider details, improves resilience, and lets teams match capability and price to each task.
+
+Start with a stable application contract. Your product should express the task, constraints, tools, output schema, and deadline. It should not need to know every provider-specific model name or retry rule. Keep provider adapters and routing policy behind a gateway or service boundary so changing models does not require rewriting every feature.
+
+Build a model portfolio by capability. Group routes for fast routine text, long-context analysis, coding, structured extraction, vision, image generation, speech, and high-reasoning tasks. For each route record context limits, tool behavior, streaming support, latency, price, rate limits, and known failure modes. A model directory without operational facts is just a catalog.
+
+Use policy-based routing. Route by task type, complexity, language, context size, required modality, customer tier, and quality target. Prefer explicit rules at first. They are easier to inspect and improve than an opaque router that cannot explain why a request was sent somewhere.
+
+Governance begins with ownership. Decide who can add a provider, change a model, raise a spending limit, or alter fallback behavior. Version prompts and route policies. Keep a change log and require evaluation results for high-impact changes. Model access is an infrastructure capability, so manage it with the same discipline as databases and queues.
+
+Centralize observability. Capture route decisions, provider and model, latency phases, token usage, retries, fallbacks, errors, and successful task outcomes. Redact sensitive content and apply tenant-level access controls. The useful question is not only which model was called, but whether the user's task succeeded at an acceptable cost and speed.
+
+Design for provider failure. Use capability-compatible fallbacks, bounded retries, circuit breakers, and deadlines. Do not blindly fail over a request that requires a feature the fallback does not support. Test malformed output, rate limits, timeouts, truncated streams, and provider outages before they occur in production.
+
+Control cost at the task level. Track cost per successful outcome, not only cost per request. Use smaller models for routine work, prompt caching for repeated context, batching for offline jobs, and premium models for cases where quality changes the result. A cheap route that creates retries or manual corrections may be expensive in practice.
+
+Protect portability without pretending providers are identical. Keep a common internal schema, but allow adapters for tool calls, structured outputs, image inputs, and provider-specific features. Compatibility means predictable application behavior, not hiding every difference behind a lowest-common-denominator interface.
+
+Evaluate the complete stack. Test prompts, retrieval, tools, transformations, routing, fallbacks, and post-processing together. Include representative traffic, difficult cases, multilingual requests, long contexts, and recent incidents. Compare quality, latency, reliability, and cost before and after a change.
+
+Make rollout gradual. Start with shadow traffic or a small canary. Define success and rollback thresholds. Keep the old route available until the new route has enough evidence. When a provider changes behavior, your gateway should let you switch policy quickly without emergency edits across many application repositories.
+
+The practical lesson is simple. Keep application contracts stable, treat models as replaceable capabilities, centralize policy and observability, test failure paths, and optimize cost per successful task. With a unified API gateway such as Crazyrouter, a multi-model stack can stay flexible without becoming operationally chaotic.
+
+That is it for today. Build for choice without creating a maze of provider dependencies. Visit crazyrouter.com, and see you in the next episode.
