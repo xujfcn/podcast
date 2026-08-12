@@ -1,0 +1,25 @@
+EP126: AI API Security — Keys, Tenants, Logs, and Safe Operations
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about security for AI API applications. The model is only one part of the risk surface. API keys, prompts, tool permissions, tenant data, billing controls, logs, and provider credentials all need clear boundaries if an AI product is going to operate safely.
+
+Start with key hygiene. Never put a production key in frontend code, public repositories, screenshots, prompts, or chat messages. Store secrets in an approved secret manager or protected environment, limit who can read them, and rotate them when a team member leaves or a leak is suspected. Use separate keys for development, staging, production, and automation so one mistake does not expose everything.
+
+Put your own backend between users and the model gateway whenever possible. The backend can authenticate users, apply quotas, select an allowed route, enforce content limits, and keep the provider key private. If a browser must call an API directly, use narrowly scoped short-lived credentials and accept that they are harder to protect than server-side secrets.
+
+Separate tenants by design. Every request should carry a trusted tenant identity from your authentication layer, not an email address supplied by the client. Enforce tenant checks on prompts, files, conversation history, tool results, usage records, and billing data. Test that changing an ID in a request cannot reveal another customer's data.
+
+Treat tools as privileged operations. A model may suggest an action, but your application should decide whether that action is permitted. Validate tool arguments against a strict schema, restrict destinations, require confirmation for irreversible actions, and use separate credentials with the smallest practical permissions. Do not give a general-purpose model unrestricted database, shell, payment, or email access.
+
+Redact logs deliberately. Prompts and responses can contain personal data, credentials, private code, or customer records. Log metadata such as request IDs, model, route, latency, token counts, and outcome by default. If content must be retained for debugging, minimize it, encrypt it, apply a short retention period, and make access auditable. Remember that tracing systems and error dashboards are also data stores.
+
+Control spend as a security measure. Per-key, per-user, and per-tenant rate limits reduce abuse and protect against runaway loops. Add daily or monthly budgets, anomaly alerts, maximum context sizes, and limits on expensive models or media generation. A leaked key is less damaging when it cannot generate an unlimited bill.
+
+Validate external content. Retrieved documents, web pages, emails, and user uploads can contain prompt injection. Keep untrusted text separate from system instructions, label its source, limit what it can influence, and require application-side authorization for every tool call. The model should never be the final authority for permissions.
+
+Secure provider and webhook integrations. Use TLS, verify signatures, validate timestamps, and reject replayed events. Keep provider credentials separate from customer credentials. When using multiple providers, record which data classes are allowed to leave your boundary and choose routes accordingly. Not every prompt should be sent to every provider.
+
+Prepare for incidents. Define how to revoke keys, disable a route, freeze a tenant, preserve relevant evidence, notify affected users, and review the cause. Practice the procedure with a test key. Security controls that require inventing a process during an incident are likely to fail under pressure.
+
+The practical lesson is simple. Keep keys private, isolate tenants, constrain tools, minimize logs, cap spending, treat external content as untrusted, and make revocation fast. With a unified API gateway such as Crazyrouter, centralized routing and usage controls can give teams a consistent security layer without scattering provider secrets across every application.
+
+That is it for today. Build AI systems that are useful without becoming an uncontrolled access path. Visit crazyrouter.com, and see you in the next episode.
