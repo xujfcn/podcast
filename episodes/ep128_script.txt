@@ -1,0 +1,27 @@
+EP128: AI API Testing — Build Regression Checks Before Users Find Bugs
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about testing AI API applications. Traditional unit tests still matter, but they cannot fully describe a system whose outputs vary, tools fail, providers throttle, and prompts evolve. Reliable AI testing combines deterministic checks with representative examples and production evidence.
+
+Start with the contract. Define what the application promises: required fields, allowed actions, latency targets, safety rules, citation behavior, and success conditions. Deterministic contract tests can then verify JSON schemas, tool arguments, status handling, and error formats even when the generated wording changes.
+
+Build a small representative dataset. Include common requests, difficult cases, multilingual inputs, long contexts, ambiguous instructions, adversarial content, and recent production failures. Each example should explain what behavior matters and what would count as failure. A focused set that the team reviews beats a huge unmaintained prompt dump.
+
+Separate test layers. Unit-test routing decisions, prompt construction, parsers, redaction, retry limits, and budget checks without calling a model. Integration-test provider adapters, streaming, structured outputs, tool calls, and fallbacks. End-to-end tests should exercise the complete user task with realistic dependencies and controlled test accounts.
+
+Use assertions that match the task. Exact string matching is brittle for open-ended answers. Prefer schema validity, required facts, citation presence, successful tool completion, code tests, policy compliance, and task-level outcomes. For subjective quality, use calibrated human review or a model judge checked against human decisions.
+
+Test failure paths deliberately. Simulate 429 responses, timeouts, truncated streams, malformed JSON, provider errors, invalid tools, retrieval misses, and partial results. Verify that retries stop at the deadline, fallbacks preserve the contract, errors are safe to show users, and side effects are not duplicated.
+
+Protect test data. Remove unnecessary personal information, use synthetic accounts for tools and payments, and never put production credentials in fixtures. Test logs and traces too: a failure report should not accidentally print API keys, private prompts, or customer documents.
+
+Watch for prompt and model drift. Pin model versions where reproducibility matters, record prompt and policy versions, and keep a change history. When a provider updates behavior, rerun the regression set. A test result without its model, prompt, route, and date is difficult to interpret.
+
+Add online checks carefully. Sample production outcomes, user corrections, escalations, invalid-output rates, and fallback spikes. Feed confirmed failures back into the regression set. Do not treat every re-prompt as a failure automatically; users can change their minds or ask follow-up questions.
+
+Set release gates. Define which checks must pass before changing a route or prompt. For important workflows, require quality not to drop beyond a threshold and require cost and latency to remain within budget. Run canaries before full rollout and keep a rollback path.
+
+Make failures actionable. Classify them as missing context, wrong route, instruction conflict, hallucination, formatting error, tool failure, policy refusal, or timeout. Link each class to an owner and a new test. The purpose of testing is not to produce a score; it is to make the next release safer.
+
+The practical lesson is simple. Test the contract, the route, the provider adapter, the tools, the failure paths, and the complete task. With a unified API gateway such as Crazyrouter, centralized routing and model access make it easier to run consistent regression checks across providers.
+
+That is it for today. Find the bugs in evaluation before users find them in production. Visit crazyrouter.com, and see you in the next episode.
