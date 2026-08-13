@@ -1,0 +1,27 @@
+EP127: AI API Observability — Trace Quality, Cost, and Reliability
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about observability for AI API applications. Logs that only say a request returned 200 are not enough. Production teams need to understand which route was chosen, how long each stage took, what the request cost, and whether the user's task actually succeeded.
+
+Start with one request identity. Generate a correlation ID at the edge and carry it through your gateway, provider call, retrieval system, tool execution, validation layer, and final response. This lets an engineer follow one task across services without copying sensitive prompt content into every log line.
+
+Capture route metadata. Record tenant, application feature, model, provider, region, prompt version, policy version, attempt count, fallback reason, and response mode. These fields make comparisons possible. They also reveal whether a quality regression came from a model change, a prompt change, a provider issue, or a routing rule.
+
+Measure latency in phases. Track queue time, connection time, time to first token, provider processing time, tool-call time, validation time, and total duration. A single average hides the difference between a fast first token and a long stalled stream. Use p50, p95, and p99 values for important routes.
+
+Connect usage to outcomes. Token counts and request counts are useful, but cost per successful task is more actionable. Add structured outcome labels such as completed, retried, fell back, invalid format, escalated, or abandoned. For offline jobs, include human correction or downstream test results. This turns billing data into product evidence.
+
+Keep quality signals practical. Deterministic checks can verify JSON validity, required fields, citations, tool schemas, and code tests. Human review can measure usefulness and factual accuracy. User corrections, re-prompts, and escalation events provide online signals, but interpret them carefully because behavior is not always a perfect label.
+
+Use traces for failure analysis. When a request fails, the trace should show whether the cause was authentication, rate limiting, timeout, malformed output, retrieval failure, tool denial, provider error, or application validation. Group failures into classes and link common classes to owners and regression tests.
+
+Protect the data in your telemetry. Prompts, responses, documents, and tool arguments may contain personal data, credentials, or private code. Prefer metadata and hashes for routine monitoring. Redact secrets, restrict trace access, encrypt retained content, and define retention periods. An observability system can become a shadow data warehouse if it stores everything forever.
+
+Build dashboards around decisions. A useful dashboard answers whether a route is healthy, whether quality changed after a release, whether a tenant is approaching a budget, and whether a provider is degrading. Avoid dozens of decorative charts. Give each metric an owner, a threshold, and a response procedure.
+
+Add alerts carefully. Alert on sustained error rates, tail latency, fallback spikes, invalid-output rates, cost anomalies, and quality regressions. Use windows and baselines so one unusual request does not wake the team. Alerts should include the route, scope, recent change, and a link to representative traces.
+
+Use observability to improve routing. Compare routes by successful outcome, cost, latency, and failure class. If a model is cheap but causes repeated retries, the router should know. If a premium route is reliable for only a small task class, restrict it to that class. Evidence should update policy rather than remain trapped in a dashboard.
+
+The practical lesson is simple. Trace the complete request, measure latency in phases, connect usage to successful outcomes, protect telemetry data, and turn failure classes into engineering action. With a unified API gateway such as Crazyrouter, centralized routing and usage metadata give teams a consistent foundation for AI observability.
+
+That is it for today. Make AI behavior measurable enough to improve. Visit crazyrouter.com, and see you in the next episode.
