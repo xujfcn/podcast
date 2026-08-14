@@ -1,0 +1,23 @@
+EP129: AI API Reliability — Design for Retries, Timeouts, and Provider Failures
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Today we are talking about a part of AI engineering that becomes important the moment real users arrive: reliability. A model can be impressive in a demo and still produce a poor product if requests time out, streams stop halfway through, or one provider failure takes down the whole workflow.
+
+Start with a deadline, not an unlimited timeout. Decide how long the user experience can wait, then divide that budget across queueing, retrieval, model generation, tools, and any fallback. A retry that starts after the deadline is not resilience; it is delayed failure.
+
+Retry only errors that are likely to recover. Rate limits, temporary upstream failures, and connection resets may deserve a retry. Invalid requests, authentication errors, content-policy decisions, and malformed tool arguments usually need a different response. Use exponential backoff with jitter, cap the number of attempts, and respect the provider's retry-after signal.
+
+Protect every side effect with idempotency. If an AI agent sends an email, charges an account, creates a ticket, or changes a database row, a retry must not duplicate that action. Give each logical operation an idempotency key, record its state, and make the tool handler safe when the same request arrives twice.
+
+Design fallbacks around the contract. A fallback model does not need to be identical, but it must return something the application can safely consume. Keep structured output schemas stable, validate every response, and reject or repair invalid output before it reaches downstream code. A cheaper model that returns valid JSON is often more useful than a stronger model that breaks the parser.
+
+Streaming deserves its own failure plan. Track whether the response has started, how many tokens have arrived, and whether the connection ended cleanly. After partial output, silently restarting can confuse users or duplicate actions. Show a clear recovery state, resume only when the workflow supports it, and never treat an incomplete tool call as a completed one.
+
+Centralize routing and observability. Record the request ID, route, provider, model, latency, retries, time-to-first-token, output validation result, and final outcome. Do not log API keys, private prompts, or customer documents. With a unified gateway such as Crazyrouter, these fields can be compared across providers without rewriting every application integration.
+
+Measure user impact, not just uptime. A service can report ninety-nine point nine percent availability while users experience slow answers, empty responses, repeated retries, or incorrect fallbacks. Track successful task completion, timeout rate, invalid-output rate, fallback rate, p95 latency, and cost per successful outcome.
+
+Test the unpleasant paths before production. Simulate 429 responses, long delays, truncated streams, provider outages, malformed JSON, and tool timeouts. Verify that deadlines are enforced, retries stop, side effects remain single, and the user receives a useful explanation. Turn every confirmed production failure into a regression test.
+
+Reliability is not one clever retry loop. It is a set of explicit contracts: a deadline, a retry policy, a safe fallback, idempotent tools, observable routes, and a tested recovery experience. Build those pieces early, and adding new models becomes a controlled change instead of a new source of surprises.
+
+That is it for today. Make failure boring before it becomes expensive. Visit crazyrouter.com, and see you in the next episode.
