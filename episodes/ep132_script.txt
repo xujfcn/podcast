@@ -1,0 +1,25 @@
+EP132: AI Model Migration Runbooks — Switch Models Without Breaking Production
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI teams change models constantly. A newer model arrives, pricing changes, a provider retires an endpoint, or a workload needs better latency. Yet many teams still handle migration as a one-line configuration edit. In production, that is risky. Today we will build a model migration runbook that makes change controlled and reversible.
+
+Start with an inventory. List every workload using the current model, including background jobs, evaluation scripts, support tools, and forgotten staging environments. Record the exact model name, endpoint, request parameters, context limits, tool schemas, output format, timeout, retry policy, and fallback route. You cannot migrate dependencies you do not know exist.
+
+Next, define the compatibility contract. The replacement model must support the capabilities the workload actually uses. Check streaming, vision, structured output, tool calling, system messages, token limits, and parameter behavior. Do not assume two OpenAI-compatible endpoints behave identically. Replay real production-shaped payloads and validate the responses with the same parser and business rules used by the application.
+
+Build a representative test set. Include common requests, difficult edge cases, long inputs, multilingual content, malformed data, and known historical failures. Compare accepted-result rate, not subjective style alone. If users depend on JSON, citations, code patches, or tool actions, those requirements must be scored explicitly.
+
+Measure operational differences. Record time to first token, total latency, tail latency, token usage, retries, and cost per accepted result. A migration that improves benchmark quality but doubles timeout failures is not an upgrade. Likewise, a cheaper model may cost more after retries and repair.
+
+Prepare the routing change before the launch. Use a stable application-facing alias or gateway policy rather than hard-coding a new model throughout the codebase. A unified gateway such as Crazyrouter lets teams change the underlying route while keeping one integration surface. Version the routing policy, review it like code, and make the previous configuration easy to restore.
+
+Roll out gradually. Begin with shadow traffic when privacy and cost allow, then send a small canary percentage of real eligible requests. Compare the new and old routes over the same time window. Watch quality failures, latency, error classes, fallback share, and spend. Increase traffic in stages only when thresholds remain healthy.
+
+Design rollback before migration. Define who can trigger it, which metrics justify it, and how quickly the old route can be restored. Preserve compatible credentials and capacity during the observation period. A rollback should be a tested policy change, not an improvised deployment during an incident.
+
+Communicate the migration. Tell application owners what changes, which model name or alias is affected, the expected timeline, known behavior differences, and where to report problems. If customers choose models directly, provide a deprecation window and concrete replacement examples. Silent changes save one announcement but create weeks of confusing support cases.
+
+After the cutover, keep monitoring. Some failures appear only with rare prompts, traffic peaks, or long-running agents. Review fallback use, validation errors, user complaints, and cost for several days. Update documentation and remove the old route only after the new path has earned confidence.
+
+The practical lesson is simple: model migration is an operational change, not a string replacement. Inventory dependencies, define compatibility, replay real workloads, canary traffic, prepare rollback, and communicate clearly. With a runbook, teams can adopt better models quickly without making users absorb the risk.
+
+That is it for today. Make every model change reversible. Visit crazyrouter.com, and see you in the next episode.
