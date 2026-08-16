@@ -1,0 +1,25 @@
+EP134: AI Agent Workflows — Control Tool Calls, State, and Spend
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI agents are moving from single responses to multi-step workflows. They read context, call tools, inspect results, revise plans, and continue until a task is complete. That flexibility is useful, but every extra step adds latency, cost, and a chance of an unintended action. Today we will look at the controls that make agent workflows dependable.
+
+Start with an explicit task boundary. Define what the agent is allowed to accomplish, what it must not do, and the conditions that end the run. A vague instruction such as keep improving can create an open-ended loop. Use a completion contract: required output, validation checks, maximum steps, deadline, and escalation path.
+
+Treat tool calls as production operations. Give each tool a narrow schema, validate arguments before execution, and separate read actions from write actions. For destructive or externally visible actions, require approval or a stronger policy check. The model should propose an action, but application code should decide whether that action is permitted.
+
+Persist state deliberately. Store the task identifier, current step, tool results, and important decisions in a durable record. Do not rely on the conversation window as the only source of truth. Durable state makes retries safer, supports resuming after a timeout, and lets operators inspect what happened without replaying every prompt.
+
+Design for idempotency. Agents retry because networks fail, providers time out, and tool responses arrive late. A payment, ticket creation, deployment, or database write must not happen twice just because the model repeated a call. Use idempotency keys, request status, and deduplication at the tool boundary.
+
+Control the loop budget. Set limits for total steps, tool calls, tokens, wall-clock time, and spend. Track the budget across the whole workflow rather than resetting it after each model request. If the agent reaches a limit, return a clear partial state and ask for human intervention instead of silently continuing.
+
+Validate every important transition. Check that tool output matches the expected schema, that required fields are present, and that the next action is consistent with the current state. For generated code or structured documents, run deterministic checks before accepting the result. Validation is often cheaper than repairing a bad action later.
+
+Route models by step. Planning, classification, extraction, and summarization may use a lighter model, while ambiguous reasoning or complex code may need a stronger one. A unified gateway such as Crazyrouter lets teams keep one API integration while applying different model policies to different workflow stages. Measure cost per successful task, not just the price of one call.
+
+Make failures observable. Record trace identifiers, model routes, tool names, latency, retries, validation failures, fallback use, and spend. Redact secrets and sensitive prompt content. Operators need enough information to diagnose a stalled agent without turning logs into a copy of every private user conversation.
+
+Build human handoffs into the design. Escalate when confidence is low, a policy check fails, the task exceeds its budget, or a write action needs approval. A good handoff includes the current state, evidence collected, proposed next action, and the exact reason the agent stopped. Humans should not have to reconstruct the entire run.
+
+The practical lesson is simple: agent quality is not just model intelligence. It is the quality of the boundaries, tools, state, validation, budgets, and recovery paths around the model. Control the workflow and you can make automation more capable without making it more fragile.
+
+That is it for today. Give every agent a boundary and every action a check. Visit crazyrouter.com, and see you in the next episode.
