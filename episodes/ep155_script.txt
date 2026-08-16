@@ -1,0 +1,25 @@
+EP155: AI API Local Development — Test Integrations Before Production
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI integrations are often tested against live providers from a developer laptop, which makes failures slow, expensive, and difficult to reproduce. A temporary rate limit looks like a code bug, a provider change looks like a flaky test, and a leaked key can become a security incident. Today we will build a safer local development workflow for AI APIs.
+
+Start with a clear boundary between environments. Use separate credentials, projects, routes, and data for local, staging, and production. Never copy a production API key into a local environment just to make a test pass. A gateway such as Crazyrouter can provide one compatible API surface, while each environment receives its own restricted configuration.
+
+Use mock providers for deterministic tests. Return fixed responses for common success cases, malformed JSON, empty content, tool errors, timeouts, rate limits, and provider failures. Mocks should reproduce the response shape and timing signals that application code depends on, not merely return a generic string. This lets developers test recovery paths without spending tokens.
+
+Keep replay fixtures from real behavior. Capture sanitized requests and responses from representative workflows, including long inputs, edge cases, and historical incidents. Remove secrets, personal data, and proprietary content before committing fixtures. Version the fixtures with the prompt, schema, model, and route metadata so a failing replay has enough context to be useful.
+
+Test the contract locally. Validate request construction, authentication headers, streaming events, structured outputs, error mapping, retries, cancellation, and usage accounting. Contract tests should fail when a client library or gateway changes an assumption. Do not wait for an end-to-end production-like test to discover that a field was renamed.
+
+Simulate the unhappy path deliberately. Add latency, disconnects, partial streams, invalid credentials, 429 responses, context overflow, malformed output, and provider downtime. Verify bounded retries, clear user messages, circuit breakers, cleanup, and fallback behavior. A local test that only checks the happy path gives false confidence.
+
+Make local state safe and repeatable. Use disposable databases, isolated queues, temporary files, and seeded test data. Give each test a unique tenant or namespace, and clean up after it. If the application stores prompts, outputs, or traces, ensure local retention is short and access is restricted.
+
+Protect secrets and logs. Load credentials from a secret store or environment mechanism that is not committed to source control. Add pre-commit checks for key patterns, redact authorization headers and private content, and make debug logging opt-in. Local development is still part of the security boundary because laptops and shared logs can be compromised.
+
+Use a small live smoke suite. Mocks cannot reveal provider availability, real tokenization, pricing, or capability differences. Run a limited authenticated test against an approved non-production route, with a strict budget and sanitized inputs. Keep it separate from ordinary unit tests and alert on unexpected cost or output changes.
+
+Promote with evidence. Require contract tests, replay tests, failure-path tests, and a live smoke check before staging. Compare latency, accepted-result rate, retries, and cost against the previous integration. Record configuration versions and make the promotion reversible. Developers should know exactly what was tested before production traffic is enabled.
+
+The practical lesson is simple: local AI development should be deterministic, private, and realistic enough to expose failure. Use mocks for speed, sanitized fixtures for coverage, small live tests for reality, and separate credentials for safety. That combination helps teams move quickly without turning every code change into an expensive production experiment.
+
+That is it for today. Test the failure before the user finds it. Visit crazyrouter.com, and see you in the next episode.
