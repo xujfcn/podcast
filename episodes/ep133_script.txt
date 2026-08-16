@@ -1,0 +1,25 @@
+EP133: AI API Deprecation Plans — Retire Models Without Surprising Users
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI models do not stay available forever. Providers release replacements, change capacity, revise pricing, and eventually retire older endpoints. For developers, the dangerous part is rarely the announcement itself. The danger is discovering a hidden dependency after production traffic starts failing. Today we will build a practical model deprecation plan.
+
+Begin with dependency discovery. Search application code, environment files, routing policies, scheduled jobs, evaluation scripts, dashboards, support tools, and customer documentation for the model name and aliases. Query gateway logs to find real traffic, including low-volume workloads that static code searches may miss. Assign an owner to every active dependency.
+
+Publish a clear timeline. A useful notice includes the affected model, the final availability date, the recommended replacement, expected behavior differences, and milestones for testing and migration. Use exact dates rather than phrases such as soon or next month. Send reminders as the deadline approaches, but avoid changing the date casually because teams build their own release plans around it.
+
+Choose replacement routes by capability, not branding. Check context limits, structured output, tool calling, vision, streaming, latency, regional availability, and parameter support. If no single replacement matches every workload, provide different recommendations by task. A coding agent and a short classification pipeline may need different successors.
+
+Make compatibility testing easy. Publish sample payloads, known parameter changes, and a concise migration checklist. Offer a temporary alias or gateway route when possible, but explain whether it preserves behavior or only preserves the model name. Developers need to know what remains compatible and what must be retested.
+
+Create an evaluation window. Let application owners replay representative requests against the replacement while the old model is still available. Compare accepted-result rate, validation failures, latency, token usage, retries, and cost per successful task. Include edge cases and historical incidents, not just happy-path prompts.
+
+Use staged migration. Shift internal workloads first, then canary a small percentage of eligible production traffic. Monitor errors, fallback share, user complaints, and spend. Increase traffic in controlled steps. A unified gateway such as Crazyrouter can centralize this routing change so teams do not have to edit every application at once.
+
+Define what happens at the deadline. Decide whether requests receive a clear error, route to an approved replacement, or continue temporarily for explicitly exempted workloads. Silent fallback may keep traffic moving, but it can also change quality, cost, or data handling without the application owner knowing. If you use automatic fallback, make it visible in logs and notifications.
+
+Preserve rollback during the transition. Keep the previous route, credentials, and capacity available until the replacement has passed its observation period, unless the upstream provider removes it first. Document emergency contacts and the exact rollback procedure. If rollback is impossible, prepare a safe failure mode rather than improvising under pressure.
+
+After retirement, verify that traffic has actually stopped. Watch for stale clients, delayed jobs, and old deployment environments. Remove obsolete secrets, aliases, dashboards, and documentation only after confirming there are no legitimate callers. Record the final migration outcome and the problems discovered so the next deprecation becomes easier.
+
+The practical lesson is simple: model retirement is a product and operations event, not just a catalog edit. Find dependencies, communicate exact dates, provide tested replacements, migrate gradually, and make deadline behavior explicit. Done well, deprecation becomes routine maintenance instead of a production incident.
+
+That is it for today. Retire routes carefully, and keep users informed. Visit crazyrouter.com, and see you in the next episode.
