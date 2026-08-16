@@ -1,0 +1,25 @@
+EP148: AI API Routing — Choose the Right Model for Every Request
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Many AI applications begin with one model and one endpoint. As the product grows, that simple choice becomes a constraint. Different tasks need different tradeoffs: fast classification, careful reasoning, long context, low cost, structured output, or regional availability. Today we will design model routing as an explicit policy instead of a pile of scattered conditionals.
+
+Start with workload classification. Identify the task type, required capabilities, input size, latency target, quality threshold, data policy, and budget. A short label request should not automatically use the same route as a long research task. Keep classification deterministic where possible, and record the reason for each route decision.
+
+Build a capability matrix. Track context limits, vision support, tool calling, structured output, streaming, languages, latency, availability, and pricing for every approved model. Validate these properties with real requests because compatible API shapes do not guarantee identical behavior. Version the matrix when provider capabilities or prices change.
+
+Separate hard constraints from preferences. Data residency, required tools, and maximum context may eliminate a route completely. Among the remaining candidates, optimize for quality, latency, cost, or availability according to the workload. This prevents a cheap but incompatible model from being selected merely because it scored well on one dimension.
+
+Use a stable policy layer. Keep model selection in a gateway or routing service rather than duplicating it across every application. A unified gateway such as Crazyrouter can provide one API surface while policy selects the underlying route. Version policies, review changes, and make the previous policy easy to restore.
+
+Use progressive routing when useful. A small model can handle clear, low-risk requests, while an uncertainty signal, validation failure, or task complexity can escalate to a stronger route. Define escalation rules in application code and cap the number of hops. Do not let the model route itself indefinitely based on an unverified confidence statement.
+
+Account for the full request cost. Include input and output tokens, retries, fallback attempts, latency impact, caching, and human review. A route with the lowest per-token price may be more expensive per accepted result if it produces invalid output or requires repeated repair. Compare routes on the product outcome they deliver.
+
+Keep routing decisions observable. Record policy version, candidate routes, selected model, exclusion reason, fallback path, latency, validation result, token usage, and effective cost. Do not log sensitive prompts just to explain a route. Structured metadata is usually enough for operators to understand why traffic moved.
+
+Test routing as a system. Build a dataset of representative workloads and replay it against candidate policies. Measure quality, p95 latency, errors, fallback share, cost, and important slices such as language, tenant, and context size. Test boundary cases where small changes in input length or task label could select a different model.
+
+Plan for change. Providers add models, retire endpoints, change prices, and experience regional capacity differences. Keep a review cadence for the capability matrix and policy thresholds. Use canary traffic for routing changes, compare old and new decisions, and retain rollback capacity until the new policy is trusted.
+
+The practical lesson is simple: routing is product logic with operational consequences. Classify requests, enforce hard constraints, optimize explicit tradeoffs, observe every decision, and test policies against real workloads. With a deliberate routing layer, teams can adopt new models without rewriting every application or guessing which model should handle each task.
+
+That is it for today. Route by need, not by habit. Visit crazyrouter.com, and see you in the next episode.
