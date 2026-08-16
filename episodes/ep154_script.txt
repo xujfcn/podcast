@@ -1,0 +1,27 @@
+EP154: AI Tool Calling — Make Function Calls Safe and Reliable
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Tool calling lets an AI application move beyond text and interact with calendars, databases, search systems, tickets, and business workflows. It also means a model can propose an action that has real consequences. Today we will design tool calling so it is useful, constrained, and auditable in production.
+
+Start with a narrow tool contract. Define the tool name, purpose, required arguments, types, allowed values, limits, and failure responses. Avoid one universal tool with a command string that accepts anything. Small, explicit tools make model behavior easier to validate and application permissions easier to enforce.
+
+Separate proposal from execution. The model may select a tool and generate arguments, but application code should validate the call before execution. Check tenant, user, resource, authorization, rate limits, and business rules outside the model. Never treat a plausible tool call as proof that the action is allowed.
+
+Use strict argument validation. Parse the arguments as structured data, reject unknown fields where appropriate, enforce maximum lengths and ranges, and normalize identifiers before lookup. Validate relationships that a schema cannot express, such as whether a requested account belongs to the current tenant or whether a date range is permitted.
+
+Prefer read-only tools first. Search, retrieve, calculate, and inspect operations are easier to retry and review than writes. For a write action, require idempotency keys, explicit confirmation when impact is high, and a deterministic record of what will change. A gateway such as Crazyrouter can provide a consistent model interface, while the application owns the final authorization decision.
+
+Design for ambiguity. Let the model ask for missing information instead of guessing required arguments. Represent unknown, not applicable, and not found as distinct outcomes when the workflow needs that distinction. If a tool result is incomplete or contradictory, return a clear status that leads to clarification or review rather than encouraging another blind call.
+
+Make execution idempotent. Models retry, workers restart, and network responses can be lost after a tool has succeeded. Use idempotency keys and durable attempt records for actions such as creating tickets, sending messages, charging accounts, or changing deployments. A repeated call should return the existing result or a safe status, not perform the action twice.
+
+Control the tool loop. Set limits for total tool calls, repeated calls to the same tool, tokens, elapsed time, and spend. Detect cycles where the model alternates between the same tools without progress. When the budget ends, preserve the current state and return a useful handoff instead of silently continuing.
+
+Treat tool output as untrusted data. Validate the response schema, cap its size, redact secrets, and separate returned content from instructions. A web page, database field, or user-generated ticket may contain text that tries to redirect the model. Tool results should inform the next step, not redefine the system policy.
+
+Handle failures explicitly. Distinguish invalid arguments, permission denial, not found, rate limits, timeouts, provider errors, and business-rule rejection. Give the model enough structured information to recover when recovery is safe, but do not expose sensitive diagnostics or encourage repeated attempts at a permanent failure.
+
+Audit the whole action. Record request ID, tenant, actor, model, policy version, selected tool, validated arguments, approval state, execution result, latency, and idempotency key. Redact secrets and unnecessary private content. These records let operators answer what happened without relying on an unverifiable model transcript.
+
+The practical lesson is simple: tool calling is an authorization and workflow problem wrapped in a model interface. Define narrow schemas, validate outside the model, enforce permissions, make writes idempotent, bound the loop, treat results as untrusted, and audit every action. With those controls, AI can operate real systems without becoming an uncontrolled command channel.
+
+That is it for today. Let the model suggest actions, and let the application decide. Visit crazyrouter.com, and see you in the next episode.
