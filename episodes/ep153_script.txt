@@ -1,0 +1,27 @@
+EP153: Production RAG APIs — Build Retrieval That Users Can Trust
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. Retrieval-augmented generation is often described as a simple pipeline: search for documents, add them to a prompt, and ask a model for an answer. In production, the hard part is making sure the retrieved evidence is relevant, authorized, fresh, and actually reflected in the response. Today we will build a RAG API that users can trust.
+
+Start with document preparation. Extract text while preserving headings, tables, page references, and source metadata. Remove boilerplate and duplicate content, but keep the information needed to interpret exceptions. Record the source ID, version, owner, effective date, and access scope alongside every chunk.
+
+Choose chunking by meaning. Fixed token windows are easy to implement, but they can split a definition from its qualification or separate a table heading from its values. Use headings, sections, semantic boundaries, and modest overlap where appropriate. Evaluate chunking on real questions rather than assuming a single chunk size works for every document type.
+
+Make indexing versioned and observable. Record the embedding model, chunking configuration, parser version, and source snapshot. Monitor failed documents, missing metadata, duplicate chunks, index lag, and deletion propagation. A unified gateway such as Crazyrouter can handle the generation route, but retrieval infrastructure still needs its own lifecycle and health signals.
+
+Enforce permissions before retrieval. Filter by tenant, user, document scope, and purpose before returning candidates to the prompt. Do not retrieve broadly and hope the model will ignore unauthorized passages. Test cross-tenant isolation, revoked access, inherited permissions, and documents whose metadata is incomplete.
+
+Retrieve for the question. Combine keyword, semantic, metadata, recency, and access filters when the workload benefits from them. Rerank candidates if the first retrieval stage returns a noisy set, and cap the evidence that reaches the model. More passages can increase distraction, cost, and the chance of conflicting instructions.
+
+Preserve provenance. Give every passage a source identifier, title, version, and location that can be cited in the final response. Instruct the model to distinguish supported evidence from uncertainty and to say when the available sources do not answer the question. A citation that points to a document but not the relevant section is less useful than a precise reference.
+
+Validate grounded answers. Check that citations refer to retrieved sources, required evidence is present, and the answer does not claim facts absent from the context. Use deterministic checks, sampled human review, and task-specific graders. Track groundedness, retrieval hit rate, answer acceptance, abstention quality, and user corrections rather than relying on one generic score.
+
+Handle freshness deliberately. Set update expectations by document type, refresh indexes after approved changes, and show effective dates when they matter. If indexing is delayed, make that status visible to operators and decide whether the system should answer from the previous snapshot, abstain, or route to a different workflow.
+
+Protect the prompt boundary. Retrieved documents are data, not instructions. Separate evidence from system policy and user commands, and defend against prompt injection embedded in documents. Keep tool permissions and write actions outside the model’s authority unless an explicit policy permits them.
+
+Design recovery paths. If retrieval is empty, the index is unavailable, or confidence is low, return a clear limited answer or escalate rather than inventing one. Cache and retry boundedly, preserve request traces, and keep the source snapshot used for an answer so incidents can be reproduced.
+
+The practical lesson is simple: production RAG is a data, authorization, retrieval, and evaluation system around a model. Prepare documents carefully, enforce access before search, retrieve selectively, cite precisely, measure groundedness, and handle stale or missing evidence honestly. That is how a RAG API becomes dependable instead of merely impressive in a demo.
+
+That is it for today. Give the model evidence it can prove, not context it can only repeat. Visit crazyrouter.com, and see you in the next episode.
