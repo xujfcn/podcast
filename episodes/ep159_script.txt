@@ -1,0 +1,27 @@
+EP159: AI API Developer Experience — Make the First Integration Fast
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. An AI API can be technically powerful and still feel difficult to adopt. Developers need to understand the first request, get a useful result quickly, diagnose failures without guesswork, and know how to move from a prototype to production. Today we will design an AI API developer experience that shortens the path from signup to reliable integration.
+
+Start with the first successful request. Provide one clear quickstart that uses a real endpoint, a minimal request, and a response the developer can verify immediately. Keep required configuration small, explain the base URL and authentication plainly, and show the expected output. A quickstart is a product workflow, not a list of links.
+
+Make examples executable. Use complete, copyable snippets in the languages your users actually deploy. Include installation, environment setup, request construction, error handling, and a safe output display. Keep examples synchronized with the current API contract and run them in CI so documentation does not quietly drift from the product.
+
+Design the SDK around the API contract. Provide sensible defaults, typed request and response objects where useful, streaming support, timeouts, retries, cancellation, and access to request IDs. Do not hide important model or route choices behind magic behavior. A gateway such as Crazyrouter can offer one compatible API surface, while SDKs make the common path ergonomic without removing control.
+
+Treat errors as part of the interface. Return stable error categories, useful messages, request IDs, retry guidance, and links to relevant documentation. Distinguish invalid credentials, rate limits, timeouts, unsupported capabilities, malformed requests, provider failures, and application-level validation errors. A developer should know whether to change code, wait, reduce load, or contact support.
+
+Document the boundary between prototype and production. Explain timeouts, idempotency, concurrency, rate limits, token accounting, data handling, logging, and key rotation. Show how to stream safely, validate structured output, handle fallbacks, and protect secrets. Developers should not need to discover critical operational behavior through their first incident.
+
+Make model and capability choices visible. Explain which routes support vision, tools, structured outputs, streaming, context size, and regional requirements. Provide a comparison based on real workload tradeoffs rather than a long catalog of names. Stable aliases can simplify adoption, but return enough metadata for teams to understand what actually served a request.
+
+Build useful observability in. Every response should expose or correlate a request ID, and usage metadata should be available in a safe form. Document how to inspect latency, errors, retries, fallback, token usage, and cost. The fastest way to lose developer trust is to make a request easy and the failure impossible to investigate.
+
+Support progressive disclosure. Keep the first page focused on one successful request, then provide focused guides for streaming, tool calls, RAG, batch jobs, webhooks, security, and optimization. Avoid forcing every beginner to understand the entire platform before sending a simple completion. Link advanced behavior exactly where the user is likely to need it.
+
+Test the docs as users do. Use fresh environments, new credentials, current SDK versions, and copy-paste checks. Track time to first successful request, common support questions, broken example rates, and drop-off points in onboarding. Review the experience across languages and operating systems, not only on the maintainer’s machine.
+
+Give users a safe upgrade path. Version SDKs and examples, announce contract changes, provide migration guides, and keep old examples from implying unsupported behavior. When a model or endpoint is deprecated, show the replacement in the same workflow and explain compatibility differences. Developer experience includes what happens after the first integration succeeds.
+
+The practical lesson is simple: developer experience is reliability before production. Make the first request clear, examples executable, errors actionable, capabilities visible, observability built in, and upgrades predictable. When developers can understand both success and failure quickly, the API earns adoption through confidence rather than marketing.
+
+That is it for today. Make the first useful request feel obvious. Visit crazyrouter.com, and see you in the next episode.
