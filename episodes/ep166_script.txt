@@ -1,0 +1,25 @@
+EP166: AI API Quality Gates — Stop Bad Outputs Before They Reach Users
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A model response is not automatically a usable result. It may be incomplete, unsupported by evidence, malformed for a downstream parser, or unsafe to turn into an external action. Today we will design quality gates that catch bad AI outputs before they reach users or production systems.
+
+Start with the contract. Define what a successful result means for each workflow: required fields, acceptable evidence, language, format, confidence, latency, and permitted actions. “The model answered” is not a quality criterion. A contract gives the application something concrete to validate after generation.
+
+Validate structure first. Parse JSON, check schemas, enforce enums, verify required fields, and reject unexpected values. For tool calls, validate names and arguments before execution. Keep repair attempts bounded and observable. If a response cannot be repaired safely, return a clear retry or review state instead of passing malformed data downstream.
+
+Check meaning, not only syntax. A response can be valid JSON and still be wrong. Use citations, retrieval checks, deterministic business rules, entailment checks, or a second model only where the risk justifies the cost. A gateway such as Crazyrouter can provide a consistent model access layer, but workload-specific quality policy belongs at the application boundary.
+
+Measure accepted results. Track how often users accept, edit, retry, reject, or escalate an output. Include fallback use, validation failures, repair attempts, and human corrections in the cost and quality picture. A high HTTP success rate can coexist with poor product quality; accepted-result rate is closer to the outcome users actually need.
+
+Design safe failure states. Not every failed check should produce a generic error. A missing citation may request more evidence. Invalid arguments may ask the model to retry. A policy risk may require human review. A timeout may use a compatible fallback. Make the next action explicit so users and operators understand what happened.
+
+Keep gates proportional to risk. A draft summary may need formatting and basic grounding checks. A financial transfer, medical recommendation, or production deployment needs stronger validation, permissions, and possibly human approval. Excessive gates add latency and cost, while weak gates allow silent damage. Match the control to the consequence.
+
+Test the gates themselves. Build fixtures for malformed JSON, incomplete lists, unsupported claims, prompt injection, tool argument confusion, empty retrieval, provider truncation, and fallback capability gaps. Test both detection and recovery. A quality gate that detects a failure but leaves the queue stuck is not a complete production control.
+
+Version everything that affects acceptance. Store the prompt version, schema version, policy version, evaluator version, model route, and evidence snapshot with the result. When quality changes, responders need to know whether the cause was the model, the prompt, the data, or the gate. Versioned evidence also makes audits and rollbacks possible.
+
+Give users honest feedback. If an answer is uncertain, show that uncertainty in useful language. If a result is being checked, say so. If the system cannot complete the task, explain the safe next step. Trust grows when the product distinguishes a verified answer from a plausible draft instead of presenting every output with the same confidence.
+
+The practical lesson is simple: generation is only one stage of an AI workflow. Define the contract, validate structure and meaning, measure accepted results, fail safely, and version the evidence behind every decision. Quality gates turn model output into a dependable product capability.
+
+That is it for today. Validate before you trust, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.
