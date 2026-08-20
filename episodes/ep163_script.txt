@@ -1,0 +1,25 @@
+EP163: AI API Cost Attribution — Know What Each Workflow Really Costs
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI API bills are easy to total and surprisingly difficult to explain. A monthly number tells you what you spent, but not which customer, feature, model, or workflow created that spend. Today we will design practical cost attribution for AI applications.
+
+Start with a stable identity for every request. Capture the tenant, workspace, project, environment, feature, workflow, and user or service account. Keep these fields separate from the prompt itself. Metadata should be queryable, privacy-aware, and consistent across providers. A gateway such as Crazyrouter can give applications one routing layer, but attribution still depends on the application sending useful ownership metadata.
+
+Record the economics at the same time as the request. Store the model route, provider, input tokens, output tokens, cached tokens, image or video units, latency, retry count, and the price version used for the calculation. Do not reconstruct cost weeks later from a changing public price page. Pricing snapshots and immutable usage events make invoices explainable.
+
+Separate direct cost from shared cost. A request can have a clear model charge, while storage, moderation, embeddings, retrieval, observability, and failed retries are shared overhead. Choose a policy: allocate shared costs by usage, by reserved capacity, or as a platform charge. The exact policy matters less than documenting it and applying it consistently.
+
+Make retries visible. A timeout followed by a successful retry may look like one user action but create two billable requests. Keep the parent operation ID, attempt number, idempotency key, and final outcome. This lets engineers distinguish provider failures from expensive application behavior and prevents a “successful request” dashboard from hiding waste.
+
+Use a small taxonomy that people can actually maintain. Feature names, cost centers, and workflow stages should come from controlled values rather than free-form labels. Version the taxonomy when a product changes. If a label is missing, route the event to an unattributed bucket and alert on it; silently dropping the cost is worse than showing a temporary unknown.
+
+Give each audience the view it needs. Finance needs reconciled totals. Product teams need cost per feature and cost per active customer. Engineers need cost by route, retry, and latency tier. Customers may need a usage statement without seeing internal provider details. One event stream can support all four views when access controls and aggregation rules are designed early.
+
+Add budgets and forecasts, not just reports. Set soft alerts for unusual growth and hard limits for workloads that can safely stop. Forecast from requests, tokens, and unit prices rather than from last month’s total alone. For long-running agents, track estimated remaining budget and make the agent degrade gracefully by shortening context, switching models, or asking for approval.
+
+Protect the data. Cost metadata can reveal customer names, internal projects, and business priorities. Minimize sensitive labels, hash identifiers where appropriate, isolate tenants, and retain raw events only as long as operations and compliance require. Never put API keys, full prompts, or private documents into a cost dashboard merely because they are available in the request log.
+
+Close the loop with routing decisions. Attribution is most useful when it changes behavior. Compare quality-adjusted cost across models, measure the effect of caching and batching, and route routine work to cheaper models while reserving premium routes for cases that justify them. A lower dollar cost is not a win if correction work or failure rates rise, so pair spend with quality and outcome metrics.
+
+The practical lesson is simple: every AI request should answer who owns it, what it did, what it cost, and how that cost was calculated. Capture identity, price versions, retries, shared overhead, and outcomes at the source. With trustworthy attribution, cost control becomes an engineering feedback loop instead of a monthly surprise.
+
+That is it for today. Know the cost behind every workflow, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.
