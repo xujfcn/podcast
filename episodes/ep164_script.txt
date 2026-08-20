@@ -1,0 +1,25 @@
+EP164: AI API Change Management — Ship Model Updates Without Breaking Workflows
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI systems change constantly. Providers release new models, retire old ones, adjust limits, and change behavior behind familiar API shapes. The technical upgrade may take an afternoon, but the operational risk can last much longer. Today we will design a change-management process for AI APIs.
+
+Begin with an inventory. List every model route, prompt version, tool schema, output contract, fallback, and customer-facing feature. Identify which workflows depend on strict JSON, vision, streaming, long context, or function calling. An API-compatible endpoint is not necessarily behavior-compatible. The inventory tells you what must be tested before a change is allowed to reach production.
+
+Define the change clearly. Record what is changing, why it is changing, which clients are affected, the expected quality and cost impact, and the rollback target. A model alias that silently moves to a new provider is still a production change. Give it an owner, a planned window, and an explicit success criterion rather than treating it as routine configuration.
+
+Build representative evaluations. Use real task shapes with sensitive content removed or safely replayed. Test correctness, completeness, structured-output validity, tool arguments, refusal behavior, latency, token usage, and cost. Include difficult cases, not only easy examples. The goal is not to prove that one model is universally better; it is to learn whether this change is safe for each workload.
+
+Stage traffic gradually. Start with offline tests, then a shadow comparison where the new route does not affect users. Continue with a small canary split and compare quality-adjusted outcomes, not just HTTP success. Keep the old route available until the canary has passed its observation window. A gateway such as Crazyrouter can make route changes easier to centralize, but the application still needs workload-aware release gates.
+
+Protect contracts at the boundary. Validate JSON against a schema, check required fields, enforce tool permissions, and reject outputs that cannot safely enter downstream systems. If a provider changes formatting or adds a new refusal pattern, boundary validation should turn the surprise into a visible failure instead of corrupting a database or triggering an incorrect action.
+
+Plan communication by audience. Engineers need migration details and test results. Support teams need symptoms and a response guide. Customers need a clear notice when behavior, limits, pricing, or data processing changes. Do not announce every internal tuning adjustment, but do announce changes that affect compatibility, availability, cost, or user-visible output.
+
+Make rollback boring. Keep the previous route, prompt, schema, and policy version deployable. Store configuration in version control, attach a change ID to request telemetry, and define who can reverse the change. Rollback should not require reconstructing yesterday’s settings from memory. For stateful migrations, include data compatibility and queue recovery in the rollback plan.
+
+Watch for delayed regressions. Some failures appear only after users adapt their prompts, traffic grows, or a long-running workflow reaches a later stage. Monitor accepted-result rate, correction rate, fallback share, latency, spend, support tickets, and downstream business outcomes after the initial canary. Set a review date so a change is not considered complete merely because the first hour looked healthy.
+
+Learn from every change. Keep a short record of the hypothesis, evidence, decision, and outcome. When a change fails, improve the evaluation set, contract, alert, or rollout guard that should have caught it. When it succeeds, preserve the evidence that made it safe. Over time, this turns model updates from stressful exceptions into a repeatable engineering capability.
+
+The practical lesson is simple: AI API change management is a product reliability discipline. Inventory dependencies, test representative behavior, stage traffic, validate contracts, communicate clearly, and keep rollback immediate. Models may change quickly, but your users should experience a stable and trustworthy system.
+
+That is it for today. Ship changes deliberately, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.
