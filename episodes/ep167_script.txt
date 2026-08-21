@@ -1,0 +1,25 @@
+EP167: AI API Capacity Planning — Scale Before the Queue Becomes the Product
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. AI applications often fail during growth in a predictable way: requests wait longer, retries multiply, providers throttle traffic, and users experience a queue instead of a product. Today we will build a practical capacity plan for AI APIs.
+
+Start with workload shape. Measure requests per minute, input and output tokens, concurrency, payload size, streaming duration, and burst behavior. A thousand short classification requests and a thousand long agent runs consume very different capacity. Forecast by workload class rather than using one average request number.
+
+Define the user-facing target. Set budgets for time to first token, completion latency, queue age, accepted-result rate, and maximum retry delay. Capacity planning is not only about serving more traffic; it is about preserving the experience that makes the feature useful. A system that is technically available but consistently too slow is already under-capacity.
+
+Separate limits. Track application concurrency, gateway concurrency, provider quotas, token-per-minute limits, connection pools, queue workers, and downstream database capacity. The narrowest limit controls the system. A gateway such as Crazyrouter can centralize routing and usage visibility, but each layer still needs an explicit budget and overload behavior.
+
+Plan for bursts and recovery. Size for normal traffic, expected peaks, and a safe emergency margin. Model what happens after a provider outage ends and queued work returns at once. Without admission control, recovery traffic can create a second incident. Use bounded queues, backpressure, priority classes, and controlled ramp-up.
+
+Protect interactive traffic. Separate user-facing requests from batch jobs, evaluations, indexing, and background agents. Give each class its own concurrency and budget. A large offline run should not consume every connection while a customer waits for a simple answer. Fairness is a product decision, so make it visible in policy and metrics.
+
+Use graceful degradation. When capacity is tight, shorten optional context, reduce output limits, switch to a compatible lower-cost route, defer non-urgent work, or ask the user to retry later. Degradation should preserve correctness and communicate what changed. Never hide overload by silently dropping requests or returning incomplete data as if it were complete.
+
+Control retries. Retry only failures that are likely to recover, use bounded exponential backoff, honor Retry-After, and cap total attempts per operation. Record the original request ID and attempt number. A retry budget should be included in capacity forecasts because a ten percent failure rate can create much more than ten percent extra traffic.
+
+Load-test realistic behavior. Include long contexts, streaming connections, tool calls, validation failures, provider throttling, and fallback routes. Test both steady state and sudden bursts. Watch queue age, token throughput, memory, connection usage, accepted-result rate, and cost. Synthetic tests that use only tiny prompts will produce dangerously optimistic plans.
+
+Review capacity continuously. Compare forecasts with actual traffic, revise model mix and provider limits, and document assumptions. Add alerts before saturation, not after users report timeouts. A good capacity plan is a living control system that connects demand, reliability, cost, and release decisions.
+
+The practical lesson is simple: capacity is a user experience budget. Measure workload shape, separate traffic classes, reserve headroom, control retries, degrade honestly, and test recovery as seriously as peak load. When queues are designed deliberately, growth becomes manageable instead of surprising.
+
+That is it for today. Scale before the queue becomes the product, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.
