@@ -1,0 +1,76 @@
+from pathlib import Path
+import subprocess, json, xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 179
+title = 'EP179: AI API Idempotency — Stop Duplicate Work and Charges'
+description = 'A practical guide to idempotency for AI APIs: design request keys, persist results, handle retries and timeouts, protect tool effects, scope deduplication, and make duplicate work observable.'
+pub_date = 'Tue, 06 Oct 2026 08:30:00 +0000'
+script = '''EP179: AI API Idempotency — Stop Duplicate Work and Charges
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A retry can be the right response to a timeout, a dropped connection, or a temporary provider failure. But an AI request may already have been accepted when the caller gives up. If the retry starts a second generation, the user can receive two answers, the team can pay twice, and a tool call can happen twice. Today we will make retries safe with idempotency.
+
+Start by defining what duplicate means for your product. Two requests with identical text are not necessarily duplicates if the user intentionally asks the same question twice. A duplicate is usually a client retry of one logical operation. Give that operation a stable idempotency key, and keep the key tied to the caller, endpoint, model policy, and intended side effects rather than trying to infer sameness from prompt text.
+
+Require the key on operations where repeating work is expensive or unsafe. Text generation without side effects may tolerate duplicate work in a simple product, but image jobs, long-running video tasks, agent runs, billing events, and tool calls deserve stronger protection. Make the requirement part of the API contract, with a clear error for missing or malformed keys and documentation that explains when a client should reuse a key.
+
+Persist the first attempt's state durably. A useful record includes the tenant, key, request fingerprint, status, response or result location, provider request ID, timestamps, expiry, and a redacted outcome. The record needs an atomic uniqueness constraint. A process-local map or an in-memory cache can reduce duplicate traffic, but it cannot be the authority after a restart or across multiple gateway instances.
+
+Handle the race between two arrivals explicitly. The first request should claim the key in one atomic operation and move it to processing. A concurrent request with the same key should wait for the existing result, receive an in-progress response, or get a documented conflict. Do not let both callers observe an empty record and proceed. Distributed locks can help, but the durable claim and its recovery rules matter more than a lock with an uncertain lease.
+
+Bind a key to its input. If a client reuses a key with a different prompt, model, tool set, or important parameter, return a conflict instead of silently returning the old result. Store a canonical request fingerprint that excludes irrelevant ordering and includes every field that changes behavior or cost. This prevents accidental key reuse from becoming a confusing form of cache poisoning.
+
+Choose the response for each state. A completed request can return the original result with a clear replay indicator. A request still processing can return a status resource or a retry-after signal. A failed request needs a policy: retain a deterministic failure for the key, or allow a retry after classifying whether the operation was safely abandoned. Never let a client guess whether a timeout means not started, still running, or completed.
+
+The hardest case is an uncertain provider outcome. The gateway may lose the connection after the provider accepted the request but before the response arrived. Query a provider operation ID when the provider supports it, or keep the request in an unknown state and reconcile it before starting another chargeable operation. If reconciliation is impossible, surface uncertainty to the caller and use a product-level recovery path instead of claiming exactly-once behavior you cannot prove.
+
+Separate inference deduplication from side-effect protection. Returning the same generated text twice is different from sending the same email, changing a ticket, charging a card, or deleting a file twice. Put idempotency keys at the tool and workflow boundaries as well as at the gateway. For each side effect, use the downstream system's native idempotency mechanism when available, and record the effect status alongside the model response.
+
+Scope and expire keys carefully. A key should be unique within a tenant and operation namespace, not accidentally global across unrelated customers. Retain completed results long enough to cover client retries, queue delays, and incident recovery, while respecting privacy and storage limits. After expiry, reject reuse or treat it as a new operation only under a documented rule. Never recycle keys silently while an old operation could still be running.
+
+Make replay behavior safe for streaming and asynchronous APIs. A replayed non-streaming result is straightforward. For a stream, store a completed result or a resumable event log and tell clients whether they are receiving a replay. For a webhook workflow, send the same event ID and let consumers deduplicate it. A reconnecting client must not cause a second job merely because it did not receive the first notification.
+
+Test the boundaries that create duplicates. Kill the gateway after claiming a key, before writing the provider ID, after the provider completes, and while persisting the response. Send concurrent retries from several regions, reuse a key with a changed body, expire a key during a long job, and replay a webhook. Verify that the invariant is visible in data: one logical operation, one chargeable provider job where possible, and one side effect.
+
+Instrument the decision, not just the request count. Track new claims, replays, in-progress responses, fingerprint conflicts, expired-key attempts, unknown outcomes, reconciliation success, and prevented duplicate tool calls. Include the logical operation ID and provider request ID in traces, but keep prompts, secrets, and sensitive results out of ordinary logs. A drop in duplicate prevention may signal a client regression even when latency and availability look healthy.
+
+Use idempotency as a gateway capability. Central routing gives teams one place to validate keys, enforce tenant scope, reconcile provider jobs, attach usage labels, and expose consistent SDK behavior. It also gives operators one place to answer the uncomfortable question after an incident: did this retry create new work, or did the platform replay the original outcome?
+
+The practical lesson is simple: idempotency is a record of one logical operation, not a hash of a prompt. Claim keys atomically, bind them to the request, persist state, reconcile uncertain outcomes, protect every side effect, and make replay behavior explicit. Safe retries are how an AI API becomes dependable when networks and providers behave like distributed systems.
+
+That is it for today. Make retries boring, make duplicate work visible, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration}')
