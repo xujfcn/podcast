@@ -1,0 +1,25 @@
+EP172: AI API Runbooks — Turn Operational Knowledge Into Fast Recovery
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. During an AI API incident, the difference between a five-minute recovery and a one-hour outage is often not intelligence. It is whether the team can find the right action, understand its risk, and verify the result without guessing. Today we will build runbooks that turn operational knowledge into fast, repeatable recovery.
+
+Start with symptoms, not implementation details. A useful runbook begins with what an operator can observe: elevated timeouts, malformed structured output, provider throttling, rising queue age, unusual spend, or a failed tool action. Link each symptom to the dashboards, logs, traces, and request identifiers that confirm the condition.
+
+Define the first safe actions. Every runbook should say what to check, what to pause, and what not to do. Stop a risky rollout, cap retries, protect interactive traffic, or disable an optional tool before attempting a large configuration change. Early actions should reduce blast radius and preserve evidence.
+
+Document decision points. If the primary provider is failing, determine whether the issue is regional, route-specific, quota-related, or application-side. If a fallback is available, verify its capability contract before switching traffic. A gateway such as Crazyrouter can centralize route changes, but the runbook must state which workloads are compatible with each fallback and what tradeoffs apply.
+
+Include exact rollback paths. Name the configuration, version, command or control, owner, and expected propagation time. Explain how to undo the change if metrics worsen. Avoid instructions that depend on an individual remembering an undocumented dashboard click. Reversible actions should be easy to identify; risky actions should require explicit confirmation.
+
+Make verification concrete. “Check that it works” is not a verification step. Specify the metrics and sample requests that should recover: accepted-result rate, time to first token, validation failures, queue age, fallback share, cost per task, or tool-call success. Include both a positive test and a check that the original failure is no longer spreading.
+
+Separate emergency and follow-up work. The incident runbook should restore service and protect users. The post-incident checklist should collect evidence, reconcile usage, notify stakeholders, and create durable fixes. Mixing long-term cleanup into the first response makes urgent recovery slower and increases operator load.
+
+Design for handoffs. Record current impact, actions already taken, open hypotheses, next update time, and the person responsible. Use a shared timeline so a new responder can contribute without repeating experiments. Clear handoffs are especially important when incidents cross provider, application, support, and finance teams.
+
+Test runbooks regularly. Run a short tabletop exercise, inject a controlled failure, or ask someone unfamiliar with the system to follow the document. Time how long it takes to find the right page and complete verification. Broken links, stale screenshots, missing permissions, and ambiguous ownership are operational defects, not editorial imperfections.
+
+Version and review the documents. Link a runbook to the services, routes, and policies it covers. Review it after incidents, architecture changes, provider migrations, and ownership changes. Track last verified date and reviewer. A short accurate runbook is more valuable than a comprehensive document that nobody trusts.
+
+The practical lesson is simple: a runbook is executable knowledge. Start from symptoms, reduce blast radius, make decisions explicit, document rollback, verify with measurable signals, and practice the handoff. When recovery steps are clear and current, teams can move quickly without turning every incident into improvisation.
+
+That is it for today. Make recovery repeatable, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.
