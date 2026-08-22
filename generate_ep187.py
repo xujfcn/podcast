@@ -1,0 +1,82 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 187
+title = 'EP187: AI API Graceful Degradation — Preserve the Core User Journey Under Pressure'
+description = 'A practical guide to graceful degradation for AI APIs: define essential outcomes, reduce optional work, preserve contracts, and keep user journeys useful when models or providers are slow, expensive, or unavailable.'
+pub_date = 'Tue, 20 Oct 2026 08:30:00 +0000'
+script = '''EP187: AI API Graceful Degradation — Preserve the Core User Journey Under Pressure
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. When an AI dependency slows down or fails, the worst response is often to let every feature fail in exactly the same way. A gateway can preserve a useful core experience by reducing optional work, choosing a compatible fallback, and being honest about what changed. Today we are talking about graceful degradation for AI APIs: how to keep the most important user journey working when capacity, latency, quality, or provider availability is under pressure.
+
+Begin by defining the outcome that must survive. “The model returned 200” is not a product outcome. A support assistant may need to show a useful answer or a clear handoff. A document workflow may need to save the upload even if extraction is delayed. An agent may need to preserve the draft plan while pausing side effects. Write the minimum acceptable result for each workload, then identify which parts are optional: extra context, citations, reranking, enrichment, long explanations, image variants, or background summaries.
+
+Separate the request into stages with explicit budgets. Retrieval, moderation, generation, validation, tool planning, and formatting should not consume one unbounded timeout. Give each stage a deadline and a failure policy. If optional retrieval misses its budget, continue with a smaller context or ask the user to retry. If validation cannot complete, do not present an unverified structured action as final. Degradation is safe only when every skipped stage has a defined consequence.
+
+Keep the external contract stable where possible. A fallback should preserve authentication, request IDs, error semantics, and the response shape that clients can safely parse. If capability changes, expose it through a status field, trace metadata, or an explicit degraded-mode indicator. Do not silently return a different schema, omit required fields, or pretend that a partial result is complete. Compatibility is more valuable than cleverness during an incident.
+
+Use a capability matrix for fallback decisions. A smaller model may support text but not vision, tools, long context, or strict JSON. A cached answer may be acceptable for a common informational request but unsafe for account-specific data. A static template may work for status updates but not for a legal or financial recommendation. Check capability, data policy, context limits, price, and quality expectations before selecting the degraded path.
+
+Design several degradation levels instead of one emergency switch. Level one might remove optional enrichment while keeping the primary model. Level two might shorten context, reduce output length, or route to a faster compatible model. Level three might return a queued job, a saved draft, or a human handoff. Level four might reject new work while preserving reads and in-flight operations. Name these modes, version the policy, and make transitions observable.
+
+Protect expensive and side-effecting work first. When capacity is tight, pause batch generation, speculative hedges, large image variants, and nonessential agent loops before cutting the core interactive path. For tool calls, preserve the user's intent and draft the proposed action, but require a fresh authorization or a single serialized commit when the system is degraded. Never use a degraded mode as a reason to bypass approval boundaries.
+
+Set quality floors for fallbacks. Faster is not automatically better if the answer becomes unusable. Define checks such as schema validity, required fields, citation presence, safety policy, language, or task-specific acceptance. If a fallback fails the floor, return a clear partial state or escalate rather than repeatedly trying cheaper models. Measure accepted-result rate, not just response latency and HTTP success.
+
+Cache deliberately. A cache can preserve availability for stable, non-sensitive requests, but it must respect tenant scope, permissions, freshness, and model or prompt version. Never serve one customer's personalized answer to another customer because degradation disabled a lookup key. Include the source and age of cached data in internal metadata, and tell users when freshness matters to their decision.
+
+Make partial results useful and labeled. A streaming answer can stop after a safe boundary, a document pipeline can save the file while marking extraction pending, and an agent can show a plan without executing it. The status must distinguish complete, partial, pending, failed, and degraded. Clients need a way to render these states without guessing from missing fields or unusual text.
+
+Coordinate with admission control and budgets. Degradation is not permission to accept unlimited work. Reserve capacity for the core path, cap fallback concurrency, and enforce tenant and workflow budgets across every attempt. A fallback that is cheap per request can still overload the provider when a traffic spike moves the entire population onto it. Watch fallback share, queue wait, cost per accepted result, and provider health together.
+
+Propagate the user's deadline and intent. If only a few seconds remain, skip optional stages rather than starting work that cannot finish. If the request explicitly requires a specific model capability, return a useful capability error instead of silently degrading. Keep an operation ID across primary, fallback, cache, and queued paths so tracing and billing explain what happened once, not as several unrelated requests.
+
+Test degradation as a normal product path. Slow the primary model, return malformed output, remove retrieval, exhaust the fallback budget, expire a cache entry, disconnect during streaming, and restart the gateway with queued work. Test tenant isolation and tool authorization in every mode. Assert that the client sees one coherent state, no side effect executes twice, and recovery restores normal routing without leaving stale degraded flags behind.
+
+Give operators a small set of safe controls. They should be able to disable optional enrichment, reduce maximum output, pause batch traffic, change a fallback route, or require human review. Each control needs an owner, reason, expiry, and audit log. Prefer scoped controls by provider, model, region, route, or workload over a single global kill switch. Keep a global emergency control for genuine incidents, but make its blast radius obvious.
+
+Communicate the change without exposing internal chaos. A user may need to know that a result is delayed, partial, cached, or awaiting review. They usually do not need a provider name, internal queue depth, or speculative attempt details. Use stable language, a request ID, and a next action. Good degraded UX turns “the AI is down” into “your file is saved; extraction will continue” or “the draft is ready; sending is paused for confirmation.”
+
+Review recovery, not only failure. When provider health improves, drain queues gradually, restore optional stages in a controlled order, and compare quality and cost with the pre-incident baseline. Do not flip every feature back on at once. Record which degraded paths users encountered, whether they completed their task, and which fallback caused support issues. Those findings should update the policy and its tests.
+
+The practical lesson is simple: graceful degradation starts with the user outcome, not the provider error. Define essential work, budget each stage, keep contracts stable, choose fallbacks by capability, label partial states, protect side effects, cap fallback capacity, and test recovery. A resilient AI gateway does not promise that every feature remains perfect under pressure. It keeps the important journey understandable and useful.
+
+That is it for today. Keep the core path alive, degrade with intent, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration} {len(parts)} chunks')
