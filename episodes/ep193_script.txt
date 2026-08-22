@@ -1,0 +1,33 @@
+EP193: AI API Rollback Design — Restore Safe Behavior Without Losing State
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A rollback sounds simple until a model change has already altered prompts, caches, queued jobs, usage records, or tool decisions. Restoring an old container does not necessarily restore old behavior. Today we are talking about rollback design for AI APIs: how to return production to a known-safe state while preserving the identity and accounting of work already in flight.
+
+Start by defining the rollback target. “Previous deployment” is not precise enough. Name the model route, provider, prompt version, capability policy, timeout, retry rules, validation behavior, and configuration snapshot that together represent the last-known-good state. Store that bundle with a version and effective time. A rollback should select a coherent behavior set, not reconstruct one from whichever pieces happen to be current.
+
+Separate new exposure from in-flight work. Stop admitting new traffic to the failing version, then decide how to finish requests that already started. A short non-streaming request may complete under the old version. A long generation or tool workflow may need to pause, cancel, or finish under the original contract. Never switch a stream halfway between incompatible behaviors, and keep operation and attempt IDs so the final result remains explainable.
+
+Preserve state across the rollback. Keep idempotency records, job status, queued work, artifacts, usage reservations, audit events, and tool commit markers. If the new version wrote a different schema, use an explicit migration or compatibility layer. Do not delete state because it was created by the bad release; that can turn a behavior regression into data loss or duplicate side effects.
+
+Rollback routing before code when routing is the failure. A model alias, provider credential, region, or policy flag can change behavior even when application binaries are unchanged. Check caches, feature flags, prompt registries, capability metadata, and edge configuration. Make the rollback atomic where possible, or sequence changes so traffic cannot observe a half-restored contract.
+
+Protect side effects during uncertainty. Pause tool execution, external writes, purchases, messages, and irreversible actions until the target policy and authorization state are verified. Preserve plans or drafts, but require a single idempotent commit after rollback. A fast rollback that sends the same email twice or creates duplicate records is not a safe recovery.
+
+Reconcile billing and usage. The failing version may have issued retries, hedges, partial streams, or fallback calls before traffic was stopped. Compare gateway attempts with provider usage, reservations, accepted results, and invoices. Keep uncertain work pending, settle it idempotently, and make the release version visible in internal accounting. Do not assume that cancelling a request removes all billable usage.
+
+Choose rollback scope deliberately. A global rollback may be necessary for a security or data-isolation defect. For a quality or latency regression, a scoped rollback by model, route, region, workload, or tenant can preserve a healthy canary. The scope should match the evidence and the blast radius. Keep an emergency global control, but make its owner, reason, expiry, and audit trail explicit.
+
+Verify the target before shifting traffic. Run synthetic requests through authentication, routing, streaming, structured validation, logging, billing, and fallback paths. Check the actual provider and model, not only the configuration file. Confirm capability, latency, quality, data policy, and safety floors. A rollback target that was healthy last week may no longer be healthy after provider drift or capacity changes.
+
+Drain and revalidate queues. Requests admitted under the failed version may depend on its prompt, schema, or model behavior. Classify each job by deadline, contract, side-effect risk, and idempotency state. Replay only work that remains valid under the rollback target. Expire or dead-letter incompatible work with a clear reason, and avoid replay storms by respecting remaining deadlines and shared budgets.
+
+Keep rollback reversible. Save the failed version's configuration and evidence before replacing it. If the rollback exposes a second issue, operators need a known path to the previous state rather than a chain of guesses. Record who initiated the change, what traffic moved, which checks passed, and what residual uncertainty remains.
+
+Test rollback under realistic pressure. Inject malformed output, provider slowdown, cache inconsistency, a gateway restart during the switch, a client disconnect, and a duplicate retry. Verify that only one side effect commits, streams remain coherent, reservations reconcile, and clients receive stable statuses. Perform the drill before an incident; the first live rollback should not be the team's first experience with the control.
+
+Communicate the behavior change. Internal teams need the target version, affected cohorts, stop conditions, and verification evidence. Customers may need to know that a request is delayed, queued, or requires a safe retry with the same idempotency key. Do not expose confidential provider details, but do not pretend a partial or cached result is normal if the contract changed.
+
+Review whether rollback is the right action. Some failures are caused by external provider drift, stale data, or a client change, so restoring the old application may not help. Compare rollback with traffic pause, fallback routing, feature disablement, or a forward fix. The decision should use user impact, safety, reversibility, and evidence rather than deployment habit.
+
+The practical lesson is simple: rollback is a behavior restoration, not a file replacement. Define a coherent target, stop unsafe exposure, preserve state and identity, protect side effects, reconcile usage, verify real user journeys, drain queues carefully, and keep the operation reversible. AI systems change across models, prompts, providers, and policy layers; safe rollback must account for all of them.
+
+That is it for today. Roll back coherently, preserve the state, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.
