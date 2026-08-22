@@ -1,0 +1,78 @@
+from pathlib import Path
+import subprocess, json, xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 180
+title = 'EP180: AI API Budgets — Put Spend Controls Where They Matter'
+description = 'A practical guide to AI API usage budgets: set tenant and workflow limits, reserve spend, enforce model-aware controls, handle streaming and retries, expose useful feedback, and keep budget enforcement reliable during incidents.'
+pub_date = 'Wed, 07 Oct 2026 08:30:00 +0000'
+script = '''EP180: AI API Budgets — Put Spend Controls Where They Matter
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. An AI product can be fast, reliable, and well designed, yet still surprise its owner with a bill that no one can explain. Spend control is not just a dashboard that reports yesterday's usage. It is a runtime capability that decides which work can start, how much it may consume, and what happens when a limit is close. Today we will design budgets that protect both the business and the user experience.
+
+Start with a budget model that matches how your organization makes decisions. A single monthly account limit is useful, but it is rarely enough. You may need a platform budget, team budgets, customer budgets, project budgets, and per-workflow limits. Keep those scopes explicit. A request can be allowed only when it fits every applicable policy, and the response should identify the policy that blocked it without exposing another tenant's financial data.
+
+Separate a budget from a rate limit. A rate limit controls how quickly work arrives, usually with requests or tokens per minute. A budget controls how much value or money can be consumed over a longer window. Rate limits protect capacity; budgets protect spend. You often need both, because a modest request rate can still create a large bill when it selects an expensive model or generates long outputs.
+
+Use a normalized accounting unit. Dollars are the clearest unit for financial control, but token counts, image units, video seconds, and tool execution time may be better for product-level quotas. Keep the provider's raw usage and price inputs alongside the normalized charge. Store the model, provider, pricing version, currency, and calculation timestamp. This makes a later invoice explainable when a provider changes its price or reports usage after the request finishes.
+
+Decide whether authorization uses an estimate, a reservation, or actual usage. Before starting work, estimate the maximum likely charge from the model, input tokens, output cap, image size, video duration, or tool plan. Reserve that amount atomically against the applicable budget. When the request completes, replace the reservation with actual usage and release the difference. Reservations prevent many concurrent requests from all seeing the same remaining balance and overspending it.
+
+Estimates need guardrails. A client-controlled max token field should not be the only source of truth, and an agent may discover additional tool work after the first model call. Apply a server-side ceiling, require a new authorization decision when the plan expands, and reserve incrementally for long jobs. If the next step cannot be reserved, pause the workflow cleanly and return a useful explanation instead of allowing an agent to run until a card is declined.
+
+Make the ledger durable and idempotent. Each charge and reservation should have a stable operation ID, tenant, budget scope, amount, status, and source request. A retry of the usage callback must not create a second charge. Use an atomic balance or ledger transaction, and reconcile the ledger with provider usage records. The in-memory counter is fine for a fast hint, but it cannot be the financial authority after a process restart or during a multi-region race.
+
+Choose what happens at each threshold. At a warning level, show remaining budget in the dashboard and return headers or structured metadata to authorized clients. At a soft limit, route to a cheaper approved model, reduce the output cap, or require an explicit user confirmation. At a hard limit, reject new work with a stable error code and a retry or reset time. Existing work needs its own policy: finish reserved work, stop safely, or allow only a bounded amount of overage.
+
+Model-aware controls are more useful than a single blunt switch. A team may permit a low-cost model for experimentation but require approval for a frontier model. A customer may have separate image, video, and text allowances. A workflow can define a maximum cost per successful task even when its monthly budget has room. Express these policies as data, evaluate them in one gateway layer, and log the decision reason so operators can tell whether a request was denied by a tenant cap, a model restriction, or a global protection rule.
+
+Streaming and asynchronous jobs need special treatment. For streaming, reserve against the output ceiling before opening the stream and account for actual usage when the stream closes or is interrupted. For a queued image or video job, reserve before enqueueing, not when a worker happens to start. If a webhook is delayed, reconcile by operation ID. A client disconnect must not release a reservation while the provider job continues in the background.
+
+Retries, fallbacks, and hedged requests can quietly multiply spend. Tie every attempt to one logical operation, but account for each provider job that actually ran. A fallback should check the remaining budget before it starts. If a timeout leaves provider state uncertain, reconcile it or keep the reservation until the outcome is known. Idempotency prevents duplicate work; budget reservations ensure that a legitimate retry does not bypass a limit while the first attempt is still unresolved.
+
+Give users a productive failure. A generic 429 or 402 leaves developers guessing. Return a stable error type, the scope that reached its limit, the reset time when safe to disclose, and a request or operation ID for support. Do not reveal exact balances to untrusted callers if that creates a privacy or abuse problem. For interactive products, let the user switch to an approved lower-cost route or request an increase without losing the original task context.
+
+Keep enforcement available during incidents. If the pricing service is unavailable, do not silently allow unlimited expensive requests. Use a versioned local price snapshot and a conservative fail-closed or bounded-degraded policy. If the ledger is unavailable, accept only work covered by a durable reservation, or pause new work until accounting recovers. Test a partial outage, a provider price update, a clock skew, a duplicate webhook, and a region partition before trusting the control plane.
+
+Make spend observable without making logs dangerous. Track estimated, reserved, actual, released, denied, overage, and reconciled amounts. Break down usage by tenant, workflow, model family, provider, and success outcome. Keep prompts, API keys, and sensitive outputs out of ordinary cost logs. Alert on unusual cost per successful task, rapid reservation growth, fallback spikes, and a gap between provider usage and your ledger. A budget system is doing its job when it explains both normal spend and abnormal spend quickly.
+
+Review the policy itself. Budgets that are too strict push teams toward workarounds; budgets that are too loose become decorative. Start with historical usage, set a warning threshold that leaves time to act, and tune limits by workflow value rather than by guesswork. For internal experimentation, a small hard cap and an approved cheap model are often better than blocking all exploration. For production customer work, combine prepaid balance, reservations, and clear overage rules.
+
+The practical lesson is simple: a spend dashboard tells you what happened, but a budget control decides what may happen next. Define scopes, estimate and reserve before work starts, settle against durable usage records, account for retries and fallbacks, enforce model-aware thresholds, and make failures actionable. Put those decisions in the gateway and every application gets a consistent answer to the question that matters: can this operation start without creating an uncontrolled bill?
+
+That is it for today. Make spend predictable, make limits useful, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration} {len(parts)} chunks')
