@@ -1,0 +1,80 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 184
+title = 'EP184: AI API Request Hedging — Cut Slow Tails Without Paying Twice'
+description = 'A practical guide to request hedging for AI APIs: identify true tail latency, launch a bounded backup safely, avoid duplicate side effects and charges, protect streaming responses, and measure whether the extra capacity is worth it.'
+pub_date = 'Sat, 17 Oct 2026 08:30:00 +0000'
+script = '''EP184: AI API Request Hedging — Cut Slow Tails Without Paying Twice
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A slow AI request is not always a failed request. Sometimes the provider is having a long-tail moment, the selected route is queueing, or one connection has stalled while the rest of the fleet is healthy. Today we are talking about request hedging: launching a carefully delayed backup attempt when the first attempt is unusually slow, then accepting the first safe result. It can improve tail latency, but in AI systems it can also double token spend, duplicate tool calls, or create two streaming answers. The engineering is in knowing when a hedge is justified and when it is dangerous.
+
+Begin by measuring the problem precisely. Look at p50, p95, p99, and the timeout rate by provider, model, route, region, request size, and workload. A hedge is aimed at the tail, not at ordinary latency. If most requests are slow, adding backups only increases load and can make the queue worse. Separate time spent waiting for a connection, waiting for the provider to start, receiving the first token, and receiving the complete validated result. For a chat user, time to first token may matter most. For a structured extraction job, complete result latency and validation matter more.
+
+Set a hedge delay from observed data. A simple starting point is a high percentile of healthy first-attempt startup latency, such as the p95 time to first token for the same route and request class. The delay must be long enough that ordinary requests do not create a second call, but short enough to help the requests that are genuinely stuck. Make it adaptive by route and load rather than one global number. During a provider incident, the delay may need to increase or hedging may need to turn off completely so the gateway does not amplify an outage.
+
+Give every logical operation one identity. The client request ID is not enough if a gateway retries internally. Create an operation ID and an attempt ID, then pass a stable idempotency key when the upstream supports it. The gateway should record that attempt two is a hedge for operation one, not a new customer request. This lets billing, tracing, quota enforcement, and incident analysis group the attempts correctly. It also gives the system a place to apply a policy such as charging for one accepted completion while accounting separately for speculative work.
+
+Hedging is safest for read-like, deterministic work with no external side effects. A text completion that is only returned to the user may be a candidate, provided the application can tolerate variation. A tool-calling request that sends an email, creates a ticket, changes a database record, or spends money is different. Two attempts may both decide to call the tool. Do not hedge side-effecting operations unless the tool layer has its own idempotency key and the gateway can guarantee that only one committed action wins. Often the right policy is to hedge the planning step but require a single serialized commit step.
+
+Treat structured output as part of the winner decision. The first response to arrive is not automatically the best response. If it is malformed JSON, missing required fields, blocked by a safety policy, or attempts an unsupported tool call, it should not win merely because it was fast. Define a completion predicate: transport completed, schema validated, policy checks passed, and any required citations or tool arguments are acceptable. Keep the other attempt available briefly if the first result fails validation. The gateway can select the first valid result while recording that the fastest result was rejected.
+
+Streaming makes hedging much harder. Once tokens from attempt one have been sent to a client, the gateway cannot switch cleanly to attempt two without producing duplicated or contradictory text. For streaming chat, hedge before the first token only. Start the backup after the hedge delay if no usable headers or first token have arrived, and commit to the first attempt that reaches a defined stream-start boundary. Cancel the loser immediately. After the first token is committed, do not hedge; use a stream timeout, connection recovery policy, or client-visible partial completion instead.
+
+Do not race two full streams by forwarding both. That doubles provider work and makes the client protocol ambiguous. If the gateway must compare streams, buffer them behind a bounded internal buffer until a winner is selected. But buffering removes the latency benefit and may consume a lot of memory for long outputs. In most products, a pre-first-token hedge with a strict commit point is the more understandable design. Document the behavior so client teams know whether the first token is a commitment boundary.
+
+Cancellation is a requirement, not an optimization. When a winner is selected, send cancellation to the losing provider connection, close its stream, and stop reading its body. Add a cancellation timeout and count cases where the provider continues generating after the gateway has disconnected. Some providers may bill generated tokens even after cancellation, so measure actual speculative cost instead of assuming cancellation makes the loser free. A hedge policy that improves p99 by five percent but adds twenty percent to billable tokens is not a win without a business reason.
+
+Put a concurrency budget around speculation. Limit the number and percentage of in-flight hedge attempts per tenant, route, provider, and gateway instance. Reserve capacity for primary traffic so a burst of slow requests cannot turn every operation into two or three attempts. A useful rule is to allow a hedge only when the route has spare concurrency and the projected cost is inside the request's budget. When the provider is returning rate-limit or overload signals, disable hedging for that route and prefer backoff, failover, or a user-visible retry state.
+
+Choose a backup that is actually independent. Sending both attempts through the same congested provider, region, connection pool, or model queue may create cost without reducing correlated latency. A backup can use another provider, an alternate region, a different capacity class, or a route with an independent queue. But independence has a quality tradeoff: a faster fallback model may produce a result that does not meet the same contract. Validate capability, price, context limits, tool support, and safety policy before using a route as a hedge target.
+
+Keep selection fair and reproducible. The primary route should follow normal routing policy, while the hedge target should be selected from an approved compatible set. Record the route, model, provider, attempt start time, hedge delay, first-token time, cancellation time, winner reason, and validation result. Include whether the hedge was launched because of startup delay, an explicit provider signal, or a local connection fault. Without this metadata, a dashboard may show faster completions while hiding that the system is winning more often on an expensive or lower-quality route.
+
+Evaluate hedging against a no-hedge baseline. Compare p50 and tail latency, first-token latency, accepted-result rate, cancellation success, token usage, cost per accepted result, provider error rate, and user-visible quality. Slice by prompt length, output length, model, provider, tenant, and streaming versus non-streaming. Run a small canary with a fixed exposure and a hard budget. The key question is not whether some requests finish faster; it is whether the product outcome improves after accounting for speculative work and rejected results.
+
+Add failure tests before enabling the feature. Delay the first attempt, make the backup fail, make both return valid results, make the first return invalid JSON, make both call a tool, drop cancellation acknowledgements, and let the client disconnect while the race is active. Test a provider that ignores cancellation and a gateway restart between attempts. Assert that only one result reaches the caller, side effects have one idempotency key, loser streams are not forwarded, and accounting groups all attempts under one operation. These cases belong in the gateway's contract tests and load tests.
+
+Make the policy explicit in the API and configuration. A request may opt out of hedging for sensitive or expensive work, while the gateway can enforce a maximum delay, maximum speculative attempts, and maximum spend. Expose a response header or trace field that says whether a hedge was used, without leaking provider details that should remain internal. Keep emergency controls for disabling hedges globally, by tenant, or by route. The default should be conservative: one primary attempt, at most one delayed hedge, and no hedging after a stream has committed its first token.
+
+The practical lesson is simple: hedging is a tail-latency tool, not a generic retry strategy. Measure the tail, delay the backup, make attempts observable, cancel losers, cap speculative capacity, validate the winner, and protect every side effect with idempotency. For streaming, commit at first token and never splice two answers together. When the extra attempt has a clear budget and a safe completion boundary, request hedging can make an AI gateway feel faster without turning every slow request into a double charge.
+
+That is it for today. Race carefully, cancel aggressively, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration} {len(parts)} chunks')
