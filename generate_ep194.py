@@ -1,0 +1,80 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 194
+title = 'EP194: AI API Dependency Mapping — Know What a Model Change Can Break'
+description = 'A practical guide to dependency mapping for AI APIs: connect models to prompts, schemas, tools, tenants, budgets, and user journeys so teams can assess blast radius before changing production behavior.'
+pub_date = 'Tue, 27 Oct 2026 08:30:00 +0000'
+script = '''EP194: AI API Dependency Mapping — Know What a Model Change Can Break
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A model change rarely affects only the line that names the model. It can change prompt length, structured output, tool arguments, latency, cost, safety behavior, cached results, and the clients that quietly depend on all of them. Today we are talking about dependency mapping for AI APIs: building enough of a living map to understand blast radius before a seemingly local change reaches production.
+
+Start with the user journey. List the outcomes your product promises, then trace each outcome through API route, authentication, tenant policy, prompt template, model capability, provider, validation, tools, storage, billing, and client rendering. A dependency map is useful when it connects technical components to a user-visible task. “Model A is used by service B” is a start; “Model A produces the JSON that lets workflow C approve an invoice” is an actionable dependency.
+
+Record direct and indirect dependencies. Direct dependencies include the selected model, provider endpoint, prompt, schema, and tool definitions. Indirect dependencies include context truncation, retry policy, cache keys, quota reservations, moderation, observability, and downstream parsers. Many incidents happen in the indirect layer because it is assumed to be stable while the model behavior changes underneath it.
+
+Version the edges, not only the nodes. A prompt version, model alias, schema, capability policy, and routing rule may each change independently. Record which versions were active together and when they became effective. Keep operation metadata that can answer which combination produced a result. Without versioned edges, a team can identify every component involved and still fail to reproduce the production behavior.
+
+Map contracts explicitly. For each dependency, write the assumptions that consumers make: required fields, token limits, tool names, latency budget, refusal behavior, language, citations, safety classification, and error semantics. A model can remain available while violating one of these assumptions. Treat a contract edge as a release gate when breaking it would cause a user-visible failure or unsafe action.
+
+Include ownership and criticality. Every route, prompt, schema, tool, and policy should have an owner, a workload classification, a rollback target, and a severity if it fails. Mark critical paths such as payments, identity, side effects, and regulated data separately from best-effort enrichment. Ownership turns a graph into an operating tool: during a change review, someone knows who can confirm the dependency and who can reverse it.
+
+Trace tenant and data boundaries. A shared model route may serve many tenants with different retention, residency, budget, or capability rules. A fallback that is acceptable for one workload may be forbidden for another. Map where prompts, outputs, traces, files, and tool results travel, and record which policy decides the route. Dependency analysis that ignores data boundaries can recommend a technically simple change that is operationally unacceptable.
+
+Connect dependencies to capacity and cost. A model change can alter output length, concurrency, queue time, token burn, or provider pricing. Map the quotas, admission pools, budgets, and fallback routes that absorb those changes. Identify shared bottlenecks and noisy-neighbor risks before rollout. A dependency is operationally important even when it never appears in the request code if it determines whether the request can finish on time.
+
+Use the map to estimate blast radius. Ask which tenants, workflows, regions, schemas, tools, and billing paths can observe the proposed change. Separate affected from critical: thousands of low-risk chat requests may be less urgent than one workflow that commits a financial action. Define the smallest safe canary cohort and the signals that would stop exposure. A map should narrow the rollout, not merely produce a longer checklist.
+
+Keep the map close to delivery. Generate or update dependency metadata from route configuration, prompt registries, schema definitions, tool catalogs, and usage traces where possible. Require a change to declare affected edges and owners. Store the human judgment that automation cannot infer, such as business criticality or acceptable fallback behavior. Stale documentation is worse than a small map because it creates false confidence.
+
+Test the highest-risk edges. For structured output, run schema and semantic validation. For tools, verify authorization, idempotency, and single-commit behavior. For routing, probe capability, residency, latency, and price. For billing, compare estimated and actual usage. For clients, replay representative requests and verify rendering of partial, degraded, and error states. Choose tests from the map's critical edges rather than applying the same generic suite to every change.
+
+Review interaction changes. A new prompt may increase context enough to trigger truncation. A new schema may change validation and fallback rates. A longer timeout may increase concurrency and budget pressure. A provider switch may alter moderation or streaming events. Run a small dependency-aware matrix for combinations that share a boundary, then preserve any failure as a regression fixture. The goal is not to test every possible combination; it is to test the combinations the map says are dangerous.
+
+Make rollback graph-aware. A rollback must restore the compatible set of model, prompt, schema, policy, cache, and route versions. Preserve in-flight state, idempotency records, queue decisions, and billing attribution. If only one node is reverted while its dependent edge remains new, the system may enter a hybrid state that was never tested. Store last-known-good bundles so recovery is a deliberate selection rather than a reconstruction under pressure.
+
+Use dependency maps during incidents. When a provider degrades, identify which workloads share the route, which fallbacks satisfy their contracts, and which tenants require a policy exception. When a schema breaks, find the clients and tools that consume it. When spend rises, trace the model and prompt changes that increased tokens or retries. A useful map reduces the time between symptom and scoped action.
+
+Measure map quality itself. Track unmapped routes, dependencies without owners, contracts without tests, stale versions, unknown fallback behavior, and changes that bypass review. Sample production traces to discover edges that documentation missed. The map is not complete when every box has a name; it is useful when it helps predict failures and choose safer actions.
+
+The practical lesson is simple: model changes are dependency changes. Start from user journeys, version the edges, record contracts and ownership, include data, capacity, and billing boundaries, test critical interactions, and make rollback restore a compatible bundle. A living dependency map gives teams the confidence to move quickly because it makes blast radius visible before production has to teach the lesson.
+
+That is it for today. Map the blast radius, protect the edges, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration} {len(parts)} chunks')
