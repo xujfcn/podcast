@@ -1,0 +1,78 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 186
+title = 'EP186: AI API Admission Control — Keep Overload From Becoming the User Experience'
+description = 'A practical guide to admission control for AI APIs: classify work, reserve capacity, shed safely, protect interactive traffic, and make overload decisions visible before queues become outages.'
+pub_date = 'Mon, 19 Oct 2026 08:30:00 +0000'
+script = '''EP186: AI API Admission Control — Keep Overload From Becoming the User Experience
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. An AI API can be technically available and still be failing its users. Requests may sit in a queue until their deadlines expire, retries may multiply the load, and one large batch can consume the capacity needed for interactive chat. Today we are talking about admission control: deciding which work should enter the system, when it should wait, and when it should be rejected before overload turns into a slow-motion outage.
+
+Start with the real bottleneck. It may be provider concurrency, tokens per minute, GPU capacity, a connection pool, a queue worker, a database, or a budget. Measure queue wait separately from provider service time. Track active work, queued work, arrival rate, completion rate, deadline misses, and the cost of work that is eventually abandoned. If you only watch CPU or HTTP success rate, the gateway can look healthy while users wait through their entire timeout.
+
+Classify work before admitting it. Interactive chat, structured extraction, background summarization, image generation, and agent tool calls have different deadlines and resource needs. Attach a workload class, tenant, priority, estimated input and output size, and client deadline to every operation. The admission decision should use that context rather than treating every request as an interchangeable unit.
+
+Use a reservation step for scarce capacity. Estimate the request's token ceiling, concurrency cost, or expected job cost, then reserve against the relevant pool before dispatching upstream. Reservations must be atomic and have an expiry or recovery path. If a gateway crashes after admission, durable state should let the system release or reconcile the reservation instead of permanently shrinking capacity.
+
+Admission control is not the same as a queue with no limit. Every queue needs a bound based on useful waiting time and available memory. A request whose remaining deadline is shorter than the estimated queue plus service time should be rejected or moved to an explicitly asynchronous path. Accepting work that cannot finish only creates more timeouts, more retries, and less capacity for requests that could succeed.
+
+Protect interactive traffic deliberately. Give latency-sensitive work a reserved pool or a weighted share, but keep a cap so priority does not become an unlimited bypass. Batch jobs can use spare capacity and pause during bursts. Weighted fair queuing, separate concurrency budgets, and deadline-aware scheduling are often more useful than a single global priority number. Fairness should be measured by accepted results and deadline success, not by equal queue positions.
+
+Shed load with a clear policy. When capacity is exhausted, reject the least valuable or least time-sensitive work first, return a stable error, and include safe retry guidance. Do not randomly drop requests or silently downgrade a model when the workflow requires a specific capability. A controlled 429 or 503 is easier for clients to handle than a request that succeeds after its deadline or fails halfway through a tool action.
+
+Make deadlines propagate end to end. The client deadline should be divided among queue wait, connection setup, provider execution, validation, and response delivery. A request admitted with only a few milliseconds remaining should not start a fresh provider attempt. Propagate cancellation when the client disconnects or the deadline expires, and account for providers that continue generating after the gateway has stopped listening.
+
+Retries must ask admission control again. A retry is new work against a shared resource, even when it belongs to the same logical operation. Carry the operation ID and remaining budget, apply an attempt limit, and avoid retrying when the remaining deadline cannot support another attempt. Otherwise a small upstream failure can cause every client to resubmit into the same overloaded queue.
+
+Use load shedding before an incident, not only during one. Keep a dry-run mode that records what the policy would have rejected. Run canaries with hard caps, rehearse provider slowdown, fill the queue with long generations, and disconnect clients while work is active. Verify that admitted work completes at the expected rate, rejected work receives an actionable response, and reservations are released after cancellation.
+
+Keep overload decisions observable. Record the workload class, tenant, route, estimated cost, queue wait, admission result, rejection reason, remaining deadline, and selected capacity pool. Dashboards should show admission rate, queue depth, deadline miss rate, shed load, accepted-result rate, and cost per accepted result. An alert on queue depth alone is not enough; a shallow queue with rapidly expiring requests is also an outage signal.
+
+Coordinate admission control with provider signals. A provider's rate-limit response, latency increase, or overload error should reduce the gateway's local offer before the queue grows without bound. Use circuit breakers and route health, but keep their state scoped by provider, model, region, and workload where possible. If every route shares one breaker, a problem with one model can unnecessarily reject unrelated work.
+
+Be honest about fallback behavior. A cheaper or faster model may be a valid fallback for a conversational answer but not for a JSON contract, vision request, or tool call. Check capabilities, context limits, safety rules, and budget before admitting a fallback attempt. Record the policy decision so a successful response does not hide that the request was served by a different contract.
+
+Give operators and customers a way to understand the decision. Expose reset time, retry-after, request status, and a request ID where appropriate. In internal traces, include the policy version and the capacity rule that admitted or rejected the operation. Keep emergency controls to reduce batch shares, pause expensive routes, or disable new admissions while allowing in-flight work to drain. Every override should have an owner, expiry, and audit record.
+
+The practical lesson is simple: capacity is a product constraint, so admission must be designed as part of the API. Classify work, reserve scarce resources atomically, bound queues, propagate deadlines, protect interactive traffic, shed load predictably, and make retries pay the same capacity cost as first attempts. A reliable gateway does not promise that every request will enter immediately. It promises that the work it accepts has a fair chance to finish.
+
+That is it for today. Admit deliberately, shed safely, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration} {len(parts)} chunks')
