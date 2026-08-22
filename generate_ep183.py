@@ -1,0 +1,78 @@
+from pathlib import Path
+import subprocess, json, xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 183
+title = 'EP183: AI API Prompt Versioning — Ship Prompt Changes Like Code'
+description = 'A practical guide to prompt versioning for AI APIs: keep templates reproducible, separate content from code, test changes, roll out safely, preserve rollback, and connect prompt releases to quality, cost, and incidents.'
+pub_date = 'Sat, 10 Oct 2026 08:30:00 +0000'
+script = '''EP183: AI API Prompt Versioning — Ship Prompt Changes Like Code
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A prompt can look like text, but in production it behaves more like a dependency. Change one instruction, reorder a few examples, or update a policy paragraph, and the model may route differently, call a tool differently, consume more tokens, or produce output that no longer passes validation. Today we will treat prompts as versioned production artifacts instead of strings hidden inside application code.
+
+Start with an explicit prompt identity. Give every system prompt, developer instruction, template, and reusable few-shot set a stable name and immutable version. A request should record the prompt version that was actually rendered, not only the name of the template selected by the application. If a support ticket says that an answer changed yesterday, the team needs to reconstruct the exact instructions, examples, model, parameters, and context policy that produced it.
+
+Separate prompt content from request data. Keep the template in a reviewed artifact and inject user content, retrieved documents, tool results, and tenant policy through named fields. This makes the boundary visible and makes it easier to test whether untrusted data can override instructions. It also prevents a quick edit to a customer message from being mistaken for a prompt release. A rendered prompt may be useful for protected debugging, but the source template and its input classes should remain separately identifiable.
+
+Use a manifest for reproducibility. A prompt release should declare its template version, model route or capability requirement, parameter defaults, output schema, tool definitions, safety policy, locale, and context assembly rules. Hash the normalized manifest so an operation can reference a compact fingerprint. When a gateway changes a default model or an adapter normalizes parameters, that change should appear in the manifest or route version rather than silently altering the meaning of an old prompt.
+
+Store prompts like code. Put them in version control or a registry with review history, owners, tests, and release status. Avoid editing a production prompt in a dashboard without creating an immutable revision. The registry should distinguish draft, approved, canary, active, deprecated, and retired states. A prompt can be rolled back only if the previous version is still available, its dependent model capability is still supported, and its policy checks can still run.
+
+Define behavioral contracts before changing wording. A contract is not a claim that the model will produce identical prose. It can require valid JSON, required fields, bounded length, no unsupported tool calls, citation presence, refusal behavior for a risk class, or a minimum task-success score. Keep exact-match examples for deterministic fragments, but use semantic or rubric-based checks for open-ended answers. The goal is to catch meaningful regressions without pretending that natural language is a byte-for-byte interface.
+
+Build a representative evaluation set. Include ordinary requests, long context, missing information, ambiguous instructions, multilingual inputs, adversarial content, tool-use cases, and previously failed production examples. Label the expected outcome and the checks that matter for that workload. Run the candidate prompt against the same model route and parameters first, then compare it with the current version on quality, validation rate, latency, token use, refusal behavior, and cost per accepted result.
+
+Do not let averages approve a prompt. A candidate that improves the mean score while breaking one critical workflow is not ready. Slice results by task class, tenant tier, language, input length, model route, and tool path. Pay attention to tail latency, output length, structured-output repair rate, and fallback share. A prompt can appear cheaper because it gives shorter answers while quietly increasing retries or human review. Release decisions should use the outcome that the product actually promises.
+
+Make rollout assignment deterministic. Choose a cohort using a stable tenant, project, or user hash so one user does not bounce between prompt versions on every request. Keep the assignment separate from the prompt name and record it in the request metadata. A canary should have a fixed exposure, an owner, a start time, and automatic stop conditions. Do not use a random percentage with no way to reconstruct who saw which version when investigating a regression.
+
+Connect prompt releases to feature flags carefully. A flag can select a prompt version, but it should not change the template, model, safety policy, and output schema as one opaque bundle unless that bundle has a single release identity. Prefer a release manifest that points to compatible components and validates them before activation. If a prompt requires a new tool schema or model capability, the gateway should reject an invalid combination before serving traffic rather than discovering the mismatch in production.
+
+Keep rollback boring and fast. Maintain the previous known-good release, define the rollback owner, and test the operation in a staging or canary environment. Rollback triggers can include a sharp fall in schema validity, task success, user rating, or tool-call correctness, along with a rise in latency, spend, fallback, or support reports. Roll back the prompt selection first when possible, then investigate whether a model or gateway change is the real cause. A rollback should not delete evidence needed to understand the failure.
+
+Version context assembly as well as the visible prompt. Retrieval ranking, chunk limits, memory summaries, conversation truncation, and tool-result formatting can change behavior as much as a sentence in the system message. Record the context policy version and relevant document or index revision. Do not store private documents in ordinary release metadata, but preserve safe references that let an authorized investigator understand which context class was included and whether stale or unauthorized material entered the request.
+
+Protect prompt supply chains. Review templates for hidden instructions, accidental secrets, unsafe tool permissions, and policy conflicts. Treat examples and retrieved text as data, not trusted instructions. Limit who can publish an active prompt and require stronger review for prompts that can send messages, modify records, spend money, or access sensitive systems. Scan prompt repositories and rendered test fixtures for credentials. A prompt registry is part of the production control plane, so it needs access control, audit logs, backups, and retention rules.
+
+Measure prompt performance over time. Dashboards should connect prompt version to accepted-result rate, validation failures, task completion, latency, tokens, cost, fallback, and user feedback. Keep model and provider dimensions alongside it so a prompt regression is not blamed on the wrong layer. Alert on a new version that exceeds a budget, causes an unusual output-length shift, or changes tool-call patterns. Track exposure so a small canary failure is not compared directly with a mature release serving most traffic.
+
+Test the release workflow itself. Create a candidate, run static checks, evaluate the representative set, review slices, publish a manifest, assign a canary, inspect telemetry, promote, and roll back. Assert that every request has a prompt fingerprint, every active release is immutable, incompatible components are rejected, and old versions remain retrievable. Test a registry outage too: decide whether the gateway uses a cached approved release, fails closed for high-risk workflows, or serves a clearly defined emergency version. Reliability includes the control plane that chooses the instructions.
+
+The practical lesson is simple: prompts are operational dependencies. Give them immutable identities, manifests, contracts, evaluation data, deterministic cohorts, protected release states, and fast rollback. Record prompt, context, model, and route versions together, then judge changes by accepted outcomes rather than impressive examples. When prompt changes move through the same disciplined path as code, teams can improve behavior without turning every edit into a production mystery.
+
+That is it for today. Version the instructions, measure the outcome, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one reliable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True)
+seconds = float(json.loads(probe.stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+size = audio.stat().st_size
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'description').text = description
+    ET.SubElement(item, 'pubDate').text = pub_date
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    ET.SubElement(item, f'{{{ns}}}duration').text = duration
+    ET.SubElement(item, f'{{{ns}}}episode').text = str(ep)
+    ET.SubElement(item, f'{{{ns}}}episodeType').text = 'full'
+    ET.SubElement(item, f'{{{ns}}}explicit').text = 'false'
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {size} bytes {duration} {len(parts)} chunks')
