@@ -1,0 +1,75 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 200
+title = 'EP200: AI API Gateway Health Probes — Test Readiness Before You Route Production Traffic'
+description = 'A practical guide to health probes for AI API gateways: use safe synthetic requests, verify provider capabilities and regions, measure useful readiness, and gate routing decisions without creating extra incidents or surprise spend.'
+pub_date = 'Thu, 27 Aug 2026 18:15:00 +0000'
+script = '''EP200: AI API Gateway Health Probes — Test Readiness Before You Route Production Traffic
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A provider can be reachable and still be a bad destination for production traffic. Its endpoint may answer a ping while streaming is broken, structured output is rejected, a model capability has changed, or the region is accepting requests but cannot finish them within your deadline. Today we are talking about AI API gateway health probes: small, deliberate checks that test whether a route is ready for a particular workload before the gateway sends real users there.
+
+The first idea is that health is not one boolean. Traditional services often expose a liveness check and a readiness check. AI routes need a richer view because the question is not simply, “Is the process running?” The useful question is, “Can this provider, model, region, and adapter deliver this workload under its current policy and deadline?” A text completion route, a vision route, a tool-calling route, and a long-running video job can all have different readiness states at the same moment.
+
+Start with a route inventory. Give every route an identity that includes provider, model family, region, adapter version, and protocol mode. Then describe the workload capabilities it claims to support: streaming, JSON or schema-constrained output, images, audio, tool calls, maximum input size, context limits, and expected latency class. A probe without this inventory can tell you that something responded, but it cannot tell you whether the response proves anything useful.
+
+Separate liveness, readiness, and suitability. A liveness check asks whether the gateway or adapter process is alive. A readiness check asks whether the upstream connection, credentials, quota, and basic protocol path are available. A suitability probe asks whether a specific workload contract works: can the selected model accept the request shape, stream the expected events, return valid structure, or complete an image input? Keeping these levels separate stops a green dashboard from hiding a broken capability.
+
+Use synthetic requests designed for safety. A probe should use a tiny fixed prompt, no customer content, no external tools, and no side effects. For structured output, request a small known object and validate it against the same parser used in production. For streaming, require the expected event sequence and a terminal marker. For vision, use a non-sensitive fixture with a known classification. For embeddings, verify dimensions and numeric validity. The fixture should be versioned, reviewed, and boring on purpose.
+
+Probe the whole path that you depend on. A direct provider ping may pass while DNS, a proxy, TLS negotiation, authentication, the gateway adapter, response normalization, or the client-facing stream is failing. Run probes through the same meaningful layers as production, but keep them clearly marked as synthetic. Record each stage separately so operators can distinguish an upstream refusal from an adapter parser failure or a gateway policy rejection.
+
+Readiness must be workload-specific. A provider can be ready for short non-streaming text and not ready for long streaming requests. Maintain separate readiness dimensions for protocol, capability, capacity, latency, quality guardrails, and policy. A route may remain eligible for a low-priority batch workload while being removed from an interactive route. This is more useful than taking an entire provider out of service because one model family or one feature is degraded.
+
+Measure more than success. Record probe duration, time to first byte, time to first token, total completion time, event counts, output validation, upstream status, and the reason a probe failed. Compare those values with a route's workload-specific thresholds. A probe that succeeds after thirty seconds is not ready for a two-second interactive deadline. A response that arrives quickly but fails schema validation is not a successful probe for a structured workflow.
+
+Use a sliding window and conservative state transitions. One failed probe should not necessarily eject a healthy route during a transient network blip, but repeated failures should reduce confidence quickly. Require a small number of consecutive successful probes before re-admitting traffic. Add cooldowns so an unstable route does not flap between eligible and ineligible. The state machine should be explicit: unknown, ready, degraded, quarantined, and recovering are easier to operate than a hidden score with no explanation.
+
+Do not let probes become an outage multiplier. Bound their frequency, concurrency, and timeout. Use a dedicated low-cost model or provider test entitlement when available. Never retry a probe indefinitely. If a provider is down, multiplying traffic with aggressive health checks only consumes more capacity and can make recovery harder. Probe schedules should also account for regional time zones, planned maintenance, and the difference between a cold route and a warm route.
+
+Treat credentials and quotas as part of readiness. A probe using a privileged production key can give a false sense of safety if customer keys have different scopes or limits. Test with credentials and policy that represent the traffic class being admitted, while keeping permissions minimal. Attribute probe usage separately from customer usage, enforce a budget, and include probe spend in capacity planning. A route that passes only because probes bypass tenant or quota controls is not actually ready.
+
+Make probe results actionable for routing. The gateway should consume a compact state with an expiry time, not an unbounded log. A route decision can then say, “eligible for streaming text in Tokyo,” or, “excluded from tool calling because the last three schema probes failed.” Include the probe version and the evidence timestamp in the decision record. This gives developers and operators a clear answer when a route changes without turning every request into a diagnostic investigation.
+
+Probe changes, not just steady state. Run checks when an adapter, model alias, routing policy, credential, region, or feature flag changes. A scheduled probe catches drift between releases, while an on-change probe catches a risky transition before broad exposure. For new routes, keep traffic at zero or at a tiny canary until the required probes pass. For a replacement route, compare probe results with the incumbent so “available” does not quietly become “less capable.”
+
+Protect the signal from false confidence. Synthetic prompts are useful, but they cannot prove answer quality for every application. Pair readiness with offline evaluations and sampled production quality checks. Keep the probe narrow enough to run frequently, and keep deeper evaluations separate. Also test the probe system itself: expire credentials, corrupt a fixture, break a stream terminator, exceed a context limit, and simulate a region that returns success too slowly. A health signal is an operational dependency and deserves its own tests.
+
+Give developers a trustworthy explanation. In a gateway dashboard or API response, expose safe route status, capability availability, last probe time, and a stable reason code. Do not expose provider secrets, internal headers, or customer data. When a requested capability is temporarily unavailable, return a useful alternative or a clear retry boundary if policy permits. Developers should be able to distinguish “model does not support this feature” from “route is recovering” without guessing from a generic five-hundred error.
+
+The practical lesson is simple: readiness for AI APIs is a tested claim, not a network ping. Inventory route capabilities, use safe synthetic requests, exercise the real adapter path, measure user-relevant behavior, maintain workload-specific states, control probe cost, and connect the result directly to routing. That turns provider uncertainty into a visible operating decision and keeps developers from discovering route failures through their users.
+
+That is it for today. Test the route before you trust the route, keep probes safe and small, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True)
+seconds = float(json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True).stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    for tag, value in [('title', title), ('description', description), ('pubDate', pub_date)]:
+        ET.SubElement(item, tag).text = value
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(audio.stat().st_size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    for tag, value in [('duration', duration), ('episode', str(ep)), ('episodeType', 'full'), ('explicit', 'false')]:
+        ET.SubElement(item, f'{{{ns}}}{tag}').text = value
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {audio.stat().st_size} bytes {duration} {len(parts)} chunks')
