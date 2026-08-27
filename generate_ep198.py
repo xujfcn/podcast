@@ -1,0 +1,68 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 198
+title = 'EP198: AI API Contracts — Normalize Providers Without Hiding Semantics'
+description = 'A practical guide to provider-neutral AI API contracts: normalize common request and response behavior, preserve important provider semantics, validate capability differences, and give developers a reliable migration path.'
+pub_date = 'Thu, 27 Aug 2026 14:15:00 +0000'
+script = '''EP198: AI API Contracts — Normalize Providers Without Hiding Semantics
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A single API endpoint can make switching AI providers feel easy, but compatibility is more than changing a base URL. Different models disagree about roles, tool calls, JSON modes, streaming events, token accounting, safety responses, and even what a successful response means. Today we are talking about provider-neutral API contracts: how an AI gateway can absorb useful differences without hiding semantics that developers need to control.
+
+Start by separating the application contract from the provider protocol. Your application should describe the outcome it needs: a conversational answer, a validated object, a tool decision, or an image job. The provider protocol describes how a particular model accepts prompts and returns events. If those two layers are mixed together, every provider change becomes an application rewrite. If they are separated, the gateway can translate at a controlled boundary.
+
+Normalize the boring, high-value surface first. Give clients stable names for messages, model selection, temperature, maximum output, metadata, timeouts, and request identifiers. Return a predictable envelope with an output, usage, finish reason, provider information, and a trace identifier. Stable fields reduce migration work and make logs comparable. But stable does not mean identical: a field should be exposed only when the gateway can define its meaning honestly.
+
+Treat capabilities as data, not assumptions. One model may support vision, another may support strict JSON, and a third may support tools only in a particular streaming mode. Maintain a capability registry with versioned evidence, not a hand-written list that silently ages. At request time, validate the requested features against that registry. If a route cannot satisfy the contract, reject it clearly or select an eligible alternative before sending data to a provider.
+
+Be precise about message semantics. Some APIs distinguish system, developer, user, and tool messages. Others merge or reinterpret them. A gateway should preserve ordering, authorship, tool-call identifiers, and content parts whenever possible. If a provider cannot represent a message type directly, use a documented lowering rule and mark the transformation. Silent concatenation can change instruction priority, break tool correlation, or create a prompt-injection surface that is invisible in the application logs.
+
+Structured output deserves its own contract. “JSON mode” is not the same as schema compliance, and schema compliance is not the same as semantic validity. The gateway should distinguish requested structure, provider enforcement, parsing, schema validation, and application-level checks. Return a stable validation error when the result is unusable. A repair attempt may be useful, but it must be bounded, observable, and charged as additional work. Never make malformed output look successful just because it can be wrapped in braces.
+
+Streaming is another place where normalization can become misleading. Providers emit different event names, deltas, usage updates, finish markers, and error shapes. A gateway can offer a stable event vocabulary, such as response started, text delta, tool call delta, usage, completed, and failed. It should also preserve provider extensions and state whether usage is final or estimated. Clients need to know whether a stream ended cleanly, was cancelled, or stopped after a partial result.
+
+Tool calling requires identity and lifecycle guarantees. Normalize the shape of a tool name and arguments, but preserve the call identifier across the entire round trip. Do not automatically execute a tool merely because one provider returned a familiar-looking function call. Validate arguments, enforce authorization, apply idempotency where side effects exist, and make the approval boundary explicit. A compatibility layer should make safe tool use easier, not turn provider syntax into permission to act.
+
+Usage and billing fields also need careful treatment. Input tokens, cached tokens, output tokens, reasoning tokens, image units, and audio seconds are not interchangeable. Expose a common accounting model for fields that truly align, while retaining a provider-specific detail section for everything else. Mark missing values as unknown rather than zero. Otherwise dashboards, customer invoices, and routing decisions can all become confidently wrong.
+
+Error translation should preserve ownership and retryability. A provider timeout, a gateway deadline, a client cancellation, a policy denial, a capability mismatch, and an invalid response are different events. Map them to stable client categories, but include a safe diagnostic code and the original provider status where appropriate. Retry guidance belongs in the contract too: automatic retry is reasonable for some transport failures, dangerous for some tool operations, and pointless for a request that violates a capability or policy.
+
+Compatibility must be tested as behavior. Build a contract suite with representative prompts, multimodal inputs, tool calls, structured outputs, streaming, cancellation, and oversized requests. Run it against every supported route and record both normalized results and provider details. Test negative cases deliberately: unknown models, unsupported features, malformed tool arguments, truncated streams, and contradictory usage metadata. A green HTTP status is not evidence that two providers behave the same.
+
+Version the contract and the translation rules. Adding an optional field is usually safer than changing the meaning of an existing field. When semantics must change, create a new contract version, publish migration notes, and keep old clients working for a defined period. Record the contract version, adapter version, model, and provider on every request. This makes an incident explainable when the same application code produces different behavior after a route change.
+
+Give developers an escape hatch, but make it deliberate. A provider-specific option can be necessary for advanced reasoning controls, cache hints, or a special media format. Put such options in a namespaced extension, validate them against the selected provider, and make fallback eligibility explicit. If a request depends on an extension, the gateway must not silently route it to a provider that cannot honor it. Portability is a choice, not a promise that every feature exists everywhere.
+
+The practical lesson is simple: a reliable AI API contract standardizes what can be made equivalent and labels what cannot. Separate application outcomes from provider protocols, maintain evidence-backed capabilities, preserve message and tool identity, validate structured results, make streaming states explicit, account for usage honestly, translate errors without losing retry meaning, and test behavior across routes. That is how a gateway gives developers freedom to change models without making important differences disappear.
+
+That is it for today. Keep the common path simple, keep the sharp edges visible, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True)
+seconds = float(json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True).stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    for tag, value in [('title', title), ('description', description), ('pubDate', pub_date)]: ET.SubElement(item, tag).text = value
+    enc = ET.SubElement(item, 'enclosure'); enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(audio.stat().st_size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    for tag, value in [('duration', duration), ('episode', str(ep)), ('episodeType', 'full'), ('explicit', 'false')]: ET.SubElement(item, f'{{{ns}}}{tag}').text = value
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {audio.stat().st_size} bytes {duration} {len(parts)} chunks')
