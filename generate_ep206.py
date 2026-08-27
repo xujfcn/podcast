@@ -1,0 +1,91 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 206
+title = 'EP206: AI API Gateway Contract Testing - Make Provider Compatibility Measurable'
+description = 'How to use capability contracts and contract tests to keep AI API gateways compatible across providers: normalize semantics, test streaming and tools, catch drift before production, and publish honest guarantees to developers.'
+pub_date = 'Thu, 27 Aug 2026 23:45:00 +0000'
+script = '''EP206: AI API Gateway Contract Testing - Make Provider Compatibility Measurable
+
+Welcome back to AI Dev Tools - The Crazyrouter Podcast. An AI API gateway can expose one familiar endpoint while connecting to many very different providers. That abstraction is powerful, but it has a dangerous failure mode: two providers may accept the same JSON request and still behave differently. One may ignore a parameter, another may reject it, and a third may return a response that looks valid until a tool call or a streaming client consumes it. Today we are talking about capability contracts and contract testing: how to make provider compatibility measurable before a mismatch reaches production.
+
+This is not primarily a story about provider outages. A provider can be healthy and a route can still be wrong for the workload. A model may support text but not vision. It may advertise tools but serialize arguments differently. It may stream tokens but omit the final usage event. It may accept a JSON schema and quietly produce plain text. These are compatibility failures. They are especially expensive because normal availability dashboards remain green while applications start making incorrect decisions.
+
+Start with a contract that describes behavior, not just fields. An OpenAI-compatible endpoint is a useful wire format, but compatibility is more than matching a URL and a request shape. Define the guarantees your gateway makes for each route: supported input modalities, context limits, output formats, tool calling, streaming events, usage accounting, finish reasons, safety responses, timeout behavior, and metadata. Separate required behavior from optional behavior, and publish the contract per model or route class instead of pretending that every model has identical capabilities.
+
+A good contract has three layers. The first is syntax: what JSON fields and types are accepted. The second is semantics: what those fields mean, whether a parameter is honored, and how values affect generation. The third is lifecycle: what happens before a request starts, while a stream is active, and when the request finishes or is cancelled. Many integrations test only syntax. They discover semantic and lifecycle differences only after users depend on them.
+
+Create a capability matrix from the contract. Rows can represent models or provider routes, and columns can represent chat, vision, structured output, tools, parallel tools, streaming, log probabilities, image input, and usage reporting. Add constraints such as maximum context, maximum output, supported temperature range, and whether a feature works only in non-streaming mode. A boolean matrix is not enough for nuanced features. Use states such as supported, supported with limits, emulated, experimental, and unsupported, with a link to the test evidence behind each claim.
+
+The word emulated matters. If a gateway implements a feature around a provider rather than forwarding it directly, that behavior needs a different contract. For example, the gateway may synthesize a final usage record, convert a provider-specific tool format, or reconstruct a uniform finish reason. Emulation can be valuable, but it introduces policy and failure modes. Developers should know whether a guarantee comes from the provider, an adapter, or gateway-side processing. Otherwise an implementation detail eventually becomes a surprising production dependency.
+
+Next, turn the contract into executable tests. A contract test sends a small, deterministic request through the adapter and verifies the observable behavior. Keep these tests focused. You do not need a benchmark suite to check whether a provider emits a valid tool call, honors a structured output request, or closes a stream cleanly. Use fixed prompts, bounded tokens, and assertions that tolerate model wording while checking protocol behavior. Store the request shape, route configuration, adapter version, and timestamp with the result so a failure can be reproduced.
+
+Test the boring paths first. Send a minimal text request and verify the normalized response contains an ID, choices, finish reason, and usage according to the contract. Send a request with a system message, multiple turns, and an explicit output limit. Test invalid input and confirm the gateway returns a stable client error rather than forwarding an ambiguous provider response. These checks establish that the adapter distinguishes caller mistakes from upstream behavior and preserves useful error details.
+
+Structured output deserves dedicated tests. Ask for a small JSON object with required fields, then validate the actual bytes against the declared schema. Test both complete output and refusal or truncation. A provider that returns valid JSON in a non-streaming response may emit fragments that cannot be parsed incrementally. Define whether the gateway validates at the end, exposes partial text, or rejects the route for strict structured-output workloads. The important point is that “the request was accepted” is not evidence that the output contract was honored.
+
+Tool calling needs more than a test that checks for a tools array in the response. Provide a tool with several argument types, including an enum, a number, and a nested object. Verify the tool name, argument encoding, call ID, and finish reason. Test multiple calls when the route claims to support parallel tools. Then send the tool result back and verify that the conversation can continue. If the gateway rewrites arguments, validate after rewriting, and never allow a malformed or unexpected argument to pass directly to a side-effecting application.
+
+Streaming is where compatibility claims are often weakest. Build a test client that consumes the stream exactly as a real SDK does. Verify event ordering, the first token, role deltas, content deltas, tool-call deltas, the terminal event, and connection closure. Check whether usage arrives in the final event, in a trailer, or nowhere. Add a cancellation test: stop reading after a few events and confirm the adapter cancels the upstream request rather than leaving work running. A route that produces correct final text but leaks cancelled generations is not fully compatible.
+
+Test multimodal inputs with small fixtures. A one-pixel image or a tiny, known document can establish whether the adapter forwards the content type, preserves ordering, and normalizes provider-specific blocks. Do not rely on a successful HTTP status. Assert that the model actually receives the modality and that an unsupported modality produces a clear capability error. Keep fixtures synthetic and non-sensitive so scheduled contract tests do not become a data-governance problem.
+
+Parameters need semantic tests. Some providers accept a temperature field but ignore it for reasoning models. Some reject a parameter only after routing. Some clamp values silently. Decide what the gateway promises. If a parameter is unsupported, reject it clearly or document that it is advisory. Silent acceptance is the worst option because application developers believe they have configured behavior that the route never applied. The adapter should expose normalized metadata when it emulates, clamps, or drops a parameter, and traces should retain the original request for diagnosis.
+
+Build negative tests as carefully as positive tests. Send an unknown model, an oversized context, an invalid schema, a missing tool result, a duplicate message ID, and an unsupported response mode. Verify stable error categories, HTTP status mapping, and whether the request was charged. Test provider-specific rate-limit and policy responses too, but keep those separate from compatibility failures. A route can be perfectly compatible and still reject a particular prompt for policy reasons. Your test report should not collapse every non-success into one red number.
+
+There are three useful times to run these tests. Run a fast adapter suite on every code change. Run a broader matrix whenever a provider, model alias, routing rule, or SDK normalization changes. Run scheduled probes against live routes to catch external drift. Live probes need a budget, explicit test identifiers, small prompts, and a policy for handling generated content. They should never silently become synthetic traffic that distorts customer metrics or consumes an open-ended amount of money.
+
+The test environment must be representative without being dangerous. Use a dedicated test tenant and credentials with low limits. Mark probe requests with a correlation header and isolate them from customer analytics and billing dashboards. Keep a deterministic fallback for tests that need to run when a provider is unavailable, but do not let a fallback hide a failed capability assertion. The test should report which route was actually exercised. “The suite passed” is meaningless if routing sent every case to a different provider.
+
+Compare results by adapter version and contract version. When a test fails, the key question is whether the provider changed, the gateway changed, or the contract changed. Record a normalized result plus raw evidence such as response headers, event traces, and redacted payloads. Diffing only the final text misses important drift in usage fields, finish reasons, tool-call IDs, and stream timing. Versioning makes a compatibility change reviewable rather than a mystery discovered by an application team.
+
+Use progressive promotion for route changes. A new provider adapter or model alias should first pass offline fixtures, then a sandbox contract suite, then a limited live probe set, and finally a small share of real traffic with enhanced telemetry. Promotion gates should be capability-specific. A route that passes chat and embeddings is not ready for tool-calling traffic. Keep routing labels aligned with the tested contract, and block a route from workloads whose required capabilities are missing.
+
+Contract testing also improves incident diagnosis. When an application reports that tool calls stopped working, operators can ask whether the issue is a provider outage, a capability drift, an adapter regression, or a caller payload change. The gateway can return a stable reason code and route contract version while keeping sensitive provider details in traces. This shortens debugging because the team is comparing behavior against an explicit promise rather than reading undocumented assumptions from scattered client code.
+
+Do not over-test model quality with protocol contracts. A contract test can verify that a JSON object parses and that a tool argument matches a schema. It cannot prove that the answer is correct, useful, or safe for every domain. Keep quality evaluations separate, with their own datasets and owners. The contract boundary should guarantee the mechanics that applications rely on, while evaluation measures whether the model is suitable for the work. Mixing both into one pass makes failures hard to interpret and encourages teams to weaken assertions.
+
+There is a similar distinction between compatibility and performance. A provider may satisfy every event and schema assertion while missing the latency target for an interactive product. Add performance probes as a related but separate suite. Measure time to first token, event gaps, completion time, and cancellation latency under a controlled workload. Then let routing policy combine capability eligibility with performance evidence. A fast route that cannot honor the required tool contract is not a candidate, and a fully compatible route that misses the user deadline may need a different workload class.
+
+Make the matrix useful to developers. Expose a concise route profile in documentation and, where appropriate, through a discovery endpoint. Show examples of supported request shapes, limits, and normalized response behavior. Include the date and contract version of the evidence. When a capability is unavailable, say so before the request is sent. Early, specific feedback is kinder to developers and cheaper for the gateway than accepting a request that fails after provider work has started.
+
+The practical lesson is simple: compatibility is a product feature, not a slogan. Define syntax, semantics, and lifecycle guarantees. Represent capabilities with limits and evidence. Test structured output, tools, multimodal inputs, parameters, streaming, cancellation, errors, and usage. Run fast checks in CI, controlled probes against live routes, and progressive promotion for changes. Separate protocol contracts from quality and performance evaluation, and version the evidence that supports every claim.
+
+When an AI API gateway makes compatibility measurable, developers can switch models without rewriting their assumptions, operators can diagnose drift before it becomes a customer incident, and routing can choose from routes that are truly eligible for the workload. One endpoint is useful. One honest contract, continuously tested, is what makes it dependable.
+
+That is it for today. Test the contract, publish the limits, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True)
+seconds = float(json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True).stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    for tag, value in [('title', title), ('description', description), ('pubDate', pub_date)]:
+        ET.SubElement(item, tag).text = value
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(audio.stat().st_size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    for tag, value in [('duration', duration), ('episode', str(ep)), ('episodeType', 'full'), ('explicit', 'false')]:
+        ET.SubElement(item, f'{{{ns}}}{tag}').text = value
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {audio.stat().st_size} bytes {duration} {len(parts)} chunks')
