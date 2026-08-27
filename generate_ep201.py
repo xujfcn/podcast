@@ -1,0 +1,79 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 201
+title = 'EP201: AI API Gateway Maintenance Windows — Coordinate Provider Changes Without Surprise Failures'
+description = 'A practical guide to maintenance windows for AI API gateways: coordinate provider changes, freeze routing safely, drain connections, communicate impact, and verify that traffic returns to normal without hidden retries or billing surprises.'
+pub_date = 'Thu, 27 Aug 2026 18:45:00 +0000'
+script = '''EP201: AI API Gateway Maintenance Windows — Coordinate Provider Changes Without Surprise Failures
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. A provider announces maintenance, an adapter needs an upgrade, or a region must be taken out of service for a few hours. The change sounds routine. Then streaming requests are cut off, retries multiply, background jobs race the deadline, and a team discovers that its gateway had no shared definition of “maintenance.” Today we are talking about maintenance windows for AI API gateways: how to coordinate planned changes so developers experience a controlled transition instead of an incident with a calendar invite.
+
+The first principle is to treat maintenance as a traffic state, not just a time range. A window should identify the affected provider, model family, region, capability, and workload classes. It should define what is changing, what remains available, and who owns the decision to pause, proceed, extend, or abort. A calendar entry is useful for humans, but the gateway needs machine-readable state that routing and admission decisions can consume.
+
+Start with an impact inventory. List every route that can select the affected upstream, including aliases, fallback routes, batch workers, scheduled jobs, and internal tools. Connect those routes to tenants, user journeys, streaming modes, tool calls, and contractual latency targets. The inventory should also include credentials, quota pools, adapter versions, and dashboards. The key question is not “which model is under maintenance?” It is “which observable user outcomes could change when this dependency is unavailable or behaves differently?”
+
+Classify work by how it behaves during the window. Interactive text requests may tolerate a short route change. A long video generation job may need to finish on the original provider. A tool call with an external side effect may require a stronger handoff rule than a read-only completion. Batch work can often pause and resume, while a live stream cannot be moved casually after bytes have been sent. These classes should have explicit policies rather than inheriting one global maintenance switch.
+
+Define the state machine before the maintenance begins. A useful sequence is announced, scheduled, prepared, draining, active, recovering, and closed. Announced means the change is known but normal routing continues. Prepared means credentials, capacity, and fallback routes have been checked. Draining stops new work from entering the affected path while allowing safe in-flight work to finish. Active is the period when new traffic is excluded or deliberately constrained. Recovering gradually restores exposure and watches evidence. Closed records the final outcome and the artifacts that prove it.
+
+Preparation should be reversible. Pin the routing-policy version, adapter version, capability data, and configuration snapshot associated with the window. Confirm that the fallback route supports the required input shape, output mode, tools, and safety controls. Reserve enough capacity for the traffic that will move, but do not assume a fallback can absorb the entire provider instantly. A staged shift is safer than a binary switch, especially when several maintenance events overlap.
+
+Capacity planning during maintenance is about demand multiplication. A route change can increase latency, token usage, queue depth, or cost even when request volume is unchanged. Estimate the effect of retries, longer prompts, different output lengths, and model-specific limits. Protect interactive traffic with admission controls and reserve capacity for recovery. A fallback that is technically online but already near its concurrency ceiling is not a fallback; it is a delayed failure.
+
+Draining requires connection awareness. For non-streaming calls, stop admission and let requests finish under their existing deadline if that is safe. For streams, track whether headers, useful tokens, finish markers, or tool events have already been delivered. Do not cut a healthy stream merely because the clock crossed the maintenance boundary. At the same time, define a maximum drain duration so one stuck request cannot hold the window open forever. When a stream must end, return a clear and retryable outcome only when the client can safely retry.
+
+Retries need a maintenance-specific budget. If the upstream returns a planned-unavailable signal, the gateway should not let every client retry immediately against the same path. Respect retry-after guidance, apply jitter, and decide whether the remaining deadline is sufficient for another attempt. Separate gateway-generated retries from client retries in telemetry. Otherwise, a quiet maintenance event can look like a sudden traffic surge, and an ordinary retry policy can turn a planned change into a retry storm.
+
+Idempotency matters whenever work can cross the boundary. Preserve the client idempotency key across a controlled retry, but never replay an external tool action without an idempotency contract or a simulator. For asynchronous jobs, keep one durable job identity while recording each provider attempt separately. For streaming, be honest about what can be resumed. A new completion that starts from scratch is not the same as resuming a partially delivered response, and the client contract should say so.
+
+Freeze the right things, not everything. During the active portion of a window, freeze unreviewed routing changes for the affected capability and keep emergency overrides auditable. Do not freeze unrelated traffic if that would delay a security fix or another reliability action. A narrow change freeze preserves a stable comparison point without turning maintenance into a blanket lock on delivery.
+
+Communication should be operationally precise. Tell developers the affected capabilities, start and end times with a timezone, expected behavior, retry guidance, and a status location. Tell internal operators which dashboards, alerts, and runbooks apply. If a customer may see a model change, altered latency, reduced context, or unavailable tool, say that plainly. Avoid promising zero impact when the real goal is bounded impact with a tested recovery path.
+
+Make the gateway explain its decisions during the window. Every request should carry a maintenance state, policy version, route eligibility result, and reason code. Useful reasons include scheduled exclusion, draining, capacity protection, residency constraint, or recovery cohort. Expose these safely in traces and support tooling without leaking prompts or secrets. When a developer asks why a request went to a different model, the answer should be discoverable without reconstructing the entire event from scattered logs.
+
+Verification must compare behavior, not just reachability. During preparation, send synthetic or replayed fixtures through each candidate route and validate schemas, tool permissions, streaming event order, latency, and cost accounting. During recovery, increase exposure in cohorts and compare accepted outcomes with the pre-window baseline. A successful HTTP response is not enough if structured outputs fail, citations disappear, tools are rejected, or token usage doubles. Check the user journey that the route exists to serve.
+
+Close the window with evidence. Record actual start and end times, affected routes, traffic moved, requests drained, cancellations, retries, fallback usage, spend, and any customer-visible changes. Mark open follow-up work rather than silently carrying it into the next window. Store the configuration snapshot and decision log with the incident and release records that reference them. This makes the next maintenance event faster to plan and easier to audit.
+
+Test the process away from production. Simulate a provider notice, delayed shutdown, partial regional loss, stale maintenance state, capacity exhaustion on the fallback, and a maintenance window that overruns its end time. Test overlapping windows for two providers and a cancellation after draining has started. Verify that stale state expires safely, emergency recovery remains possible, and operators can distinguish planned exclusions from unexpected failures.
+
+Measure whether maintenance is becoming less surprising. Track the percentage of windows completed without unplanned user impact, drain completion time, fallback saturation, retry amplification, recovery time, cost variance, and the number of requests whose behavior changed without an explainable reason. Review these metrics by workload class. A single overall success rate can hide the fact that interactive traffic was fine while batch jobs or tool calls were repeatedly damaged.
+
+The practical lesson is simple: planned provider work deserves the same engineering discipline as an outage, with a different objective. Inventory the blast radius, classify workloads, model maintenance as a gateway state, prepare reversible routes, drain connections deliberately, bound retries, protect idempotency, communicate concrete behavior, and verify real outcomes during recovery. When maintenance becomes explicit state with evidence around it, developers can keep building while operators change the infrastructure underneath.
+
+That is it for today. Make planned changes boring, keep fallback capacity honest, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True)
+seconds = float(json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True).stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    for tag, value in [('title', title), ('description', description), ('pubDate', pub_date)]:
+        ET.SubElement(item, tag).text = value
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(audio.stat().st_size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    for tag, value in [('duration', duration), ('episode', str(ep)), ('episodeType', 'full'), ('explicit', 'false')]:
+        ET.SubElement(item, f'{{{ns}}}{tag}').text = value
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {audio.stat().st_size} bytes {duration} {len(parts)} chunks')
