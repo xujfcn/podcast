@@ -1,0 +1,91 @@
+from pathlib import Path
+import json
+import subprocess
+import xml.etree.ElementTree as ET
+
+root = Path('/root/.openclaw/workspace/podcast')
+ep = 203
+title = 'EP203: AI API Gateway Control Planes — Make Routing Policy Changes Safe and Observable'
+description = 'A practical guide to control planes for AI API gateways: separate policy from request serving, version routing decisions, validate changes, stage publication, keep rollback fast, and make every production change explainable.'
+pub_date = 'Thu, 27 Aug 2026 20:45:00 +0000'
+script = '''EP203: AI API Gateway Control Planes — Make Routing Policy Changes Safe and Observable
+
+Welcome back to AI Dev Tools — The Crazyrouter Podcast. An engineer changes one routing rule, a provider model alias moves, or a new tenant policy is published. The request path is healthy, but behavior changes in production before anyone can explain why. Today we are talking about the control plane of an AI API gateway: the system that stores, validates, publishes, and rolls back the decisions that the request-serving data plane applies.
+
+This is different from discussing whether one request can partially fail. The focus today is the machinery that changes routing behavior before requests arrive, while they are being served, and after a change needs to be reversed. A reliable gateway is not only a fast proxy. It is also a disciplined configuration system.
+
+Start with a clean separation between control plane and data plane. The data plane should be able to serve requests from a known, immutable policy snapshot even when the control plane is slow, unavailable, or undergoing maintenance. The control plane can accept edits, evaluate them, and publish versions. It should not force every request to wait on a database or a remote configuration service.
+
+This separation gives you a useful failure boundary. If the policy service has a bad deploy, existing workers can continue using their last known good snapshot. If a policy update is malformed, it can be rejected before it reaches request handlers. And if an operator needs to stop a rollout, they can point workers back to a previous version without rebuilding the gateway.
+
+The snapshot needs a real contract. Include the routes, model identifiers, provider priorities, capability constraints, tenant rules, quotas, safety settings, timeout budgets, and feature flags that affect a request. Include a unique policy version, creation time, author or automation identity, and the parent version from which it was derived. A timestamp alone is not enough. Operators need to answer exactly which decision set served a request.
+
+Keep policy data separate from secrets. A snapshot may refer to a credential binding or provider account, but it should not contain raw keys. This reduces the damage of logging, caching, and debugging the control plane. It also lets a credential rotate without changing every routing rule, while a routing change can be reviewed without granting access to secret material.
+
+Design changes as transactions. An edit should produce a candidate version that can be validated, reviewed, and compared with its parent. Do not mutate the live policy in place. Immutable versions make diffs meaningful, give audit logs stable references, and let rollback mean selecting a known version rather than trying to reconstruct old values from a sequence of edits.
+
+Validation must be more than syntax checking. Verify that every referenced model and provider exists, that required capabilities are available, that fallback routes satisfy the workload contract, and that tenant rules do not accidentally widen access. Check that weights add up, priorities are coherent, regions meet residency constraints, and timeout budgets fit inside the client deadline. Reject impossible configurations before publication.
+
+Use semantic validation for AI-specific behavior. A route that accepts text may not support image inputs, tool calls, structured output, or the context length a workflow requires. A provider may expose a model name but not the same tokenizer, safety controls, streaming events, or response schema. The control plane should evaluate these constraints against a capability registry rather than trusting a string comparison on a model name.
+
+Policy review should show impact, not just changed lines. A useful preview says which tenants, models, regions, and workload classes could select the candidate version. Estimate traffic movement, capacity demand, token cost, and exposure to new providers. Show routes that become ineligible and routes that gain traffic. A compact diff is useful to an engineer, but an impact report is what helps an owner decide whether the change is safe.
+
+Separate authoring from publication. Many people may propose a policy, but publication should require an explicit permission and an accountable identity. Automated changes should still carry a reason, source event, and approval policy. For high-risk changes, require two-person review or an automated evaluation gate. The objective is not bureaucracy. It is to prevent an unreviewed edit from becoming a fleet-wide behavioral change.
+
+Make policy versions portable to workers. Publish a signed or integrity-checked artifact, distribute it through a reliable channel, and let each worker activate it atomically. A worker should never observe half of one version and half of another. Keep the active version and the previous version available locally so a rollback does not depend on a fresh network call.
+
+Rollout state deserves explicit modeling. A version can be draft, validated, approved, published, staged, active, superseded, or rolled back. Record the intended scope for each stage. A staged version might be active for one region, tenant cohort, or small percentage of eligible requests. Avoid a single boolean called enabled; it hides the operational choices that make a rollout safe.
+
+Canary by decision, not only by machine. A policy canary should select a stable cohort and make the cohort visible in telemetry. Compare success rate, useful latency, output validation, provider errors, fallback selection, token cost, and user-level task outcomes with the previous version. If the policy changes model selection, quality regressions may appear even when HTTP health is perfect. The gate must watch the behavior the policy was intended to change.
+
+Guard against cohort leakage. Hash a stable tenant or request identity so a user does not bounce between policy versions on every request, unless the experiment explicitly requires that. Keep privacy constraints intact and avoid putting raw identifiers into public traces. Define what happens for new tenants, missing identity, retries, asynchronous jobs, and long-lived streams. A rollout boundary should be predictable across the workflows that depend on it.
+
+Activation needs freshness rules. Workers should report which policy version they have loaded, when it was fetched, and whether validation succeeded. The control plane should know if a region is lagging. Do not declare a rollout complete merely because a publish API returned success. Require an activation quorum or an explicit exception for workers that are offline, and make stale workers visible before their snapshots become dangerous.
+
+The data plane also needs a safe response to an unknown or expired policy. Usually the right behavior is to continue with the last known good snapshot for a bounded period, then fail closed for routes whose safety or residency guarantees can no longer be proven. The correct boundary depends on the workload. A low-risk internal completion may tolerate a short stale window; a regulated workflow may not. Make the rule explicit and measurable.
+
+Rollback should be a first-class operation. Define who can trigger it, which version is the rollback target, and which checks run before activation. Preserve the audit trail that says why the rollback happened and what traffic was affected. Test rollback under control-plane outage, worker restart, regional partition, and a version that references a provider credential that has since been disabled. A rollback path that exists only in a design document is not a reliability feature.
+
+Emergency controls need narrow scope. A global kill switch is sometimes necessary, but it should not be the only control. Prefer scoped exclusions for a provider, model, region, capability, tenant cohort, or policy version. Every emergency override should have an owner, creation time, expiry, reason, and visible precedence in the decision trace. Temporary overrides become permanent risk when nobody can find or remove them.
+
+Explainability is part of the API gateway contract. For each request, record the active policy version, rollout cohort, route candidates, constraint failures, selected provider, and override reason. Use safe identifiers and redact prompts, credentials, and sensitive tenant data. Support engineers should be able to explain a model choice without replaying a production request or reading an entire configuration database.
+
+Observe the control plane itself. Track candidate validation failures, review age, publication latency, worker activation lag, stale snapshot age, rollback frequency, override count, and policy decision errors. Alert on a growing gap between published and active versions, repeated failed activations, or an unexpected increase in traffic assigned to one provider after a policy change. These are control-plane signals even if the data plane still returns HTTP 200.
+
+Test the boundary with failure injection. Stop the configuration service while workers serve traffic. Deliver a corrupted artifact. Publish a version that is valid JSON but semantically impossible. Partition one region during activation. Restart workers between download and commit. Race two competing publications. Expire an emergency override. Verify that requests use an internally consistent snapshot, that unsafe changes are rejected, and that operators can recover without hand-editing live servers.
+
+Keep policy as code where it helps, but do not confuse a repository with a runtime control plane. Git history is excellent for review and provenance. Production still needs validated artifacts, activation status, scoped rollout, fast rollback, and live evidence. A commit merged into a repository is not proof that every gateway worker is serving that policy.
+
+The practical lesson is simple: routing reliability depends on how decisions change, not only on how requests execute. Separate control and data planes, use immutable policy versions, validate capabilities and impact, review publication, activate atomically, canary by stable cohorts, monitor freshness, keep scoped emergency controls, and make rollback routine. When every request carries the policy context that produced it, developers get a gateway they can trust and operators get a system they can reason about.
+
+That is it for today. Make configuration changes deliberate, keep the serving path independent, and see you in the next episode. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.'''
+
+(root / 'episodes').mkdir(exist_ok=True)
+(root / 'audio').mkdir(exist_ok=True)
+(root / f'episodes/ep{ep:03d}_script.txt').write_text(script)
+parts = script.split('\n\n')
+for i, part in enumerate(parts, 1):
+    subprocess.run(['edge-tts', '--voice', 'en-US-GuyNeural', '--text', part, '--write-media', str(root / f'episodes/ep{ep:03d}_chunk{i}.mp3')], check=True)
+concat = root / f'episodes/ep{ep:03d}_concat.txt'
+concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1, len(parts) + 1)))
+audio = root / f'audio/ep{ep:03d}.mp3'
+subprocess.run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c:a', 'libmp3lame', '-q:a', '4', str(audio)], check=True)
+seconds = float(json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(audio)], capture_output=True, text=True, check=True).stdout)['format']['duration'])
+duration = f'{int(seconds // 60)}:{int(seconds % 60):02d}'
+feed = root / 'feed.xml'
+tree = ET.parse(feed)
+channel = tree.getroot().find('channel')
+if not any((x.findtext('title') or '').startswith(f'EP{ep:03d}:') for x in channel.findall('item')):
+    item = ET.Element('item')
+    for tag, value in [('title', title), ('description', description), ('pubDate', pub_date)]:
+        ET.SubElement(item, tag).text = value
+    enc = ET.SubElement(item, 'enclosure')
+    enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3', length=str(audio.stat().st_size), type='audio/mpeg')
+    ET.SubElement(item, 'guid').text = f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'
+    ns = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+    for tag, value in [('duration', duration), ('episode', str(ep)), ('episodeType', 'full'), ('explicit', 'false')]:
+        ET.SubElement(item, f'{{{ns}}}{tag}').text = value
+    ET.SubElement(item, 'link').text = f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'
+    channel.insert(0, item)
+    tree.write(feed, encoding='utf-8', xml_declaration=True)
+print(f'DONE {audio} {audio.stat().st_size} bytes {duration} {len(parts)} chunks')
