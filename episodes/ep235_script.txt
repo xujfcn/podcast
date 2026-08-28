@@ -1,0 +1,49 @@
+EP235: AI API Gateway Configuration Drift - Detect When Regions and Workers Disagree
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about configuration drift in AI API gateways. The control plane may publish one route policy, while a region runs an older snapshot, a worker carries a stale feature flag, or a pricing cache uses yesterday's revision. The gateway can appear healthy while different requests receive different behavior. Drift turns configuration into an invisible source of inconsistency.
+
+Start by separating desired, published, acknowledged, active, and observed state. Desired state is what operators intend. Published state is what the control plane accepted. Acknowledged state is what a worker or region says it received. Active state is what the request path actually uses. Observed state is what telemetry proves. These states can diverge, and each divergence needs a reason, owner, and freshness limit.
+
+Version every consequential object. Route sets, model aliases, policy bundles, credentials, quotas, pricing, probes, feature flags, adapter contracts, and data-residency rules need immutable revisions. Attach control-plane version, policy revision, route revision, pricing revision, and adapter version to every operation. Without request-level evidence, an operator cannot tell whether a symptom came from a provider or from mixed configuration.
+
+Define drift precisely. A worker running an older approved snapshot may be stale but safe for in-flight work. A worker using an unknown or locally modified snapshot is unauthorized drift. A region that lacks a new deny rule is a policy violation. A pricing revision applied too early or too late is accounting drift. Classification matters because not every difference deserves the same response.
+
+Use a canonical representation. Normalize ordering, defaults, omitted fields, units, and references before comparing configurations. Compare content hashes for immutable bundles, but also compare effective semantics. Two snapshots can have different formatting and the same behavior, or identical route weights with different policy and capability consequences. Hashes detect change; semantic checks explain impact.
+
+Track propagation explicitly. When a bundle is published, record target regions, workers, queues, adapters, and acknowledgement deadlines. Workers should report version, checksum, activation time, and health. Detect missing, delayed, duplicate, or contradictory acknowledgements. A green publish response must not imply global activation until the rollout evidence supports it.
+
+Freshness is a safety property. Set maximum ages for route policy, deny rules, credentials, pricing, quotas, and capability metadata. A stale route may continue a bounded set of safe existing work, while a stale safety rule may require immediate fail-closed behavior. Make freshness rules object-specific instead of using one convenient global timeout.
+
+Stale mode should be deliberate. If the control plane is unavailable, a worker may use a signed, approved snapshot within its freshness window. It may continue existing capabilities but refuse new tools, providers, regions, or risky permissions. Expose stale mode in health probes and dashboards. Never silently use an empty policy, permissive default, or unverified local file.
+
+Configuration drift can cross tenant boundaries. Validate tenant and project scopes when comparing and applying state. A global route update must not overwrite a project-specific restriction. Caches, queues, replay systems, and support dashboards need the same ownership checks as the data plane. Drift detection itself must not leak one tenant's configuration to another.
+
+Policy drift deserves priority. A missing allow rule may reduce availability, but a missing deny rule can create a security incident. Detect policy revision gaps, evaluator mismatches, cache reuse across projects, and region-specific exceptions. If a worker cannot prove the required policy is active, block the affected action or route it only through a verified safe path.
+
+Pricing and quota drift can be silent and expensive. Compare effective pricing, token limits, credits, concurrency, retry budgets, and customer plan rules across regions and workers. Link discrepancies to operation and attempt records. Do not repair historical billing by changing the current configuration; preserve the revision that governed the work and reconcile with an explicit adjustment.
+
+Capability drift changes routing semantics. A provider adapter may advertise tool calls, structured output, streaming, or a context limit that the active implementation does not actually support. Compare declared capability metadata with probe and contract-test evidence. Remove drifted candidates from routing rather than letting a request discover incompatibility in production.
+
+Credential drift needs careful handling. Workers may have expired, revoked, unexpected, or incorrectly scoped credentials. Report credential class and version, never secret values. Validate that every active route uses an approved reference and that rotation has propagated. If a worker cannot prove authorization, stop new dispatch and preserve in-flight cleanup according to the documented contract.
+
+Drift may be caused by deployment, not configuration. A worker binary can interpret the same snapshot differently because of adapter, SDK, parser, or default changes. Include software versions and schema versions in the comparison. Test compatibility between snapshot and worker before activation. A configuration checksum alone cannot detect semantic drift caused by code.
+
+Observe actual behavior, not only declarations. Sample requests with synthetic tenants and bounded budgets to verify route, policy, capability, streaming, cancellation, usage, billing, and cleanup. Compare operation evidence with the worker's reported active snapshot. Health probes should test the exact contract that production traffic relies on, not merely whether a process responds.
+
+Drift alerts need useful severity. Page immediately for security, data-residency, unauthorized credential, cross-tenant, or billing attribution drift. Ticket a bounded stale snapshot with safe behavior. Suppress duplicate alerts while preserving first detection and recovery times. Include affected regions, workers, tenants, capabilities, traffic, and rollback options so the alert supports a decision.
+
+Automatic repair has boundaries. It is usually safe to restart a worker that has an old signed snapshot and no in-flight work. It may be unsafe to overwrite a local policy during an incident, activate a new pricing revision, or switch a tool executor without review. Classify repair actions by reversibility and impact. Every repair must be idempotent, scoped, observable, and auditable.
+
+Containment should precede repair. Remove drifted workers from new traffic, preserve safe in-flight operations, fence unsafe credentials, quarantine suspicious snapshots, and prevent retries from spreading the condition. Do not let an automatic reconciler erase evidence or repeatedly churn a region. Stabilize the boundary, then restore the intended state.
+
+Rollback depends on drift evidence. Choose a known-good immutable snapshot that current dependencies can still support. Verify policy, capability, credential, pricing, and residency compatibility before activation. Preserve operations under their original revisions and reconcile late events. If only one region drifted, avoid a global rollback unless the evidence shows a shared cause.
+
+Configuration conflicts need ownership. Two regions may report different active revisions during a partition, or an emergency override may intentionally diverge from desired state. Record the exception, scope, actor, reason, expiry, and return path. Do not force convergence while the control plane is split brain or while a safety override is protecting customers.
+
+Test drift continuously. Delay propagation, drop acknowledgements, corrupt a checksum, restart a worker, serve an old policy, expire a credential, change a parser default, and split regions from the control plane. Verify that detection is timely, classification is correct, stale mode is safe, traffic is contained, evidence is preserved, and repair does not duplicate work or billing.
+
+The practical checklist is clear. Distinguish desired, published, acknowledged, active, and observed state. Version and hash important objects, compare effective semantics, track propagation and freshness, and define object-specific stale modes. Detect policy, residency, capability, credential, quota, pricing, software, and tenant drift. Contain before repair, automate only bounded actions, and preserve revision evidence through rollback and reconciliation.
+
+The larger lesson is that configuration is a distributed system. A route or policy is not real merely because a control plane published it; it is real when every eligible request path has activated and can prove the same intended behavior. Drift detection turns disagreement between regions and workers into an operational signal before customers become the consistency check.
+
+That is it for today. Detect when your gateway disagrees with itself, and restore convergence without erasing the evidence. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
