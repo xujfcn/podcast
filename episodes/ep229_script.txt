@@ -1,0 +1,47 @@
+EP229: AI API Gateway Cancellation Contracts - Stop Work When the User Leaves
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about cancellation contracts for AI API gateways. A user closes a page, an agent changes direction, a deadline expires, or a workflow is superseded. If the gateway notices only the client disconnect and does not stop downstream work, providers continue generating tokens, tools continue running, queues retain reservations, and customers may pay for work nobody needs.
+
+Cancellation is not merely a socket event. It is a lifecycle decision with a scope, deadline, authority, and observable outcome. Define what cancellation means for the logical operation, each provider attempt, each stream, each tool call, and each queued child operation. A request can be cancelled by the client, the gateway deadline, policy, overload control, or an operator. Every cause should be distinguishable.
+
+Start with one operation identity. Preserve it across queueing, provider attempts, retries, fallbacks, streams, and tools. A cancellation signal should target the logical operation and propagate to its children. Each child must acknowledge whether it stopped, completed, or entered an unknown state. This avoids cancelling one attempt while a fallback or tool continues consuming resources under another identifier.
+
+Deadlines are cancellation signals with a clock. Propagate the remaining time through admission, routing, provider adapters, response validation, and cleanup. Reserve time for cancellation acknowledgement and finalization. Starting another retry after the deadline is not recovery; it is work that cannot improve the requested outcome.
+
+Cancellation authority must be explicit. The client can usually cancel its own operation, while policy or overload controls may cancel work for safety or capacity. Authenticate cancellation requests and verify tenant ownership. Do not allow an arbitrary client to cancel another operation by guessing an identifier. Record the actor, reason, timestamp, and policy revision.
+
+Queued work should be easy to cancel. Remove cancelled operations from admission queues, release reservations, and prevent dispatch. If a queue implementation cannot remove an item immediately, mark it cancelled and check that state before dispatch. A late worker must not send a request merely because it already dequeued an operation before seeing the cancellation.
+
+Provider cancellation has different guarantees. Some providers support a cancellation endpoint, some close the stream, and some cannot stop server-side work once accepted. The adapter should report the actual guarantee, not a generic success. If cancellation is unconfirmed, mark the attempt as unknown and block unsafe retries or duplicate side effects until reconciliation.
+
+Streaming makes cancellation visible. When the client disconnects, stop producing and attempt to cancel the provider stream. Record the last event delivered, provider acknowledgement, bytes or tokens already exposed, and terminal outcome. A stream that ends after cancellation is not automatically a successful completion. The gateway must distinguish cancelled, completed-before-cancel, failed, and unknown outcomes.
+
+Backpressure and cancellation work together. A client that stops reading can leave buffers and provider work alive. Detect stalled consumers, bound buffers, and propagate cancellation after an idle threshold. Do not keep unlimited output in memory while waiting for a disconnected client. Release connection and concurrency capacity promptly.
+
+Retries must respect cancellation. A cancellation signal should stop pending backoff, prevent new attempts, and terminate optional child work. If a provider error and a cancellation race, use a documented precedence rule and preserve both events. Never interpret a cancelled operation as permission to retry because the previous attempt did not return a normal error.
+
+Fallbacks need the same signal. When the primary route is cancelled, do not dispatch a fallback unless the contract explicitly says the client requested a replacement result. Preserve one logical operation ID and the remaining budget. A fallback started after the user has left is usually wasted work and may create a second provider charge.
+
+Tool calls require side-effect-aware cancellation. A read-only lookup may stop safely. A mutating action may already have started and may not be interruptible. The executor must expose accepted, running, completed, cancelled, and unknown states. If acknowledgement is unknown, reconcile using the idempotency key before any repeat. Cancelling the model request does not undo an external effect.
+
+Agent workflows should cancel children hierarchically. When a parent operation is cancelled, stop queued branches, reduce parallelism, and send cancellation to active children. Record which branches acknowledged, which completed first, and which remain unknown. A child may be required to finish a cleanup or compensation action even after the user-facing result is cancelled; that exception must be explicit.
+
+Resource accounting must close every path. Release queue leases, capacity reservations, token budgets, retry budgets, connections, and temporary storage exactly once. If provider work continues after gateway cancellation, retain its usage and reconcile it later. Do not erase the cost simply because the client did not receive the result.
+
+Billing semantics should be clear. Customers may be charged for provider work that began before cancellation, charged only for accepted output, or receive credits under a published reliability policy. Preserve provider usage, cancellation timing, pricing revision, and customer billing decision separately. A cancelled operation must remain explainable in a usage statement.
+
+Policy can require cancellation. A data classification change, expired approval, revoked credential, or safety decision may make continued processing forbidden. In these cases, cancellation should fail closed, stop downstream transmission where possible, and record the containment action. Do not let a provider's inability to cancel become a reason to continue sending more data.
+
+Cancellation races need a state machine. Define legal transitions for queued, admitted, dispatched, streaming, tool-running, completed, cancelled, failed, and unknown states. A late success must not overwrite a terminal cancellation unless the documented precedence rule allows a completed-before-cancel result. Use sequence numbers or compare-and-set transitions to prevent concurrent workers from producing contradictory outcomes.
+
+Observability should show cancellation effectiveness. Track cancellation request rate, acknowledgement latency, provider stop rate, work completed after cancellation, tokens generated after cancellation, leaked reservations, unknown effects, and cleanup duration. Break results down by provider, adapter, model, stream, tool, tenant, and cancellation cause. A high cancellation count is not necessarily bad; ineffective cancellation is the real signal.
+
+Failure capsules should preserve the race. Capture the cancellation actor, operation and attempt IDs, event ordering, client disconnect, provider response, stream events, tool state, resource release, usage, and final classification. Redact sensitive content. Replaying the structural event sequence should reproduce whether cancellation wins against retry, completion, or fallback.
+
+Test hostile timing. Cancel while queued, during provider admission, after the first token, during backoff, during fallback selection, after a tool acknowledgement, and while a worker restarts. Drop the cancellation response, delay provider acknowledgement, duplicate the signal, and deliver a late success. Verify that cancellation is idempotent, resources are released, effects are not duplicated, billing remains honest, and unknown states are reconciled.
+
+The practical checklist is clear. Define cancellation scope, causes, authority, deadlines, and outcomes. Preserve operation and child identities. Check cancellation before dispatch and before retry. Propagate it through streams, providers, fallbacks, tools, and agent branches. Report actual provider guarantees, bound buffers, release every resource, preserve usage and billing evidence, and test races with late events.
+
+The larger lesson is that cancellation is part of the user experience and the cost contract. When a user leaves, the system should stop work when it safely can, explain what could not be stopped, and avoid multiplying uncertain effects. A strong cancellation contract turns an abrupt disconnect into a controlled lifecycle transition.
+
+That is it for today. Stop work when the user leaves, preserve the truth about what continued, and make cancellation measurable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
