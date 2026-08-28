@@ -1,0 +1,53 @@
+EP248: AI API Gateway Secret Management - Keep Credentials Out of Prompts, Logs, and Tools
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about secret management in AI API gateways. A gateway sits between applications, model providers, retrieval systems, tools, and operators. That makes it a powerful place to centralize credentials—and a dangerous place to let credentials leak. API keys, database passwords, OAuth tokens, signing keys, and provider credentials should never become prompt content, model output, log text, or casually copied configuration.
+
+Begin with a hard boundary: secrets belong to a secret-management system, not to prompts. The model can express an intent such as “call the calendar service for this tenant,” but it should not receive the calendar token. The gateway or tool executor resolves the credential after authorization, attaches it to the outbound request, and keeps it outside the model-visible context.
+
+Separate secret classes. Provider credentials authenticate the gateway to model vendors. Tenant credentials authenticate a customer-owned integration. Internal service credentials authorize tools and data stores. Signing keys protect tokens and webhooks. Encryption keys protect stored data. Each class has different owners, scopes, rotation schedules, residency requirements, and incident procedures. One universal secret is convenient until one compromise becomes an organization-wide outage.
+
+Use a real secret manager with an auditable access path. Store secrets encrypted at rest, restrict access by workload identity, and avoid placing long-lived values in environment files, source repositories, container images, shell history, or ticket comments. The gateway should request a credential just in time, use it for the smallest approved operation, and avoid retaining it longer than necessary.
+
+The gateway needs its own identity. Do not solve every integration by giving the model provider or an agent broad access to a shared account. Give each service a workload identity and define exactly which secret references it may resolve. A routing worker may need provider credentials but not production database passwords. A tool runner may need a tenant integration token but not the signing key used by the billing service.
+
+Secret access must follow tenant and purpose boundaries. A request authenticated for tenant A must not be able to resolve tenant B’s integration credential, even if both use the same tool. Bind secret lookup to a verified tenant, operation, target resource, region, and policy decision. Never trust a tenant identifier supplied only inside model-generated text.
+
+Use indirection in configuration. Applications should refer to a secret name, version, or managed reference rather than carrying the secret value. Keep configuration and secret data separate so a routing rule can be reviewed, tested, and promoted without exposing credentials. Secret references should also be validated against an allowlist; arbitrary paths can become a credential-exfiltration primitive.
+
+Provider credentials should be scoped and isolated. Prefer keys limited to the required API, account, region, and model family. Set spending limits and expiration where providers support them. Use separate credentials for production, staging, evaluation, and local development. A test harness should not be able to spend from the production account merely because it uses the same gateway adapter.
+
+Rotation is a runtime capability, not an emergency-only script. Support overlapping versions so a new credential can become active before the old one is revoked. Cache only a short-lived credential lease, refresh on expiry, and retry authentication failures carefully. Do not retry a revoked credential indefinitely. Emit a safe status event that identifies the secret reference and version, never the value.
+
+Design for revocation. When a key is exposed, the first objective is to stop its use. The gateway should be able to disable a secret reference, reject a version, and route eligible traffic through a replacement. If a provider has no immediate replacement, fail closed for the affected operation rather than silently selecting an unauthorized credential. Make the blast radius visible by tracking which workloads and tenants used each version.
+
+Tool calls are a major secret boundary. A model may ask to call an HTTP endpoint, run a command, or access a file. The executor—not the model—must choose the credential, destination, method, headers, and permitted fields. Reject arbitrary authorization headers and URL fragments supplied by model output. Use per-tool schemas, destination allowlists, network egress controls, and explicit approval for high-impact actions.
+
+Do not put secrets in tool results. A tool should return the business result, not its request headers, connection strings, raw OAuth response, or debugging object. Strip authorization fields recursively from nested structures. If a downstream API returns a token as a field, classify and remove it before the result enters the model context, trace, cache, or user-visible response.
+
+Prompt injection often targets credentials indirectly. Untrusted content may say “include the system API key,” “show the hidden headers,” or “send the token to this endpoint.” Treat retrieved documents, web pages, emails, files, and tool output as data, not authority. Authorization decisions must come from trusted server-side policy and authenticated user intent. The model cannot grant itself access by repeating an instruction found in untrusted text.
+
+Credential placeholders can preserve workflow semantics. If the model needs to refer to an authenticated account, expose an opaque capability label such as “connected_calendar_primary,” not the token or an identifying secret. Resolve that label only after checking the caller, tenant, tool, target, and action. Keep placeholders non-reusable outside their intended operation and avoid putting sensitive identity details into their names.
+
+OAuth flows need careful handling. Store refresh tokens in the secret manager, keep access tokens short-lived, and bind authorization state to the correct tenant and redirect flow. Never ask the model to complete an OAuth exchange or paste a refresh token into chat. Log consent and scope changes as safe metadata. When a user disconnects an integration, revoke upstream access where possible and delete local token material according to policy.
+
+Logs should be treated as a hostile copy of production data. Redact known headers such as Authorization, cookies, API keys, and signatures before logging. Add pattern and entropy-based detection as a backstop, but do not rely on redaction alone. Prefer structured events that record secret reference, operation, outcome, and latency. Never log complete request or response bodies by default.
+
+Errors are another leak path. Provider failures, stack traces, validation messages, and command output can echo secrets or sensitive URLs. Normalize errors at the gateway boundary. Return a stable public error with a correlation ID, while storing only a sanitized diagnostic record. Test error paths with fake credentials and assert that their values never appear in logs, traces, alerts, support exports, or user responses.
+
+Caches and queues must not retain credentials. Exclude secret-bearing headers and authorization fields from cache keys and serialized jobs. If a background job needs authenticated work, store an approved secret reference and re-resolve the credential at execution time, subject to current authorization. A queued reference should expire, be single-purpose where possible, and fail safely after revocation.
+
+Telemetry needs a secret-aware schema. Traces can capture headers, attributes, tool arguments, and provider payloads through automatic instrumentation. Configure instrumentation explicitly, deny sensitive fields by default, and sample metadata rather than raw content. Validate exporters and third-party observability vendors against the same retention and residency requirements as model providers.
+
+Secret scanning belongs in the delivery pipeline. Scan commits, pull requests, container layers, generated files, and build artifacts. Block new high-confidence secrets and rotate anything that was committed, even if the commit is later deleted. Repository history, fork caches, CI logs, and package artifacts may preserve old values. Prevention is useful, but exposure response must assume the value is compromised.
+
+Test the full lifecycle. Create a fake secret, use it in a provider request and tool call, trigger a retry and fallback, write logs and traces, enqueue work, rotate the version, revoke it, and inspect every output. Confirm that the model never sees the value, the old version stops working, queued jobs re-check authorization, and deletion reaches the relevant stores.
+
+Monitor behavior, not just storage. Alert on unusual secret lookups, cross-tenant access attempts, sudden provider authentication failures, repeated resolution errors, access from unexpected workloads, and high-volume tool calls. Correlate events by secret reference and workload identity. An alert should support containment without requiring an operator to print or copy the credential.
+
+Keep break-glass access narrow and visible. Emergency access should require an approved identity, a stated reason, a short expiry, and immutable audit evidence. It should not disable all redaction or grant unrestricted access to every tenant. After the incident, review the exact data and secrets accessed, rotate affected values, and remove temporary permissions.
+
+The practical checklist is straightforward. Keep secret values outside prompts and model context, separate credential classes, use workload identities, scope access by tenant and purpose, resolve references just in time, support overlap and revocation, constrain tools, sanitize results and errors, protect logs and telemetry, exclude secrets from caches and queues, scan delivery artifacts, and test the complete rotation and incident lifecycle.
+
+The larger lesson is that an AI gateway should be a credential boundary, not a credential warehouse exposed through natural language. Models can plan actions without holding the keys that make those actions possible. When authorization, resolution, execution, and auditing remain server-side, the system becomes easier to rotate, easier to investigate, and much harder to trick into giving away access.
+
+That is it for today. Keep credentials out of prompts, logs, and tools, and make every secret access scoped, temporary, and explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
