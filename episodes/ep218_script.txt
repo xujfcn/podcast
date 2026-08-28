@@ -1,0 +1,43 @@
+EP218: AI API Gateway Load Shedding - Preserve the Core User Journey
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about load shedding at an AI API gateway. When demand exceeds capacity, a system that keeps accepting every request does not remain helpful. It turns overload into queue growth, timeouts, provider throttling, and wasted spend. Load shedding is the deliberate decision to stop some work so the most important work can still complete.
+
+Load shedding is not the same as failure. A controlled rejection with a clear reason can be healthier than accepting a request that will time out after consuming resources. The design question is which work to protect, which work to defer, and which work to reduce. Those choices should be based on workload value, deadline, tenant fairness, cost, and safety rather than on whichever request happens to arrive last.
+
+Start by defining the core user journey. Interactive response generation may be essential, while title suggestions, analytics enrichment, background summaries, and optional tool lookups may be deferred. For each feature, define the minimum useful result, acceptable degradation, maximum wait, and whether work can be resumed later. Without this classification, emergency shedding will remove features arbitrarily and confuse users.
+
+Use signals that reflect real pressure. Queue age, concurrency, token throughput, provider latency, connection count, memory, budget utilization, and deadline misses can all indicate overload. No single signal is sufficient. A gateway may have free CPU while provider concurrency is exhausted, or low request count while long streams hold every connection. Combine signals into explicit operating modes with hysteresis so the system does not flap.
+
+Operating modes should be understandable. Normal mode admits work according to ordinary policy. Constrained mode reduces optional work and tightens output or tool budgets. Emergency mode protects critical traffic, rejects low-priority workloads, and may pause batch processing. Recovery mode reopens capacity gradually while watching queue age and error rates. Record mode changes so operators can explain why behavior changed.
+
+Shedding should happen as early as possible. Reject work at admission before reserving provider capacity or building large prompts. If a request is already queued, expire low-value work before it consumes a slot. For an active workflow, cancel optional child operations before terminating the primary result. Late shedding saves fewer resources, but it can still protect downstream capacity if the cancellation path is reliable.
+
+Priority must not become a license for starvation. Give critical traffic a protected share, but cap it so it cannot consume every resource forever. Allocate weighted capacity to tenants and workload classes, enforce maximum wait times, and track how long each class remains excluded. A low-priority request that is always shed is not a useful product behavior; it needs a quota, a batch window, or a clear capacity promise.
+
+Cost should influence shedding. A request with a large context, high output limit, multiple retries, or agent fan-out consumes a larger resource envelope. Under pressure, reduce optional context, cap output, disable nonessential child work, or route to a cheaper approved model. Never silently remove required safety, authorization, residency, or schema guarantees just to make the request fit.
+
+Streaming needs special treatment. Long-lived streams occupy concurrency and connections even when token throughput is low. Apply maximum duration, idle time, and output limits. If the client stops reading, propagate cancellation and release capacity. When entering emergency mode, prefer refusing new long streams or reducing optional stream features rather than abruptly terminating critical streams without an honest terminal outcome.
+
+Queue shedding needs a clear ordering rule. Possible policies include lowest priority first, soonest deadline first, oldest low-value request first, or highest estimated cost first. Each has tradeoffs. A good default is to protect requests with credible deadlines and high user value while preventing any tenant or class from consuming the entire queue. Make the selected rule visible in reason codes and metrics.
+
+Agent workflows can amplify overload. One admitted request may create dozens of searches, model calls, and tool actions. Give the workflow a child-operation budget and enforce it continuously. When pressure rises, stop optional branches, reduce parallelism, and preserve the branch that serves the core outcome. Parent admission is not enough if downstream fan-out remains unlimited.
+
+Tool calls require an explicit shedding policy. Read-only enrichment can often be deferred, but a required authorization check cannot be skipped. A mutating action should not be partially executed because the gateway entered emergency mode. If an action has started, use its cancellation or compensation contract. If its result is unknown, mark it unknown and reconcile rather than blindly repeating it.
+
+Clients need useful overload semantics. Return a stable error class, operation identifier, retryability, retry-after guidance, and a reason such as queue full, deadline infeasible, tenant limit, or emergency shedding. Do not encourage every client to retry immediately. SDKs should apply bounded backoff and respect the workload's deadline. For deferred work, provide a durable job status rather than a request that remains stuck in memory.
+
+Fallback routing can help, but it is not free capacity. A fallback provider may have different limits, pricing, capabilities, and data rules. Filter candidates by the original contract, reserve capacity before switching, and include fallback work in the same retry and budget envelope. Routing every rejected request to another saturated provider simply moves the overload and creates a larger incident.
+
+Admission and shedding must share accounting. A shed request should release any reservation it already holds. A partially completed stream should record delivered output and provider usage. A cancelled child operation should not leave a hidden slot or budget reservation behind. Reconcile abandoned work periodically because cleanup bugs can make the gateway believe it is overloaded forever.
+
+Observability should show who was protected and who was shed. Track shed requests by tenant, workload class, reason, route, model, estimated cost, queue age, and operating mode. Measure protected traffic's success and latency as well as excluded traffic's wait and retry outcomes. Watch for fairness regressions, mode flapping, cleanup leaks, and clients that retry aggressively after deliberate rejection.
+
+Recovery deserves as much design as overload. Reopen admission gradually, drain queues by policy, and reserve capacity for fresh critical traffic so old work cannot create a second spike. Keep emergency limits in place until provider latency, queue age, and cancellation cleanup are healthy. A recovery dashboard should show whether accepted results are improving, not merely whether requests are being admitted again.
+
+Test overload as a planned scenario. Fill the queue with long streams, exhaust one provider, send a burst from a noisy tenant, trigger agent fan-out, cancel requests while shedding, and restart workers holding reservations. Verify that low-value work is rejected predictably, critical work remains usable, tools do not partially execute, budgets are released, retries stay bounded, and recovery does not create a thundering herd.
+
+The practical checklist is clear. Define the core journey and degradation levels. Detect pressure with multiple signals and hysteresis. Shed early with explicit operating modes. Protect critical traffic without starving other classes. Account for cost, streams, agents, tools, and fallbacks. Return stable overload semantics, release every reservation, measure fairness, and recover gradually.
+
+The larger lesson is that graceful degradation is a product decision expressed through infrastructure. Under pressure, the gateway cannot preserve everything equally. It can preserve the most valuable user journeys, explain what was deferred, and keep the system healthy enough to recover. Deliberate shedding is how a busy AI platform stays useful instead of merely staying busy.
+
+That is it for today. Protect the work that matters, shed the rest honestly, and make recovery part of the contract. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
