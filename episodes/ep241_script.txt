@@ -1,0 +1,55 @@
+EP241: AI API Gateway Request Lineage - Make Every Response Explainable
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about request lineage in AI API gateways. When a response is slow, surprising, expensive, partially streamed, or disputed by a customer, a request ID alone is not enough. Operators need to understand what happened from admission to delivery: which policy applied, which route was chosen, which providers were tried, what tools ran, and how usage and billing were decided.
+
+Start with the logical operation. Create one stable operation identity when the gateway accepts the client request. It should survive retries, provider attempts, fallback, queueing, streaming, tool calls, cache lookups, reconciliation, and support investigation. Keep operation identity separate from provider request IDs and client-generated idempotency keys, while preserving their relationships.
+
+Define lineage as a graph. A logical operation can create route decisions, attempts, validation steps, tool executions, cache candidates, stream segments, usage records, billing entries, and audit events. Parent-child relationships matter. A flat log list makes it hard to distinguish a retry from a parallel hedge or a tool call from a new user request.
+
+Capture the admission context. Record authenticated tenant and project scope, workload class, requested capability, data classification, residency policy, deadline, budget, idempotency key reference, and applicable plan. Store references and decisions rather than raw sensitive content by default. The lineage should explain what the gateway believed at admission without becoming a duplicate prompt archive.
+
+Record policy decisions explicitly. Include policy revision, authorization result, safety mode, tool permissions, region eligibility, rate limit, quota, budget, and any deny or transform action. A later investigator should be able to answer which rule allowed or blocked the operation. Do not reconstruct critical policy decisions from a changing configuration after the fact.
+
+Routing needs evidence. Record candidate routes, exclusion reasons, selected route, model and adapter revisions, region, feature flags, and route weight. Preserve the decision timestamp and relevant health or SLO signals. “The model was selected” is less useful than “these candidates were excluded for policy, capacity, and capability, and this route was selected under revision X.”
+
+Provider attempts are distinct events. Track start, connection, request acceptance, first byte, completion, cancellation, timeout, retryability, provider error category, and opaque provider reference. Link all attempts to the same logical operation. Never overwrite an earlier failed attempt with a later successful one; recovery depends on knowing the full sequence.
+
+Streaming requires event lineage. Record stream start, chunks or bounded summaries, finish reason, disconnect, cancellation, backpressure, and late events. Avoid logging raw tokens by default. A client-visible partial response must be distinguishable from a completed response, and a provider that continued after cancellation must remain visible for cleanup and billing.
+
+Tool calls create a side-effect branch. Link the model proposal, policy decision, schema validation, executor, target scope, start, completion, result classification, cancellation, and idempotency reference. Read-only and mutating calls need different event types. If the tool effect is unknown, record that state rather than marking the parent operation successful.
+
+Cache decisions belong in lineage. Record hit, miss, bypass, candidate compatibility, age, scope, model and policy revisions, source version, and validation outcome using opaque entry references. A cached response must be explainable without exposing another tenant's content. If the cache was bypassed because authorization or freshness could not be proven, retain that reason.
+
+Retrieval should be traceable without leaking documents. Record corpus, index, reranker, embedding, and retrieval policy revisions, result counts, filters, and source references or hashes as appropriate. Preserve tenant and residency scope. The lineage should show whether an answer depended on current retrieval, while respecting document confidentiality.
+
+Usage events must reconcile with attempts. Record provider-reported input, output, reasoning, cached, tool, and other usage categories, along with estimates, timestamps, and confidence. Link usage to the attempt that produced it. A cache hit should show that no provider tokens were consumed for that response. Late or contradictory usage must remain visible until reconciliation completes.
+
+Billing lineage needs customer-readable mapping. Link the logical operation to pricing revision, charge components, discounts, currency, adjustments, and invoice or balance entries. Keep provider usage and customer charge distinct but connected. Support should be able to explain a charge without granting access to raw prompts, hidden policies, or provider secrets.
+
+Timing should cover the whole path. Capture admission, queue, policy, route selection, cache, provider, validation, tool, stream, response, and billing timestamps. Use synchronized clocks or monotonic durations where possible. Break down tail latency by stage. A provider completion timestamp cannot explain a request that spent most of its deadline waiting in a queue.
+
+Privacy must shape observability. Use data classification to select retention, redaction, sampling, access, and regional storage. Hash or tokenize sensitive identifiers where correlation is enough. Separate operational metadata from content access. Raw payload inspection should be exceptional, approved, time-limited, and audited.
+
+Access control applies to lineage. Tenants should see their permitted operation and billing evidence, not internal credentials, other tenants, hidden prompts, or unrestricted provider details. Operators need role-based access, purpose limitation, and support-safe views. Security staff may need deeper evidence, but every access should be recorded.
+
+Lineage storage needs durability and ordering. Use append-oriented events with immutable identifiers, schema versions, timestamps, parent references, and source component. Handle retries and duplicate event delivery idempotently. Preserve enough ordering information to reconstruct concurrent attempts, while accepting that distributed clocks may not provide a perfect total order.
+
+Unknown and missing events are first-class states. A missing cancellation acknowledgement, late provider callback, unavailable usage report, or unobserved tool effect should not disappear. Mark uncertainty, reason, and reconciliation owner. Unknown state should influence retry, billing, incident response, and customer communication.
+
+Failure handling should preserve evidence. If the telemetry pipeline is degraded, buffer essential security, billing, and state events locally or in an approved regional store. If a nonessential field cannot be recorded, degrade that field explicitly. Never let observability failure cause unsafe retries or silently erase policy and side-effect evidence.
+
+Lineage powers incident response. During an outage, group failures by provider, route, adapter, region, policy revision, and workload. Identify first divergence and amplifiers such as retries, hedges, queue buildup, or fallback. Link incident timelines to representative operations without copying sensitive content into the incident channel.
+
+Lineage supports change verification. Attach release, configuration, feature flag, model, adapter, pricing, and policy revisions to operations. Compare before and after cohorts. When a new route raises schema errors or billing mismatches, lineage should identify the affected revision and scope without guesswork.
+
+Lineage also enables customer support. Provide a safe explanation containing operation time, outcome, route class, attempt summary, retryability, usage status, charge status, and next action. Keep internal risk details and sensitive content restricted. An accurate concise explanation is better than exposing every internal event.
+
+Test the graph, not just individual logs. Exercise retries, hedging, fallback, cancellation, partial streams, cache hits, tool calls, queue replay, late usage, unknown effects, policy changes, and cross-region rejection. Verify parent-child relationships, idempotency, redaction, access control, retention, and reconstruction. Delete or expire data through every derived view.
+
+Measure lineage quality. Track event completeness, propagation delay, duplicate rate, orphan rate, missing parent rate, unknown-state age, reconciliation time, and support resolution time. A dashboard can be green while lineage is incomplete, so observability itself needs objectives and alerts.
+
+The practical checklist is clear. Create a stable logical operation identity and model the path as a graph. Capture admission, policy, routing, attempts, streams, tools, retrieval, cache, usage, billing, timing, uncertainty, and revisions. Protect privacy and access, preserve essential events during telemetry failure, test concurrency and recovery, and offer safe customer explanations.
+
+The larger lesson is that lineage turns a response into an accountable event. It connects what the user asked for, what the gateway decided, what providers and tools did, and what the customer was charged. In a changing AI system, every response should carry enough evidence to answer not only “what came back?” but also “why, from where, under which rules, and at what cost?”
+
+That is it for today. Make every response explainable, and let evidence travel with every operation. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
