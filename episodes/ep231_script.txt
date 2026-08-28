@@ -1,0 +1,45 @@
+EP231: AI API Gateway Tenant Isolation - Keep Shared Infrastructure From Crossing Boundaries
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about tenant isolation in AI API gateways. Shared infrastructure makes model access efficient, but one missing tenant check can leak prompts, mix usage, exhaust another customer's quota, or route restricted data to the wrong provider. Isolation is not a single middleware function; it is a property that must survive every queue, cache, retry, stream, tool, and billing path.
+
+Begin at identity. Resolve tenant, project, environment, and workload from authenticated credentials and server-side configuration. Treat client-supplied tenant headers, metadata, and operation identifiers as claims to validate, never as authority. Bind every operation, attempt, reservation, tool call, log record, and charge to the authenticated boundary.
+
+Define the isolation model explicitly. Decide which resources are shared, pooled, dedicated, or partitioned. Document whether tenants share connection pools, queues, concurrency limits, caches, model contexts, workers, temporary files, provider credentials, and observability indexes. If a resource is shared, specify the invariant that prevents data, authority, capacity, and billing from crossing boundaries.
+
+Separate data plane and control plane permissions. A request may be allowed to invoke a model while being forbidden to inspect routing policy, usage from another project, or tool results. Operators may need aggregate metrics without access to raw prompts. Support access should be scoped, time-limited, audited, and redacted. Broad administrative access is not a substitute for a clear isolation design.
+
+Queues are isolation boundaries. Carry authenticated tenant context in every message, validate it when consuming, and prevent a worker from using ambient or stale context. Partition queues when fairness or data sensitivity requires it. A cancelled or retried message must retain the original ownership. Dead-letter and replay systems need the same checks as the primary queue.
+
+Concurrency and budgets need tenant dimensions. Track requests, tokens, streams, tool fan-out, retry work, and provider usage per tenant and workload class. Use global limits for system safety and tenant limits for fairness. Make reservations atomic and release them exactly once. One noisy customer should not consume all shared capacity, and one accounting bug should not transfer cost to another customer.
+
+Caches are a frequent leak. Key them by every security and behavior dimension that affects the result: tenant or permission scope, project, model, policy revision, region, request mode, and relevant input. Never cache private output in a public namespace. If caching across tenants is intentionally supported, prove that the data is public and the policy permits reuse. Disable caching when the classification is unknown.
+
+Prompt and context assembly must preserve boundaries. Do not reuse conversation state, retrieval results, tool outputs, or system instructions across tenants. Validate references before loading them. A shared vector index needs tenant filters enforced server-side, not merely added by a client query. Log denials and filter failures without recording sensitive content.
+
+Provider credentials and routing require tenant-aware policy. A shared credential may be technically efficient but can complicate attribution, revocation, residency, and incident response. Route each operation only to providers and regions permitted for its tenant, plan, data classification, and capability. Fallback candidates must be evaluated against the same boundary; a fallback is not an exception to isolation.
+
+Retries and failover preserve ownership. Every attempt inherits the operation's tenant, policy, and data classification. Do not let a worker retry with a default project or a global credential after context is lost. When a provider returns a late event, validate its operation and tenant association before applying state, usage, or billing updates.
+
+Streaming introduces connection-level risk. Bind the stream to the authorized operation and tenant, validate every event, and close it if context becomes invalid. Do not let a recycled connection deliver buffered events from a previous request. Record the last sequence number and terminal outcome so a reconnect cannot accidentally join another operation.
+
+Tools are privilege boundaries. Authorize the tool, arguments, target resources, and side-effect scope for the tenant and user. Do not rely on the model's selection as authorization. Pass a narrowly scoped capability to the executor and validate it again there. Tool results must return only to the owning operation. Unknown or duplicated effects require reconciliation under the original tenant boundary.
+
+Policy decisions should be tenant-specific and versioned. Record policy revision, plan, data classification, region, decision, and reason code. Guard against policy cache reuse across projects. When policy service availability is degraded, define whether the gateway fails closed, uses an approved bounded cache, or enters a restricted mode. Never silently fall back to the broadest permission set.
+
+Usage and billing must remain isolated. Link provider usage, retries, fallbacks, tool calls, credits, charges, corrections, and statements to the correct tenant and project. Reconciliation jobs must be idempotent and ownership-aware. A malformed provider callback must not update the first matching customer or a global aggregate without attribution.
+
+Observability needs both usefulness and privacy. Add tenant and project dimensions to metrics and traces with access-controlled aggregation. Keep raw content in governed stores with retention limits. Hash or tokenize identifiers where full values are unnecessary. Ensure logs, failure capsules, exports, and support dashboards apply the same tenant filter as the request path.
+
+Cross-tenant errors need containment. If a mismatched tenant context is detected, stop the operation, prevent downstream dispatch, quarantine the affected record, and alert the owner. Do not repair the record by guessing. Preserve enough evidence to identify exposure, affected operations, provider destinations, tool effects, and billing impact without spreading the sensitive data further.
+
+Isolation failures can be silent. A request may return the right text while consuming the wrong budget, using the wrong policy, or appearing in another tenant's dashboard. Add invariant checks for tenant identity continuity, resource ownership, cache scope, policy scope, provider route, tool authorization, and billing attribution. Make violations observable even when the customer-visible response looks successful.
+
+Test boundaries adversarially. Swap tenant headers, replay operation IDs, reuse cache keys, delay queue messages, recycle workers, duplicate provider callbacks, reconnect streams, trigger fallback, and run tools concurrently. Fill one tenant's queue and verify another retains its service objective. Change policy and pricing during an in-flight operation. Confirm that no data, authority, capacity, or charge crosses the boundary.
+
+Review shared infrastructure during every change. A new cache, worker pool, retry layer, provider adapter, analytics export, or debugging feature can create a new cross-tenant path. Include isolation impact in release readiness, dependency maps, contract tests, and rollback plans. Removing a guardrail during an emergency rollback requires the same scrutiny as adding one.
+
+The practical checklist is clear. Resolve identity server-side and bind it to every child action. Document shared resources and their invariants. Partition or budget queues, capacity, caches, contexts, tools, policy, observability, usage, and billing by tenant. Validate at every asynchronous boundary. Fail closed on mismatch, quarantine evidence, and test races, replay, fallback, streaming, and worker reuse.
+
+The larger lesson is that tenant isolation is continuity of authority. A gateway is safe when the identity that authorized work remains attached to that work until every result, reservation, side effect, and charge is finalized. Shared infrastructure can be efficient without becoming shared trust, but only when the boundary is explicit, enforced, and continuously tested.
+
+That is it for today. Keep shared infrastructure from crossing boundaries, and make every tenant's authority follow its work. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
