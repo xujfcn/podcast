@@ -1,0 +1,59 @@
+EP243: AI API Gateway Model Deprecation - Retire Versions Without Breaking Clients
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about model deprecation in AI API gateways. Providers retire models, change aliases, remove regions, and update behavior. Replacing one model identifier with another may look simple, but clients can depend on output style, tools, schemas, context limits, safety, latency, and price. Safe retirement is a migration program, not a string replacement.
+
+Start with an owned deprecation record. Capture the retiring model and provider, affected regions and capabilities, provider deadline, internal cutoff, reason, replacement candidates, migration owner, and rollback authority. Separate provider announcements from verified gateway facts. If the deadline or scope is uncertain, record that uncertainty and assign someone to resolve it.
+
+Discover actual dependencies before choosing a replacement. Query route configuration, aliases, tenant overrides, SDK defaults, saved workflows, prompt registries, tool policies, batch jobs, caches, evaluations, documentation, examples, and billing rules. Use recent request lineage to identify real traffic by tenant, workload, region, capability, and version. Configuration search alone misses dynamic and long-lived clients.
+
+Classify impact by contract. Determine which workloads use text, images, audio, streaming, tools, structured output, long context, deterministic settings, safety behavior, embeddings, or provider-specific extensions. Record data residency, latency, cost, and policy requirements. Two workloads using the same model name may need different successors.
+
+Do not assume a newer model is compatible. Compare accepted fields, role semantics, modalities, token limits, structured output, tool protocol, streaming events, finish reasons, errors, safety controls, usage reporting, pricing, capacity, and regional availability. Build an explicit compatibility matrix and identify unsupported or approximate mappings.
+
+Use representative evaluations. Sample approved requests across affected workload classes, including difficult prompts, long context, multilingual content, schemas, tools, refusals, and partial streams. Protect sensitive data through redaction or controlled environments. Evaluate contract invariants and user outcomes rather than expecting identical wording.
+
+Structured output deserves a migration gate. Test schema adherence, strictness, refusals, truncation, additional properties, and streaming fragments. Validate responses before success. If the replacement requires repair more often, measure the added latency and cost and decide whether the degradation is acceptable.
+
+Tool behavior needs side-effect safety. Compare tool selection, argument validity, parallel calls, call identities, approval boundaries, cancellation, and retry behavior. Run mutating tools against sandboxes or deterministic fakes. A replacement that writes fluent text but chooses tools differently can be a dangerous regression.
+
+Prompt compatibility is part of the dependency. System prompts and examples may have been tuned around the retiring model. Version prompt bundles separately from model routes. Test the current prompt first, then make bounded prompt changes with their own evaluation and rollback. Avoid changing model, prompt, tools, policy, and timeout in one opaque release.
+
+Latency and capacity require distributions. Measure first byte, completion, stream stability, deadline misses, concurrency, queue behavior, and rate limits by region. Include retries and fallbacks. A replacement may be faster on average but worse at the tail, or healthy in tests but unavailable at production volume.
+
+Cost comparisons need full accounting. Include input, output, reasoning, cached, image, audio, tool, retry, and gateway costs. Verify provider usage and effective pricing revisions. Model changes can alter output length and tool frequency, so unit price alone is misleading. Forecast customer and platform impact under realistic traffic.
+
+Safety and policy behavior must remain authoritative. Compare refusal categories, content controls, prompt-injection resistance, tool permissions, and data handling. Keep gateway policy enforcement independent of provider-specific language. If the replacement cannot satisfy a required policy or residency rule, it is not a valid candidate for that workload.
+
+Define a migration map, not one universal alias. Different tenants, regions, capabilities, or plans may require different successors. Preserve explicit model pinning where contractually supported. For aliases, publish resolved revisions and effective times. Never silently redirect a pinned model to behavior that violates its documented contract.
+
+Communication should be staged. Notify internal owners first, then affected customers with dates, scope, recommended replacements, known differences, pricing, testing instructions, and support contacts. Distinguish deprecation, migration start, default switch, read-only or blocked states, and final removal. Avoid vague notices that say a model is going away without an actionable path.
+
+Offer a discovery mode. Let customers inspect which projects, keys, workloads, or recent operations still use the retiring model without exposing sensitive prompts. Provide replacement eligibility and incompatibility reasons. A migration is faster when users can see precise impact instead of searching every application manually.
+
+Shadow evaluation can reduce risk. For eligible read-only workloads, send a bounded copy to the candidate model and compare contract outcomes without returning or billing the shadow response to the customer. Respect data residency, privacy, provider terms, and budget. Never shadow mutating tools or sensitive traffic without explicit authorization.
+
+Canary the replacement by workload. Start with internal and synthetic requests, then a narrow approved tenant, region, and capability. Measure success, schema validity, tool safety, policy, latency, usage, cost, and customer outcomes. Increase traffic only when the evidence meets predefined gates. A global percentage can hide concentrated harm.
+
+Dual routing needs clear semantics. If both models run, decide which response is authoritative, how loser attempts are cancelled, whether customers are charged, and how side effects are prevented. Preserve lineage for both attempts. Do not use production users as an uncontrolled comparison experiment.
+
+Fallbacks should not resurrect the retiring dependency. During migration, remove the old model from fallback chains in a controlled order and verify that retries, aliases, and regional routes cannot select it accidentally. If temporary fallback remains necessary, give it an expiration and alert on every use.
+
+Control-plane changes should be immutable and staged. Version route maps, aliases, pricing, prompts, policies, evaluation gates, and rollback snapshots. Workers should acknowledge the active revision. Detect configuration drift so one region does not continue routing to the retired model after the cutoff.
+
+Caches and stored artifacts need version awareness. Semantic caches, prompt caches, embeddings, fine-tuning references, evaluation baselines, and saved outputs may encode the old model contract. Decide what remains valid, what must be invalidated, and what needs relabeling. A cache hit should not hide that live traffic has migrated.
+
+Billing transitions need an effective boundary. Publish when the new price applies and how in-flight, retried, cached, and late-reported operations are treated. Link every charge to the resolved model and pricing revision. Reconcile provider statements after the switch and correct mismatches without rewriting history.
+
+Rollback must be realistic. The retiring provider may become unavailable before the migration is complete, so rollback cannot always mean returning to the old model. Maintain a verified safe route, prompt, policy, and capacity plan among remaining candidates. Define how to handle in-flight streams, tools, usage, and caches during reversal.
+
+Enforce the final cutoff deliberately. Reject new configurations that reference the retired model, disable alias resolution, stop provider dispatch, revoke obsolete credentials where appropriate, and remove it from catalogs and documentation. Keep historical lineage and billing evidence. Do not delete the records needed to explain past operations.
+
+Monitor after removal. Track unknown model references, failed migrations, fallback spikes, schema errors, tool anomalies, latency, support tickets, and cost. Search queues, scheduled jobs, and dormant tenants for late callers. A quiet dashboard immediately after cutoff may mean traffic has not reached the hidden dependency yet.
+
+Run a post-migration review. Compare predicted and observed compatibility, cost, latency, safety, and support impact. Record exceptions and retire temporary flags, dual routes, and elevated logging. Update the deprecation playbook with what the dependency inventory and tests missed.
+
+The practical checklist is clear. Create an owned record, discover real dependencies, classify contracts, evaluate replacement candidates, test prompts, schemas, tools, safety, capacity, and cost, communicate precise stages, provide discovery, canary by workload, version every change, preserve billing evidence, plan rollback without assuming the old model survives, and monitor late callers.
+
+The larger lesson is that a model identifier represents a web of behavior. Retiring it safely means moving every dependent promise, not merely every API call. A gateway with strong lineage, contracts, evaluations, and staged routing can turn provider churn into a controlled migration instead of a customer outage.
+
+That is it for today. Retire model versions without breaking clients, and make every migration evidence-driven. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
