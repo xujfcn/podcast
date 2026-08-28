@@ -1,0 +1,47 @@
+EP232: AI API Gateway Audit Trails - Turn Runtime Decisions Into Durable Evidence
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about audit trails for AI API gateways. Logs help engineers debug. Traces explain timing. An audit trail answers a different question: who or what made a consequential decision, under which policy and release, with what evidence, and what happened afterward? For model routing, tool access, data handling, usage, billing, and incident response, durable evidence is part of the product.
+
+Start by defining auditable events. Include authentication, tenant binding, admission, policy decisions, route selection, provider attempts, retries, fallback, stream termination, tool authorization, tool effects, cancellation, quota changes, pricing decisions, credits, corrections, configuration changes, and operator actions. Do not record everything indiscriminately. Record events that change authority, data destination, customer outcome, resource use, or financial state.
+
+Every event needs context. Preserve operation ID, attempt or child ID, tenant, project, actor, timestamp, event type, previous and next state, policy revision, release and adapter versions, reason code, and related resource. Keep requested intent separate from effective behavior. An audit record should show what was asked, what the gateway allowed, what it did, and why.
+
+Use a stable event schema. Version the schema, require mandatory fields, define enumerations, and reject malformed records at the boundary. Event names should describe facts rather than opinions. “route.selected” with a reason and candidate evidence is stronger than “routing succeeded.” Avoid free-form messages as the only source of meaning.
+
+Audit causality across asynchronous work. Link queue messages, provider callbacks, reconciliation jobs, tool executions, and billing updates to their parent operation. Preserve ordering with sequence numbers or event time plus ingestion time. Late events must remain late events; they must not overwrite the original decision. A complete audit trail connects the request to every consequential child action.
+
+Integrity is central. Use append-only storage where appropriate, hash chains or signatures for high-value records, controlled writers, and audited reads. Detect deletion, mutation, gaps, and reordering. Store the event's source and ingestion path. If an event cannot be verified, mark the evidence as degraded instead of presenting an apparently complete history.
+
+Auditability does not mean copying all customer content. Apply data minimization, redaction, encryption, sensitivity labels, access control, and retention rules. Store hashes, classifications, references, and bounded summaries when raw prompts or tool arguments are unnecessary. Keep sensitive payloads in a separate governed store, and make access to that store itself auditable.
+
+Tenant boundaries must hold in the audit system too. Enforce ownership server-side on writes, reads, exports, replays, and support views. An operator may need cross-tenant aggregate evidence without seeing raw content. Support access should be scoped, time-limited, reasoned, and logged. Never treat an internal observability database as a trusted bypass around application authorization.
+
+Audit policy decisions precisely. Record policy revision, evaluator version, input classification, region, plan, decision, constrained fields, and reason code. When a request is denied, transformed, challenged, or routed to a fallback, preserve the decision and the effective result. If policy evaluation was unavailable, record whether the system failed closed, used an approved cache, or entered restricted mode.
+
+Route and provider evidence should be explainable without exposing secrets. Record eligible and excluded route reason codes, selected provider, region, capability match, health state, timeout, adapter version, and provider request reference. Never store credentials or raw authorization headers. Use opaque references for secrets and record which credential class was used, not its value.
+
+Tool actions need stronger evidence than model text. Separate proposal, authorization, validation, dispatch, acknowledgement, completion, cancellation, and unknown states. Record the capability or approval that authorized the action, target scope, idempotency key reference, executor, and reconciliation result. If a mutating action may have happened, preserve uncertainty until it is resolved. Audit trails must prevent a side effect from disappearing behind a cancelled model request.
+
+Usage and billing events require financial discipline. Link provider-reported usage, gateway estimates, retries, fallbacks, tool work, pricing revision, charge, credit, quarantine, and correction. Preserve original records and adjustment relationships. Do not rewrite a questionable charge into a clean number without retaining the reason, actor, and evidence for the correction.
+
+Configuration changes belong in the same story. Record who changed model aliases, policies, route weights, quotas, pricing, credentials, probes, and feature flags; what the previous value was; what the new value is; which approval or change ticket applied; and when the change became effective. A request audit trail is incomplete if it cannot reconstruct the configuration that governed the request.
+
+Operator actions should be first-class events. Rollback, drain, override, replay, quarantine, credit, access grant, and emergency disablement all need actor, scope, reason, approval, expiration, and result. Break-glass access must be time-bounded and reviewed. “An engineer changed it” is not enough evidence for a financial or security-impacting operation.
+
+Use audit trails for detection, not only investigations. Build checks for missing identity, policy bypass, unexpected provider region, cross-tenant references, route changes without approval, tool effects without authorization, charges without usage, and state transitions without a valid predecessor. Alert on patterns and invariant violations, while keeping raw evidence available for verification.
+
+Make evidence queryable. Operators should be able to retrieve one operation's complete history, a provider's change impact, all actions under a policy revision, or every charge corrected during an incident. Index tenant, operation, attempt, release, policy, route, provider, tool, and billing references carefully. Queries should return evidence and gaps, not a polished narrative that hides missing records.
+
+Audit trails and lineage serve different purposes. Lineage connects causal work in real time. Audit trails preserve consequential facts for later proof. Reuse identifiers and event contracts, but do not assume a short-retention trace is a durable audit record. Decide which events need longer retention, stronger integrity, stricter access, or legal hold.
+
+Retention should follow risk. Keep enough evidence to support customer support, reconciliation, security investigation, compliance, and incident learning. Delete or anonymize records when the retention period ends, and record the deletion policy without retaining forbidden payloads. Legal or contractual requirements may differ by tenant, region, or data class; make those rules explicit.
+
+Test the audit path under failure. Drop events, duplicate them, reorder callbacks, lose a queue message, restart a writer, corrupt a signature, and delay ingestion. Verify that gaps are detected, duplicate events are idempotently handled, and the user-facing operation does not become unsafe merely because auditing is degraded. Define when a critical action must fail closed if evidence cannot be durably recorded.
+
+Review audit completeness during releases. A new provider adapter, tool, cache, fallback, billing rule, or control-plane endpoint can create an unaudited decision. Include event schema changes, privacy review, access review, retention, dashboards, and failure behavior in readiness gates. If rollback changes policy or route behavior, its audit events must remain distinguishable from normal operation.
+
+The practical checklist is clear. Define consequential events and stable schemas. Preserve identity, causality, state, policy, release, route, tool, usage, billing, configuration, and operator evidence. Enforce tenant and privacy boundaries. Protect integrity, detect gaps, make queries useful, separate lineage from durable audit, apply risk-based retention, and test degraded audit paths.
+
+The larger lesson is that an AI gateway needs a memory that can be trusted. Audit trails turn runtime decisions into durable evidence without turning customer data into an uncontrolled archive. When something goes wrong, the question should not be “which log line looks plausible?” It should be “what happened, who authorized it, what did it affect, and can we prove it?”
+
+That is it for today. Make consequential decisions durable, verifiable, and appropriately private. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
