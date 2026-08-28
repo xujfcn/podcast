@@ -1,0 +1,57 @@
+EP244: AI API Gateway Policy Evaluation - Turn Intent Into Runtime Decisions
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about policy evaluation in AI API gateways. A policy document may express intent, but production safety depends on turning that intent into consistent runtime decisions. Which request is allowed, which model is eligible, where may data go, which tool may run, and what evidence proves the decision? Policy must be executable, observable, and difficult to bypass.
+
+Start with the decision contract. Define inputs, outputs, precedence, defaults, obligations, deny conditions, and failure behavior. A policy result should say more than allow or deny: it should identify the effective scope, eligible routes, required transformations, logging mode, tool permissions, residency boundary, budget, and expiration. Make the contract versioned so a later evaluation can explain an earlier decision.
+
+Authenticate before authorization. Bind the operation to a verified tenant, project, user, key, plan, environment, and workload. Do not evaluate high-impact policy against untrusted headers or model-generated context. Preserve the authenticated context through retries, queues, streams, fallbacks, cache lookups, and tool calls. Child actions must not inherit more authority than the parent operation grants.
+
+Separate identity from attributes. Identity answers who is acting; attributes describe data class, region, model capability, risk, time, quota, and purpose. Keep these inputs typed and sourced. Client labels can be useful claims to validate, but they cannot become authority by themselves. Unknown or conflicting attributes should trigger a safe default or an explicit decision path.
+
+Define evaluation points. Policy may apply at admission, before provider dispatch, before fallback, before cache reuse, before retrieval, before tool execution, before output delivery, and before billing or export. One check at the gateway edge is insufficient when later steps can change destination, scope, or side effects. Document which decisions are re-evaluated and which are inherited.
+
+Make precedence explicit. Tenant policy, project policy, workload policy, platform safety rules, provider constraints, residency requirements, and emergency denies can conflict. Define ordering and explain the winning rule. Prefer restrictive outcomes for ambiguous conflicts. Avoid a policy engine where behavior depends on file order or evaluation timing that operators cannot inspect.
+
+Use typed outcomes and obligations. An allow may require regional routing, redaction, human approval, a specific model class, a shorter retention period, or a read-only tool set. A deny should include a stable category and safe customer message. A challenge or review state should have a deadline and owner. Do not encode obligations as comments that adapters are expected to remember.
+
+Fail closed where harm is high. If authorization, residency, tool approval, or emergency policy cannot be evaluated, stop the affected action. For low-risk public workloads, a bounded degraded mode may be acceptable if explicitly defined. Never turn a policy service timeout into an unrestricted provider call because the request is already waiting.
+
+Policy and routing must cooperate. Build the candidate route set only after applying identity, capability, region, data, safety, budget, and provider constraints. Record excluded candidates and reasons. A healthy provider is not eligible if it cannot satisfy the effective policy. Routing should not reinterpret a deny as a suggestion.
+
+Cache policy decisions carefully. A decision may depend on tenant permissions, time, quota, model, data class, source version, or incident state. Include all relevant inputs in the decision key and set an appropriate lifetime. Re-evaluate on revocation and emergency changes. Never let a stale allow bypass a current deny.
+
+Semantic cache hits still need authorization. A reused answer may have been generated under another prompt, policy revision, user permission, region, or source corpus. Validate scope, freshness, model contract, and residency before returning it. Cache compatibility is not permission to reuse content.
+
+Tools are a hard policy boundary. Check tool name, target, arguments, data class, user approval, side-effect level, region, and idempotency before execution. Validate generated arguments independently. Re-check after a model requests a second tool or changes the target. A model's instruction to call a tool is a proposal, not an authorization decision.
+
+Output policy is not optional. Inspect response type, content policy, structured schema, tool results, sensitive data, and customer plan before delivery. Decide what happens on refusal, redaction, transformation, partial stream, or invalid output. Preserve the distinction between a policy block and a provider failure so clients do not retry incorrectly.
+
+Streaming requires staged decisions. Authorize the operation before opening the stream, then enforce output and tool policy as events arrive. Define what happens when a later chunk violates a rule or a tool request appears after content has been sent. Cancellation and cleanup must be visible. Do not assume a first approved token makes the rest of the stream safe.
+
+Data residency belongs inside policy evaluation. Derive approved regions from authenticated tenant and data classification, then intersect them with provider, queue, cache, retrieval, tool, log, and backup locations. Re-evaluate before every new destination. If no route preserves the boundary, fail clearly rather than silently using a global fallback.
+
+Budgets and quotas are policy inputs. Check request count, tokens, concurrency, spend, retries, tool calls, and provider capacity according to plan and workload. Reserve budget before work that can fan out. Release or reconcile reservations on cancellation and unknown outcomes. A policy decision that allows work without reserving its budget can create an avoidable overload or billing dispute.
+
+Time is an attribute. Policies may vary by maintenance window, subscription expiry, approval duration, retention period, or emergency incident. Use trusted time and explicit time zones. Include effective and expiration timestamps in decisions. Avoid long-lived allows whose validity outlasts the credentials, policy, or business purpose that created them.
+
+Emergency changes need priority and propagation. Support signed emergency denies or route restrictions with an explicit scope and expiration. Define how they reach control planes, workers, caches, queues, and provider adapters. Measure propagation lag and fail closed for high-risk paths while a new rule is not yet present. An emergency button that changes one region is not global containment.
+
+Policy distribution must be versioned. Publish immutable bundles or snapshots with hashes, signatures, effective times, dependencies, and rollback references. Workers should report the active policy revision and reject malformed or unauthorized bundles. Detect drift between intended and active policy. Never debug a production decision using the current policy when the request used an older one.
+
+Testing should cover combinations. Exercise tenant boundaries, plan changes, region restrictions, provider capability gaps, tool approvals, schema requirements, quota exhaustion, emergency denies, stale cache, queue replay, fallback, stream violations, and policy-service failure. Add property tests for monotonicity: adding a restriction should not make an ineligible route eligible, and removing permission should not leave an old allow usable.
+
+Adversarial tests matter. Try spoofed region headers, confused deputy paths, prompt injection, tool argument widening, cache-key collisions, policy version rollback, malformed attributes, replayed approvals, and race conditions between revocation and execution. Verify that policy cannot be bypassed through a different endpoint, worker, provider adapter, or support tool.
+
+Observability must explain decisions without leaking content. Record operation reference, authenticated scope, input attribute sources, policy revision, rule identifiers, outcome, obligations, excluded routes, evaluation latency, and failure reason. Use opaque references and redaction for prompts, documents, tool arguments, and outputs. Make customer-safe and operator-deep views separate.
+
+Lineage links policy to effects. Connect admission decision, route selection, provider attempt, cache validation, retrieval, tool execution, output filtering, usage, billing, and export. If a later action violates policy, investigators should identify which decision was inherited, which was re-evaluated, and where enforcement failed. A policy log disconnected from data-plane effects is weak evidence.
+
+Policy changes need canaries. Evaluate new bundles against recorded or synthetic requests before activation. Compare outcomes, route eligibility, latency, denials, obligations, tool scope, residency, and cost. Run a shadow decision mode when safe. Promote by tenant, region, and workload, and keep an immediate rollback or emergency restriction path.
+
+Human approvals should be durable but bounded. Record approver identity, purpose, scope, decision, expiration, and policy revision. Bind approval to the exact operation or a carefully defined class. Do not let a broad approval be replayed for unrelated data or tools. Make approval state visible to support and audit without exposing secrets.
+
+The practical checklist is clear. Define typed decisions and obligations, authenticate context, evaluate at every relevant boundary, make precedence and failure behavior explicit, integrate policy with routing, cache, tools, streams, residency, budget, and output, version and sign bundles, test combinations and attacks, observe decisions, link them to effects, and roll out changes gradually.
+
+The larger lesson is that policy is a runtime control system. Documents and dashboards describe intent, but the gateway earns trust by applying that intent consistently to every route, retry, cache hit, tool call, stream, and charge. When decisions are typed, versioned, explainable, and enforced at the boundary, policy becomes an operational guarantee rather than a promise hidden in documentation.
+
+That is it for today. Turn intent into runtime decisions, and make every important allow or deny explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
