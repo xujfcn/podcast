@@ -1,0 +1,57 @@
+EP242: AI API Gateway Semantic Contracts - Preserve Meaning Across Providers
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about semantic contracts in AI API gateways. An OpenAI-compatible endpoint can make integration easy, but compatibility is not the same as equivalence. Providers differ in roles, content parts, tool calls, streaming, errors, usage, safety, and cancellation. A reliable gateway normalizes syntax while preserving meaning.
+
+Start with the contract users actually depend on. Define accepted inputs, output shape, ordering, timing, errors, usage, policy, tool effects, and billing. Separate guaranteed behavior from best effort and provider-specific extensions. If a client cannot tell which semantics are stable, every provider change becomes a hidden breaking change.
+
+Use a typed intermediate representation. Parse incoming requests into explicit messages, content parts, tools, response formats, limits, deadlines, identity, policy, residency, and billing context. Translate from this representation into provider requests, then translate responses back. Avoid passing loosely shaped dictionaries through several adapters where fields can be silently lost.
+
+Preserve message meaning. Roles, system instructions, developer guidance, user content, assistant history, tool results, and multimodal parts may not map one-to-one between providers. Define precedence and conversion rules. Reject unsupported combinations or surface a documented downgrade; never silently turn a system instruction into ordinary user text.
+
+Content parts need capability checks. Text, images, audio, video, files, and cached references can have different limits and security treatment. Validate media type, size, encoding, ordering, and provider support. If a provider lacks a requested modality, return a clear capability error or choose an approved alternative. A successful request with discarded content is not compatibility.
+
+Parameter semantics are rarely identical. Temperature, top-p, penalties, seeds, stop sequences, reasoning controls, token limits, and response formats may have different ranges or meanings. Maintain a capability and translation matrix. Normalize only when equivalence is defensible. Otherwise expose the difference, reject the request, or mark the behavior as approximate.
+
+Structured output requires more than a JSON flag. Validate schema support, strictness, refusal behavior, partial streams, additional properties, and finish reasons. Run response validation before declaring success. If repair is allowed, record that repair and keep it within the customer's contract. Never return malformed output as a successful structured response.
+
+Tool calls are a protocol, not a text pattern. Preserve tool name, argument structure, call identity, ordering, parallelism, approval, result, and side-effect status. Validate arguments independently of the provider. If a provider emits tool-like text instead of a typed call, do not execute it automatically. Mutating tools need idempotency and reconciliation semantics.
+
+Streaming needs event compatibility. Define event types, deltas, role transitions, tool fragments, usage timing, finish reasons, errors, cancellation, and disconnect behavior. Translate provider events into a stable stream contract without inventing completion. Test empty deltas, duplicated chunks, out-of-order events, late usage, and failure after partial output.
+
+Cancellation must be meaningful. Propagate client disconnects and deadlines to adapters and providers. Record whether the provider acknowledged cancellation and whether work continued. If cancellation cannot be guaranteed, expose that limitation and protect side effects, budgets, and billing. A closed client connection does not prove upstream work stopped.
+
+Errors need stable categories and preserved detail. Distinguish validation, authentication, authorization, policy, capacity, rate limit, timeout, cancellation, provider failure, adapter incompatibility, and unknown outcome. Define retryability and backoff guidance. Keep opaque provider references for diagnosis, but do not leak secrets or make provider-specific details part of the stable client contract accidentally.
+
+HTTP status is only one layer. A response with status 200 may contain a refusal, incomplete tool call, invalid schema, stale cache result, or unknown side effect. Define response acceptance checks. Make success depend on contract validation, not transport status alone.
+
+Usage semantics must survive translation. Map input, output, reasoning, cached, tool, audio, image, and other categories where possible. Distinguish provider-reported values from gateway estimates. Handle missing, delayed, rounded, and contradictory usage without fabricating precision. Link usage to attempts and explain how it affects customer billing.
+
+Pricing is a separate contract. Provider units and customer units may not match. Version price tables, effective times, discounts, minimums, rounding, and adjustments. A provider adapter must not hard-code assumptions that outlive the pricing revision. Test representative requests and reconcile statements against provider evidence.
+
+Safety behavior needs explicit preservation. Providers can differ in refusal categories, filtering, safety settings, and returned explanations. Keep gateway policy authoritative. Normalize outcome categories carefully and retain enough detail for support. Do not weaken a policy because one provider expresses refusal differently.
+
+Context limits are semantic constraints. Count tokens or provider units according to the selected adapter, account for multimodal content, tool schemas, reasoning budgets, and output reservations. Reject or transform over-limit requests deliberately. A provider that truncates silently can change the task while still returning an answer.
+
+Model aliases need version control. A friendly model name can point to different provider versions over time. Record resolved model, contract revision, adapter revision, and capability snapshot. Do not promise reproducibility if the underlying model can change without notice. Support explicit pinning for workloads that require stable behavior.
+
+Provider extensions should have namespaced escape hatches. Let advanced users access supported provider features without polluting the common contract. Validate extension ownership, policy, residency, and compatibility. An extension must not override identity, billing, tool authorization, or safety decisions. Keep extension behavior observable and versioned.
+
+Adapters need metamorphic tests. Send equivalent requests through two compatible providers and compare invariants: required fields, tool authorization, schema validity, finish semantics, policy result, usage accounting, and error class. Do not expect identical wording. Test that transformations preserve the properties the contract promises.
+
+Golden tests are useful but insufficient. Keep fixtures for text, multimodal, streaming, tools, structured output, refusal, timeout, cancellation, and usage. Add fuzzing for malformed fields, oversized content, unknown events, nested schemas, and provider deviations. Golden outputs detect regressions; invariant tests explain what must remain true.
+
+Contract changes need compatibility levels. Mark additions, behavior changes, deprecations, and breaking changes. Version schemas and event streams where necessary. Publish migration guidance and run old clients through the new adapter. Never treat a provider API update as harmless because the URL stayed the same.
+
+Observability should expose translation decisions. Record input contract version, selected provider contract, adapter version, dropped or transformed fields, capability checks, response validation, usage confidence, and error mapping. Avoid raw sensitive payloads by default. Operators need to know whether a failure originated in the client contract, translation, provider, or normalization layer.
+
+Fallbacks must preserve the original promise. Select alternatives based on capability, policy, region, latency, cost, and semantic equivalence. Do not send a request to a cheaper route that cannot preserve tools, schema, modality, or safety. If the gateway must downgrade, require an explicit policy and make the downgrade visible.
+
+Rollouts should compare contract outcomes. Canary a new adapter or provider with bounded traffic. Measure field preservation, schema validity, stream completion, error classification, tool safety, usage reconciliation, latency, and billing. Stop promotion on semantic regressions even if availability improves. A faster wrong response is not a successful rollout.
+
+Incident response needs the contract graph. Link client operation, parsed representation, transformed request, provider attempt, translated events, validation, tool effects, usage, and charge. Preserve evidence for unknown outcomes and late callbacks. This makes it possible to answer whether the provider failed, the adapter changed meaning, or the gateway declared success too early.
+
+The practical checklist is clear. Define stable guarantees, parse into a typed intermediate representation, preserve roles and content, validate parameters and capabilities, treat tools and streams as protocols, normalize errors and usage honestly, version models and contracts, test invariants and hostile inputs, make fallbacks explicit, and observe every translation decision.
+
+The larger lesson is that an AI gateway earns compatibility by preserving meaning, not by copying an endpoint shape. Providers will change their APIs, models, limits, and semantics. A strong contract lets the gateway absorb those differences while keeping client expectations, safety, cost, and recovery behavior explicit.
+
+That is it for today. Normalize providers without hiding semantics, and make compatibility something you can test. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
