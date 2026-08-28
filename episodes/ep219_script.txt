@@ -1,0 +1,39 @@
+EP219: AI API Gateway Retry Budgets - Make Recovery Affordable
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about retry budgets for AI API gateways. Retries can recover from transient provider failures, but they can also multiply traffic, token spend, queue pressure, and tool side effects. A gateway needs more than a retry count. It needs a budget that limits how much recovery the system can afford.
+
+A retry budget is a bounded allowance for additional work beyond the original attempt. It can include attempt count, wall-clock time, tokens, concurrency, provider cost, and downstream side effects. These dimensions protect different resources. Two retries may be harmless for a tiny completion but dangerous for a long stream or an agent workflow with ten child calls.
+
+Begin with the logical operation. Keep one operation identifier across attempts, and give each provider attempt its own identity. The retry budget belongs to the operation and, in some cases, to the tenant, workload class, route, or incident mode. This prevents every layer from applying its own independent retry policy and accidentally multiplying the allowed work.
+
+Retryability must come from failure semantics. A connection reset before provider acceptance may justify another attempt. A valid content-policy result usually should not. A malformed structured response may permit one constrained retry. An unknown tool side effect should wait for reconciliation rather than being repeated blindly. Classify the failure first, then consult the budget and policy.
+
+Time is often the most important budget. A retry that starts after the client's deadline cannot improve the user outcome. Propagate the deadline through the gateway, queue, provider adapter, and fallback. Reserve time for response validation and cleanup. If the remaining time is insufficient, return the original failure or an indeterminate outcome instead of spending resources on a retry that cannot complete.
+
+Attempt count alone is misleading. A single retry with a large output limit can cost more than several short attempts. Estimate input, output, reasoning, media, and tool-work budgets before dispatch. Track actual usage as it arrives, and stop or constrain work when the operation reaches its ceiling. For streaming, include maximum duration and output size because the connection can hold capacity long after the first token.
+
+Retries need backoff and jitter, but delay does not make unlimited work safe. Use bounded exponential backoff with a maximum delay and a deadline check before every attempt. Coordinate retry timing with provider Retry-After signals and gateway overload state. During an incident, reduce retry budgets or disable selected retry classes so recovery traffic does not overwhelm the remaining healthy capacity.
+
+The budget should be shared across fallback routes. If provider A fails and provider B is tried, that is recovery work for one logical operation, not a fresh budget for B. Preserve the original contract, capability requirements, data rules, and customer deadline. A fallback that ignores the remaining budget can produce a slower, more expensive response than the failed primary would have produced.
+
+Layered clients are a common source of multiplication. A browser may retry, an SDK may retry, the gateway may retry, and a provider SDK may retry again. Define ownership for each layer. Prefer one clear retry authority for provider recovery, pass stable operation and attempt identifiers downward, and expose whether a response was produced after retries. If multiple layers must retry, calculate a combined maximum rather than multiplying defaults.
+
+Idempotency is required before retrying work with effects. A text generation may be replayable under a documented policy, but sending a message, charging a card, deploying code, or updating a record requires an executor-side idempotency key. If the previous attempt's effect is unknown, reconcile it first. Never turn a timeout into permission to repeat an irreversible action.
+
+Admission control and retry budgets must cooperate. A retry is not more important merely because it is already in progress. Reserve capacity for critical original work, cap retry concurrency, and shed optional recovery work when the system is under pressure. Track retry traffic separately from new traffic so operators can see whether the system is serving users or mostly trying to recover past failures.
+
+Budgets should be tenant-aware. One noisy tenant can consume all recovery capacity if retries are counted only globally. Set per-tenant and per-workload allowances, then maintain a protected pool for critical operations. Apply fairness without hiding the fact that an operation exhausted its own budget. The client should receive a clear retry-exhausted reason and a safe next step.
+
+Budget decisions need durable evidence. Record original attempt, retry reason, policy version, budget before and after, selected route, estimated and actual cost, and final outcome. Do not log sensitive prompts or tool arguments by default. Operation and attempt identifiers, bounded error codes, token categories, and timing are usually enough to explain why a retry happened.
+
+Billing should distinguish successful recovery from wasted recovery. A retried attempt may consume provider resources even when its answer is discarded. Customer charge policy may cover all work, only accepted work, or include a reliability credit. Whatever the rule, preserve attempt-level cost and pricing versions so support teams can explain the statement without guessing.
+
+Metrics should reveal budget pressure. Track retry rate, attempts per operation, retry success rate, budget exhaustion, time spent waiting to retry, retry tokens, retry cost, duplicate effects prevented, and recovery traffic as a share of total traffic. Break these down by provider, model, adapter, failure class, tenant, and incident mode. A rising retry success rate can still be unhealthy if it requires twice the spend.
+
+Test the boundaries deliberately. Return transient failures until the budget is exhausted. Send Retry-After longer than the deadline. Trigger fallback after partial streaming. Fail after a tool action may have started. Make every layer retry by default. Enter emergency shedding mode midway through recovery. Verify that attempts stay bounded, deadlines are respected, effects are not duplicated, reservations are released, and the final outcome remains explainable.
+
+The practical checklist is clear. Budget attempts, time, tokens, concurrency, cost, and side effects. Classify failures before retrying. Share one budget across fallbacks and layers. Use deadline-aware backoff and jitter. Protect idempotency boundaries. Coordinate retries with admission control and load shedding. Record budget evidence, separate provider cost from customer charge, and measure recovery traffic independently.
+
+The larger lesson is that retries are a reliability feature with a price. Recovery is useful only while it improves the chance of a valuable outcome without consuming the capacity needed for new work. Explicit retry budgets let an AI gateway recover deliberately, stop when recovery is no longer credible, and keep an incident from becoming an expensive feedback loop.
+
+That is it for today. Make recovery bounded, observable, and worth the cost. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
