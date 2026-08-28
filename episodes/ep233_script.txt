@@ -1,0 +1,49 @@
+EP233: AI API Gateway Multi-Region Failover - Preserve Semantics Across Locations
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about multi-region failover for AI API gateways. Moving traffic to another region can restore availability, but it can also change data residency, provider capabilities, latency, policy, pricing, state, and tool behavior. A failover is successful only when the gateway preserves the promised semantics while moving work across locations.
+
+Start by defining the failover contract. Identify which regions may serve each tenant, workload, data class, model capability, and tool. Specify what can move automatically, what requires approval, and what must fail closed. “The service is global” is not a policy. Each operation needs an explicit set of eligible destinations and a documented degradation mode.
+
+Separate availability from eligibility. A region can be healthy yet forbidden for a tenant, unavailable for a data class, incompatible with a model capability, or unable to execute an approved tool. Build failover selection from the same identity, policy, capability, and residency rules used for primary routing. Never treat geographic distance as a sufficient reason to cross a boundary.
+
+Preserve identity across regions. Authenticate at the gateway edge, bind tenant, project, environment, and workload to the operation, and carry that context through queues, attempts, streams, tools, and billing. Validate ownership again after failover. A replicated message without validated tenant context is a cross-region security risk.
+
+Data replication needs a classification model. Decide which configuration, prompts, conversation state, retrieval indexes, usage records, and audit events may be replicated, where they may be stored, and how long they may remain. Use encryption, access controls, regional keys where required, and deletion propagation. Do not replicate sensitive content globally merely because control-plane databases are easier to share.
+
+Stateless requests are not automatically safe to move. Defaults, policy caches, credentials, provider contracts, model aliases, pricing tables, and feature flags can differ by region. Record the effective release, policy, adapter, and pricing revision for each operation. A failover target must be compatible with the contract that the client invoked.
+
+Stateful conversations need a consistency decision. Use a durable operation or conversation store with clear freshness and conflict rules, or require the client to provide the state needed for recovery. Define what happens when the last turn is not replicated, when two regions accept writes, or when a worker completes after the primary is declared failed. Do not silently merge incompatible histories.
+
+In-flight work creates ambiguity. During a region outage, an operation may be queued, dispatched, streaming, or executing a tool. The failover controller should know whether the original attempt was accepted, cancelled, completed, or unknown. Use operation and idempotency identifiers to avoid duplicate provider work and side effects. Reissue only when the contract and effect safety permit it.
+
+Streaming failover is especially difficult. A client may have received partial output from the primary while the secondary is preparing a replacement. Decide whether streams can resume, must terminate with an incomplete result, or can restart from a checkpoint. Preserve sequence numbers and tell clients whether continuation is supported. Do not concatenate two independent generations as if they were one deterministic stream.
+
+Provider capabilities may differ by region. Context limits, tool support, structured output, modalities, safety behavior, finish reasons, usage reporting, and streaming protocols can change. Route only to candidates whose tested capability contract satisfies the request. If a fallback cannot preserve the requested behavior, return a clear degraded result rather than silently changing semantics.
+
+Capacity must fail over gradually. A secondary region may have enough idle capacity for a probe but not for the primary region's full workload. Reserve headroom, classify critical traffic, cap failover admission, and shed optional work. Protect existing secondary tenants from a sudden flood. Recovery that overloads the destination simply moves the outage.
+
+Queues and retries need regional ownership. Mark the region that accepted a queue lease and the region responsible for completion. On failover, fence the old leader or make its messages safe to replay. Reconcile duplicate deliveries, stale leases, delayed callbacks, and workers that reconnect after isolation. A globally visible queue without ownership rules is a duplication engine during a partition.
+
+Credentials and provider accounts can be regional dependencies. Ensure the failover region has valid, least-privilege credentials, correct quotas, approved provider terms, and tested network access. Do not copy secrets into every region by default. Track credential class and rotation state without recording values. Test expiry and revocation during failover so the control path does not depend on an unverified assumption.
+
+Policy must follow the tenant and location. Evaluate residency, retention, safety, tool, plan, and approval rules against the failover destination. Version policy decisions and preserve reason codes. If the policy service is unavailable in the primary region, the secondary must not default to permissive behavior. Fail closed or enter an explicitly constrained mode.
+
+Tools and external effects require regional awareness. A tool may target a regional database, queue, deployment, or payment service. Authorize target scope, ensure idempotency, and reconcile whether the primary executor already started. A model request can fail over while an external side effect remains in the original region. The gateway must track that relationship instead of pretending the effect moved with the request.
+
+Usage and billing need one accounting truth. Record provider usage, attempts, retries, failover cause, regional pricing revision, credits, and customer charges against one logical operation. Replicate records with idempotent keys and reconcile late primary events. Regional dashboards may differ temporarily, but the customer statement must not double-charge or lose work when records converge.
+
+Observability should make the transition visible. Record primary and target region, failover trigger, controller decision, traffic percentage, policy result, capability match, in-flight handling, provider attempts, stream state, tool state, capacity, usage, billing, and recovery evidence. Track failover attempts, rejection reasons, duplicate work, unknown effects, and time to verified recovery.
+
+Control-plane fencing prevents split brain. Use leases, epochs, quorum, or another explicit ownership mechanism so two regions do not both believe they are primary for the same mutable operation. Ensure configuration changes have a clear effective version. An operator override should have scope, expiry, audit evidence, and a safe return path.
+
+Client contracts should remain stable. Return operation IDs, region-neutral status, retryability, and bounded explanations. Avoid exposing a provider or region as a permanent client assumption unless the API promises it. For asynchronous work, let clients poll durable state. For an indeterminate operation, say that status is unknown and provide a reconciliation path instead of inviting unsafe retries.
+
+Test failover as a semantic exercise. Partition the primary region, delay replication, lose callbacks, fill the secondary queue, remove a capability, expire a credential, and cancel during a stream or tool call. Verify identity, residency, policy, capability, capacity, state, effect safety, usage, billing, and audit continuity. A successful HTTP response from the secondary is not enough.
+
+Exercise failback too. Returning traffic to the original region can replay stale configuration, reopen a recovered dependency too quickly, or create duplicate state transitions. Drain or fence the secondary, reconcile operations and charges, compare policy and pricing revisions, canary the primary, and expand only after health and semantics are verified. Failback is another change event, not an automatic undo button.
+
+The practical checklist is clear. Define eligible destinations and degradation modes. Preserve identity, residency, policy, capabilities, release, state, streams, tools, capacity, usage, billing, and audit evidence. Fence ownership, make queues and retries idempotent, validate regional dependencies, cap admission, expose uncertainty, and test both failover and failback under partitions and late events.
+
+The larger lesson is that multi-region resilience is semantic continuity. Availability improves when traffic can move, but trust survives only when the same authorization, data rules, capability contract, and accounting truth follow the operation. Move requests when you can; preserve meaning wherever they go.
+
+That is it for today. Fail over across locations without losing the contract. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
