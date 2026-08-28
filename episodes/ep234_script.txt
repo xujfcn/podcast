@@ -1,0 +1,49 @@
+EP234: AI API Gateway Control Planes - Make Routing Policy Changes Safe and Observable
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about control planes for AI API gateways. Routing weights, model aliases, provider credentials, quotas, policies, pricing, probes, and feature flags change over time. If those changes are pushed directly into request workers without versioning, validation, staged rollout, and evidence, a small configuration edit can become a production incident.
+
+Start by separating control plane from data plane. The control plane defines desired configuration and policy. The data plane executes requests using a validated, immutable snapshot. Do not make every request depend on a mutable database read, and do not let workers invent missing configuration. The boundary should make it clear which version governed each operation.
+
+Control-plane objects need identity and lifecycle. Give each route set, policy bundle, model alias, credential reference, quota, pricing revision, probe definition, and feature flag a version, owner, status, effective time, and expiration where applicable. Preserve previous versions. A configuration without provenance is difficult to review, reproduce, or roll back.
+
+Desired state and effective state are different. The control plane may want provider B at twenty percent, while one region still runs provider A because propagation is delayed or validation has not completed. Record both states and the reason for divergence. Operators should never have to infer rollout progress from scattered worker logs.
+
+Validate before publication. Check syntax, references, capabilities, regions, policy compatibility, credentials, pricing, quotas, health probes, and rollback artifacts. Reject a route that points to an unavailable model or a policy that permits a tool without an executor contract. Static validation should catch impossible states before they reach the data plane.
+
+Use semantic validation too. A configuration can be syntactically valid but operationally unsafe. Verify that fallback candidates preserve residency, output format, safety, tool, and billing requirements. Check capacity, retry budgets, deadline behavior, cancellation, usage reporting, and state transitions. The question is not merely “can this be parsed?” but “can this change preserve the request contract?”
+
+Approval should match impact. A harmless dashboard label may need one owner. A new provider, region, credential, mutating tool, pricing rule, or broad route change needs stronger review and explicit authorization. Record approver, scope, reason, ticket, expiration, and emergency status. Break-glass changes must remain bounded and auditable.
+
+Publish immutable snapshots. Once a bundle is accepted, assign a content hash and make the exact contents retrievable. Workers should fetch or receive a snapshot, validate its signature or checksum, and expose the active version. Avoid partially applying related changes where route weights use one policy revision and pricing uses another without an intentional compatibility rule.
+
+Rollout needs stages. Begin with validation and a synthetic tenant, then a small canary by region, capability, workload, or customer class. Monitor errors, latency, streaming, policy, tool outcomes, usage, billing, and cleanup. Expand only when gates pass. A percentage alone is not a meaningful canary if it excludes the workloads most affected by the change.
+
+Propagation is part of correctness. Track which regions, workers, queues, and adapters have acknowledged the snapshot. Detect stale workers and define their behavior: stop receiving new traffic, continue only for in-flight work, or use a safe prior snapshot. Do not assume that a successful publish means every request immediately uses the new state.
+
+Data-plane requests need snapshot context. Attach control-plane version, policy revision, route revision, pricing revision, and credential class to the operation and its attempts. If a request crosses a rollout boundary, preserve the original effective versions. This makes mixed-version behavior explainable and prevents late events from being interpreted under today's configuration.
+
+Conflict resolution must be explicit. Two operators, automation jobs, or regions may update the same route or policy near the same time. Use optimistic concurrency, monotonic revisions, leases, or a clear arbitration rule. Never silently let last-writer-wins erase a high-impact change. Show conflicts to the owner and preserve both proposals in the audit trail.
+
+Control-plane availability needs a safe mode. If the configuration service is unavailable, data-plane workers may use a bounded, approved snapshot with a freshness limit. They may continue existing traffic but refuse new capabilities or risky changes. Never fall back to an empty configuration or the broadest policy. Make stale mode visible in health and operations dashboards.
+
+Secrets belong behind references. Store credentials in a dedicated secret system and let control-plane objects reference a credential class or version. Validate access without exposing secret values. Rotation should support overlap, revocation, regional scope, and rollback. A route snapshot should remain reproducible without embedding credentials in logs or configuration exports.
+
+Policy changes deserve special treatment. A new deny rule may need immediate propagation, while a new allow rule should require stronger validation. Emergency safety controls should have a fast, reliable path across regions. If propagation is incomplete, fail closed for the affected capability or restrict admission. Do not claim global enforcement while a region is still running an older permissive bundle.
+
+Pricing and quotas must be coordinated. A route rollout that changes model usage or output limits can alter cost and fairness. Publish pricing and quota revisions with effective times and compatibility rules. Record which revision governed each attempt. Reconciliation must handle operations that start before a change and finish after it without double charging or applying an arbitrary rate.
+
+Feature flags need guardrails. Scope flags by tenant, project, region, capability, and workload rather than using one global boolean for a complex behavior. Set defaults, expiration, owner, and rollback action. A flag that quietly changes retries, tool access, or data routing is a production control and should receive control-plane treatment.
+
+Observability should show control decisions. Track publication, validation, approval, propagation, activation, rejection, rollback, stale mode, and conflict events. Dashboards should answer which version is active where, what traffic uses it, which workers are stale, and whether the data plane is behaving as expected. Alerts should distinguish a bad configuration from a provider failure and from delayed propagation.
+
+Rollback should be a first-class command. Select a known-good immutable snapshot, validate it against current dependencies, stage it, and monitor restoration. Preserve in-flight operations under their original versions and reconcile usage or tool effects. A rollback that changes route policy but forgets pricing, quotas, or data residency is incomplete.
+
+Control-plane APIs need authorization and idempotency. Scope who can read, propose, approve, publish, activate, revoke, and roll back each object. Require idempotency keys for mutations and return the resulting revision. Protect against replayed commands, stale approvals, and cross-tenant edits. Every mutation should be safe to retry without producing duplicate effective versions.
+
+Test dangerous transitions. Publish an invalid reference, lose a region during propagation, race two updates, expire a credential, reject a canary, interrupt rollback, and run workers on stale snapshots. Verify that traffic remains within policy, risky changes stop, old state remains recoverable, and every discrepancy is visible. Test the control plane independently and in the full request path.
+
+The practical checklist is clear. Separate desired and effective state. Version every consequential object. Validate syntax, semantics, dependencies, policy, capability, capacity, and finance before publication. Require impact-based approval, immutable snapshots, staged rollout, propagation evidence, stale-mode behavior, bounded flags, secret references, audit trails, and first-class rollback.
+
+The larger lesson is that configuration is executable behavior. In an AI gateway, a route weight or feature flag can change safety, cost, latency, data location, and customer outcomes just as surely as code. A disciplined control plane turns those changes into reviewed, versioned, observable state transitions instead of hidden surprises.
+
+That is it for today. Make routing policy changes safe, staged, and observable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
