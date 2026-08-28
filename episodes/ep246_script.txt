@@ -1,0 +1,63 @@
+EP246: AI API Gateway Prompt Injection Defense - Keep Untrusted Instructions Out of Control Paths
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about prompt injection defense in AI API gateways. An AI model may read instructions from a user, a document, a web page, a tool result, or retrieved content. Some of those instructions are trusted policy; many are untrusted data pretending to be authority. A gateway must keep untrusted text out of control paths.
+
+Start by separating data from authority. System policy, tenant permissions, residency, budgets, tool scope, and safety rules must come from trusted server-side context. User prompts, retrieved documents, web pages, emails, files, and model outputs are data to process, not instructions that can rewrite gateway policy. The model can propose an action, but the gateway decides whether it is allowed.
+
+Define trust boundaries explicitly. Mark every input source, transformation, storage location, and output destination as trusted, untrusted, or conditionally trusted. Carry provenance through retrieval, summarization, tool calls, caching, and fallback. If provenance is lost, treat the content as untrusted. A clean-looking string is not evidence that its origin was safe.
+
+Keep control decisions outside the prompt. Do not ask the model to decide its own tenant, region, budget, tool authorization, retention, or policy mode. Compute those values in typed server-side context and enforce them at the adapter and executor boundaries. Prompt instructions can help the model behave, but they cannot be the only security control.
+
+Minimize instruction mixing. Use structured fields for roles, documents, tool results, policies, and user content. Delimit untrusted content, label provenance, and avoid concatenating everything into one ambiguous text block. Delimiters help the model; typed validation and separate enforcement protect the system.
+
+Treat retrieved content as hostile by default. A document can contain text such as ignore previous instructions, reveal secrets, or call this endpoint. Apply source controls, content classification, tenant filtering, and provenance labels. The retrieval system should return evidence for the task, not authority over the gateway. Never let a retrieved passage widen tool permissions.
+
+Web browsing expands the attack surface. Pages can contain hidden text, malicious links, prompt injection, tracking, and instructions aimed at agents. Restrict domains, redirects, content types, download size, and network access. Sanitize or isolate page content before model use. The browser should not inherit unrestricted credentials or network authority from the user's request.
+
+Tool results are untrusted inputs too. An external API, database row, or command output may contain instructions that attempt to redirect the agent. Validate type, schema, size, provenance, and allowed fields. Keep the executor's authorization independent from the result text. A tool response can inform the next step but cannot approve a new side effect.
+
+Tool calls require a proposal-and-enforcement model. Let the model propose a tool, target, and arguments. The gateway or executor then checks identity, tenant, policy, region, data class, approval, idempotency, and side-effect level. Reject unknown tools, extra fields, widened targets, and missing approvals. Never execute tool-like text simply because it looks syntactically convincing.
+
+Separate read and write capabilities. Use distinct credentials, endpoints, policies, and approval requirements for reads and mutations. Prefer read-only sandboxes during exploration. For writes, require explicit scope, bounded arguments, idempotency, confirmation where appropriate, and reconciliation. Prompt injection is much less dangerous when the model cannot reach a powerful executor directly.
+
+Protect secrets from the model context. Keep API keys, session tokens, hidden policies, internal URLs, and credential material out of prompts and tool results whenever possible. Use references and server-side secret injection at the final execution boundary. Redact secrets in logs, traces, cached outputs, and error messages. A model should not need to know a credential to use an approved capability.
+
+Constrain network egress. Apply allowlists, DNS controls, private routing, request size limits, timeouts, redirects, and response filtering. Block access to metadata services, internal control planes, credential stores, and unrelated tenant endpoints. Prompt injection often becomes serious only when untrusted text can turn model reasoning into unrestricted network access.
+
+Guard the control plane. Do not let model output edit routes, policies, feature flags, credentials, billing, retention, or deployment configuration without a separate authenticated workflow. Use typed commands, schema validation, role-based authorization, approval, dry runs, and audit trails. An agent may draft a change, but a control-plane service must verify and apply it.
+
+Protect policy evaluation from override language. Policy inputs should be authenticated attributes and versioned rules, not phrases inside the conversation. If the user asks to ignore a restriction, that is a request to evaluate—not a policy change. Emergency denies and residency rules must remain effective even when prompts, documents, or tools attempt to contradict them.
+
+Context windows create authority confusion. Long conversations can contain old instructions, quoted attacks, tool outputs, and previous model mistakes. Mark message provenance, apply explicit precedence, and expire stale approvals. Do not assume the most recent text is the most authoritative. Server-side policy should be re-evaluated for every meaningful action.
+
+Memory needs the same defense. Stored user preferences, summaries, and agent notes can become persistent injection payloads. Validate provenance, scope, retention, and write permissions. Keep instructions and factual memory separate. Require policy checks before memory is promoted into future control context, and provide deletion and correction paths.
+
+Semantic caches can replay attacks. A cached answer or tool plan may have been created under a different tenant, policy, model, or source context. Validate scope, freshness, provenance, and authorization before reuse. Do not cache executable plans as though they were ordinary text. If a cached result contains instructions, treat them as untrusted again at the next boundary.
+
+Streaming needs incremental enforcement. A harmful instruction or tool request may appear in a later event after safe-looking text has already been emitted. Validate event types, tool fragments, structured output, and finish state as they arrive. Do not execute partial tool arguments. If policy fails mid-stream, stop safely, record what was sent, and reconcile any continuing provider work.
+
+Multimodal inputs can carry hidden instructions. Images, PDFs, audio, video, metadata, alt text, and OCR output may contain adversarial content. Treat extracted text as untrusted and preserve source provenance. Limit file types, size, parsers, and external references. Do not let visual or audio instructions bypass the same tool, policy, and data controls applied to text.
+
+Output handling must prevent exfiltration. Check for secrets, cross-tenant data, forbidden content, internal policy, and unsafe commands before delivery. Be careful with error messages and citations: a model can reveal hidden context while appearing helpful. Apply output policy without assuming that a trusted model or provider always followed the intended instructions.
+
+Use confirmation for high-impact actions. Make the proposed action, target, scope, data, and consequence visible to the authorized user or operator. Bind confirmation to the exact action and short expiration. Do not accept a generic “yes” from an ambiguous conversation as approval for a new target or broader operation.
+
+Design for least privilege and bounded autonomy. Give each workload only the tools, regions, data, budgets, and time it needs. Use separate identities for planning, reading, and execution. Limit loops, retries, fan-out, token budgets, and action count. A model that is successfully manipulated should still have limited ability to cause harm.
+
+Detection should combine signals. Look for instruction-conflict patterns, unusual tool requests, secret-seeking, cross-tenant references, policy override language, unexpected destinations, repeated denials, and abnormal action sequences. Avoid relying on keyword filters alone; attackers can encode or paraphrase instructions. Detection should trigger review, restriction, or logging, not replace authorization.
+
+Evaluate defenses against realistic attacks. Build a corpus of direct injections, indirect document attacks, tool-result attacks, multilingual and encoded variants, long-context placement, multimodal payloads, and chained attempts. Measure unauthorized actions, secret exposure, policy bypass, false positives, latency, and user impact. Test the complete gateway path, not only the prompt template.
+
+Red-team the executor and control plane. Attempt to widen tool arguments, change regions, access another tenant, invoke hidden tools, modify policy, replay approvals, exploit cache keys, force fallback, and use error messages as exfiltration channels. Verify that every attempted path meets server-side authorization and leaves evidence.
+
+Observe provenance and decisions. Record source class, trust label, policy revision, tool proposal, authorization result, blocked reason, executor identity, destination, and output filtering using opaque references. Avoid storing raw sensitive content by default. Lineage should show how untrusted text influenced a proposal without granting it authority.
+
+Failure must be safe. If classification, policy, authorization, or tool validation is unavailable, block high-impact actions or fall back to read-only behavior. Do not bypass controls because the model is waiting or the provider is slow. If an action's outcome is unknown, stop retries and reconcile before attempting another mutation.
+
+Incident response should contain both prompt and effect. Quarantine affected workflows, revoke exposed credentials, disable unsafe tools or routes, identify stored and derived copies, and review all related operations. Preserve evidence and determine whether the injection reached a provider, cache, log, queue, tool, or control plane. Communicate customer impact without spreading the malicious payload.
+
+The practical checklist is clear. Separate trusted authority from untrusted data, keep policy outside prompts, preserve provenance, isolate retrieval and browsing, enforce tools server-side, restrict secrets and network egress, protect memory and caches, validate streams and multimodal inputs, require bounded confirmation, use least privilege, test realistic attacks, observe decisions, and fail closed when enforcement is uncertain.
+
+The larger lesson is that prompt injection is not only a prompt problem. It is a confused-deputy problem at the boundary between language and authority. A dependable AI gateway lets models reason over untrusted information while ensuring that only authenticated, policy-checked services can route data, spend budget, call tools, or change the system.
+
+That is it for today. Keep untrusted instructions out of control paths, and make every model proposal pass a real authorization boundary. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
