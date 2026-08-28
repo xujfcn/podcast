@@ -1,0 +1,57 @@
+EP247: AI API Gateway Data Minimization - Send Providers Only What They Need
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about data minimization in AI API gateways. Models often receive far more context than they need: full conversation history, entire documents, internal metadata, broad tool results, and identifiers added for convenience. Extra context can increase cost and latency, but the deeper problem is exposure. Every unnecessary field expands the privacy, security, retention, and incident-response surface.
+
+Start with a purpose contract. Define what the operation is trying to accomplish, which data categories are necessary, which are optional, and which must never leave the gateway. Bind that purpose to the tenant, workload, model capability, provider, region, and retention policy. “The model might find it useful” is not a sufficient reason to disclose data.
+
+Inventory the full payload path. Include prompts, system instructions, conversation history, retrieved passages, uploaded files, tool arguments, tool results, metadata, headers, traces, cache keys, usage records, and support exports. Identify where each field originates, where it is transformed, and every component that receives it. Teams often minimize the visible prompt while hidden middleware still copies sensitive metadata.
+
+Classify fields before routing. Mark identity, contact data, credentials, secrets, financial data, regulated content, customer documents, operational metadata, and public information. Use server-side classification and conservative defaults. Unknown fields should not automatically flow to providers. Classification must survive serialization, queues, retries, fallbacks, and asynchronous jobs.
+
+Separate routing metadata from model context. The gateway may need tenant, region, budget, policy, and billing data to choose a route, but the model usually does not. Keep those fields in trusted control context and send only provider-required metadata upstream. A provider request ID does not need to contain a customer email, internal project name, or database key.
+
+Trim conversation history deliberately. Preserve instructions, user intent, relevant state, unresolved tool results, and necessary evidence. Remove greetings, duplicate turns, obsolete decisions, unrelated topics, and sensitive details that no longer serve the task. Summaries can reduce tokens, but they remain data and need provenance, scope, and deletion rules.
+
+Context selection should be policy-aware. A relevance score cannot override tenant permissions, residency, retention, or purpose. Apply authorization filters before ranking documents or messages. Record why selected context was eligible and why excluded content stayed out. A highly relevant document from another tenant is still forbidden.
+
+Retrieval should return the smallest useful evidence. Limit passages, fields, metadata, and neighboring context. Prefer document references and narrowly scoped excerpts over entire files. Configure vector stores, rerankers, and embedding providers with the same minimization rules. Do not send full documents to a model merely because retrieval found one matching sentence.
+
+Tool arguments need field-level allowlists. The model may propose a broad object containing names, tokens, account data, and free-form notes. The executor should construct the final request from approved fields, validate target scope, and reject extras. Never forward an arbitrary model-generated payload directly to a privileged internal API.
+
+Tool results should be reduced before returning to the model. Databases and SaaS APIs often return dozens of unused fields, internal identifiers, access tokens, and nested objects. Project the result into a typed schema containing only what the next decision needs. Use pagination and bounded result counts. A read-only tool can still disclose excessive data.
+
+Files and multimodal inputs require selective extraction. A PDF, image, audio file, or spreadsheet may contain hidden pages, metadata, comments, coordinates, or unrelated records. Extract the relevant pages, regions, columns, or time segments when possible. Strip metadata that is not needed. Preserve a source reference so users can verify the answer without copying the entire artifact into every model call.
+
+Redaction should be typed, not improvised. Detect and transform known data classes with stable placeholders that preserve task meaning when appropriate. Keep the re-identification map inside an approved boundary and delete it according to policy. Do not assume a generic regular expression can recognize every secret or that replacing names always preserves the task.
+
+Pseudonymization can support useful processing. Replace direct identifiers with operation-scoped or tenant-scoped tokens when the model needs consistency but not identity. Choose scope carefully so tokens cannot correlate users across unrelated workloads. Pseudonymized data can still be sensitive and must retain access, residency, and retention controls.
+
+Provider selection should consider disclosure. Two compatible models may differ in retention, training use, subprocessors, regions, logging, and enterprise controls. Include those properties in route eligibility. The cheapest or fastest route may not be eligible for the data class. Record the provider policy and contract revision used for each attempt.
+
+Fallback must not widen the payload. Re-evaluate provider eligibility and field minimization before every alternative attempt. A fallback provider may require a different request shape, but that is not permission to send additional context. If no eligible route can complete the task with the approved payload, return a bounded failure.
+
+Retries and hedges multiply disclosure. Each additional provider attempt creates another transmission, log entry, usage record, and possible retained copy. Include privacy exposure in retry and hedge budgets. Avoid cross-provider hedging for sensitive workloads unless explicitly approved. Cancel losing attempts and record whether providers acknowledged cancellation.
+
+Semantic and prompt caches need minimized keys and values. Avoid raw prompts, customer identifiers, and secrets in cache keys. Scope entries by tenant, policy, model, region, and source versions. Store only the result and metadata needed for safe reuse. Deleting the response while retaining a sensitive embedding or raw key is not complete minimization.
+
+Logs and traces are common overcollection points. Prefer operation references, classifications, sizes, hashes, route decisions, timing, and error categories over raw content. Disable request-body logging by default. Use short-lived, approved diagnostic capture only when necessary, with access control, regional storage, audit, and automatic expiration.
+
+Usage and billing usually need less data than prompts. Record model, provider, operation, token or unit categories, pricing revision, tenant reference, and charge outcome. Finance rarely needs user text or model output. Keep customer statements explainable through opaque lineage references instead of duplicating content in billing systems.
+
+Human review must follow the same rules. Review queues should show only the content required to make the decision, with sensitive fields masked where possible. Limit reviewers by tenant, purpose, region, and time. Record access and prevent exports. A manual workflow is not an exemption from data minimization.
+
+Retention should be derived from purpose. Provider payloads, queues, caches, logs, evaluation datasets, support cases, and failure capsules may need different lifetimes. Set explicit expirations and deletion workflows. Verify deletion across replicas, indexes, backups, and derived embeddings. “No longer queried” is not the same as deleted.
+
+Measure minimization outcomes. Track bytes, tokens, documents, fields, tool-result size, sensitive-field count, provider attempts, retention duration, and cache footprint by workload. Compare task success, latency, and cost before and after reduction. The goal is the smallest sufficient payload, not the smallest payload regardless of usefulness.
+
+Test for accidental expansion. Add fields to upstream objects, change tool schemas, enable debugging, trigger fallback, replay queues, restore backups, and use a new provider adapter. Verify that allowlists and projections still exclude unapproved data. Schema evolution should fail safely instead of sending newly introduced fields by default.
+
+Adversarial testing matters. Ask the model to reveal hidden context, request full documents, widen tool queries, include secrets in errors, or copy data into memory and cache. Try prompt injection that claims more context is required. Verify that server-side policy, field projections, and executor boundaries remain authoritative.
+
+Incident response should identify every copy. If excessive data was disclosed, stop the route, preserve evidence, determine affected operations and providers, revoke exposed credentials, request deletion where supported, and inspect logs, caches, queues, tools, and backups. Do not focus only on the primary prompt while derived copies remain available.
+
+The practical checklist is clear. Define purpose and necessary data, inventory every payload path, classify fields, separate control metadata from model context, trim history, minimize retrieval, project tool inputs and outputs, selectively extract files, redact or pseudonymize safely, route by disclosure policy, bound retries, minimize caches and logs, derive retention, and test schema expansion and adversarial requests.
+
+The larger lesson is that context is a liability as well as a capability. Better AI systems do not send everything they know to every model. A dependable gateway gives each provider and tool only the minimum information required for the approved task—and can prove where that information went and when it was deleted.
+
+That is it for today. Send providers only what they need, and make data minimization part of every routing decision. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
