@@ -1,0 +1,53 @@
+EP240: AI API Gateway Data Residency - Keep Every Request Inside Its Approved Boundary
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about data residency in AI API gateways. A request may cross the gateway, provider, cache, queue, tool, log, and billing systems before it is complete. Routing the primary model to an approved region is necessary, but it is not enough. Residency is an end-to-end boundary that must follow data through every processing and storage path.
+
+Start with a residency contract. Define where each tenant, project, workload, and data class may be processed, stored, replicated, logged, and supported. Distinguish required regions, permitted regions, and forbidden regions. Specify whether metadata, embeddings, usage records, backups, and support exports have different rules. “Europe” or “global” must resolve to enforceable infrastructure choices.
+
+Derive scope from authenticated context. Bind tenant, project, plan, environment, and residency policy to the logical operation at admission. Do not trust a client-supplied region header without checking entitlement and policy. Preserve the effective residency decision through queues, retries, fallbacks, streams, tools, usage, and billing.
+
+Classify data before routing. Prompts, uploaded files, retrieved documents, conversation state, tool arguments, model output, and identifiers may have different sensitivity. Use server-side classification and explicit defaults. When classification is missing or uncertain, choose the safest eligible path or reject the operation. Do not let an unknown label become permission for global processing.
+
+Route eligibility must combine residency with capability. A provider region may be approved but lack the requested model, context limit, tool support, structured output, or streaming contract. Build the candidate set from identity, data class, residency, capability, policy, capacity, and cost together. Geographic eligibility does not override semantic requirements.
+
+Provider names are not locations. Verify the actual processing region, account configuration, network endpoint, subprocessors, retention terms, and failover behavior. Record provider, region, credential class, contract revision, and evidence for each attempt. A regional hostname is not proof that all processing and storage remain inside that geography.
+
+Fallbacks must preserve the boundary. If the primary provider fails, re-evaluate every alternative against the original tenant and data policy. Never use a global fallback simply because it is healthy. If no compatible regional route exists, return a bounded failure with clear retryability rather than silently violating residency.
+
+Multi-region failover needs explicit permission. A regional outage does not automatically authorize moving data elsewhere. Define which workloads may fail over, which require approval, and which must remain unavailable. Separate service availability from legal or contractual eligibility. Record the failover trigger, destination, policy decision, and scope.
+
+Queues and asynchronous workers are data locations. Partition or constrain queues by region when messages contain protected content. Carry signed or validated residency context with each message and check it again before dispatch. Dead-letter queues, replay tools, delayed jobs, and reconciliation workers need the same controls as the primary path.
+
+Streaming also crosses boundaries. Confirm where provider connections terminate, where buffers live, and where partial events are stored. Bound buffers, propagate cancellation, and avoid routing a resumed stream through a different region unless the contract allows it. Partial output and late provider events must retain their original residency context.
+
+Semantic caches and response caches require regional scope. Key entries by tenant or approved public scope, policy, model contract, source versions, and residency. Store embeddings and cached outputs only in eligible locations. Invalidation and deletion must reach replicas, indexes, backups, and derived artifacts. A cache hit must never become a shortcut around current residency policy.
+
+Retrieval systems are part of the request path. Vector indexes, document stores, rerankers, and embedding providers must satisfy the same data boundary. Enforce tenant and region filters server-side. Record corpus and index revisions. A model running in the right region does not repair a retrieval query that sent protected documents somewhere forbidden.
+
+Tools create additional destinations. A model may call search, databases, messaging, payments, deployment systems, or customer APIs. Authorize each tool target against residency and data-class rules before dispatch. Limit arguments to necessary fields, use scoped credentials, and preserve the executor location and side-effect evidence. The model's request is not authorization to export data.
+
+Observability is often the hidden leak. Logs, traces, metrics labels, failure capsules, prompt debugging, and support dashboards can copy sensitive data into global systems. Prefer structured metadata, redaction, hashing, sampling, and regional stores. Raw content access should be exceptional, scoped, time-limited, and audited.
+
+Usage and billing records need a data model. Decide which identifiers and usage fields may be centralized and which must remain regional or pseudonymized. Link charges to opaque operation references where possible. Finance needs explainable evidence, but it rarely needs raw prompts or outputs. Keep billing correctness without turning statements into a second content archive.
+
+Control-plane configuration may be global while data-plane content is regional. Separate policies, route metadata, and model catalogs from customer payloads. Protect tenant-specific configuration and secrets with appropriate location rules. Workers should activate signed snapshots and report region, policy, and route revisions without copying sensitive payloads into the control plane.
+
+Credentials should match regional authority. Use least-privilege provider accounts and secret references scoped to approved regions and workloads. Test expired, revoked, and incorrectly scoped credentials. Prevent a worker from falling back to a global credential when a regional credential fails. Record credential class, never its secret value.
+
+Residency drift needs continuous detection. Compare desired policy with active routes, worker regions, provider attempts, queue locations, cache replicas, log destinations, tools, and backups. Alert immediately on forbidden-region dispatch or cross-tenant scope. A system can return correct answers while silently violating the boundary, so customer-visible success is not enough.
+
+Audit trails should prove enforcement. Record authenticated scope, data classification, residency policy revision, eligible and excluded routes, selected region, provider attempt, queue and worker location, cache decision, tool destination, observability mode, and deletion events. Protect the audit data itself and detect missing or altered records.
+
+Deletion and retention complete the contract. Propagate tenant deletion, expiration, and legal-hold rules through primary stores, queues, caches, embeddings, logs, failure capsules, backups, and provider workflows. Track completion and exceptions. Deleting the original prompt while retaining its cached vector or debug export is not complete deletion.
+
+Test hostile paths. Force provider failure, cross-region failover, stale policy, missing classification, cache reuse, queue replay, tool execution, debug mode, delayed callbacks, and backup restoration. Attempt to route a forbidden tenant through every fallback. Verify that the gateway fails closed, preserves evidence, and does not expose data through observability or billing systems.
+
+Release readiness should include residency evidence. New models, providers, regions, tools, caches, analytics exports, and support features all change data flow. Require dependency maps, policy tests, regional probes, provider evidence, deletion behavior, rollback plans, and owner approval before production exposure. A feature is not ready when its data path is unknown.
+
+Incident response must contain exposure. If a forbidden route is detected, stop new dispatch, quarantine affected operations, preserve evidence, revoke unsafe credentials, and identify all derived copies. Do not delete the audit trail in an attempt to clean up. Coordinate security, privacy, support, provider, and billing workstreams with one factual timeline.
+
+The practical checklist is clear. Define required, permitted, and forbidden locations by tenant and data class. Bind residency at admission and preserve it through every child action. Enforce it across providers, fallbacks, queues, streams, caches, retrieval, tools, logs, billing, backups, and deletion. Detect drift, protect evidence, fail closed on uncertainty, and test outage and replay paths.
+
+The larger lesson is that data residency is a lifecycle invariant. The right model endpoint is only one link in the chain. A trustworthy gateway keeps every request, copy, derived artifact, and side effect inside the approved boundary—and can prove that it did so.
+
+That is it for today. Keep every request inside its approved boundary, from admission through deletion. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
