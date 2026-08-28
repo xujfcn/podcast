@@ -1,0 +1,37 @@
+EP215: AI API Gateway Usage Reconciliation - Make Every Charge Explainable
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about usage reconciliation for AI API gateways. A customer sees one request, but the gateway may have made two provider attempts, streamed a partial answer, retried after a timeout, or received token usage hours later. If those facts are not reconciled into one clear record, billing becomes a guessing game.
+
+The foundation is a logical operation record. Give every client request a stable operation identifier and link provider attempts beneath it. Keep the client request, provider work, accepted outcome, usage evidence, and financial decision as related but separate objects. One logical operation can contain several attempts, but it should not accidentally become several customer charges.
+
+Usage has its own lifecycle. A record may be pending, estimated, reported, reconciled, corrected, or disputed. Do not mark usage final simply because the response was accepted. A useful answer can reach the client before the provider sends its final token count. Show that uncertainty explicitly and update the record when authoritative evidence arrives.
+
+Capture evidence at each boundary. Before dispatch, store the model, route, pricing context, and request identity. When an attempt starts, store its provider identifier and timestamp. During streaming, record whether a terminal event arrived. When usage appears, preserve the raw provider fields and the adapter version that interpreted them. This evidence makes a later calculation reproducible.
+
+Provider usage is rarely uniform. One provider may report prompt and completion tokens, another may separate cached or reasoning tokens, and a third may report only a combined total. Normalize common fields while preserving provider-specific data. Never erase the original evidence just because the gateway has a convenient internal schema.
+
+Pricing must be versioned. A charge depends on model, token category, region, modality, discounts, and the pricing rule active at the time of the attempt. Store the pricing-rule version with the calculation. If a price changes later, historical statements must not silently change. A correction should be an adjustment linked to the original charge, not an overwrite.
+
+Retries and fallbacks make customer billing subtle. A failed attempt may still consume provider resources. A rejected schema response may be followed by a successful fallback. Decide whether the customer pays for all attempts, only the accepted result, or a policy-defined combination. Keep provider cost and customer charge separate so reliability features do not hide margin erosion.
+
+Timeouts create ambiguity. The gateway can stop waiting while the provider continues working. Do not assume zero usage. Mark the operation indeterminate, query provider status when available, and reconcile late evidence. If no evidence can ever arrive, apply a documented bounded policy such as a provisional amount, a credit, or manual review.
+
+Streaming creates two timelines: delivery and consumption. A client may disconnect after receiving useful content while the provider continues generating. Record first-byte time, delivered amount, disconnect reason, cancellation attempt, and final provider usage. A closed client connection is not proof that provider work stopped.
+
+Tool calls need separate accounting from model generation. Record proposal, authorization, execution, and result as distinct events. A tool action may have side effects even when the surrounding model request is retried. Use an action identifier and executor-side idempotency so a repeated model attempt cannot send the same message, place the same order, or modify the same record twice.
+
+Late events must be safe. Webhooks and usage reports may arrive out of order or more than once. Give each event an identifier or stable hash, deduplicate it, and make updates idempotent. A late usage event can enrich a final response record, but it must not create a duplicate charge. A correction should preserve both the original and revised values.
+
+The reconciliation worker should be bounded and observable. Select pending records by age and evidence type, query available provider records, apply safe updates, and classify each result as reconciled, still pending, disputed, or permanently unresolved. Track queue age, amount at risk, provider errors, and the next retry time. Do not let a broken status endpoint create an internal retry storm.
+
+Customer statements should group attempts under the logical operation. Show the accepted outcome, route, usage status, and any adjustment in language a customer can understand. Internal provider identifiers can be available in a detail view without overwhelming the summary. If an amount is provisional, label it clearly. Honest uncertainty is less damaging than a confident invoice that later changes without explanation.
+
+Metrics should measure convergence. Track the percentage of operations finalized within a target window, estimated-to-final corrections, pending usage age, duplicate webhook rate, disputed charges, orphaned provider attempts, and cost from rejected or discarded work. Break these down by provider, model, adapter, route, and tenant. A rise in pending usage can reveal integration drift before it becomes a billing complaint.
+
+Test adversarial timelines. Deliver usage twice. Deliver it before the response. Time out after provider completion. Retry after partial streaming. Return decreasing token counters. Reject a schema, then succeed on fallback. Disconnect during a tool call. Restart between attempt completion and charge commit. The invariants are simple: no duplicate charge, no lost evidence, deterministic final state, and an auditable correction path.
+
+The practical checklist is clear. Give every operation and attempt a stable identity. Model usage separately from response outcome. Preserve raw evidence. Version pricing rules. Account for retries, fallbacks, streaming, and tool actions. Treat timeouts as ambiguous. Make late events idempotent. Reconcile asynchronously when needed, and show provisional or disputed states honestly.
+
+The larger lesson is that billing is part of reliability. A gateway that returns a fast answer but cannot explain the resulting charge has only solved half the problem. When usage, outcome, provider work, and pricing converge on one evidence-backed operation record, customers can trust the platform and operators can improve it.
+
+That is it for today. Make every request, attempt, token, and charge explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
