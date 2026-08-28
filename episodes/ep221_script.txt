@@ -1,0 +1,47 @@
+EP221: AI API Gateway Failure Capsules - Make Intermittent Bugs Reproducible
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about failure capsules for AI API gateways. The hardest production bugs are often intermittent: one provider times out, a stream ends without a terminal event, a fallback changes semantics, or a tool call is duplicated only under a particular race. A screenshot and a vague timestamp are not enough. Engineers need a compact, privacy-aware record that can be replayed and compared.
+
+A failure capsule is a bounded package of evidence for one logical operation and its provider attempts. It should capture the request shape, policy context, route decisions, timing, state transitions, adapter versions, response events, errors, usage, and cleanup results. It should explain what the gateway believed at each step without requiring unrestricted access to raw customer content.
+
+Start with identifiers. Keep one operation ID across the lifecycle and a unique attempt ID for every provider dispatch. Include trace and parent-child IDs for retries, fallbacks, and tools. These identifiers let an investigator distinguish one request with three attempts from three unrelated requests, which is essential for understanding duplicated work and misleading aggregate metrics.
+
+Capture the contract boundary. Record the contract version, canonical request fields, effective defaults, capability checks, policy revision, and requested deadline. Store a redacted or hashed representation of sensitive content, plus token counts and content classifications. The capsule should preserve enough structure to reproduce the control flow while minimizing exposure of prompts, responses, credentials, and tool arguments.
+
+Timing is evidence, not decoration. Record admission, queueing, dispatch, first byte, each meaningful stream transition, cancellation, provider acknowledgement, validation, billing, and finalization. Use a consistent clock and include durations between events. Tail failures often become obvious when a request's queue time, provider time, and cleanup time are separated instead of collapsed into one latency number.
+
+State transitions should be explicit. Include the previous state, next state, event, actor, timestamp, and reason code. For a retry, record why the previous attempt was classified as retryable and how much budget remained. For an indeterminate tool effect, record that the gateway stopped repeating the action and entered reconciliation. A final error without the path to that error is rarely enough to fix a race.
+
+Provider evidence needs boundaries. Capture provider name, model, region, adapter version, request classification, HTTP status or protocol outcome, rate-limit hints, finish reason, usage categories, and provider request ID when available. Do not store provider secrets or entire headers by default. Keep raw payloads behind a separate, tightly controlled retention path only when incident policy permits it.
+
+A capsule must distinguish observed facts from derived interpretations. “Connection closed at event seven” is an observation. “Provider overloaded” may be a hypothesis based on status and latency. Label each field accordingly. This prevents a convenient diagnosis from becoming permanent evidence and helps later investigators challenge assumptions.
+
+Reproduction has levels. A full-content replay may be prohibited by privacy rules. A structural replay can use synthetic content with the same token shape, modalities, tool schema, deadline, and policy context. A protocol replay can reproduce event timing, disconnects, malformed chunks, and provider errors without contacting a real provider. Preserve the level used so test results are not mistaken for a customer-content replay.
+
+Determinism should be intentional. Fix random seeds where supported, freeze configuration and pricing versions, use recorded provider fixtures, and control scheduler timing in race tests. Exact model output may still vary, so compare contract properties: state transitions, finish semantics, usage accounting, tool authorization, retry count, and final classification. Reproduction means recreating the failure mechanism, not necessarily identical words.
+
+Capsules should be safe to share inside the engineering team. Redact authorization headers, API keys, personal data, raw tool secrets, and unapproved prompt content. Apply field-level access controls and expiration. Include a sensitivity classification, owner, creation reason, and retention deadline. Incident urgency is not permission to copy sensitive data into tickets, chat rooms, or public issue trackers.
+
+Sampling needs judgment. Capture all capsules for policy violations, duplicate side effects, unexplained billing, and contract failures. Sample ordinary upstream timeouts, but increase sampling when a route enters an incident mode or a new adapter is canaried. Apply a size limit and prioritize state transitions, error evidence, and resource accounting over redundant token chunks.
+
+Streaming failures require event preservation. Store sequence numbers, event types, timestamps, content lengths, usage updates, and the terminal condition. If the stream ends after partial output, record whether the client saw a terminal event and whether the provider acknowledged cancellation. A concatenated transcript hides exactly the ordering information needed to diagnose backpressure, replay, and early-close bugs.
+
+Retries and fallbacks need one timeline. Include the budget before and after each attempt, backoff duration, selected route, rejection reason for skipped candidates, and whether any output was exposed. This reveals cases where a client retry, SDK retry, gateway retry, and provider retry multiplied one logical operation. It also makes it possible to prove that a fallback preserved or violated the original contract.
+
+Tool failures need effect status. Record the tool authorization decision, argument validation result, executor request ID, idempotency key reference, acknowledgement state, and reconciliation outcome. Never replay a mutating tool from a capsule unless the executor confirms it is safe. A capsule should help reproduce the gateway decision without creating a second real-world side effect.
+
+Comparison is where capsules become useful. Diff a failing capsule against a successful one with the same workload class, route, and policy version. Compare queue age, provider attempt sequence, state events, capability decisions, output validation, and cleanup. Highlight the first divergence rather than dumping two large logs. A good viewer tells the engineer which invariant stopped holding.
+
+Capsules should feed tests. Convert a confirmed bug into a regression fixture with synthetic content and an expected state trace. Add it to provider conformance, adapter tests, chaos tests, and billing reconciliation tests as appropriate. Keep the fixture small and remove unnecessary production details. The goal is to make the next occurrence fail in CI before it reaches a customer.
+
+Operational tooling needs lifecycle controls. Create a capsule automatically when a configured invariant fails, attach related logs by ID, encrypt it, and expose a short-lived retrieval link. Support quarantine when a capsule contains unexpected sensitive data. Mark whether it is open, triaged, reproduced, fixed, verified, or expired. Without lifecycle ownership, evidence accumulates while the underlying bug remains ambiguous.
+
+Metrics should show evidence quality. Track capsule creation rate, redaction failures, missing state transitions, incomplete provider IDs, replay success, time to reproduction, and regression conversion. A low failure count with poor capsule completeness is not good reliability. Alert when critical failures cannot produce a usable capsule because a logger, tracer, or policy component is unavailable.
+
+Test the capsule system itself. Break the logger, lose a trace segment, exceed size limits, trigger concurrent retries, cancel during serialization, and send malformed provider events. Verify that the request still receives the correct safety and billing outcome, sensitive fields are not leaked, and the absence of evidence is visible. Observability failure must not become request-path failure or silently erase the most important clues.
+
+The practical checklist is clear. Identify logical operations and attempts. Capture contract, policy, timing, state, route, provider, stream, retry, tool, usage, and cleanup evidence. Separate observations from hypotheses. Support privacy-aware structural and protocol replays. Bound size, retention, and access. Compare capsules by first divergence, convert fixes into regression fixtures, and monitor evidence quality.
+
+The larger lesson is that intermittent failures become tractable when the system preserves the path that produced them. A failure capsule is not a giant log dump. It is a compact, governed explanation of what happened, what the gateway decided, and what can be safely replayed. That turns “we cannot reproduce it” into a concrete engineering workflow.
+
+That is it for today. Preserve the evidence, replay the mechanism, and make every rare failure teach the system something permanent. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
