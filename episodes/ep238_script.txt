@@ -1,0 +1,55 @@
+EP238: AI API Gateway Provider Onboarding - Prove a New Model Is Safe Before Routing
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about onboarding a new provider or model into an AI API gateway. Adding a route can look like a configuration task, but it introduces a new contract, dependency, data destination, credential, cost profile, and failure mode. The right question is not “can we call it?” but “what evidence proves that we can safely route production work to it?”
+
+Start with an intake record. Capture provider, model, regions, capabilities, intended tenants, workload classes, data classifications, expected volume, pricing, retention terms, support contacts, and ownership. Identify whether the model is text, image, audio, video, reasoning, embedding, or tool-capable. A new identifier without a service owner and intended scope is not ready for integration.
+
+Define the gateway contract before writing the adapter. Specify request fields, response fields, streaming events, finish reasons, errors, usage, limits, timeout behavior, cancellation, idempotency, tool semantics, structured output, and content policy. Document which provider behavior is normalized and which differences remain visible. Do not hide meaningful semantics behind a misleading compatibility layer.
+
+Verify provider identity and access. Use least-privilege credentials, approved regions, quota limits, terms, data handling, and rotation procedures. Store secrets behind references and record credential class and version, never secret values. Test invalid, expired, revoked, and insufficiently scoped credentials. Onboarding is incomplete if the happy path works only from one engineer's laptop.
+
+Build a capability matrix. Test context limit, modalities, structured output, tool calls, streaming, cancellation, safety controls, usage reporting, latency, concurrency, and maximum output. Compare declared capabilities with observed behavior. A provider's marketing page is an input to investigation, not evidence that the gateway can safely advertise the capability.
+
+Test the adapter at the boundary. Validate translation of system messages, roles, content parts, tool schemas, response formats, stop conditions, metadata, and provider-specific options. Ensure unknown fields are handled deliberately. Record adapter version and contract test results. Silent field dropping can turn a safe request into a different request while returning a plausible response.
+
+Error normalization needs care. Map provider errors into stable gateway categories while preserving retryability, policy, capacity, authentication, validation, and unknown distinctions. Never convert a provider refusal into a generic server error that invites unsafe retries. Preserve opaque provider references for support without exposing secrets or internal credentials.
+
+Streaming deserves its own gate. Verify event ordering, deltas, usage timing, finish reason, disconnect handling, cancellation, backpressure, partial output, and provider acknowledgement. Test a stream that fails after the first token and one that sends late events after cancellation. A model should not be advertised as streaming-compatible because one short prompt happened to stream successfully.
+
+Tool onboarding must be side-effect aware. Test proposal, authorization, schema validation, executor dispatch, acknowledgement, cancellation, timeout, idempotency, and reconciliation. Confirm that the provider cannot widen tool scope through unrecognized fields or generated arguments. Read-only and mutating tools need different gates. A new model that is good at text but unsafe at tool selection should be eligible only for the approved subset.
+
+Policy compatibility comes before traffic. Evaluate safety, data classification, residency, retention, tenant plan, tool permissions, and approval rules for every intended route. Confirm that fallback candidates obey the same restrictions. If the provider cannot support a required policy control, exclude it from that workload rather than hoping downstream filtering will repair the gap.
+
+Privacy review should follow data flow. Identify what content, metadata, files, tool arguments, and logs leave the gateway; where they are processed and stored; and how deletion and retention work. Test redaction and classification. Do not send production secrets or sensitive customer prompts during onboarding unless the approved process explicitly permits it.
+
+Capacity testing should reflect real traffic. Measure concurrency, token throughput, stream duration, queue behavior, rate limits, burst handling, and provider recovery. Include retries and fallback pressure. A provider that handles a single request may still fail under the gateway's fan-out pattern or consume more shared capacity than the route budget allows.
+
+Latency and deadline behavior need distributions. Measure first byte, completion, tail latency, queue time, cancellation latency, and timeout classification. Test slow responses, partial output, and provider throttling. Set adapter and route timeouts from the client contract, leaving time for validation, cleanup, and billing. Do not choose a timeout from the median response alone.
+
+Usage and pricing need evidence. Verify input, output, reasoning, cached, tool, and other provider usage categories. Compare provider reports with gateway estimates and customer billing rules. Test missing, delayed, rounded, and contradictory usage. Publish a pricing revision with an effective time and reconciliation plan. A route is not production-ready if it can generate output but cannot explain the charge.
+
+Observability must exist before traffic. Emit operation, attempt, provider request, route, adapter, policy, model, region, usage, billing, stream, and tool references. Add dashboards and alerts for error classes, latency, capacity, policy decisions, fallback, cancellation, unknown effects, and cost. Avoid raw prompt logging by default. If a failure cannot be diagnosed without inventing telemetry, the onboarding gate has failed.
+
+Health probes should test the contract. Use bounded synthetic requests for authentication, basic generation, structured output, streaming, cancellation, usage, policy, and cleanup as appropriate. Use a dedicated tenant and data class. A process health check proves that a process is alive; it does not prove that a model is safe to route.
+
+Canary scope must match risk. Start with internal or synthetic workloads, then a small approved tenant and a narrow capability. Segment by region, model mode, tool use, stream, and data class. Track success, contract mismatches, latency, cost, safety decisions, and customer-visible outcomes. A global five percent canary can be riskier than a targeted one percent if it includes sensitive or high-value workflows.
+
+Fallback design should be tested, not assumed. Identify compatible alternatives for each capability, residency rule, policy, output format, and budget. Verify that fallback does not duplicate side effects, violate the original contract, or surprise billing. If no safe fallback exists, return a clear bounded failure. “Some model will answer” is not a reliability strategy.
+
+Rollback artifacts must be ready. Keep the prior route, policy, pricing, credential references, probe definitions, and dependency versions immutable and retrievable. Validate that rollback remains compatible with current provider availability and policy. Define how to handle in-flight streams, tool effects, usage, charges, and late callbacks. A new route without a verified rollback path should not receive broad traffic.
+
+Control-plane publication needs gates. Require validation, owner approval, policy review, capability evidence, security and privacy review where relevant, capacity results, pricing confirmation, observability, canary thresholds, and rollback readiness. Record the release and configuration revisions. Workers should activate a signed or hashed snapshot and report acknowledgement.
+
+Security testing should be adversarial. Attempt prompt injection through provider-specific fields, tool schema confusion, oversized inputs, cross-tenant references, malformed streaming events, unauthorized regions, and credential substitution. Confirm that output validation, policy enforcement, and tenant isolation remain active. Provider trust does not remove the gateway's responsibility to enforce its contract.
+
+Operational readiness includes humans. Provide provider escalation details, runbook steps, known limitations, support language, customer impact guidance, and billing procedures. Train on-call staff to distinguish provider errors, adapter errors, policy blocks, capacity limits, and usage mismatches. An integration that only its author understands is a single point of failure.
+
+Review evidence, not checkboxes. Every gate should link to test runs, traces, policy decisions, capacity results, pricing examples, screenshots or dashboards, approvals, and known exceptions. Mark confidence and open risks. If a requirement is not applicable, record why. “Passed” without evidence is a status label, not proof.
+
+Test lifecycle changes after onboarding. Rotate credentials, change provider versions, alter model aliases, update policy, revoke a capability, cross a region boundary, and degrade usage reporting. Verify drift detection, stale mode, rollback, reconciliation, and customer communication. Onboarding is a beginning; the provider contract can change after launch.
+
+The practical checklist is clear. Create an owned intake record and explicit gateway contract. Verify credentials, capabilities, translation, errors, streaming, tools, policy, privacy, capacity, latency, usage, pricing, observability, probes, canary, fallback, rollback, security, and human readiness. Publish only an immutable, versioned snapshot with evidence and bounded scope.
+
+The larger lesson is that provider onboarding is a production change. A new model is not merely another endpoint; it is a new dependency and a new interpretation of the gateway's promises. Evidence-based onboarding lets teams expand the model portfolio while keeping safety, cost, compatibility, and recovery under control.
+
+That is it for today. Prove a new model is safe before routing real work to it. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
