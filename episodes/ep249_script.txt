@@ -1,0 +1,47 @@
+EP249: AI API Gateway Supply Chain Security - Verify What Runs Between Client and Model
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about supply chain security for AI API gateways. A request may look like a simple call from an application to a model, but the gateway often depends on SDKs, provider adapters, proxy libraries, tokenizers, retrieval packages, tool connectors, container images, build systems, and remote services. Any of those layers can change behavior, introduce a vulnerability, or quietly alter what your system sends and receives.
+
+Start with an inventory that describes what actually runs. Record direct dependencies, transitive dependencies, base images, operating system packages, model adapters, plugins, hosted services, build actions, and runtime configuration. Include versions, sources, hashes, owners, licenses, and the environments where each component is used. A package name in a lockfile is useful, but it is not a complete operational inventory.
+
+Create a software bill of materials for every release. Generate it from the built artifact and container image, not only from source declarations. Track components in production, staging, evaluation, and developer tooling separately. When an incident names a vulnerable library, you should be able to answer which gateway versions contain it, which tenants could be affected, and whether the vulnerable code path was reachable.
+
+Pin dependencies deliberately. Floating versions and unbounded ranges make builds difficult to reproduce and allow upstream changes to arrive without a reviewed decision. Lock direct and transitive versions, verify package checksums, and use an internal or policy-approved registry where practical. Pinning is not permanent stagnation: update through a controlled process with tests, evidence, and a clear exception path.
+
+Reproducible builds turn trust into evidence. Given the same source, lockfiles, build instructions, and approved inputs, the resulting artifact should be identical or explainably equivalent. Record the compiler, package manager, base image, build environment, and source revision. Sign release artifacts and publish provenance so deployment systems can verify how an image or binary was produced.
+
+The build system is part of the attack surface. Restrict CI permissions, isolate jobs, protect release branches, and keep deployment credentials unavailable to ordinary test steps. Review workflow changes like application code. A dependency update should not be able to rewrite a release pipeline, exfiltrate environment variables, or publish an unsigned image.
+
+Verify before installation. Check package signatures, registry identity, checksums, provenance attestations, and expected maintainers where those controls exist. Watch for typosquatting, unexpected ownership transfers, suspicious release timing, and packages that suddenly add install scripts or native binaries. A familiar name is not proof that the artifact came from the intended source.
+
+Treat provider adapters as security-sensitive code. An adapter translates request fields, authentication, streaming, retries, errors, usage, and tool semantics. It can accidentally log prompts, drop safety settings, send data to the wrong region, or interpret a provider response as success when it is not. Require code review, contract tests, restricted permissions, and explicit ownership for every adapter.
+
+Third-party plugins need a narrow capability model. Do not let a plugin access the entire gateway process, filesystem, network, tenant database, or secret namespace merely because it formats a request. Give it only the APIs and data required for its declared function. Isolate plugins with separate processes or sandboxes when feasible, and enforce network destinations outside the plugin itself.
+
+The model supply chain has its own risks. If your gateway downloads model metadata, tokenizer files, safety configurations, prompts, evaluation assets, or local model weights, verify their source and integrity. Separate executable code from data. Keep model and adapter versions linked in the release record, and test that a model update has not changed output schemas, tool behavior, residency assumptions, or content controls.
+
+Remote configuration is executable behavior in disguise. Routing tables, provider capability maps, prompt templates, safety policies, tool schemas, and feature flags can change what traffic does even when the binary is unchanged. Authenticate configuration sources, validate schemas, sign or version sensitive policies, and require review for changes that expand access, destinations, or data classes.
+
+Build a trust boundary around outbound requests. The gateway should enforce destination allowlists, TLS validation, certificate policy, region restrictions, and approved provider domains. Do not let a compromised package or plugin turn an ordinary model request into an arbitrary outbound HTTP call. Egress controls are valuable even when application-level validation fails.
+
+Validate inputs at every translation boundary. A client request, normalized internal request, provider payload, tool call, and provider response each need schema validation. Reject unknown fields when safe, constrain sizes and nesting, and prevent header injection or URL rewriting. Transforms should be explicit and testable, not a chain of permissive dictionary merges.
+
+Protect the update path. Use staged rollouts, canaries, and automatic rollback for dependency, adapter, image, and configuration changes. Compare error rates, latency, token accounting, data classifications, provider destinations, and tool activity against the previous version. A release that passes unit tests but changes outbound behavior deserves investigation before broad traffic arrives.
+
+Contract tests should cover security semantics. Verify that authentication headers go only to approved hosts, sensitive fields stay out of logs, region policy survives fallback, tool permissions remain bounded, usage is reconciled, and cancellation works across adapters. Test both normal and malformed responses. Compatibility is not enough if a new dependency preserves the API while weakening the control plane.
+
+Use vulnerability intelligence with reachability. A vulnerable package does not always mean an exploitable gateway, and a package without a published advisory is not automatically safe. Map the vulnerable function to deployed components, exposed endpoints, privileges, and reachable inputs. Prioritize issues that cross tenant boundaries, execute untrusted content, handle credentials, parse complex formats, or control outbound traffic.
+
+Have an emergency patch process. When a critical dependency or provider component is compromised, identify affected releases, freeze risky promotions, build a verified replacement, test the relevant path, and roll it out with heightened monitoring. Keep the process fast without bypassing provenance, review, or artifact verification. Emergency does not mean “download a random replacement and hope.”
+
+Retirement matters too. Remove abandoned adapters, unused plugins, stale images, deprecated registries, and unneeded build permissions. Delete credentials and signing keys associated with retired components. An old package that is no longer called may still be importable, reachable through a debug endpoint, or present in a container layer.
+
+Audit runtime integrity. Compare running image digests and package inventories with the approved release record. Alert on unexpected processes, changed files, new outbound destinations, unsigned artifacts, and configuration drift. Runtime evidence helps distinguish “we deployed this” from “this is what is executing now.”
+
+Keep tenant impact visible. A shared dependency issue may affect every tenant, while a plugin or integration issue may affect only selected workloads. Link component versions to route decisions, tenant policies, provider attempts, and tool executions. During incident response, this lets operators contain a precise slice instead of disabling the entire gateway blindly.
+
+The practical checklist is clear. Inventory the real stack, generate artifact-based SBOMs, pin and verify dependencies, make builds reproducible, protect CI, verify package provenance, review provider adapters, sandbox plugins, validate model and configuration assets, restrict egress, test every translation boundary, stage updates, map vulnerabilities to reachable paths, and maintain a fast verified patch and retirement process.
+
+The larger lesson is that an AI gateway is only as trustworthy as the chain that builds and extends it. Reliability and security do not begin when a request reaches the model. They begin when a dependency is selected, a plugin is installed, a container is built, a policy is fetched, and an adapter decides what leaves the system. Make that chain visible, verifiable, and replaceable.
+
+That is it for today. Verify what runs between client and model, and make every release carry evidence of its origin and behavior. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
