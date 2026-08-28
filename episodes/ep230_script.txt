@@ -1,0 +1,49 @@
+EP230: AI API Gateway Dependency Mapping - Know What a Model Change Can Break
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about dependency mapping for AI API gateways. A model change rarely affects only one model call. It can change context limits, tool behavior, streaming, usage, pricing, latency, policy decisions, fallbacks, client parsing, and support procedures. A dependency map makes that blast radius visible before production finds it for you.
+
+Start with the request journey. Map how an operation moves from identity and admission through policy, routing, adapter translation, provider dispatch, streaming, tool execution, validation, usage, billing, and finalization. Include asynchronous queues, retries, callbacks, reconciliation jobs, health probes, and failure capsules. The map should follow causal relationships, not just service ownership.
+
+Define dependency types. A direct dependency is called during the request. A contract dependency relies on behavior such as finish reasons or usage fields. A policy dependency determines whether work is allowed. A capacity dependency controls admission. A data dependency carries sensitive content. A financial dependency affects charge or credit. A human dependency includes on-call, approval, and support workflows. Different dependencies require different evidence and failure handling.
+
+Inventory the release surface. Include model versions, provider routes, regions, adapters, SDKs, defaults, capability metadata, policy rules, credentials, pricing tables, dashboards, probes, and runbooks. Record owners, versions, environments, tenants, workload classes, and retirement dates. If a dependency has no owner or version, treat it as a risk rather than an invisible assumption.
+
+Map capabilities, not only names. A model identifier may be shared across providers while context length, tools, structured output, reasoning, modalities, safety, and streaming differ. Link each advertised capability to the provider behavior and adapter implementation that supports it. A change to one capability can affect route eligibility, fallback selection, client guarantees, and test fixtures.
+
+Trace policy and data boundaries. Show where identity is derived, where data classification occurs, where redaction happens, and which providers and regions are permitted. Link policy rules to routes, tools, logs, traces, retention, and fallback candidates. A dependency map that omits data flow cannot reveal that a new fallback violates residency or that a diagnostic path stores restricted content.
+
+Capacity dependencies are often hidden. Connect provider concurrency, token throughput, queue slots, connection pools, stream duration, tool fan-out, retry budgets, and tenant shares to admission and load shedding. A model with the same request shape but slower generation can consume more concurrency and change the behavior of every workload class sharing that pool.
+
+Financial dependencies need a separate view. Link provider usage categories, pricing revisions, retries, fallbacks, tool calls, customer plans, credits, reconciliation, statements, and alerts. A model change can alter output length or reasoning usage without changing the API schema. If pricing and usage dependencies are not mapped, a technically successful release can still create incorrect charges.
+
+State and lifecycle dependencies explain races. Connect operation state, attempt state, stream state, tool state, reservation state, and billing state. Record which events can transition each state and which workers own them. A provider callback may arrive after cancellation; a billing update may arrive after a rollback. Mapping these relationships reveals where late events can overwrite truth.
+
+Use lineage and failure capsules as map evidence. Operation and attempt identifiers show which services actually participated in a request. Failure capsules show the first divergence, missing dependency, or contract mismatch. Compare designed dependencies with observed dependencies. Surprising edges often reveal a hidden SDK retry, a global cache, or an undocumented provider feature.
+
+Model failure propagation. For each dependency, ask what happens when it is slow, unavailable, stale, malformed, unauthorized, over capacity, or partially successful. Identify whether the gateway fails closed, fails open, uses a cache, sheds work, falls back, or marks the operation unknown. Then map which downstream state, cost, policy, and customer behavior follows.
+
+Separate trigger from amplifier. A provider may trigger a timeout, while a broad retry policy amplifies traffic and a shared queue spreads the impact. A model may trigger malformed output, while silent adapter repair hides it and billing reconciliation delays detection. Dependency maps help identify every link that needs a guardrail rather than naming only the first failing component.
+
+Map change blast radius by dimension. A change can affect tenants, regions, workload classes, capabilities, data classifications, tools, client versions, and billing plans differently. Use this matrix to choose canary scope and promotion gates. A five percent traffic canary is weak if it excludes the only tenant using the changed tool or schema.
+
+Version the map. Dependencies change with deployments, provider updates, policy revisions, and customer configuration. Keep a time-aware snapshot with release, contract, adapter, model, policy, pricing, and probe versions. When analyzing an incident, reconstruct the map that was active at the time rather than relying on today's topology.
+
+Make ownership actionable. Each important node needs an owner, escalation path, service objective, change process, and evidence source. Each edge needs a contract, timeout, retry rule, data classification, and rollback implication. Ownership without a contract leaves teams guessing; a contract without an owner leaves violations unresolved.
+
+Use automated discovery carefully. Traces, configuration, code references, provider telemetry, and billing records can suggest edges. Validate inferred relationships with service owners and contract tests. Do not assume that absence from a trace means absence from the dependency graph; optional branches and failed early paths may not appear in successful traffic.
+
+Contract tests should follow the map. For every critical edge, test request and response shape, capability, error, timeout, cancellation, usage, policy, and idempotency semantics. Run tests per provider, model, region, adapter, and client version where behavior differs. A dependency edge is trustworthy when its contract is observable and continuously checked.
+
+Readiness and rollback use the same map. Before a release, identify affected nodes and edges, required probes, canary dimensions, alert thresholds, and rollback artifacts. During rollback, verify that the old route's current dependencies still exist and remain compliant. Restoring a configuration that depends on an expired credential or retired model is not recovery.
+
+Security review benefits from dependency mapping. Identify trust boundaries, secrets, privileged tools, data processors, logging destinations, and external effects. Ask whether a new provider or adapter expands access, changes retention, or bypasses an approval path. Threat modeling becomes more concrete when the request and data flows are visible.
+
+Maps must remain usable. Provide views for request lineage, data flow, capacity, financial impact, state transitions, and ownership. Highlight changed edges, unknown dependencies, stale versions, missing tests, and single points of failure. A giant graph that cannot answer “what breaks if this model changes?” is a diagram, not an operating tool.
+
+Test the map with controlled changes. Disable a policy service, slow one provider, remove a capability, change pricing, fill a queue, expire a credential, and break a callback. Verify that the observed failure path matches the mapped propagation and that containment occurs at the documented boundary. Differences between predicted and observed paths are valuable findings.
+
+The practical checklist is clear. Map the full request journey and dependency types. Inventory versions, owners, capabilities, policies, data, capacity, state, finance, and human workflows. Distinguish designed from observed edges. Model failure propagation, trigger, amplifier, and blast radius. Version the map, attach contracts and tests, and use it for readiness, canaries, rollback, security, and incident analysis.
+
+The larger lesson is that dependency mapping turns change risk into a visible system. AI gateways are not simple proxies; they are coordination layers across models, providers, policies, tools, resources, and money. Knowing what depends on a model change lets teams choose safer exposure, stronger tests, faster containment, and a rollback that actually works.
+
+That is it for today. Map the edges before changing the node, and know what your model change can break. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
