@@ -1,0 +1,47 @@
+EP228: AI API Gateway Request Lineage - Make Every Response Explainable
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about request lineage for AI API gateways. When one response passes through admission, policy, routing, retries, fallbacks, streaming, tools, validation, and billing, a final status code cannot explain what happened. Lineage connects every decision and attempt into one traceable story.
+
+Start with the logical operation. Assign one operation ID at the gateway boundary and preserve it through queues, adapters, providers, tools, billing, and client callbacks. Give each provider attempt, tool call, retry, and fallback its own child ID. This prevents a single user request from appearing as many unrelated events and makes duplicated work visible.
+
+Lineage is more than distributed tracing. A trace shows timing and network spans; lineage explains ownership, causality, policy, and state. Record who initiated work, which operation caused each child action, why a route was selected, why a retry happened, and which evidence authorized the next transition. Keep causal links even when work is asynchronous or handled by another service.
+
+Capture the request boundary carefully. Record authenticated tenant, project, environment, workload class, contract version, policy revision, requested model or capability, data classification, deadline, idempotency reference, and budget. Derive identity and policy context server-side. Avoid putting raw prompts, credentials, or sensitive tool arguments into ordinary lineage records.
+
+Preserve intent and effective behavior. The client may request one model, output format, region, or tool scope while the gateway applies defaults, transformations, or fallback rules. Record both the requested contract and the effective parameters, including fields that were dropped or constrained. A response is explainable only when an operator can see what the gateway promised and what it actually sent.
+
+Route decisions need reasons. Include eligible candidates, excluded candidates, capability matches, residency checks, policy results, health state, price or budget constraints, and the selected route. Do not expose sensitive internal rules to untrusted clients, but preserve enough bounded reason codes for support and operations. “Selected provider B” is weaker than “provider A excluded for capacity, provider B matched region and schema.”
+
+Attempts form a causal sequence. Record dispatch time, provider request ID, adapter version, timeout, response class, usage, retryability, backoff, and final disposition. A fallback is a child of the original operation, not a new request. This lineage makes it possible to explain why a customer saw a response after a provider timeout and how much recovery work occurred.
+
+Streaming lineage must include events. Store sequence numbers, event types, first-byte time, terminal condition, cancellation request, provider acknowledgement, validation, and client disconnect. Link late provider events to the attempt that produced them. If the client saw partial output and the provider later failed, lineage must preserve that ordering instead of reducing the result to a generic error.
+
+Tool lineage needs effect boundaries. Link a model proposal to authorization, argument validation, executor request, acknowledgement, idempotency key, and reconciliation. Separate proposed, authorized, started, completed, failed, and unknown states. If a tool has side effects, make the causal chain explicit so a retry cannot be mistaken for an independent user action.
+
+State transitions should be linked to events. Record previous state, next state, actor, reason, and parent operation. A cancellation event may terminate a queued operation while a late provider response belongs to an already closed attempt. Explicit lineage prevents late events from overwriting the outcome of another attempt and supports invariant checks on legal transitions.
+
+Policy lineage explains control decisions. Include policy revision, evaluator version, input classification, decision, reason code, and fallback mode. When a request is transformed, throttled, challenged, or denied, connect that action to the policy event. If policy evaluation is unavailable, record whether the gateway failed closed, used an approved cache, or entered a constrained mode.
+
+Resource lineage makes cost and capacity visible. Link reservations, queue leases, token budgets, retry budgets, provider usage, and final charges to the operation. Record creation, adjustment, release, and reconciliation. If an operation times out, support should be able to see whether capacity was released and whether provider work continued. A response without resource lineage leaves hidden costs behind it.
+
+Billing lineage should distinguish work from charge. Preserve provider-reported usage, gateway estimates, retries, fallbacks, tool calls, pricing revision, and customer billing decision. Link every charge to the logical operation and the relevant attempts. If a charge is quarantined or corrected, keep the original record and the reconciliation relationship rather than overwriting history.
+
+Lineage must survive asynchronous boundaries. Queue messages, callbacks, scheduled retries, stream workers, and reconciliation jobs should carry operation and parent identifiers. Validate that identifiers are present and belong to the expected tenant. Do not trust an arbitrary client-supplied parent ID to join unrelated data. Missing or invalid lineage should be visible and should trigger a safe handling path.
+
+Privacy requires selective detail. Use structured fields, redaction, hashing, sensitivity labels, encryption, access controls, and retention limits. Keep raw content in a separate governed store only when necessary. Support teams usually need route, policy, timing, state, usage, and reason evidence rather than full prompts or responses. Do not let observability become an uncontrolled copy of customer data.
+
+Lineage views should answer practical questions. What did the client request? Which policy applied? Why was this route chosen? How many attempts ran? Did a fallback preserve the contract? Was output streamed or partial? Did a tool side effect start? What usage and charge resulted? Which resource reservations remain? Design the data model around these questions instead of around whichever service happened to emit a log.
+
+Comparison is powerful. Compare successful and failed lineage for the same workload, route, model, and policy revision. Highlight the first divergence in admission, capability, state, timing, provider behavior, tool authorization, or billing. This is more useful than searching millions of unconnected log lines and helps convert a failure capsule into a regression test.
+
+Lineage should support stable client explanations. Return an operation identifier, bounded reason, retryability, and final state. Let clients retrieve durable status for asynchronous work without exposing internal provider details. For an indeterminate side effect or partial stream, say so clearly. Do not claim successful completion just because one child attempt returned HTTP 200.
+
+Integrity matters. Sign or hash important lineage records, use append-only storage where appropriate, and detect missing or reordered events. Access should be audited. If a lineage segment is unavailable, expose the gap rather than presenting a complete-looking story assembled from partial evidence. Investigation depends on knowing both what is recorded and what is missing.
+
+Test lineage under failure. Drop queue metadata, duplicate a retry message, reorder stream events, lose a provider callback, cancel during tool execution, restart a worker, and corrupt a billing update. Verify that parent-child relationships remain correct, tenant boundaries hold, gaps are visible, and the request outcome remains safe. Observability failure must not authorize work or silently change billing.
+
+The practical checklist is clear. Use one operation identity with child attempts and effects. Record intent, effective behavior, policy, route reasons, state transitions, timing, streams, tools, resources, usage, and billing. Preserve causality across asynchronous services. Protect sensitive content, validate lineage ownership, expose bounded client explanations, detect gaps, and compare traces by first divergence.
+
+The larger lesson is that explainability in an AI gateway is operational lineage. It is the connective tissue between what a customer asked for, what the gateway decided, what providers did, and what the customer was charged. With complete and governed lineage, support can answer questions, engineers can reproduce failures, and automation can enforce the contract instead of guessing from fragments.
+
+That is it for today. Connect every decision, preserve every boundary, and make each response explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
