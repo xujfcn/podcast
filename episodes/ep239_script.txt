@@ -1,0 +1,53 @@
+EP239: AI API Gateway SLOs - Turn Reliability Targets Into Routing Decisions
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about service-level objectives for AI API gateways. Availability and latency targets are useful, but an AI gateway also has semantic, policy, usage, billing, and side-effect correctness to protect. An SLO is valuable when it changes routing, admission, fallback, rollout, and recovery decisions—not when it is only displayed on a dashboard.
+
+Start with the user journey. Define what success means for a logical operation: an authorized response, within the deadline, matching the requested contract, with correct policy, complete or honestly partial streaming, safe tool behavior, accurate usage, and explainable billing. A provider returning HTTP 200 is not necessarily a successful gateway operation.
+
+Choose indicators that represent outcomes. Track successful operation rate, deadline compliance, first-byte and completion latency, stream completion, cancellation effectiveness, structured-output validity, policy correctness, tool outcome correctness, usage attribution, billing accuracy, and unknown-state rate. Separate provider, adapter, gateway, and client failures so one aggregate number does not hide the real contract breach.
+
+Define SLOs by workload. Interactive chat, batch generation, agent tools, embeddings, image generation, and asynchronous jobs have different deadlines and success criteria. Segment by tenant plan, capability, region, model class, stream mode, and data policy when behavior differs. One global average can look healthy while an important workload is failing.
+
+Error budgets should include semantic risk. Traditional budgets count errors or downtime. For an AI gateway, budget invalid schemas, policy violations, duplicate side effects, unbilled usage, wrong-region routing, and unresolved operations separately. Some events should consume the budget dramatically or trigger immediate containment because their harm is not proportional to request count.
+
+Routing should consume live budget. Prefer providers and routes that can meet the remaining deadline, capability, policy, and cost contract. Remove candidates whose error budget is exhausted for the relevant workload. Do not route all traffic to the lowest-latency provider if it is failing structured output or policy checks. Reliability is multidimensional.
+
+Tail latency matters more than averages. Measure p95, p99, and deadline misses by route, provider, region, capability, and tenant. Include queue, adapter, provider, validation, cleanup, and billing time. A fast first token followed by a stalled stream can still violate the user contract. Route decisions should consider the distribution and the remaining attempt budget.
+
+Availability needs a denominator. Define whether cancelled, policy-denied, client-aborted, rate-limited, provider-throttled, and unknown operations count as failures for each objective. Publish the rules. A system can improve its availability number by excluding the exact failures customers care about, so measurement semantics must be reviewed like API semantics.
+
+Multi-window alerting avoids noise. Use a fast window for urgent regressions and a longer window for sustained budget burn. Alert on burn rate, affected scope, first divergence, and likely causes. A provider-wide outage, one tenant's quota exhaustion, and an adapter schema regression need different responses. Alerts should include available routing and rollback actions.
+
+Admission control should protect objectives. When a route or region is burning budget, reduce optional work, preserve critical workloads, and reserve capacity for recovery. Apply tenant and workload fairness. Do not wait for total outage before shedding load. Admission decisions should record which SLO, budget, policy, or capacity signal caused them.
+
+Retries spend reliability budget. A retry can improve success while increasing latency, provider cost, and overload. Define retry budgets per operation, tenant, route, and incident state. Retry only errors classified as safe, preserve idempotency, and stop when the deadline or semantic contract cannot be met. Measure the success gained and the work amplified.
+
+Hedging is another budget decision. Starting a second provider attempt can reduce tail latency but may double cost or create duplicate effects. Hedge only requests with safe idempotency and bounded work, and cancel the loser with an observable guarantee. Exclude mutating tools and other side-effecting operations unless the executor contract explicitly supports it.
+
+Fallback must preserve SLO meaning. A fallback that returns within the deadline but changes output format, data region, safety, tool capability, or pricing may meet a latency objective while violating a more important one. Define per-capability and per-policy fallback objectives. If no candidate can preserve the contract, return a bounded failure and explain retryability.
+
+SLOs should guide canaries. Define success gates before a route or model rollout: operation success, tail latency, contract validity, policy outcomes, stream completion, tool safety, usage, billing, and cleanup. Segment canary results by affected workload rather than relying on global traffic percentage. Stop promotion when a critical objective burns too quickly even if aggregate availability remains acceptable.
+
+Control-plane changes need objective evidence. A route weight, quota, pricing revision, timeout, retry policy, or feature flag can move SLOs. Attach active configuration and policy versions to indicators. Compare desired and observed state. Do not claim an SLO improvement until the traffic actually uses the new revision and the measurement window is valid.
+
+Provider onboarding should inherit objectives. Before adding a model, set expected latency, capacity, error, capability, usage, and cost envelopes. Run synthetic and representative tests. During canary, compare against the incumbent for the same workload. A route is not “healthy” merely because it responds; it must meet the objectives that justify putting it in production.
+
+SLOs need honest treatment of uncertainty. Track indeterminate operations, unknown tool effects, late provider work, and missing usage separately. Do not classify unknown as success to protect the dashboard. Some unknowns may be reconciled later; until then, they should consume an appropriate risk budget and remain visible to support and finance.
+
+Billing objectives belong beside availability. Define targets for usage completeness, attribution, charge correctness, reconciliation delay, and adjustment accuracy. If a provider reports usage late or inconsistently, route and admission decisions may need to change. Cheap output with untrustworthy accounting is not a reliable service.
+
+Policy and security objectives need hard floors. Set objectives for authorization continuity, residency compliance, tool approval, secret isolation, and audit completeness. A single cross-tenant leak or forbidden-region dispatch may trigger immediate disablement rather than gradual budget consumption. Reliability targets should reflect severity, not make every failure interchangeable.
+
+SLO ownership must be operational. Name the team that owns each indicator, budget, alert, runbook, and customer communication. Define review cadence and escalation. When a budget is spent, the owner must decide whether to reduce change velocity, adjust routing, invest in capacity, or accept a documented tradeoff.
+
+Use causal evidence in reviews. A monthly SLO report should link budget burn to request lineage, audit events, releases, provider attempts, policy revisions, tools, usage, and billing. Identify first divergence and amplifiers. Avoid treating one chart as an explanation. SLOs tell you that the contract is suffering; lineage helps show why.
+
+Test the decision loop. Degrade a provider, increase tail latency, invalidate schemas, delay usage, exhaust capacity, break policy evaluation, and create tool uncertainty. Verify that alerts fire, routing responds, admission protects critical work, retries remain bounded, canaries stop, and recovery is verified. If an SLO violation produces only a retrospective report, it is not yet an operational control.
+
+Review objectives after incidents. Ask whether the indicator detected customer harm, whether the denominator was honest, whether the budget reflected severity, and whether routing actions were available. Add a missing objective when the incident exposed an unmeasured contract. Do not solve every incident by lowering the target until the graph turns green.
+
+The practical checklist is clear. Define success from the user journey. Measure latency, errors, semantics, policy, tools, usage, billing, cleanup, and uncertainty by workload. Use severity-aware budgets, tail-aware alerts, and objective-driven routing, admission, retries, fallbacks, canaries, and rollback. Version the evidence, assign owners, protect hard security floors, and test the full decision loop.
+
+The larger lesson is that SLOs are decisions encoded as measurements. In an AI gateway, reliability means more than staying online; it means preserving the requested contract, authority, cost, and state under changing providers and pressure. When objectives influence where traffic goes and what work is admitted, reliability becomes a runtime behavior instead of a monthly score.
+
+That is it for today. Turn reliability targets into routing decisions, and make every objective reflect what users actually trust. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
