@@ -1,0 +1,39 @@
+EP216: AI API Gateway Policy Enforcement - Turn Intent Into Runtime Controls
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about policy enforcement at an AI API gateway. Teams often have clear intentions: protect private data, limit spend, require approved models, restrict tools, and keep workloads in the right region. But an intention is not a control until it is evaluated consistently at runtime and produces evidence that operators can inspect.
+
+Start by separating policy intent from enforcement mechanism. A policy can say that a tenant may use approved models for a specific workload, that sensitive prompts must stay in an allowed region, or that a tool requires human approval. Enforcement turns those statements into checks at admission, routing, request transformation, response acceptance, tool execution, and billing. Make the mapping explicit so a policy is not merely documentation.
+
+Every request should carry a policy context. Include tenant, project, environment, workload class, data classification, region constraints, budget class, requested capabilities, and approval state. Derive this context from authenticated identity and server-side configuration, not from untrusted client fields alone. The gateway should be able to explain which context caused a request to be allowed or denied.
+
+Policy evaluation should be deterministic for the same inputs and policy version. Avoid hidden dependence on process-local state, unordered provider responses, or changing defaults. Record the policy revision, evaluator version, decision, and reason code. If a request is denied, the reason should be actionable without revealing sensitive rules that would help bypass them.
+
+Enforce policy in layers. Admission can reject unknown tenants, exhausted budgets, or disallowed regions before provider work begins. Routing can filter models by capability, price, residency, and approval. Request transformation can remove unsupported options or reject unsafe ones. Response acceptance can check schemas, finish reasons, and content policy. Tool execution needs a separate authorization boundary because a valid model proposal is not automatically an allowed side effect.
+
+Do not confuse normalization with permission. A gateway may translate a provider-specific parameter into a common request shape, but that does not mean the requested capability is approved. Preserve the difference between what the client asked for, what the adapter can represent, and what policy permits. Silent downgrades are dangerous when developers believe they received a stronger guarantee than the system actually enforced.
+
+Policy precedence must be clear. Organization rules may set a maximum, while a project or request can impose a stricter limit. A tenant may allow a model that a specific environment forbids. Define which rules are additive, which are restrictive, and how conflicts are reported. Test precedence as carefully as the individual rules. A policy system that produces different answers depending on evaluation order will eventually create an incident.
+
+Budgets should be enforced before and during work. Reserve estimated spend at admission, account for retries and fallbacks, and reconcile against final usage later. A request that begins within budget can exceed it through a long stream or repeated tool calls. Set hard ceilings for attempts, tokens, concurrency, and tool actions, then expose whether a request was accepted, limited, or terminated by policy.
+
+Safety controls need a defined failure mode. If the policy service is unavailable, decide whether the request fails closed, uses a cached decision, or proceeds only for a low-risk workload class. Do not let an outage silently disable the most important controls. Cache decisions with an explicit expiry and policy version, and make fallback behavior visible in the audit trail.
+
+Data handling policies should be enforced at the boundary where data enters the gateway. Classify content when required, redact or tokenize sensitive fields, restrict provider routes, and control retention in logs and traces. A policy that only checks the final provider response is too late if the prompt already crossed a forbidden boundary. Keep raw content out of ordinary audit records unless retention is explicitly approved.
+
+Tool policy deserves capability-based design. Give each request only the tools and scopes it needs. Check tool name, tenant, environment, approval status, argument schema, rate, and side-effect class before execution. Separate read-only tools from mutating tools, and require stronger approval for irreversible actions. Enforce these rules in the executor as well as the gateway so a direct or replayed call cannot bypass the intended boundary.
+
+Streaming makes enforcement time-sensitive. Some checks happen before the first token, while others require inspecting the completed output. Define whether content can be displayed provisionally before final acceptance and what happens when a later policy check rejects it. Cancellation must release reservations and stop provider work where possible. A stream ending normally does not prove that every policy requirement passed.
+
+Policy changes need controlled rollout. Version the policy, validate it against representative requests, preview the decision diff, and canary exposure before making it default. Keep rollback fast and preserve the previous revision for in-flight operations. Never edit a live rule without recording who changed it, why, and what scope it affected.
+
+Observability should measure enforcement outcomes. Track allowed, denied, transformed, throttled, challenged, and policy-terminated requests. Break reasons down by rule, policy version, tenant, workload, model, region, and adapter. Alert on sudden deny-rate changes, unexpected fallback use, missing policy evaluations, and requests that proceed without a required decision. These signals reveal drift between intended controls and observed behavior.
+
+Policy errors need stable client semantics. Return a consistent error class, reason code, operation identifier, and remediation hint. Do not expose internal stack traces or provider credentials. For a temporary policy-service failure, distinguish retryable unavailability from a deliberate denial. SDKs should make these differences easy to handle so applications do not blindly retry a request that policy will always reject.
+
+Test policy boundaries with adversarial fixtures. Change tenant identity, request data classification, model capability, region, budget, tool scope, and approval state one at a time. Bring the policy service down. Deliver a late stream event. Retry after a policy termination. Roll back while requests are in flight. Verify that every result follows the documented precedence, no forbidden provider sees the request, and the audit record identifies the exact decision.
+
+The practical checklist is clear. Translate intent into checks at each relevant boundary. Build policy context from trusted identity. Version evaluators and rules. Define precedence and failure modes. Enforce budgets during work. Restrict data routes and tool scopes. Treat transformations separately from permissions. Roll out policy changes gradually, expose stable errors, and measure decisions with privacy-aware evidence.
+
+The larger lesson is that policy is part of the runtime contract, not a document stored beside the code. AI gateways sit where identity, data, models, tools, budgets, and providers meet. Reliable enforcement makes those constraints executable, observable, and reversible while leaving developers a clear explanation of why a request was allowed or stopped.
+
+That is it for today. Turn every important policy into a runtime decision you can explain and verify. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
