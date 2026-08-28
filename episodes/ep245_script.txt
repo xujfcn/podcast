@@ -1,0 +1,59 @@
+EP245: AI API Gateway Shadow Traffic - Compare Models Without Exposing Users to Risk
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about shadow traffic in AI API gateways. Sending a copy of a production request to a candidate model can reveal compatibility, latency, and quality problems before users see them. But it can also duplicate sensitive data, provider cost, policy exposure, and tool effects. Safe shadowing is a controlled evaluation path, not free extra traffic.
+
+Start with a written purpose. Define which decision the shadow experiment should support: provider onboarding, model migration, adapter validation, prompt comparison, capacity planning, or incident recovery. Specify the workload, tenant scope, region, sample rate, duration, success criteria, owner, budget, and stop conditions. An experiment without a decision and expiration becomes permanent hidden infrastructure.
+
+Obtain the right authority. Production traffic belongs to customers, not to the experiment. Confirm contractual, privacy, security, residency, and provider-term eligibility before copying any request. Use explicit tenant enrollment where required. A platform-wide feature flag cannot grant permission that the data contract does not provide.
+
+Classify requests before sampling. Exclude secrets, regulated data, private files, high-risk tools, unsupported regions, and tenants that have not opted in. Apply server-side classification and policy. Unknown classification should mean no shadow copy. Sampling before classification can leak the very content the controls were meant to protect.
+
+Minimize the copied payload. Send only the fields required for the comparison. Remove internal metadata, credentials, hidden identifiers, unrelated conversation history, and tool tokens. Redact or tokenize sensitive values where the evaluation permits it. Data minimization should happen before the candidate provider receives the request.
+
+Residency remains binding. The candidate route, queue, worker, cache, logs, evaluation store, and provider processing location must all satisfy the original request's residency policy. Never shadow an eligible regional request to a global endpoint merely because the response is discarded. Discarding output does not undo data transfer.
+
+Use a distinct shadow operation identity. Link it to the primary logical operation through an opaque parent reference, while keeping provider attempts, usage, cost, and outcomes separate. Mark the shadow path clearly so it cannot affect the customer response, retry logic, billing, or reliability metrics. Lineage should explain both paths without confusing one for the other.
+
+Prevent side effects by construction. Remove mutating tools, external callbacks, messaging, payments, deployments, database writes, and customer-controlled webhooks from the candidate request. Replace allowed tools with deterministic fakes or read-only sandboxes. Do not rely on an instruction telling the model not to call a tool; enforce the restriction at the executor boundary.
+
+Read-only tools still require policy. Search, retrieval, and database reads can expose sensitive data or create provider-visible queries. Scope credentials, tenant filters, region, and result size. Prefer recorded fixtures when testing tool selection rather than replaying live customer data. A read may not mutate state, but it can still violate confidentiality.
+
+Keep the primary path independent. The customer response must not wait for the shadow result unless the feature is explicitly designed as a synchronous comparison. Apply separate queues, concurrency, deadlines, retries, and circuit breakers. If the shadow provider is slow or unavailable, drop or defer the evaluation rather than consuming the primary request's latency budget.
+
+Reserve capacity and spend. Shadow traffic can double provider calls and amplify queues during peak load. Set per-tenant, per-model, per-region, and global budgets for requests, tokens, concurrency, and cost. Admission control should shed shadow work first when production objectives are at risk. An experiment should never become the cause of the outage it was intended to prevent.
+
+Do not bill customers for hidden attempts. Record shadow provider usage and internal experiment cost separately from customer usage. Prevent shadow tokens, retries, tool calls, and storage from entering customer invoices or quotas. Reconcile provider statements against experiment records so the platform can explain the additional spend.
+
+Choose comparisons based on contracts. Evaluate schema validity, tool-call structure, safety outcomes, refusal class, stream semantics, finish reason, usage, latency, output length, and policy compliance. For open-ended text, use task-specific evaluations, human review, or carefully validated judges. Text similarity alone cannot prove equivalent usefulness.
+
+Avoid treating one model as universal truth. The primary response may also be wrong, unsafe, or incomplete. Compare both candidates against invariants and reference expectations where available. Label uncertain judgments and disagreement. Shadow evaluation should identify evidence and tradeoffs, not manufacture a winner from an unreliable score.
+
+Judge models need their own controls. If another model evaluates outputs, define its prompt, version, rubric, privacy eligibility, region, cost, and known biases. Do not send sensitive primary and shadow outputs to an unapproved third provider. Calibrate automated judgments against human-reviewed samples and track drift when the judge changes.
+
+Streaming comparisons need bounded capture. Decide whether to compare time to first byte, event ordering, partial output, completion, cancellation, or final assembled text. Avoid storing every raw token by default. A candidate that produces a good final answer after violating the client's stream contract has not passed the same test.
+
+Cancellation should propagate independently. When the client leaves, decide whether the shadow attempt should stop immediately or may finish under an approved offline evaluation policy. Bound any continued work by time, cost, privacy, and retention. Record provider acknowledgement and late usage. Never assume closing the primary connection cancels the shadow request.
+
+Retries and hedges can distort results. Use a defined attempt policy for both primary and candidate paths, and report raw model behavior separately from gateway recovery behavior. If the shadow path retries more aggressively, its success rate and latency are not directly comparable. Preserve attempt counts and causes in the evaluation record.
+
+Sampling should be representative and fair. Segment by workload, language, context size, modality, tool use, region, tenant plan, and traffic shape. Random sampling alone may underrepresent rare but important workflows. Use bounded stratified sampling and publish coverage. Do not conclude compatibility from easy prompts that happen to dominate request volume.
+
+Protect stored evaluation data. Prefer structured metrics, hashes, labels, and short-lived opaque references over raw prompts and outputs. Apply tenant isolation, regional storage, encryption, access control, and retention. Human review queues require purpose-limited access and audit logs. Delete derived embeddings and exports when the source evaluation expires.
+
+Observability should separate experiment health from production health. Track eligibility, sampled requests, exclusions, dropped shadow work, candidate errors, latency, contract failures, policy outcomes, cost, and evaluation coverage. Exclude shadow failures from customer availability while retaining them for release decisions. Alert when the experiment affects production capacity or violates its own limits.
+
+Use predefined release gates. Before starting, decide what success means for schema validity, tool safety, policy, latency, cost, error rate, stream completion, and task quality. Define hard blockers and acceptable tradeoffs. Do not move the threshold after seeing an inconvenient result without documenting the reason and new risk acceptance.
+
+Roll out the experiment itself gradually. Begin with synthetic and internal requests, then approved low-risk tenants and narrow workloads. Validate privacy, residency, accounting, lineage, and capacity before increasing sample rate. Stop automatically on forbidden-region dispatch, unexpected tool execution, customer billing impact, or production SLO burn.
+
+Shadow evidence must connect to migration. Link experiment revision, model and adapter versions, prompt bundle, policy, route, rubric, sample cohort, and evaluation results. When the candidate changes, start a new comparable cohort. Do not combine results from several moving versions into one reassuring average.
+
+After the decision, clean up. Stop sampling, remove temporary routes and credentials, expire stored content, close review queues, reconcile provider cost, and publish the verdict and limitations. Preserve only the durable evidence required for audit and future comparison. Temporary shadow infrastructure should not survive simply because nobody owns its removal.
+
+Test hostile and failure paths. Attempt cross-tenant sampling, forbidden-region routing, tool execution, customer billing leakage, queue overload, judge failure, raw-content logging, stale policy, client cancellation, and provider timeout. Verify that the primary response remains unaffected and that the experiment fails closed or sheds safely.
+
+The practical checklist is clear. Define purpose, authority, scope, duration, budget, and release gates. Classify and minimize data, preserve residency, isolate lineage and accounting, block side effects, protect primary capacity, compare contract outcomes, calibrate judges, sample representative workloads, secure retained evidence, roll out gradually, and clean up when the decision is made.
+
+The larger lesson is that shadow traffic is production data taking a second path. Its response may be invisible to the user, but its privacy, cost, capacity, and policy consequences are real. A disciplined gateway can learn from live workloads without making customers unknowingly carry the experiment's risk.
+
+That is it for today. Compare models without exposing users to hidden risk, and make every shadow experiment bounded and explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
