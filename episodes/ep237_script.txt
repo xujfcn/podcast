@@ -1,0 +1,51 @@
+EP237: AI API Gateway Semantic Caching - Reuse Results Without Reusing Risk
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about semantic caching for AI API gateways. Reusing an earlier answer can reduce latency and provider cost, but similarity is not permission, and a plausible answer is not necessarily the right answer. A cache hit changes routing, policy, freshness, usage, and billing behavior. Safe semantic caching requires an explicit contract.
+
+Start by defining what can be reused. Some requests are deterministic and public. Others depend on tenant data, user permissions, current time, policy, tools, retrieval state, or hidden system context. Classify workloads as cacheable, conditionally cacheable, or never cacheable. Unknown or sensitive inputs should default to a miss rather than becoming a shared artifact.
+
+Cache identity must include behavior, not only prompt text. Consider tenant or public scope, project, model and provider contract, system instructions, policy revision, region, data classification, tool permissions, retrieval corpus version, output format, temperature, seed, and relevant request parameters. If any dimension can change the meaning or authorization of a result, it belongs in the cache key or invalidation rule.
+
+Similarity is a candidate generator, not the final decision. An embedding match can find related questions, but it cannot prove equivalent intent, permissions, freshness, or safety. Use thresholds, reranking, structured filters, and a final compatibility check. When the cost of a wrong hit is high, require a stronger exact or semantic contract rather than relying on distance alone.
+
+Tenant isolation is non-negotiable. Private output must not enter a global namespace. Enforce scope server-side on writes and reads, and bind cached entries to the same identity and policy context as the request. Shared reuse is appropriate only when the content is explicitly public and the policy allows it. A client-supplied cache scope is a hint to validate, not authority.
+
+Permissions can change after caching. A user may lose access to a document, tool, project, or conversation while an old answer remains in the cache. Decide whether authorization is checked on every hit, whether entries are scoped to a permission epoch, and how revocation invalidates dependent results. Never let a cache hit bypass current policy evaluation.
+
+Freshness depends on the question. A definition may remain useful for months, while stock prices, model availability, account balances, retrieved documents, and policy explanations can become stale quickly. Store creation time, source versions, expiration, and freshness class. Make stale-while-revalidate behavior explicit and prevent it for workloads where stale information can cause material harm.
+
+Model changes require version awareness. Different models can produce different style, safety, tool, schema, or reasoning behavior even when their names look compatible. Tie entries to a tested model contract and adapter version. A route alias change should not silently serve output generated under an incompatible provider or capability set.
+
+Policy and prompt changes invalidate meaning. System instructions, safety rules, tool permissions, data-residency rules, and output constraints can change while the underlying question remains the same. Include policy and prompt bundle revisions in cache compatibility. For urgent deny rules or safety changes, support immediate invalidation or bypass before global propagation completes.
+
+Retrieval and tool results have their own dependencies. An answer based on a document corpus, user profile, database record, or tool response should reference the source version or freshness token. Do not cache a tool-derived answer as if it were a timeless language response. Mutating tools should generally bypass semantic caching unless the result is explicitly read-only and safely scoped.
+
+Streaming changes the cache contract. Decide whether to cache the final assembled result, the event sequence, or nothing. Preserve finish reason, structured output, usage, and cancellation state. A client that received a partial stream must not be served a cached complete answer as though the original operation succeeded. Cache hits should expose whether the result is replayed and whether streaming semantics are preserved.
+
+Usage and billing need honest treatment. A cache hit may avoid provider usage but still consume gateway resources. Decide whether customers pay for cached responses, receive a discount, or see a separate usage category. Record hit, miss, bypass, provider work, cache storage, and invalidation events against the logical operation. Never invent provider token usage for a result that was not sent upstream.
+
+Cache warming can create risk. Precomputing popular prompts may send sensitive or unnecessary requests to providers and may create charges before a user asks. Use approved public inputs, bounded budgets, and explicit ownership. Warm only entries whose policy, region, model, and freshness contract are known. Do not use customer traffic as an unreviewed training or cache-warming source.
+
+Eviction is part of correctness. Remove entries when policy, credentials, permissions, source data, model contract, or residency requirements change. Support tenant deletion and retention expiry across replicas, indexes, backups, and derived embeddings. Record invalidation requests and completion evidence. A cache that forgets the primary value but retains a vector or debug copy is not fully deleted.
+
+Region and residency rules apply to cache storage. Store entries only in eligible regions and use encryption and access controls appropriate to the data class. A globally replicated cache can quietly violate a tenant's residency contract even when provider routing is correct. Fail closed when the cache location or classification is unknown.
+
+Cache poisoning needs an adversarial model. Attackers may submit high-similarity prompts, exploit weak normalization, cause one tenant's content to be reused, or populate entries with unsafe instructions. Validate provenance, scope, policy, and content before insertion. Rate-limit warming, isolate namespaces, and monitor unusual hit patterns. Do not trust a cached result merely because it was generated by your own gateway.
+
+Observability should explain every hit. Record candidate key or opaque reference, scope, similarity and compatibility decision, model and policy revisions, age, source version, hit or bypass reason, and final outcome. Avoid logging raw prompts or answers by default. Dashboards should show hit quality, stale hits, policy bypass attempts, tenant leakage signals, cost savings, latency, and invalidation lag.
+
+A cache hit should remain on the request lineage. Link the client operation to the cache lookup, candidate evaluation, selected entry, validation, response delivery, usage classification, and any revalidation. This makes support answers possible: why did this request avoid the provider, which revision produced the answer, and was the entry still authorized?
+
+Failure modes need safe defaults. If the cache is unavailable, fall back to an ordinary provider path only if policy, capacity, and budget allow. If validation is unavailable, treat the candidate as a miss or fail closed for sensitive workloads. Never return an unverified entry simply because the provider is slow. Caching should improve performance, not weaken the contract under pressure.
+
+Canary cache behavior separately. Start with a narrow tenant, public workload, model, and region. Compare cache hits against fresh generations for correctness, policy, freshness, schema, and customer outcomes. Measure false hits and false misses, not just hit rate. A high hit rate can be a serious regression if the cache is returning answers outside their intended scope.
+
+Rollback requires cache compatibility. Disabling writes is not enough if old entries remain readable under a new policy or model contract. Choose whether to bypass, invalidate, or constrain reads. Preserve operation and billing evidence for responses already served. When restoring an older route, do not automatically trust entries generated under the newer behavior.
+
+Test difficult boundaries. Change tenant permissions, revoke a tool, update a system prompt, rotate policy, delete source documents, cross a region boundary, alter model aliases, expire an entry, receive a partial stream, and race invalidation with a cache hit. Attempt poisoning and cross-tenant lookup. Verify that the gateway refuses incompatible reuse, preserves deletion, reports usage honestly, and remains safe when the cache fails.
+
+The practical checklist is clear. Classify workloads and define reusable behavior. Build keys from identity, policy, model, region, data, tools, retrieval, freshness, and output contract. Treat similarity as a candidate signal, enforce authorization on hits, version dependencies, preserve streaming and billing semantics, constrain storage and deletion, explain lineage, and use safe miss behavior.
+
+The larger lesson is that a semantic cache is a second inference path. It can be faster and cheaper, but it also makes decisions about equivalence, authority, freshness, and evidence. Reuse results only when the gateway can prove that the result still belongs to this request, this tenant, this policy, and this moment.
+
+That is it for today. Reuse results without reusing risk, and make every cache hit explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
