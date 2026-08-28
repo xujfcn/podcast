@@ -1,0 +1,45 @@
+EP227: AI API Gateway Rollback Design - Restore Safe Behavior Without Losing State
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about rollback design for AI API gateways. When a model, adapter, policy, route, or pricing change causes trouble, restoring the previous binary is only part of the job. Requests may be in flight, streams may be partially delivered, tools may have created real effects, and billing may still be reconciling. A safe rollback restores behavior while preserving state and evidence.
+
+Start by defining what rollback means. It may restore a previous route, adapter, policy, credential, pricing revision, or complete release bundle. Identify which behavior is being restored and which state must remain. Do not assume that reverting code also reverts provider-side work, customer-visible output, external tool effects, or charges already recorded.
+
+Every release needs a rollback artifact. Keep the previous configuration, dependency versions, policy rules, capability metadata, pricing table, probe definitions, and credential references available. Store immutable release identifiers and checksums. A rollback that depends on reconstructing yesterday's configuration from memory is not an operational control.
+
+Rollback authority must be clear. Define who can initiate it, which signals qualify, and whether emergency rollback requires later review. Critical invariant violations, policy escapes, duplicated effects, severe deadline failures, and billing corruption should have lower thresholds than a modest latency regression. Automate the mechanical path while keeping the decision auditable.
+
+Traffic rollback should be gradual when possible. Stop new admissions to the failing route, preserve approved alternatives, drain safe in-flight work, and canary the restored route before reopening fully. Under severe safety or data risk, immediate isolation may be correct. Document the difference between a traffic rollback and a hard stop so operators do not use a gentle control for an urgent containment problem.
+
+In-flight operations cross release boundaries. Record which contract, policy, adapter, and pricing revision governed each attempt. Let safe operations finish under their original contract where possible. If an operation cannot safely continue, terminate it with an explicit outcome and preserve the evidence. Do not silently reinterpret a partially completed request under the restored release.
+
+Streaming rollback needs special care. A client may have received partial output before the route is removed. Decide whether the stream can finish, whether it must close with an incomplete outcome, and whether a retry is safe. Propagate cancellation where possible, release capacity, and record provider acknowledgement. Never convert a partial stream into a successful final response merely because traffic was rolled back.
+
+Tool side effects cannot be rolled back like code. If a mutating tool may have run, mark the operation unknown and reconcile with the executor. Use idempotency keys and compensation procedures where supported. Do not blindly replay the request on the restored route. A rollback plan that restores API responses but duplicates a payment, message, deployment, or database update is unsafe.
+
+Policy rollback must preserve security. Restoring an older policy may re-enable a rule that was removed for a reason, while keeping a newer restriction may make the old route incompatible. Bundle policy with the release contract and test precedence, residency, tool scope, and approval behavior before reopening traffic. Emergency rollback is not permission to bypass mandatory controls.
+
+Pricing and billing state deserve an independent path. Keep attempt-level provider usage, gateway estimates, retry cost, fallback cost, and customer charge status. If the failed release produced questionable charges, quarantine them for reconciliation rather than deleting records. Apply the correct pricing revision based on when the work occurred and which contract governed it.
+
+Rollback should not reset accounting. Capacity reservations, retry budgets, queue leases, and tool-operation records must survive process changes. Reconcile abandoned reservations and indeterminate operations explicitly. Verify conservation rules after rollback: every reservation is released exactly once, every charge has evidence, and every logical operation has one final or indeterminate state.
+
+Dependencies can make rollback asymmetric. The old adapter may require a credential that has already expired. The old model may no longer be available. A provider may have changed its protocol. Validate the rollback path against current dependencies before an incident. Maintain a compatibility window or a safe emergency route when a previous release cannot be restored literally.
+
+Health probes must validate restored behavior. Check authentication, policy, capabilities, streaming, cancellation, usage, billing, and cleanup on the exact route and revision. Use a dedicated synthetic tenant and bounded budgets. One successful completion does not prove that the restored path handles the failure that triggered rollback.
+
+Observability should expose the rollback state. Record trigger, initiator, old and restored revisions, traffic percentage, in-flight handling, policy mode, health evidence, and stop or recovery conditions. Keep operation and attempt identifiers continuous across the transition. Dashboards should distinguish traffic removed because of rollback from ordinary provider errors and should show whether the original invariant is healthy again.
+
+Client behavior needs a stable contract. Tell clients whether errors are retryable, whether a request may have partially completed, and whether they should poll a durable operation. Do not encourage immediate retries while the gateway is draining or reconciling. SDKs should preserve operation and idempotency identifiers through the transition.
+
+Rollback can amplify an incident if it creates a thundering herd. Bound restored-route admission, retry traffic, and queue reopening. Keep capacity for critical workloads and use load shedding for optional work. Expand traffic only after latency, errors, reservations, policy, tools, and billing are stable. Recovery speed matters, but uncontrolled recovery is another failure mode.
+
+Test rollback before production needs it. Deploy a candidate that fails structured output, streaming, policy, tool, or billing checks. Trigger traffic rollback while requests are in flight. Break the rollback control plane, expire the old credential, and make the old provider route unavailable. Verify that the gateway contains risk, preserves state, avoids duplicate effects, and reports uncertainty honestly.
+
+Rehearse external reconciliation. Simulate a timeout after a tool acknowledgement, a partial stream followed by provider failure, and a charge created under the bad pricing revision. Confirm that support can identify affected operations, engineering can replay structural evidence safely, and finance can correct statements without deleting the audit trail.
+
+Post-rollback verification closes the event. Compare customer success, deadline misses, policy decisions, route health, stream completion, tool outcomes, usage, charges, and cleanup against the pre-incident baseline. Keep the failing release quarantined with its evidence. Record whether the rollback restored the intended guarantee or merely reduced symptoms, then require a new readiness review before re-release.
+
+The practical checklist is clear. Define rollback scope and preserve immutable artifacts. Set authority and measurable triggers. Separate traffic rollback from state, policy, tool, billing, and reconciliation work. Handle in-flight and streaming operations explicitly. Validate current dependency compatibility, probe the restored contract, bound recovery traffic, preserve identifiers and evidence, and rehearse the full path.
+
+The larger lesson is that rollback is a state transition, not a time machine. A gateway can restore safe routing without pretending that completed work never happened. Good rollback design contains the failure, preserves customer and accounting truth, and gives operators a controlled path from unsafe behavior to verified recovery.
+
+That is it for today. Restore safe behavior, preserve state, and make uncertainty visible until it is reconciled. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
