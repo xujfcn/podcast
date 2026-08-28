@@ -1,0 +1,43 @@
+EP217: AI API Gateway Admission Control - Decide What Runs Under Pressure
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about admission control for AI API gateways. When demand exceeds capacity, accepting every request does not preserve service. It creates long queues, exhausted budgets, provider throttling, and a worse experience for everyone. A reliable gateway decides what work can start, what should wait, and what must be rejected before overload becomes the product.
+
+Admission control is different from rate limiting. A rate limit counts requests or tokens over time. Admission control decides whether a specific operation should consume scarce capacity now. It can consider queue age, concurrency, estimated cost, workload priority, tenant fairness, provider health, deadlines, and the value of completing the request. These decisions should be explicit and observable.
+
+Begin with a capacity model. Track provider concurrency, gateway workers, token throughput, queue slots, connection limits, and budget reservations. Capacity is not one number: streaming requests hold resources differently from short non-streaming calls, and a tool-using agent can create many downstream operations. Estimate the resource footprint before admission and update it as the request evolves.
+
+Every request needs a workload class. Interactive chat, batch enrichment, background indexing, evaluation, and safety review should not compete blindly for the same pool. Assign priority, maximum wait, token ceiling, concurrency cost, and fallback policy to each class. A low-priority batch may be delayed while an interactive request is admitted, but fairness still requires a bounded share so background work does not starve forever.
+
+Admission should happen before expensive provider work. Authenticate the tenant, validate the request, check policy, estimate cost, and reserve capacity before dispatch. If a request cannot meet its deadline within the available queue, reject it early with a useful retry or polling hint. Sending it to a provider only to discover that the gateway cannot deliver the result wastes money and capacity.
+
+Queues need strict bounds. An unbounded queue turns overload into memory growth and misleading latency. Set limits by count, estimated tokens, age, tenant, and workload class. When a queue is full, choose a documented action: reject new work, shed the oldest low-value work, reduce optional processing, or route to a constrained fallback. Return a stable reason so clients do not treat overload as a random server failure.
+
+Fairness must be designed rather than assumed. One tenant with many workers can consume every available slot unless concurrency and token budgets are isolated. Use per-tenant limits, weighted shares, and reservations for critical traffic. Measure both admission rate and time to admission by tenant and class. A system that protects the average while one customer waits indefinitely is not fair in practice.
+
+Budgets belong in the admission decision. A request with a high maximum output, multiple retries, or many possible tool calls has a larger spend envelope than a short completion. Reserve against the envelope or apply a lower cap before starting. Release unused reservation after final usage arrives. This prevents a burst of apparently small requests from creating a large hidden liability.
+
+Deadlines should shape queueing. A request with one second remaining is not useful if the queue predicts five seconds before dispatch. Propagate the client deadline, estimate queue and provider time, and admit only when the remaining budget is credible. If the request may still be useful with reduced work, apply an explicit degradation policy such as a smaller output limit or a faster approved model.
+
+Provider health should influence capacity, not replace it. A healthy provider can still be saturated, and a provider with low error rates can have unacceptable tail latency. Maintain per-route concurrency and latency signals. When a provider enters a constrained state, reduce admission gradually, drain in-flight work, and preserve capacity for traffic that the provider can still serve reliably.
+
+Streaming changes resource accounting. A stream may occupy a connection and a concurrency slot for much longer than a short response. Apply maximum duration, output, and idle intervals. Use backpressure and cancellation when the client stops reading. Do not admit unlimited long streams merely because their initial token estimate is small. Capacity must reflect time held, not only input size.
+
+Agent fan-out needs a budget before it starts. One user request can create searches, model calls, tool executions, and validation passes. Set a maximum child-operation count, total token budget, wall-clock deadline, and concurrency ceiling. Reserve or meter these limits as the workflow runs. Otherwise admission at the top level can be defeated by uncontrolled downstream work.
+
+Safety degradation should preserve the core contract. Under pressure, it may be reasonable to disable optional enrichment, reduce context, defer analytics, or use a cheaper approved route. It is not reasonable to silently remove authorization, data residency, or required output validation. Define which features are optional and record every degradation so the client and operator know what changed.
+
+Admission decisions need an explainable response. Include operation identifier, workload class, queue state, retryability, estimated wait, and a bounded reason code. Avoid exposing internal capacity numbers that enable abuse. For accepted requests, record the reservation and policy version. For rejected requests, make clear whether the client should retry, poll, reduce scope, or wait for a later window.
+
+Reservations must be released on every terminal path. Accepted, rejected, failed, cancelled, timed out, and indeterminate operations can all hold capacity if cleanup is incomplete. Use ownership identifiers, lease expiry, and reconciliation for abandoned reservations. A leak in admission accounting gradually turns a healthy gateway into one that rejects everything.
+
+Observability should focus on user-visible pressure. Track admission rate, queue age, rejection rate, reservation utilization, deadline misses before dispatch, shed work, fairness by tenant, and capacity by workload class. Break provider metrics down by route and model. An aggregate CPU graph will not reveal that long-running streams have consumed all useful concurrency.
+
+Load shedding should be graceful and deterministic. Prefer rejecting optional or low-priority work before critical interactive work, but cap the amount of protected traffic so it cannot consume every resource. If the system enters emergency mode, communicate the mode through metrics and stable error codes. Recovery should be gradual to avoid a thundering herd when the queue reopens.
+
+Test overload as a normal operating condition. Fill the queue with long streams, send a burst from one tenant, exhaust a token budget, make a provider slow, cancel requests while waiting, and restart a worker holding reservations. Verify that high-priority work remains usable, low-priority work is bounded, reservations are released, deadlines are respected, and every decision is explainable.
+
+The practical checklist is clear. Model capacity by resource and workload. Separate admission from rate limiting. Set bounded queues and per-tenant fairness. Account for cost, deadlines, streams, and agent fan-out. Reserve before dispatch and release on every outcome. Degrade optional work explicitly, preserve safety and contracts, shed load deterministically, and measure pressure by tenant, route, and class.
+
+The larger lesson is that reliability under load comes from choosing what to protect. A gateway that accepts everything until every request times out has avoided making a decision, not solved overload. Admission control turns scarce capacity into a policy: useful work starts with a credible chance of completion, while rejected work receives a clear and safe explanation.
+
+That is it for today. Decide what runs before overload decides for you. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
