@@ -1,0 +1,43 @@
+EP220: AI API Gateway Contracts - Normalize Providers Without Hiding Semantics
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about contracts at an AI API gateway. A gateway promises a common interface across providers, but a common shape is not the same as common behavior. If normalization hides important differences in streaming, tools, reasoning, safety, usage, or failure semantics, developers receive a contract that looks portable until production exposes the gap.
+
+Start by defining the contract in terms of observable behavior. Document accepted inputs, defaults, output shape, streaming events, usage accounting, latency expectations, error classes, cancellation, retries, idempotency, and policy enforcement. A field list is not enough. Clients depend on what happens when a provider is slow, a model refuses, a stream ends early, or a tool call is interrupted.
+
+Separate the canonical request from provider translation. Preserve the client's intent, then create an adapter request for the selected provider. Record what was represented exactly, what was approximated, what was dropped, and what was rejected. Silent loss is the most dangerous outcome because the caller believes a guarantee was honored when the adapter could not express it.
+
+Capabilities should be explicit and versioned. A model may support vision but not image detail controls, tools but not parallel tools, JSON output but not strict schemas, or reasoning controls with provider-specific limits. Expose capability metadata and validate requests before dispatch. Do not advertise a broad capability merely because one route can emulate part of it.
+
+Defaults are part of the contract. Temperature, maximum output, timeout, safety behavior, reasoning effort, tool choice, and response format can vary widely across providers. Choose gateway defaults intentionally, publish them, and include effective values in request evidence. An omitted field should not produce an unexplained change when routing moves to another provider.
+
+Normalization must preserve semantics in errors. Map provider failures into stable gateway classes such as invalid request, policy denial, capacity unavailable, deadline exceeded, upstream failure, incomplete output, and indeterminate side effect. Keep the provider code and attempt details for operators. Clients need a predictable class and retryability signal, not a raw vendor message that changes every week.
+
+Streaming is a contract, not a transport detail. Define event types, ordering, usage timing, finish reasons, tool-call deltas, heartbeats, and terminal behavior. If one provider emits partial usage and another reports usage only at the end, the gateway should document the difference or normalize it with clear evidence. A stream that closes without a terminal outcome must be marked incomplete, not treated as a successful response.
+
+Tool calling needs a precise boundary. Normalize the proposal format, but keep provider-specific guarantees visible. Validate tool name, arguments, schema, authorization, and side-effect class before execution. A model's tool proposal is not execution, and an adapter must never imply that a provider has performed a side effect merely because it returned a function call.
+
+Reasoning and hidden computation require care. Providers may expose visible reasoning summaries, encrypted traces, token categories, or no reasoning information at all. Do not map all of these to one misleading field. State what the gateway guarantees, what it merely forwards, and what is unavailable. Billing and observability should distinguish generated output, reasoning usage, cached tokens, and media where the provider supplies those categories.
+
+Structured output is another boundary. A provider may support JSON mode without enforcing a schema, while another validates a strict grammar. The gateway should advertise the actual guarantee, validate the final response when required, and apply a bounded repair or retry policy only when safe. Never label best-effort parsing as strict schema compliance.
+
+Routing changes the effective contract. A request may move to a fallback model with different context length, modality, latency, pricing, or tool behavior. Filter routes by the original requirements, not by name similarity. If the gateway must degrade a capability, require an explicit policy and tell the client what changed. Portability should mean a predictable decision, not a silent downgrade.
+
+Context limits must be enforced before provider work. Count tokens using the selected model's rules when possible, account for system messages and tool schemas, and leave room for the requested output. If estimates are uncertain, use a conservative bound and return an actionable error. Truncation should be policy-driven and visible; silently removing the beginning of a conversation can change the application meaning.
+
+Time and cancellation semantics should cross the adapter boundary. The gateway deadline includes queueing, provider time, response validation, and cleanup. When the client disconnects, propagate cancellation where supported and record whether the provider acknowledged it. If cancellation cannot be guaranteed, mark the attempt accordingly and prevent unsafe retries for operations with possible side effects.
+
+Usage and billing need one source of truth. Preserve provider-reported usage, gateway-estimated usage, cache hits, retries, and fallback attempts separately. Apply the published pricing version after reconciliation. A normalized response can hide provider differences for application code, but it must not hide the evidence needed to explain cost or identify a provider accounting anomaly.
+
+Contract versions let the gateway evolve safely. Version schemas, event formats, error classes, capability metadata, and billing fields. Additive changes should remain compatible; behavior changes need a migration path and a feature flag. Keep old versions long enough for clients to upgrade, and include the contract version in traces and support diagnostics.
+
+Conformance tests should run per provider and model. Send the same fixture through every route and compare only the guarantees the contract promises. Test invalid parameters, unsupported capabilities, context overflow, tool schemas, stream cancellation, malformed output, provider timeouts, retries, usage reporting, and fallback. Store request, policy, adapter, and response evidence so a failure can be reproduced.
+
+Differential testing is useful, but identical output is not the goal. Compare latency distributions, finish semantics, usage categories, refusal behavior, schema validity, and tool boundaries. A provider can produce different words while still meeting the contract. Conversely, similar text can hide a violation in usage, safety, or completion state.
+
+Operators need to see the translation. Record canonical request fields, selected route, adapter version, effective parameters, capability decisions, dropped or transformed fields, provider response class, and final contract outcome. Keep sensitive content protected and avoid copying raw prompts into ordinary logs. The evidence should answer what the client requested, what the gateway promised, and what the provider actually supported.
+
+The practical checklist is clear. Define observable behavior, not only JSON shapes. Separate intent from adapter translation. Version capabilities and defaults. Preserve error, stream, tool, reasoning, schema, cancellation, usage, and billing semantics. Validate context and route requirements before dispatch. Expose explicit degradation, version the contract, and run conformance and differential tests.
+
+The larger lesson is that abstraction is valuable only when it is honest. An AI gateway should remove unnecessary provider-specific work while preserving differences that affect correctness, cost, safety, and reliability. A strong contract does not pretend every model is identical. It makes portability measurable, limitations visible, and routing decisions explainable.
+
+That is it for today. Normalize the interface, preserve the meaning, and make every compromise visible. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
