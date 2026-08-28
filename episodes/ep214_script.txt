@@ -1,0 +1,39 @@
+EP214: AI API Gateway Idempotency - Stop Retries From Duplicating Work
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about idempotency at an AI API gateway. Clients retry when networks fail, users press the button twice, workers restart, and providers respond after a timeout. Without an explicit idempotency contract, one logical request can become multiple model calls, multiple tool actions, and multiple charges.
+
+Idempotency means that repeating the same logical operation does not create an unintended additional effect. It does not mean every retry returns the same generated text. A gateway may produce a different provider response while still ensuring that the client receives one committed operation result and that side effects are not executed twice. Separate result determinism from effect deduplication.
+
+Start by defining the scope of an idempotency key. The key should be unique for a client, tenant, endpoint, and retention window. A key reused with a different request body must produce a conflict, not silently run new work. Store a request fingerprint based on the relevant normalized fields, while excluding values that are intentionally non-semantic such as transport headers.
+
+The logical operation record should be created before provider dispatch. It needs the client key, request fingerprint, current state, creation time, and ownership context. If two workers receive the same key at nearly the same time, one must win the create race and the other must attach to the existing operation. A database uniqueness constraint is more reliable than a best-effort cache check.
+
+What the second request receives depends on the operation state. If the original request is still running, the gateway can wait, return an in-progress status, or offer a polling URL. If the result is committed, return the stored outcome and its evidence. If the operation is indeterminate, do not start another attempt merely because the client asks again. First apply the documented resolution policy.
+
+Provider calls complicate the boundary. The client idempotency key is not proof that the provider saw only one request. Give every provider attempt its own identifier and, when supported, pass a derived provider idempotency key. The derived key should remain stable for a specific attempt but should not confuse a fallback attempt with the original provider call.
+
+Timeouts are the classic failure case. The gateway sends a request, waits too long, and returns a timeout. The provider may have completed successfully just after the deadline. A naive client retry can now create duplicate work. Mark the first operation as indeterminate, query provider status when possible, and reconcile before allowing a new attempt unless the request contract explicitly permits duplication.
+
+Streaming requires idempotency at the delivery layer as well as the work layer. A client may receive half a response before disconnecting and reconnecting. The gateway should associate the reconnect with the original operation, not automatically start a new generation. If replay is supported, persist bounded output or a resumable event position. If replay is not safe, return a clear indeterminate result instead of pretending the stream never existed.
+
+Generated text is usually not a side effect in the same sense as sending an email or changing a database. But it can still create cost and user-visible inconsistency. Decide whether a repeated request should return the original content, generate a fresh answer, or require an explicit force-new option. Make that behavior part of the API contract rather than an accidental consequence of cache state.
+
+Tool calls demand a stricter rule. A model can propose the same purchase, message, deletion, or deployment more than once after a retry. Assign each logical tool action an idempotency identity derived from the operation and call identifier. The executor must enforce that identity around the side effect, not just the gateway around the model request. A prompt saying do not repeat is not a transaction protocol.
+
+The tool lifecycle should distinguish proposed, approved, started, completed, failed, and unknown. If the executor times out after starting an action, the result is unknown until an authoritative lookup resolves it. Do not blindly retry an unknown side effect. For operations that cannot be queried, require a human review or use a compensating action designed for that specific tool.
+
+Billing must follow logical operations and actual attempts. A duplicate client request that returns a stored result should not create a second customer charge. A retry that caused a second provider call may still consume provider resources, even if its answer is discarded. Keep internal attempt cost separate from the customer charge policy, then expose credits or adjustments when the gateway caused avoidable duplication.
+
+Retention is part of correctness. An idempotency key is useful only while its record exists. Choose retention based on client retry behavior, queue delays, provider settlement time, and business risk. Expiring the record too early can turn a late retry into duplicate work. Expiring it too late can block legitimate new operations if clients reuse keys carelessly. Document the window and return the expiry metadata when practical.
+
+Caches can improve speed but should not be the source of truth for idempotency. A cache eviction, regional split, or failover can cause two requests to miss the same key. Persist the authoritative operation record, then use caches only for fast lookup. In multi-region systems, define where the uniqueness decision is made and how a regional outage affects new attempts.
+
+Observability should make duplicate prevention visible. Track deduplicated requests, key conflicts, attached waiters, replayed results, indeterminate operations, duplicate provider attempts, and tool actions rejected as already executed. Include operation and attempt identifiers in logs and response headers, but avoid logging full prompts, generated content, or sensitive tool arguments by default.
+
+Test races deliberately. Send the same key concurrently from several workers. Retry immediately after a timeout. Disconnect halfway through a stream and reconnect. Deliver a late provider callback after a fallback begins. Restart the gateway between operation creation and dispatch. Repeat a tool request after an executor timeout. The invariant is simple: one logical operation may have many observed attempts, but no unintended side effect or customer charge should happen twice.
+
+The practical checklist is clear. Define idempotency scope and retention. Fingerprint request bodies and reject key reuse with different input. Create the logical operation before dispatch. Separate operation, attempt, and tool-action identities. Treat timeouts as ambiguous. Make stream reconnects explicit. Enforce deduplication at the side-effect executor. Keep billing policy separate from provider attempt cost, and test concurrent races and restarts.
+
+The larger lesson is that retries are not free copies of a request. They are new events entering a distributed system whose earlier work may still be running. An AI API gateway earns trust when it can say which operation a retry belongs to, which attempts happened, which effects were executed, and why the customer was charged once rather than twice.
+
+That is it for today. Give every retry an identity, every side effect a guard, and every ambiguous outcome a safe policy. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
