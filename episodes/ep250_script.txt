@@ -1,0 +1,51 @@
+EP250: AI API Gateway Content Provenance - Know Where Every Answer Came From
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today is episode two hundred and fifty, and we are talking about content provenance in AI API gateways. When an application receives an answer, it should be possible to understand where that answer came from: which model version generated it, which retrieved sources influenced it, which tools supplied facts, which prompt revision shaped it, and which gateway policies allowed the request. Provenance turns a plausible response into an explainable response.
+
+Start by defining the unit of provenance. A whole conversation is too broad, while a single token is often too expensive and fragile. Use a request and response lineage record with references to input messages, selected context, tool calls, model attempts, transformations, policy decisions, and output artifacts. Keep the record structured, versioned, and linked by stable identifiers rather than duplicating sensitive content everywhere.
+
+Separate origin from influence. A document may be retrieved but never used. A system prompt may constrain the answer without contributing a factual claim. A tool may return data that appears in the response. Record both what was available and what the system marked as influential, without pretending that model internals provide perfect causal explanations. Provenance should describe observable system events and declared inputs, not invent certainty.
+
+Capture model identity precisely. Record provider, model name, model revision when available, adapter version, region, request parameters, safety configuration, and the policy revision used for routing. “GPT” or “Claude” is not enough for an incident review. Aliases can move over time, so preserve the resolved model identity alongside the client-facing alias.
+
+Prompts are versioned inputs. Track system prompt, developer instructions, template revision, tool definitions, response schema, and relevant feature flags by immutable version or hash. Do not store raw sensitive prompts by default. A provenance record should let an operator reconstruct the approved prompt shape and identify changes without turning the audit system into another content warehouse.
+
+Retrieved context needs source references. For every selected passage, store document ID, version, chunk ID, source system, retrieval timestamp, authorization scope, and relevant ranking or filter metadata. The answer does not need to copy every passage into its audit record. A stable reference and a controlled replay path are usually more useful than an uncontrolled duplicate of the source text.
+
+Citation quality depends on boundaries. A citation should point to the exact document version and passage or record that supports a claim. Avoid linking to a mutable homepage when the answer used a historical file. If a source changes or is deleted, retain enough metadata to explain what was used under the applicable retention policy, while respecting deletion and privacy obligations.
+
+Tools contribute data and actions. Record tool name and version, authorized target, sanitized arguments, result reference, execution status, and timing. Distinguish a tool that read a database from one that changed a record. A model-generated suggestion is not the same as an executed action. Provenance should make that difference obvious to downstream clients and reviewers.
+
+Tool results may be transformed. The gateway can redact fields, project a schema, normalize units, summarize records, or filter by tenant. Record transformation type and version so an operator can tell whether a value came directly from a provider or from a gateway-controlled projection. Keep secrets and unnecessary personal data out of the lineage record.
+
+Streaming responses require incremental provenance. A final record written only after the stream closes can lose partial output, tool events, cancellation state, or the identity of an early model attempt. Emit a compact event sequence or checkpoints with ordering, timestamps, and request ID. Mark whether the client received the complete response, a partial response, or an error after some content was delivered.
+
+Retries and fallbacks change origin. If the first provider times out and a second provider produces the answer, the final record must not report only the successful attempt. Preserve attempt order, provider eligibility, error class, cancellation status, and the model that supplied the delivered content. A fallback is part of the answer’s provenance, not an implementation detail to hide.
+
+Shadow traffic should remain clearly separated. A shadow model may inspect an approved copy of the request, but its output must not be confused with the response delivered to the user. Record shadow status, model identity, comparison metrics, and retention class separately. Never cite a shadow answer as if it influenced production behavior unless the system explicitly used it.
+
+Caches can obscure origin. A cache hit may reuse a response generated earlier under a different model, prompt, policy, or source version. Include cache key scope, producer lineage reference, freshness, and invalidation policy. If provenance is missing or incompatible with the current tenant and policy, treat the entry as unusable. Reuse should preserve explainability rather than erase it.
+
+Embeddings and semantic indexes need lineage too. A result may come from an embedding model, index build, parser, chunking policy, and source snapshot that differ from the current pipeline. Track those versions and timestamps. When relevance changes unexpectedly, the team should be able to distinguish a retrieval-model change from a document update or a parser bug.
+
+Output transformations should be visible. Safety filters, JSON repair, truncation, translation, redaction, formatting, and post-processing can alter the delivered response. Record which transformations ran and whether they changed content materially. Downstream clients should know if a response is raw model output, validated structured output, or a gateway-produced repair.
+
+Confidence is not provenance. A model’s probability or a score from a reranker does not prove that a source supports a statement. Keep confidence signals separate from source references. If the system makes a groundedness assessment, record the evaluator version, scope, and limitations. Do not turn a green score into a claim of factual truth.
+
+Provenance can support policy enforcement. Require citations for selected workloads, disallow answers without an approved source class, prevent cross-tenant references, or route high-impact decisions to human review. Enforce these rules after retrieval and before delivery. A client request for citations is not enough if the gateway cannot verify their source boundaries.
+
+Design the public response contract carefully. Expose only provenance appropriate for the caller: source titles and links may be safe, while internal database IDs, tenant names, provider details, or policy rules may not be. Use capability-based access to detailed lineage. A user should receive useful evidence without receiving a map of internal systems.
+
+Protect provenance from tampering. Sign or hash important lineage events, restrict write access, use append-oriented storage, and audit reads of sensitive records. If events can be silently edited, the system cannot rely on them during a dispute or incident. Store clock and ordering information consistently enough to reconstruct the request lifecycle.
+
+Retention must match purpose. A customer may need citations for a limited period, while an internal incident record may require longer retention. Keep references and content on separate schedules where possible. Honor deletion requests across lineage indexes, cached copies, evaluations, exports, and derived artifacts. Provenance is valuable, but it is still data.
+
+Test provenance under failure. Drop a provider response, make a tool partially fail, cancel a stream, hit a stale cache, change a source version, trigger a fallback, and inject malformed citations. Verify that the system marks uncertainty and partial delivery instead of emitting a clean-looking but incomplete record. Missing evidence should be visible.
+
+Measure explainability operationally. Track the percentage of responses with complete model identity, prompt revision, source references, tool lineage, transformation history, and delivery status. Measure citation resolution, stale-source rate, unsupported-claim rate, provenance write failures, and time to reconstruct a request. What is not measured will disappear when latency pressure arrives.
+
+The practical checklist is clear. Define request-level lineage, distinguish origin from influence, capture exact model and prompt versions, reference source snapshots, record tool execution and transformations, preserve streaming and fallback history, scope cache provenance, expose safe citations, protect audit records, enforce provenance-aware policies, honor retention, and test incomplete or contradictory evidence.
+
+The larger lesson is that trustworthy AI is not only about producing a good answer. It is about being able to explain the path that produced it, including uncertainty, retries, tools, transformations, and source changes. An AI gateway can make that path a durable contract between client, model, data, and operator.
+
+That is it for today—and for episode two hundred and fifty. Know where every answer came from, make evidence usable, and keep provenance honest about what the system can and cannot prove. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
