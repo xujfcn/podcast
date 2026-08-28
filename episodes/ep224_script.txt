@@ -1,0 +1,43 @@
+EP224: AI API Gateway Maintenance Windows - Coordinate Provider Changes Without Surprise Failures
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about maintenance windows for AI API gateways. Providers change models, rotate credentials, adjust capacity, deploy new adapters, and move infrastructure. If those changes are treated as invisible background work, production discovers them through failed requests. A maintenance window turns provider change into a coordinated operating event with scope, evidence, and rollback.
+
+Start by defining the change precisely. Identify the provider, model, region, adapter, policy, credential, or gateway component being modified. Record the expected impact, affected workload classes, start and end time, owner, validation plan, and rollback condition. “Routine maintenance” is not a sufficient description when a route's latency, capability, pricing, or data boundary may change.
+
+A maintenance window needs an inventory of dependencies. Map routes to providers, models, regions, capabilities, policy rules, budgets, health probes, dashboards, and customer-facing contracts. Include hidden consumers such as batch jobs, scheduled evaluations, fallback routes, and tool workflows. Without dependency mapping, a change can appear isolated while quietly removing the only approved route for a workload.
+
+Choose the right mode. A planned drain can stop new admissions while allowing in-flight work to finish. A canary can move a small percentage of traffic to a new adapter or provider revision. A hard cutover may be required for an expiring credential, but it still needs a tested rollback path. Make the mode visible to routing and operations so automation does not interpret deliberate exclusion as an unexplained outage.
+
+Drain before changing stateful work. Long streams, agent workflows, and tool calls may hold resources or have side effects. Stop new work first, communicate deadlines to queued operations, and allow safe work to finish. Cancel only when the contract defines cancellation and record the outcome. Never assume that killing a connection proves a provider-side operation stopped.
+
+Health probes should validate the new path before traffic arrives. Check authentication, policy evaluation, capability negotiation, provider response shape, streaming terminal events, usage accounting, and cleanup. Use small synthetic requests with an approved tenant and strict budgets. A TCP connection or HTTP 200 is not proof that the route can honor the production contract.
+
+Configuration changes require versioning. Publish the old and new adapter, policy, pricing, and route revisions. Include the effective revision in traces, failure capsules, and billing records. If a request begins before the window and finishes after it, preserve which revision governed each attempt. This is essential for explaining behavior during overlapping deployments.
+
+Credentials deserve a dual-run strategy where possible. Load the new credential, validate it against a safe route, and keep the old credential available until the new path has passed its checks. Rotate without printing secrets in logs or capsules. If the provider invalidates the old credential immediately, reduce traffic and keep the recovery procedure ready rather than discovering the dependency during a full cutover.
+
+Capacity changes must account for warm-up. A new route may have cold caches, connection pools, model loading, or stricter concurrency limits. Shift traffic gradually and watch queue age, first-byte latency, tail latency, errors, usage, and budget consumption. Do not infer capacity from a few successful probes. The route must survive representative concurrency without creating a hidden backlog.
+
+Model changes need semantic validation. Compare context limits, tool behavior, structured output, reasoning controls, safety responses, finish reasons, and usage categories. Similar model names do not guarantee equivalent behavior. If a model change alters the contract, require an explicit version or migration rather than silently replacing a route behind the same identifier.
+
+Pricing changes belong in the window plan. Load the new pricing revision, verify effective timestamps, and run a known-cost fixture through the billing path. Keep provider usage, gateway estimates, retries, fallbacks, and customer charges distinguishable. A route can be technically healthy while producing incorrect statements if pricing metadata changes without reconciliation.
+
+Data residency and policy rules must be rechecked after rerouting. A fallback or maintenance route may be operationally available but forbidden for a tenant or workload. Test restricted data classifications, tool scopes, and approval requirements before enabling traffic. Never use emergency routing to bypass a policy boundary that the primary route was required to enforce.
+
+Maintenance communication should be actionable. Tell internal operators and affected customers what may change, when, which workloads are affected, and what error or retry behavior to expect. Avoid promising zero impact when the plan includes connection drains or capability differences. Stable reason codes and a status endpoint are more useful than vague “degraded service” messages.
+
+Queue and retry behavior must be coordinated. If a route is intentionally removed, clients should not retry immediately against it. Return a clear retryability signal and route-safe guidance. Pause or reduce gateway retries during a cutover so recovery traffic does not compete with validation traffic. Preserve one operation ID across a route change and charge recovery work according to the documented policy.
+
+Rollback conditions should be measurable. Define thresholds for error rate, deadline misses, malformed output, stream incompleteness, policy failures, billing mismatches, reservation leaks, and unexpected cost. Assign each threshold an action: pause rollout, drain the new route, restore the old route, quarantine charges, or begin reconciliation. A rollback that depends on a person noticing a vague dashboard is not a reliable rollback.
+
+Rollback must preserve state. Keep the previous configuration, credential reference, adapter, pricing revision, and route health context available. Do not restore only the traffic percentage while leaving new policy or billing metadata active. In-flight operations should complete under their original contract where safe, or be marked indeterminate with reconciliation. Reverting code does not undo an external tool side effect.
+
+Post-window verification closes the change. Confirm traffic distribution, route health, provider acknowledgements, stream outcomes, policy decisions, usage records, reservations, and customer charges. Compare the maintenance period with a baseline and inspect failure capsules created during the window. Remove temporary overrides only after they are documented, and record lessons for the next provider change.
+
+Test maintenance as a failure scenario. Make the new credential invalid, slow the new provider, return an unsupported capability, interrupt a stream during drain, change pricing unexpectedly, and fail the rollback control plane. Verify that traffic stops safely, retries remain bounded, protected workloads retain an approved route, billing remains explainable, and the gateway exposes the correct operating mode.
+
+The practical checklist is clear. Define scope and impact. Map dependencies. Choose drain, canary, or cutover deliberately. Validate the full route contract with safe probes. Version configuration, credentials, adapters, pricing, and policies. Warm capacity gradually, preserve residency and tool rules, coordinate queues and retries, define measurable rollback thresholds, and verify state, billing, and customer outcomes afterward.
+
+The larger lesson is that maintenance is part of reliability engineering. Provider changes are inevitable; surprise failures are not. A disciplined maintenance window gives the gateway time to drain, test, shift, observe, and reverse changes while preserving the evidence needed to explain every request. That is how infrastructure evolves without turning each update into an incident.
+
+That is it for today. Coordinate the change, test the route, and keep rollback ready before production feels the difference. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
