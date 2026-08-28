@@ -1,0 +1,51 @@
+EP236: AI API Gateway Incident Command - Coordinate Decisions Under Pressure
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about incident command for AI API gateways. During a provider outage, policy failure, billing discrepancy, or cross-region event, many people can see symptoms and propose actions. Without clear roles, a shared fact base, and reversible decision-making, the response itself becomes another source of risk. Incident command turns pressure into coordinated control.
+
+Start with an explicit incident declaration. State what is known, what is suspected, which customer journeys are affected, when the impact began, and who is coordinating. Assign a severity based on user harm, data risk, security exposure, financial correctness, and recovery uncertainty. Do not wait for a perfect diagnosis before establishing ownership.
+
+The incident commander owns coordination, not every technical decision. Assign leads for mitigation, investigation, communications, customer support, security or privacy, and finance when charges or credits may be affected. Give each role a clear scope and a backup. A single overloaded operator cannot safely manage traffic, evidence, stakeholders, and recovery at the same time.
+
+Create one operational fact base. Record timeline, impact, affected tenants and regions, current hypotheses, confirmed evidence, active mitigations, owners, risks, and next review time. Link operation, attempt, release, policy, route, provider, tool, usage, and billing identifiers. Keep facts separate from guesses. Mark confidence and source so an attractive theory does not become an unchallenged premise.
+
+Protect evidence at the start. Preserve audit trails, request lineage, failure capsules, configuration snapshots, provider references, stream events, tool states, and billing records. Avoid broad log changes, unbounded debug capture, or ad hoc replay that could overwrite or expose data. Any emergency diagnostic mode needs scope, retention, privacy controls, and an exit condition.
+
+Stabilize the customer journey first. Decide whether to drain a provider, reduce admission, disable an optional capability, freeze a rollout, fail over regions, or shed noncritical work. Prefer actions that are scoped, reversible, observable, and low-risk to state and side effects. A technically elegant fix that expands traffic or changes billing before the failure is understood can increase harm.
+
+Use explicit decision records. For each mitigation, capture trigger, expected effect, scope, owner, start time, rollback action, stop condition, and validation signal. Record alternatives considered and why they were rejected when impact is significant. Under pressure, short structured decisions are safer than long informal debates scattered across chats.
+
+Keep control-plane and data-plane actions distinct. A route drain, policy disablement, quota change, feature flag, or credential revocation changes runtime behavior. A code patch, provider escalation, or database repair changes deeper state. Label which plane an action affects and verify the active revision afterward. Do not assume that a control-plane command reached every region or worker.
+
+Hypotheses need falsifiable checks. “The provider is down” is incomplete. Ask which model, region, capability, tenant class, and request phase fail. Compare successful and failed lineage, inspect first divergence, run bounded synthetic probes, and check provider status independently. A useful hypothesis predicts what evidence should change if it is true.
+
+Preserve tenant and data boundaries during investigation. Use synthetic tenants and redacted samples where possible. Scope queries by authorization. Do not copy customer prompts into public incident channels or paste credentials into debugging tools. Security and privacy leads should be involved when routing, retention, tools, or provider destinations may be implicated.
+
+Communications should be accurate and bounded. Internal updates should state impact, current mitigation, confidence, and next checkpoint. Customer messages should explain affected behavior, retryability, partial or unknown outcomes, and what is being done without exposing unverified provider details. Never promise full recovery because one dashboard turned green.
+
+Provider coordination needs one voice. Assign a provider liaison to collect incident IDs, timestamps, regions, models, request references, and observed errors. Do not have multiple engineers repeatedly retrying the same provider or sending inconsistent claims. Provider evidence is useful, but the gateway remains responsible for its own customer contract and accounting.
+
+Mitigation must account for retries and fallbacks. Draining a route can push load to a fallback that has different capacity, policy, residency, capability, or pricing. Bound admission, preserve operation IDs, and monitor downstream effects. A fallback that returns more successful responses but violates tool or data rules is not a safe mitigation.
+
+Cancellation and in-flight work require an explicit plan. Identify queued, dispatched, streaming, and tool-running operations. Decide what can finish, what should be cancelled, and what becomes unknown. Preserve idempotency and reconcile external effects before replay. Do not issue a global retry command while the original provider state is uncertain.
+
+Billing incidents need a parallel workstream. Quarantine questionable charges, preserve provider usage and pricing revisions, and stop automated corrections that could overwrite evidence. Define whether new traffic should be admitted under the affected pricing path. Customer credits, if needed, should be traceable adjustments tied to an incident scope rather than unexplained manual edits.
+
+Change freezes should be targeted. Freeze risky releases, policy updates, pricing changes, and unrelated migrations when they could obscure causality. Keep necessary safety and containment changes available through an approved path. A blanket freeze that blocks a critical security rule can be worse than controlled change.
+
+Watch leading indicators during mitigation. Track error classes, deadline misses, tail latency, stream completion, cancellation effectiveness, queue depth, provider usage, fallback share, tool outcomes, tenant fairness, policy decisions, and billing reconciliation. Define the expected direction and threshold for each action. If an indicator worsens, pause or reverse the mitigation instead of defending it.
+
+Recovery is a verification phase. A green primary metric does not prove that in-flight state, queues, streams, tools, resources, usage, billing, and audit trails are correct. Compare against baseline, run synthetic journeys, inspect late events, reconcile unknown operations, and confirm that stale workers and regions have converged. Require evidence before declaring the incident resolved.
+
+Return to normal gradually. Remove emergency flags, restore optional traffic, reopen queues, and re-enable providers in stages. Keep a rollback path for each recovery action. Watch for a second wave caused by retries, cache warm-up, backlog release, or failback. Recovery traffic needs the same admission and budget controls as ordinary traffic.
+
+The handoff to normal operations should be explicit. Name the owner of remaining follow-ups, unresolved customer cases, billing reconciliation, provider claims, evidence retention, and release quarantine. Record what is safe now, what remains unknown, and the exact conditions for closing the incident. Do not let unresolved uncertainty disappear when the incident channel quiets down.
+
+Post-incident learning should improve controls, not assign blame. Build a timeline from audit and lineage evidence, identify the first divergence and amplifiers, evaluate detection and mitigation latency, and create concrete changes with owners and deadlines. Add contract tests, probes, invariants, runbook steps, or budget controls where they would have changed the outcome.
+
+Rehearse the command structure. Simulate provider failure, cross-region drift, policy outage, tool side-effect uncertainty, streaming degradation, and billing corruption. Practice role assignment, evidence preservation, communications, controlled mitigation, provider escalation, and recovery verification. A runbook that has never been exercised is a hypothesis about coordination.
+
+The practical checklist is clear. Declare the incident early, assign commander and workstream leads, maintain one fact base, preserve evidence, and separate facts from hypotheses. Choose scoped and reversible mitigations. Track control-plane propagation, retries, fallbacks, in-flight work, tools, data boundaries, usage, and billing. Communicate accurately, verify recovery across the full lifecycle, and hand off remaining uncertainty explicitly.
+
+The larger lesson is that incident command is a reliability control. An AI gateway coordinates models, providers, policies, tools, customers, resources, and money; no single metric can tell the whole story. Clear authority and durable evidence let teams move quickly without guessing, multiplying effects, or declaring victory too soon.
+
+That is it for today. Coordinate decisions under pressure, preserve the facts, and recover with proof. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
