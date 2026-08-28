@@ -1,0 +1,55 @@
+EP251: AI API Gateway Privacy Budgets - Quantify Disclosure Across Routes
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about privacy budgets for AI API gateways. Data minimization tells us to send only what a provider needs. A privacy budget adds an operational question: how much exposure is acceptable for this workload, this tenant, this route, and this request lifecycle? Without a budget, teams may approve one small disclosure while retries, fallbacks, logs, caches, and evaluations quietly multiply it.
+
+Start by defining exposure as more than payload size. A request can disclose identity, location, financial information, customer documents, business strategy, credentials, health data, or unique behavioral patterns. The same field may have different sensitivity depending on its tenant, purpose, region, retention, and combination with other fields. A budget should describe data classes and consequences, not just megabytes or tokens.
+
+Build a disclosure inventory for the complete lifecycle. Count the primary provider request, embedding calls, retrieval services, tool backends, safety classifiers, retries, hedged attempts, shadow traffic, caches, queues, logs, traces, support exports, and evaluation datasets. Record which components see raw data, transformed data, metadata, hashes, or only an opaque reference. A privacy budget is useful only when it follows the data path.
+
+Represent the budget as policy. Define allowed data classes, maximum provider attempts, approved regions, retention ceilings, permitted subprocessors, logging mode, cache behavior, and whether human review is allowed. Bind those limits to tenant, operation, model capability, and purpose. Keep policy versions immutable and record which version authorized each route.
+
+Use tiers that operators can understand. Public information may have a broad budget. Internal business data may allow one approved provider in one region with short retention. Sensitive personal data may require redaction, a dedicated route, no logging, and no cross-provider fallback. Credentials and certain regulated fields may have a zero-provider-disclosure budget, meaning only a server-side tool may handle them.
+
+A budget should constrain combinations. Ten fields that are harmless alone can identify a person together. A prompt containing a rare job title, exact timestamp, location, and customer event may be highly identifying even if no name is present. Classification and policy checks should consider joins, quasi-identifiers, and repeated observations across requests.
+
+Route selection is a budget decision. Compare provider retention, training use, region, subprocessors, encryption, access controls, and contractual commitments. A model with a compatible API is not automatically eligible. The gateway should reject or transform a request when the selected route exceeds the approved disclosure budget.
+
+Minimization spends less budget. Trim conversation history, select narrow retrieval passages, project tool results, remove unused metadata, and extract only relevant file regions. Track the reduction as evidence. The objective is not to make a payload small for its own sake; it is to preserve task usefulness while reducing the number and sensitivity of facts that leave the boundary.
+
+Redaction changes the budget, but does not erase it. Mask direct identifiers, secrets, and unnecessary fields before routing. Preserve meaning with typed placeholders when needed, and assess whether combinations still identify a person or organization. A redacted document can remain confidential, and a pseudonymous identifier can still enable correlation.
+
+Retries multiply exposure. If one sensitive request is sent to three providers, the budget must account for three disclosures, even when only one response reaches the user. Set attempt ceilings by data class. Prefer a safe bounded failure to an unapproved fallback. When a request is retried, record the reason, destination, transformation, and whether the new provider had an equal or stricter policy.
+
+Hedging needs even stricter controls. Parallel attempts reduce latency tails but create simultaneous copies and may complicate cancellation. Disable hedging for high-sensitivity workloads unless the budget explicitly permits it. If a losing request cannot be reliably cancelled, count its full potential retention and provider access in the route decision.
+
+Shadow traffic is not free privacy. A shadow model receives data even if its answer is discarded. Use minimized or synthetic inputs where possible. Separate shadow budgets from production budgets, cap volume, and make the retention and provider policy visible in the experiment record. Do not treat experimentation as an exemption from tenant consent or residency rules.
+
+Caches consume a different kind of budget. A cache can extend retention, widen access, and make a response available to later requests. Scope entries by tenant, policy, model, region, and source version. Avoid raw sensitive keys. If the privacy budget does not permit reuse, bypass the cache. Invalidation and deletion should be tested, not assumed.
+
+Logs and traces should have their own allowance. Most operations need timing, sizes, route decisions, error classes, and opaque references—not raw prompts or outputs. Make body capture an explicit, short-lived exception with access controls and automatic expiry. Count diagnostic copies in the budget and require a reason for exceeding the normal logging mode.
+
+Evaluation can create a large hidden disclosure pool. Redacted production samples may be copied into test suites, annotation tools, benchmark stores, and vendor platforms. Set a separate evaluation budget, restrict sample selection, expire datasets, and track who can access them. Synthetic or consented data is often a better way to test routing behavior than repeatedly exporting customer conversations.
+
+Tool calls deserve separate accounting. A model may need a small answer from a large database, but an overbroad query can expose thousands of records to the tool runner and model. Enforce field and row limits, tenant scope, purpose, and destination. Count both the backend query exposure and the tool result returned to the model.
+
+Budget accounting should distinguish visibility levels. A provider receiving an encrypted opaque reference is different from a provider receiving plaintext content. A classifier seeing a redacted category is different from a model seeing the original text. Define levels such as metadata-only, transformed, sensitive, and secret, then assign costs or hard limits to each level.
+
+Do not turn privacy into a misleading single score. A numerical score can help compare routes, but hard prohibitions must remain hard prohibitions. A route that violates residency or exposes credentials cannot become acceptable because other fields are low risk. Combine a quantitative budget with categorical deny rules, approvals, and evidence requirements.
+
+Make budgets visible at decision time. Operators and developers should see why a route was allowed, which limits were consumed, and what alternative would exceed policy. Return stable error codes such as sensitive_data_route_denied, retry_budget_exhausted, or retention_policy_mismatch. Explanations should be useful without revealing hidden policy details or the sensitive content itself.
+
+Budget state must be consistent. Concurrent retries, streaming continuations, tool calls, and queued work can race to spend the same allowance. Use atomic reservations or an equivalent control mechanism. Define what happens when a request starts within budget but later needs more context. Fail safely, ask for explicit approval, or switch to a stricter transformation.
+
+Budget windows need a clear meaning. Some limits apply per request, some per tenant and day, and some over the lifetime of a data object. A daily count of requests does not protect against one request being copied into ten systems. Track event-level exposure and aggregate views separately. Make clocks, regions, and reset behavior explicit.
+
+Monitor actual versus planned exposure. Compare policy decisions with provider logs, gateway events, tool executions, and retention records. Alert on unexpected destinations, extra attempts, raw-body logging, cache scope changes, and data-classification drift. A budget is a control only when the system can detect that runtime behavior differs from the approved plan.
+
+Test budget exhaustion and failure paths. Fill a tenant budget, trigger a provider timeout, attempt a fallback, run a tool that returns extra fields, enable debug logging, and replay a queued job after policy changes. Verify that the gateway refuses expansion, does not leak data in the error, and leaves a durable explanation of the decision.
+
+Review budgets when the workload changes. New model capabilities, larger context windows, agent loops, multimodal files, and tool integrations can radically increase exposure. Treat a change from one model call to an autonomous workflow as a new data-flow review. Update the budget, route policy, and tests together.
+
+The practical checklist is clear. Define exposure by data class and consequence, inventory every copy, bind budgets to tenant and purpose, enforce hard deny rules, compare provider policies, minimize before routing, limit retries and hedges, isolate shadow and evaluation traffic, scope caches and tools, protect logs, synchronize budget state, monitor actual disclosure, and test exhaustion and policy changes.
+
+The larger lesson is that privacy is an operating constraint, not a paragraph in a compliance document. A gateway can turn that constraint into routing behavior: this request may use this provider, in this region, with this transformation, for this many attempts, for this long. When the budget is exceeded, the system should know before the data leaves.
+
+That is it for today. Quantify disclosure across routes, keep hard boundaries hard, and make every privacy decision explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
