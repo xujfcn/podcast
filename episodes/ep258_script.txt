@@ -1,0 +1,59 @@
+EP258: AI API Gateway Provider Reconciliation - Match Usage, Responses, and Charges
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about provider reconciliation in AI API gateways. A production request creates more than a response. It creates attempts, tokens, tool calls, retries, cancellations, provider usage reports, gateway measurements, customer charges, and sometimes refunds. If those records cannot be connected, teams cannot explain a bill, detect leakage, or prove that failed work was handled correctly.
+
+Start with a canonical request ledger. Give every client request a stable request ID and every provider attempt its own attempt ID. Link retries, fallbacks, streams, tools, cache hits, and final delivery to that lineage. Keep the client’s idempotency key separate from provider request IDs; they solve different problems and may not be unique across services.
+
+Record intent and outcome independently. A client may request one generation, while the gateway makes three attempts and delivers one response. Store requested operation, accepted operation, attempts, delivered result, and charge decision as separate events. Never infer billing solely from the final HTTP status.
+
+Capture provider usage precisely. Record input tokens, output tokens, cached tokens, reasoning units, image pixels, audio seconds, video duration, tool calls, and any provider-specific units. Preserve the provider’s usage payload and the normalized gateway interpretation, with adapter and pricing versions. If a provider omits usage, mark it unknown instead of quietly estimating it as exact.
+
+Logical and physical usage are different. A prompt may be sent to two providers because of a hedge, while the user sees one answer. A cache hit may create no provider usage but still consume gateway resources. A failed request may consume input tokens. Reconciliation needs both the logical task and each physical attempt.
+
+Use immutable event records. Append request accepted, provider started, provider responded, stream completed, tool executed, cancelled, retried, charged, refunded, and reconciled events rather than overwriting one mutable row. Corrections should reference the original event and state why the correction occurred. This makes late provider reports and billing adjustments explainable.
+
+Provider request IDs are valuable but insufficient. Providers may reuse formats, delay usage reports, or return no ID on connection failure. Combine provider ID with account, model, region, attempt time, and a gateway correlation ID. Do not expose internal identifiers to customers unless the contract says they are safe and stable.
+
+Streaming requires checkpointed accounting. Capture usage events when the provider emits them, final usage when the stream closes, and whether the client received all or only part of the content. A disconnect after many generated tokens is not the same as a failure before generation began. Define whether partial delivery is billable and apply that rule consistently.
+
+Cancellation needs a clear charge policy. A client can leave while the provider continues work, or the provider can acknowledge cancellation after more tokens are generated. Record cancel requested, cancel sent, cancel acknowledged, provider stopped, and final usage separately. Do not promise zero cost merely because the client disconnected.
+
+Retries and fallbacks must preserve attribution. Charge each physical attempt according to approved policy, then decide whether the customer sees pass-through cost, a capped amount, or a service-level adjustment. If a retry was caused by a gateway fault, the business may choose not to pass that cost through, but the underlying provider usage must still remain visible internally.
+
+Hedging creates duplicate physical work. Track which attempt won, which lost, whether the loser was cancelled, and the usage of every attempt. A request-level success metric that ignores losing attempts will understate cost. A customer invoice that hides duplicate work may be legally or commercially unacceptable.
+
+Pricing is versioned data. Store model, provider, region, unit type, price revision, currency, discounts, markups, minimums, and effective timestamps. Never recompute historical charges from today’s pricing table. A provider can change rates or add a new token category while old requests are still being reconciled.
+
+Normalize without erasing semantics. Map provider-specific usage into a common schema, but retain raw categories and unknown fields. “Tokens” may mean different things across providers. Keep input, output, cached, reasoning, and media units distinct. A convenient total can be derived, but it should not replace the underlying evidence.
+
+Customer charges should reference evidence. An invoice line can show workload, model, period, units, price revision, and amount, with a request or reconciliation reference for drill-down. Avoid copying prompts or outputs into billing systems. Customers need an explainable charge, not a second archive of their content.
+
+Reconciliation compares independent sources. Compare gateway ledger events with provider usage exports, provider invoices, internal meters, payment records, refunds, and customer statements. Differences can come from time zones, rounding, delayed data, tax, discounts, currency conversion, or genuinely missing attempts. Define tolerances and classify variances instead of hiding them in a single “balanced” flag.
+
+Late data is normal. A provider report may arrive hours or days after the request. Support provisional charges, pending reconciliation, and post-period adjustments. Make the customer-facing state clear. Do not silently rewrite an invoice after payment; issue a traceable credit or debit adjustment.
+
+Rounding must be deterministic. Define decimal precision, unit conversion, minimum charge behavior, and order of operations. Apply rounding at the documented level, and retain unrounded intermediate values where policy permits. A one-cent discrepancy repeated across millions of requests becomes an operational problem.
+
+Time boundaries need care. Provider timestamps, gateway timestamps, invoice periods, and tenant time zones may disagree. Store UTC timestamps and the provider’s reported time separately. Define which clock controls usage windows, budgets, refunds, and reporting. Do not assign a late usage record to the wrong month because a local time conversion was implicit.
+
+Failures should still be measurable. Distinguish authentication failure, rejected request, timeout, partial response, malformed response, provider-side generation, client cancellation, gateway cancellation, and successful delivery. Some failures consume provider units; others do not. The error taxonomy should drive reconciliation and customer policy.
+
+Tool and retrieval costs belong in the workflow ledger. A model request may trigger embeddings, reranking, database queries, external APIs, and storage. Attribute each cost to the parent request and service, while keeping model generation units distinct from tool units. This reveals the true cost of an accepted result without pretending every downstream call is a model token.
+
+Cache hits need explicit accounting. A reused response may carry a historical provider lineage, but the current request still needs a cache-hit event, policy scope, model identity, and any gateway charge. Do not charge provider usage again merely because a customer requested the same result, and do not reuse a cached result outside its approved tenant or policy boundary.
+
+Guard against duplicate ledger events. Retries in the event collector, webhook redelivery, and provider export replay can duplicate records. Use event IDs, source sequence numbers, idempotency keys, and reconciliation-aware deduplication. Never deduplicate on timestamp and amount alone; two legitimate attempts can look identical.
+
+Monitor variance, not just totals. Alert on provider-to-gateway unit gaps, unexpected model or region changes, missing usage IDs, rising provisional charges, duplicate attempts, unexplained refunds, and customer statements that do not match the ledger. Segment by provider, adapter, model, tenant, and workload. A total that balances can still conceal one broken route.
+
+Make corrections safe. A reconciliation job should be repeatable, bounded, and able to explain every adjustment. Keep original evidence, correction reason, operator or job identity, and timestamp. Do not edit historical provider data to make the books balance. Quarantine ambiguous records for review.
+
+Test the full accounting lifecycle. Simulate a provider timeout after generation, a stream cancelled halfway through, a hedge with two usage reports, a delayed invoice, a price change, a duplicate webhook, a cache hit, a refund, and a tool call that fails after the model succeeds. Verify that customer charges, internal cost, and audit evidence remain consistent.
+
+Protect financial and request data. Billing records can reveal tenant activity, model choices, volume, and business operations. Restrict access, minimize content, encrypt sensitive fields, and set retention. Support exports with references and summaries instead of raw prompts. Reconciliation evidence is operationally important and still subject to privacy policy.
+
+The practical checklist is clear. Build a canonical request ledger, separate logical and physical work, capture normalized and raw usage, version pricing, checkpoint streams and cancellations, attribute retries and tools, scope cache hits, compare independent sources, handle late data and rounding, deduplicate safely, classify variances, make corrections traceable, and test failure-heavy lifecycles.
+
+The larger lesson is that trust in an AI gateway includes trust in its numbers. A dependable system should explain not only what answered, but what work happened, what the provider measured, what the customer was charged, and why those records agree—or why they do not yet agree. Reconciliation turns usage and billing from a monthly mystery into an operable contract.
+
+That is it for today. Match usage, responses, and charges, and make every adjustment traceable back to the request that created it. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
