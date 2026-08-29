@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about cancellation contracts in an AI API gateway: how to stop work when the user leaves, release capacity quickly, and avoid turning retries into duplicate jobs.
+
+Cancellation sounds like a client convenience, but in an AI gateway it is a resource and correctness problem. A user may close a page while a model is generating, a mobile connection may disappear, or a deadline may expire. If the gateway stops sending bytes but leaves provider work running, the system still consumes tokens, concurrency, and money.
+
+Start with a clear operation state machine. Distinguish requested, accepted, dispatched, streaming, cancellation-requested, cancelled, completed, failed, and unknown. A client disconnect is an event, not proof that every downstream action stopped. Keep the logical operation ID while each provider attempt has its own cancellation state.
+
+Define who may cancel. The original client, an authorized service, an administrator, or a deadline controller may have different permissions. Validate the operation identity and tenant scope. A cancellation endpoint should not let one customer stop another customer’s work just because it knows a request identifier.
+
+Propagate cancellation downstream when supported. Abort the HTTP stream, send the provider’s cancellation signal, cancel queued work, and stop tool execution. Use bounded deadlines so the gateway does not wait forever for confirmation. If a provider cannot cancel, record that limitation and mark the operation as cancellation-requested or unknown instead of claiming that work definitely stopped.
+
+Streaming needs special handling. The gateway may have already delivered partial output. The client should know whether the response ended normally, was cancelled by the caller, timed out, or was interrupted by infrastructure. Preserve a final reason in metadata where possible. Partial text must not be mistaken for an accepted result unless the application explicitly supports partial completion.
+
+Cancellation and retries must share one budget. A client that sees a broken stream may retry while the original provider attempt continues. Use idempotency keys for side-effecting operations and make retry policy aware of cancellation uncertainty. A new attempt should not create duplicate email, payment, database, or external API actions.
+
+Release reservations carefully. Input work may already be charged, output capacity may have been reserved, and concurrency may remain occupied until downstream confirmation. Release what is known to be unused, reconcile delayed usage later, and keep accounting records linked to the original operation. Never convert an uncertain provider state into a zero-cost assumption.
+
+Tools and agents make cancellation harder. A model may be waiting on retrieval, code execution, or an external API. Cancel child tasks, revoke temporary permissions, and prevent new tool calls after cancellation is accepted. For non-cancellable tools, use leases and compensation where appropriate. A cancelled model stream should not quietly continue an agent loop in the background.
+
+Make cancellation observable. Measure time from client request to gateway acknowledgement, downstream cancellation, resource release, and final confirmation. Track cancellation success by provider, model, tool, and route. High cancellation latency can explain concurrency exhaustion even when request volume looks normal.
+
+Expose actionable client behavior. Document whether cancellation is best effort, what status the client receives, whether partial output is usable, and how billing is handled. Return a stable operation ID and a clear final state. Clients should use deadlines, connection cancellation, and idempotency consistently rather than assuming that closing a socket cancels all work.
+
+Test the uncomfortable cases. Cancel before dispatch, during provider connection, after the first token, during a tool call, after a provider timeout, during failover, and while usage is delayed. Verify that no new side effects start, reservations eventually settle, and billing distinguishes completed work from cancelled or unknown work.
+
+The practical pattern is simple: define explicit states, authorize cancellation, propagate it downstream, handle streams and tools, share budgets with retries, reconcile uncertain usage, expose clear semantics, and measure release latency. Cancellation is reliable when “the user stopped waiting” becomes an intentional control signal throughout the entire request graph.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
