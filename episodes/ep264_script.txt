@@ -1,0 +1,25 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about model deprecation in an AI API gateway: how to retire a model without surprising clients or breaking the workflows built around it.
+
+Model names look like simple configuration values, but production dependencies are rarely simple. A model may be referenced by prompts, schemas, tools, safety rules, budgets, dashboards, cached results, and customer documentation. Retiring it safely means understanding those dependencies before changing the route.
+
+Start with an inventory. Find every direct and indirect consumer of the model: API keys, projects, tenants, prompt versions, structured-output contracts, agent tools, batch jobs, evaluations, and fallback routes. Include operational dependencies such as alerts, cost assumptions, latency objectives, and region restrictions. If you cannot identify who depends on a model, you do not yet have a safe migration plan.
+
+Separate the provider’s deadline from your customer deadline. A provider may announce a shutdown date, but clients need time to test, update, and deploy. Publish a clear timeline with announcement, recommended replacement, opt-in migration, default cutover, and final removal. Include the exact old and new identifiers, capability differences, pricing changes, and rollback conditions.
+
+Choose replacements by workload, not by name. Compare accepted-result rate, latency, cost per successful task, context limits, tool behavior, structured output, moderation behavior, regional availability, and error semantics. A newer model with a similar label may have different defaults or incompatible payload requirements. Compatibility is something to test, not something to assume.
+
+Run a migration evaluation with production-shaped requests. Use privacy-safe fixtures and representative segments. Include long contexts, multilingual inputs, streams, tools, retries, cancellations, and malformed requests. Check not only answer quality but also schema validity, finish reasons, usage reporting, billing, and client-visible errors. The replacement must work through the entire gateway path.
+
+Offer an explicit compatibility layer when useful. It may translate request fields, map deprecated parameters, adjust unsupported settings, or normalize response metadata. Keep the transformation versioned and observable. Do not silently change meaning. If a parameter cannot be preserved, document the difference and provide a safe failure rather than pretending the old contract still exists.
+
+Use staged traffic. Start with offline tests, then synthetic requests, then shadow evaluation with tools disabled, and finally a small canary cohort. Keep the old route available while the new route gathers evidence. Promotion gates should cover accepted outcomes, latency, cost, policy, error classes, and customer support signals. A migration is not complete merely because the new model returns text.
+
+Plan rollback before cutover. Preserve the old route configuration, keep routing changes reversible, and define how to handle in-flight streams, queued jobs, cached responses, and provider usage during the transition. If the old provider has a hard shutdown, rollback may mean switching to a second tested replacement, not returning to the original model. State that constraint clearly.
+
+Treat billing and reporting as part of compatibility. Model changes can alter tokenization, minimum charges, cache discounts, and usage fields. Version pricing and keep historical records tied to the model and pricing version that produced them. Customers should be able to understand why their cost or usage changed after migration.
+
+After cutover, monitor for drift. Watch real acceptance rates, retries, support tickets, latency tails, spend, tool failures, and segment-specific regressions. Keep a migration dashboard until the final removal date, then archive the evidence and remove dead configuration deliberately. Deleting an identifier too early can turn a recoverable issue into an outage.
+
+The practical pattern is simple: inventory dependencies, publish a timeline, evaluate replacements by workload, version compatibility transformations, stage exposure, preserve rollback, reconcile billing, and monitor after cutover. Model deprecation becomes manageable when it is treated as a customer migration and an infrastructure change at the same time.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
