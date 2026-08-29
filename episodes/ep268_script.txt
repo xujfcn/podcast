@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about multi-region failover in an AI API gateway: how to preserve request meaning, data boundaries, reliability, and billing when traffic moves to another location.
+
+Failover is often described as changing one URL to another. For AI workloads, that is incomplete. Regions may have different providers, model availability, pricing, latency, data residency rules, tool access, and policy configuration. A request that succeeds in one region can become invalid or noncompliant when moved elsewhere.
+
+Start with an explicit failover contract. Define which workloads may leave their preferred region, which must fail closed, which providers are eligible, and which capabilities must remain available. Store residency, tenant, model, and tool constraints as routing inputs rather than burying them inside regional code.
+
+Keep routing policy consistent, but do not assume configuration is identical. Version policies, model catalogs, pricing tables, safety rules, adapter mappings, and feature flags. Continuously compare regional snapshots and alert on drift. A failover target that is healthy but configured differently can create a semantic outage.
+
+Use health signals that represent readiness, not just process uptime. Check provider reachability, authentication, model availability, quota, latency, error rates, tool dependencies, and policy loading. A region should receive traffic only when it can satisfy the request contract. Health probes should be safe, synthetic, and representative of important workloads.
+
+Preserve operation identity across regions. A failover attempt is another execution attempt under the same logical operation. Keep the original request ID, add a regional attempt ID, and record the reason and time of the move. This prevents duplicate billing and makes it possible to determine whether the first region completed work after the client was redirected.
+
+Design for in-flight work. Streaming responses may be partially delivered when a region fails. Queued jobs may be claimed by two workers. Provider calls may continue after the gateway loses contact. Use idempotency keys, leases, cancellation where supported, and explicit unknown states. Never assume that a timeout means the first attempt did nothing.
+
+Respect data boundaries during failover. Do not replicate sensitive prompts, tool arguments, or retrieved documents into an unapproved region merely to make recovery easier. Use regional storage, encrypted transport, redaction, and tenant-specific allowlists. If no compliant target exists, return a clear failure instead of silently crossing a boundary.
+
+Preserve semantics across provider changes. The backup route may use a different model or adapter. Verify context limits, tool schemas, structured output, moderation, token accounting, and response metadata. If a capability cannot be preserved, choose a documented degradation or fail closed. A successful HTTP response is not proof that the user’s task contract survived.
+
+Make cost behavior predictable. A backup provider may have different prices, minimum charges, currency, or cache discounts. Version pricing by region and provider, and attach the executed route to the ledger. Tenants should be able to understand why a failover request cost more or used a different model. Budget reservations must follow the logical operation without double-counting attempts.
+
+Test failover without waiting for an outage. Exercise provider denial, regional network loss, stale configuration, quota exhaustion, partial streams, delayed usage, and recovery. Measure time to detect, time to route, accepted-task rate, duplicate work, data-policy violations, and reconciliation completeness. Game days should verify both the failover path and the return path.
+
+Avoid failback storms. When the primary region recovers, do not move every request back instantly. Use hysteresis, gradual traffic restoration, and capacity checks. Existing streams and queued work may need to finish where they started. Record every transition so operators can distinguish a controlled migration from route flapping.
+
+The practical pattern is simple: define eligibility, detect readiness, prevent configuration drift, preserve operation identity, control in-flight work, enforce data boundaries, verify semantic compatibility, reconcile regional costs, test regularly, and restore traffic gradually. Multi-region failover is reliable when it preserves the customer contract—not merely when it finds another server.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
