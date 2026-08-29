@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about health probes for an AI API gateway: how to verify readiness before routing production traffic to a provider, model, region, or new configuration.
+
+A process can be running while the route is unusable. Credentials may be expired, a model may be unavailable in the selected region, quotas may be exhausted, an adapter may be incompatible, or a policy may fail to load. A health check that only asks whether an HTTP endpoint responds will miss the failures users actually experience.
+
+Start with the distinction between liveness, readiness, and capability. Liveness asks whether the component is running. Readiness asks whether it can safely accept work. Capability probes ask whether a specific model, tool, stream, schema, or region contract works. Keep these signals separate so a healthy gateway process does not accidentally attract traffic for an unhealthy provider route.
+
+Probe the complete path with safe synthetic requests. Verify authentication, DNS and TLS, provider reachability, model availability, request transformation, response parsing, usage reporting, and policy enforcement. Use minimal prompts and synthetic data. Do not invoke real side effects, send customer content, or consume unbounded output just to make a check look realistic.
+
+Match probes to workload risk. A text generation route may need a different probe from an image, embedding, batch, streaming, or tool-use route. Check the properties that matter to the contract: structured output, context size, tool schema, latency, finish reason, and region eligibility. A generic “hello” response can pass while the production capability is broken.
+
+Use budgets and rate limits for probes. Health checks consume provider capacity and can become a hidden source of cost or load. Set strict frequency, token, concurrency, and spend limits. Tag probe traffic separately from customer traffic, exclude it from customer billing, and include it in operational cost reporting.
+
+Make probes version-aware. Record the provider, model revision, adapter, policy, pricing, and probe fixture versions. When a route changes, the evidence should show which contract was tested. If a probe succeeds against one configuration while production uses another, the signal is misleading.
+
+Define failure thresholds and hysteresis. One transient timeout should not remove a healthy route immediately, but repeated semantic failures should. Use consecutive failures, rolling windows, and recovery thresholds. Require more evidence to restore traffic than to mark a route degraded when the cost of a false recovery is high.
+
+Separate provider health from route health. The provider may be reachable while one model is unavailable. The model may answer while the adapter corrupts tool calls. The route may work in one region and violate residency policy in another. Store health by provider, model, region, capability, and configuration rather than collapsing everything into one green light.
+
+Make probe results actionable. When a route is not ready, record a stable reason such as authentication failure, quota exhaustion, model unavailable, schema mismatch, policy unavailable, excessive latency, or usage reporting failure. Operators need enough evidence to repair the route without storing sensitive prompts or responses.
+
+Use health signals in admission and routing. A route marked degraded should receive only eligible traffic, a smaller canary, or no traffic depending on the failure. Do not let a stale health result authorize a long queue of work. Attach timestamps and expiry to readiness decisions, and recheck at important transitions.
+
+Test the probes themselves. Simulate expired credentials, provider 500 errors, slow responses, malformed output, missing usage, stale model catalogs, policy engine outages, and partial streams. Verify that probes detect real failures, do not trigger side effects, recover gradually, and cannot be abused as an unlimited provider client.
+
+The practical pattern is simple: separate liveness from readiness, probe real capabilities safely, bound cost and load, version the evidence, define hysteresis, expose actionable reasons, scope health by route, and connect the signal to admission control. A gateway is ready when its health checks prove it can honor the production contract—not merely when its process is alive.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
