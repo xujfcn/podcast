@@ -1,0 +1,25 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request lineage in an AI API gateway: how to make every response explainable from the client request to the provider work that produced it.
+
+When an AI response looks wrong, slow, or unexpectedly expensive, “the model answered” is not an adequate explanation. A production request may pass through authentication, policy checks, routing, retries, fallbacks, prompt assembly, retrieval, tools, caching, and response transforms. Without lineage, operators have to reconstruct that path from scattered logs, and customers receive guesses instead of answers.
+
+Start with one logical operation identifier. Generate it at the gateway boundary or accept a validated client request ID, then preserve it across queues, provider attempts, tool calls, and asynchronous jobs. Give every execution attempt its own identifier as well. The logical ID answers “which user operation?” while the attempt ID answers “which piece of work?” Both should appear in client-safe error metadata and internal traces.
+
+Record the decision points, not just timestamps. Capture which authentication policy matched, which tenant budget was applied, which model and region were selected, which fallback rules were considered, and why a route was accepted or rejected. Store policy and configuration versions with the decision. If routing changes later, historical traces should still explain what the system knew at the time.
+
+Keep lineage structured. A useful event says what happened, when it happened, which operation it belongs to, what version made the decision, and what outcome followed. Examples include request accepted, cache hit, provider attempt started, tool authorized, stream cancelled, retry scheduled, response validated, and charge reconciled. Structured events can power traces, billing, support tools, and incident analysis without scraping prose logs.
+
+Protect sensitive content by separating metadata from payloads. A trace may need token counts, hashes, schema names, and policy outcomes without storing the full prompt or response. Redact credentials, personal data, and tool arguments by default. Use short-lived access to content when debugging requires it, and audit who viewed it. Explainability should not become a reason to copy every private input into every system.
+
+Lineage must survive streaming. Record headers and the first token separately from completion, then capture close, cancellation, timeout, and disconnect events. A client disconnect does not always mean provider work stopped. The final lineage state should distinguish completed, cancelled, failed, abandoned, and unknown. This distinction matters for reliability metrics, retries, and billing reconciliation.
+
+Tools and side effects belong in the same graph. Link the model decision to each tool authorization and execution, then record whether the tool was simulated, shadowed, or real. For external side effects, include an idempotency key and outcome state. This makes it possible to answer not only which model produced text, but also which action was attempted and whether it actually happened.
+
+Use lineage to explain cost and quality. Attach usage, pricing version, cache status, validation results, and accepted-task outcome to the logical operation. A customer support agent should be able to see why a request used a fallback or incurred multiple attempts without receiving secrets. Engineers should be able to compare routes by accepted result, latency, and total work.
+
+Design for partial failure. Telemetry systems can drop events, providers can return incomplete usage, and queues can delay updates. Use sequence numbers, durable checkpoints, and explicit unknown states. Do not manufacture a clean story when evidence is missing. A trace that says “provider usage pending” is more trustworthy than one that silently reports zero.
+
+Make the trace useful to different audiences. Clients need a stable request ID and actionable error category. Support needs a compact route summary. Engineers need attempt-level details and policy versions. Finance needs usage and charge reconciliation. Security needs access history and data-handling decisions. One lineage model can serve all four if sensitive fields and permissions are separated carefully.
+
+The practical pattern is simple: identify the logical operation, identify every attempt, record decision versions, link tools and side effects, handle streams explicitly, protect payloads, reconcile usage, and expose the right summary to each audience. An AI gateway becomes explainable when every response carries a defensible history instead of a vague assertion about what happened.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
