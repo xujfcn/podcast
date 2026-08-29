@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about safe request replay in an AI API gateway: how to reproduce production behavior without replaying secrets, charging customers twice, or triggering real-world side effects.
+
+When an AI request fails in production, the first instinct is often to copy the payload and send it again. That can expose credentials, repeat a purchase, email a customer, invoke a tool, or create a second provider charge. A useful replay system must reproduce the conditions that matter while making dangerous work impossible by default.
+
+Start by separating the logical operation from the replay. Give the replay its own operation ID and link it to the original incident or request. Never reuse the original idempotency key unless the provider explicitly guarantees safe inspection. Mark the replay as diagnostic traffic so billing, analytics, alerts, and customer reports cannot confuse it with production work.
+
+Capture execution context, not just the prompt. Preserve model and provider identity, region, gateway configuration versions, policy decisions, adapter versions, retry settings, cache state, and relevant timing. Context explains why the original request behaved as it did. A copied JSON body without that context may reproduce the input but not the failure.
+
+Redact before storage and before replay. Remove API keys, authorization headers, personal data, private tool arguments, and provider-specific secrets. Replace sensitive values with deterministic placeholders when equality matters for debugging. Keep the mapping outside the replay environment, with restricted access and an audited workflow. Redaction should be tested against nested fields, encoded values, logs, and error messages.
+
+Make side effects impossible or simulated. Disable email, payments, account mutations, webhooks, code execution, and external writes unless a separately approved test environment is being used. Replace tools with fixtures that return the recorded shape and controlled timing. If a side effect must be tested, use sandbox credentials, synthetic identities, and explicit allowlists. “We intended not to send it” is not a safety control.
+
+Preserve nondeterminism carefully. Record random seeds when supported, but do not assume a seed makes provider behavior identical. Capture tool responses, retrieved documents, system time, feature flags, and traffic cohort. Replay against a pinned model revision where possible. If the environment has changed, label the result as a comparison rather than a reproduction.
+
+Compare invariants, not raw text alone. Check schema validity, tool selection, policy outcomes, token usage, latency stages, retry count, provider identity, and final task acceptance. Text can vary while behavior remains acceptable, and identical text can hide a different route or unsafe transformation. Define the invariants that matter for the incident before running the replay.
+
+Keep replay data minimal and temporary. Store only the fields needed to investigate, apply retention limits, and delete derived artifacts when the incident closes. Separate replay access from ordinary production access. A debugging archive containing prompts and tool results can become a high-value target if it lives forever.
+
+Use a staged replay workflow. First validate the redacted fixture locally. Then run with all tools mocked. Next compare the gateway’s policy and routing decisions. Only after those checks pass should an isolated provider call be considered, and even then with a small budget and no customer-visible side effects. Require an explicit reason and owner for each replay.
+
+Reconcile the economics. Diagnostic traffic may still consume provider capacity and tokens. Tag it, exclude it from customer billing, and include it in engineering cost reports. If a replay accidentally reaches production billing, the lineage should make the mistake detectable. A replay system that hides its own cost is not operationally complete.
+
+Turn replay results into prevention. Save the minimal redacted fixture, the expected invariants, the configuration versions, and the failure explanation as a regression test. Link it to the incident and rerun it when models, adapters, policies, or providers change. The lasting value of replay is not one successful reproduction; it is a test that prevents the same failure from returning.
+
+The practical pattern is simple: create a separate identity, capture full execution context, redact aggressively, mock side effects, pin what can be pinned, compare invariants, limit retention, tag cost, and convert the result into a regression test. Safe replay gives engineers evidence without turning debugging into another production incident.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
