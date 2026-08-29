@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about provider attestation in an AI API gateway: how to prove which service answered a request, which model version ran, and what the gateway actually did along the way.
+
+An AI response is often treated as if its origin were obvious. The client asks for a model by name, the gateway routes it, and text comes back. In reality, aliases move, providers fall back, model revisions change, and compatibility layers transform requests. If the answer affects a financial decision, a regulated workflow, or a customer dispute, “we think it was model X” is not strong evidence.
+
+Begin with an execution identity. For every provider attempt, record the provider account or service identity, endpoint region, model identifier, model revision when available, and gateway route version. Keep the requested model separate from the executed model. The requested value describes intent; the executed identity describes what actually ran.
+
+Capture evidence at the boundary where the claim is made. Provider response headers, signed usage records, request IDs, model metadata, and gateway-observed TLS endpoints can all contribute. None is automatically perfect. A provider may omit a revision, return a display alias, or provide a request ID that is useful only inside its support system. Record the evidence source and its confidence instead of flattening every signal into a single unquestioned field.
+
+Attestation is not the same as trusting a label. A response body can say it came from a model, but that field may be user-controlled or passed through an adapter. Prefer authenticated provider metadata and preserve the raw evidence separately from the normalized identity. When the provider cannot prove a detail, mark it unknown. Honest uncertainty is more useful than false precision.
+
+Bind the attestation to the logical operation and each attempt. Retries and fallbacks may involve multiple providers. A final answer can be produced by the second attempt while the first attempt still consumed resources. The lineage should show requested route, attempted route, executed identity, outcome, and selection reason. This makes it possible to explain a fallback without rewriting history.
+
+Version the gateway’s own transformations. Prompt templates, parameter mappings, safety filters, structured-output validators, and response redactors can materially affect the result. Record their versions alongside provider evidence. If an adapter changes a temperature field or translates a tool schema, the attestation should make that transformation visible rather than implying the provider received the original request unchanged.
+
+Protect attestation data from becoming a secret leak. Provider account identifiers, internal endpoints, and routing rules may be sensitive. Expose clients only the stable request ID, an appropriate provider or model summary, and the fields needed for their contract or audit. Keep detailed evidence behind role-based access, encrypt it, define retention, and log evidence access. Auditability does not require publishing infrastructure topology.
+
+Use cryptographic linkage where the stakes justify it. Hash the canonical request metadata, response metadata, and relevant execution events, then store a signed record or append-only digest. Do not hash raw secrets into a public record without considering dictionary attacks. The goal is tamper evidence and correlation, not the illusion that hashing alone creates provenance.
+
+Test attestation under failure. Providers may time out before returning metadata, streams may disconnect, usage may arrive later, and a gateway may lose part of its telemetry. Define states such as verified, provider-asserted, gateway-observed, pending, and unknown. Do not label a response verified merely because the HTTP status was 200. Verification should reflect the evidence actually available.
+
+Connect identity to billing, quality, and policy. The executed model and pricing version should explain the charge. The model revision should identify the evaluation cohort. The provider region should be checked against residency policy. If attestation conflicts with the requested route, trigger a review or fail closed according to the customer’s risk profile.
+
+Make the evidence useful after the request. Support teams need a compact explanation. Engineers need attempt-level traces. Finance needs provider and pricing reconciliation. Security needs access history and policy outcomes. Store a durable, queryable record with stable identifiers so each audience can obtain the right level of detail without copying the full prompt or response everywhere.
+
+The practical pattern is simple: separate requested and executed identity, collect evidence at provider boundaries, preserve raw signals, version gateway transformations, bind attempts to lineage, protect sensitive metadata, represent uncertainty honestly, and add cryptographic linkage when necessary. An AI gateway earns trust when it can prove what happened—or clearly state what it cannot prove.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
