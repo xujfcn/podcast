@@ -1,0 +1,25 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tenant budgets and quotas in an AI API gateway: how to control spend and capacity without turning every customer into the same blunt rate limit.
+
+A request-per-minute limit is easy to explain, but it is rarely enough. AI workloads consume different resources: input tokens, output tokens, concurrency, provider capacity, tool calls, image units, and money. Two tenants sending the same number of requests can create very different load and cost. A useful gateway measures the resources that actually create pressure.
+
+Start with separate budgets for separate purposes. A request quota limits frequency. A token budget limits model work. A concurrency limit protects active capacity. A spending budget limits financial exposure. These controls interact, but they should not be collapsed into one number. A tenant can be under its request limit while exhausting tokens, or under its token limit while creating too many simultaneous streams.
+
+Define the scope of every budget. Is it per API key, project, organization, plan, model family, region, or shared account? Make the scope explicit and stable. If a customer rotates keys, the organization budget should still protect the shared account. If a team has separate production and development projects, their limits may need to be independent so testing cannot consume production capacity.
+
+Reserve before work begins. Admission control should estimate the likely cost and resource demand of a request, then reserve against the applicable budgets. After completion, reconcile the reservation with actual usage. If the request is streamed, keep the reservation alive until the stream closes or is cancelled. Without reservation, a burst can pass many checks at once and overspend before counters catch up.
+
+Be careful with estimates. Input tokens are often knowable before dispatch, but output tokens are uncertain. Tool calls and retries can multiply the total. Use conservative reservations with a bounded maximum, then release unused capacity. If the estimate is too high, small tasks may be rejected unnecessarily; if it is too low, the budget becomes a promise the system cannot keep. Track estimation error by route and model so the policy improves over time.
+
+Fairness matters as much as enforcement. A shared pool should not allow one noisy tenant to monopolize provider capacity. Use weighted limits, burst allowances, and per-tenant concurrency. Protect interactive work from batch jobs when the product requires it. But make priority rules visible: customers should understand why a request was delayed, downgraded, or rejected.
+
+Degradation is often better than a hard stop. When a tenant approaches a budget, the gateway can reduce optional context, route to a cheaper eligible model, disable nonessential fan-out, queue batch work, or return a clear retry time. These changes must preserve the contract. Do not silently remove required tool calls or alter sensitive data policies just to fit a budget.
+
+Budget decisions need useful errors. Tell the client whether the issue is request rate, tokens, concurrency, spend, provider capacity, or plan entitlement. Include a stable error type and a Retry-After value when retrying may help. If the budget is exhausted for the billing period, an immediate retry is not useful; the client needs a different action.
+
+Account for ambiguous outcomes. A client timeout does not prove that provider work stopped. A cancelled stream may have consumed tokens. A retry may create another billable attempt. Keep reservations and actual usage in the same operation lineage, and reconcile delayed provider usage before declaring the budget state final.
+
+Observe budgets as a product signal. Alert on rejected requests, reservation failure, sustained near-limit tenants, estimation error, and cost per accepted task. Review whether limits are preventing abuse, protecting reliability, or simply frustrating legitimate customers. A quota that is never reached may be irrelevant; one reached constantly may be mis-sized or revealing real demand.
+
+The practical pattern is simple: separate resource dimensions, define clear scopes, reserve before dispatch, reconcile actual usage, enforce fairness, degrade deliberately, return actionable errors, and measure whether the policy protects both reliability and user value. Tenant budgets work when they control the resources that matter without hiding the reason for each decision.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
