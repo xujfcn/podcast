@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about data minimization in an AI API gateway: how to send providers only what they need to complete a task, while reducing privacy exposure, cost, and operational risk.
+
+An AI request can contain far more information than the model needs. Prompts may include full documents, user profiles, hidden metadata, old conversation turns, credentials, or unrelated attachments. Tool arguments and logs can repeat that data across several systems. A gateway is a useful control point for deciding what crosses each boundary.
+
+Start with the task and data inventory. Identify the purpose of the request, the fields required for that purpose, sensitive categories, retention needs, and every downstream recipient. Classify prompts, attachments, tool inputs, outputs, and telemetry separately. “The application sent it” is not a sufficient reason for every provider or log sink to receive it.
+
+Minimize before routing. Remove unrelated fields, truncate history, select relevant document sections, downsample media where quality permits, and replace direct identifiers with scoped references or tokens. Preserve the information needed for the task and the acceptance contract. Minimization that silently removes essential context can create correctness failures, so measure the tradeoff.
+
+Use purpose-bound transformations. Redaction, masking, hashing, tokenization, and summarization have different privacy and utility properties. A hash may help correlate records but cannot hide a value from a model if the model needs the original. A summary can reduce volume but may introduce omissions. Record which transformation was applied and which policy authorized it.
+
+Keep provider boundaries explicit. Different routes may have different residency, retention, training, and access guarantees. Do not send a minimized payload to a provider whose policy still disallows the data class. Routing should evaluate data classification, provider capability, region, contract, and tenant policy together.
+
+Treat attachments as first-class data. Extract only the pages, fields, frames, or regions needed for the task. Validate file type and size, scan for embedded secrets, and avoid forwarding hidden metadata unless required. For large files, use controlled retrieval references rather than copying the entire object into every prompt and log.
+
+Protect tools and side effects. A model may need only a narrow set of fields to choose a tool, while the tool itself may fetch authorized details directly. Keep secrets out of model-visible arguments, validate destinations and identifiers, and apply tenant-scoped access at the tool boundary. Minimizing the prompt does not replace authorization.
+
+Minimize logs by default. Store request IDs, classifications, sizes, model and route metadata, validation outcomes, and safe hashes instead of raw prompts and responses. Capture redacted samples only when there is a justified diagnostic need, with access controls and expiry. Never allow debug logging to become an undocumented data export path.
+
+Account for derived data. Embeddings, summaries, cached prompts, traces, evaluator fixtures, and provider usage records may preserve sensitive information even after the original request is deleted. Define retention and deletion behavior across every copy. A privacy boundary is incomplete if the gateway deletes the prompt but leaves an equivalent artifact in a cache.
+
+Measure utility and cost. Track input tokens, attachment bytes, latency, accepted-task rate, repair frequency, and provider charges before and after minimization. A smaller payload should not be assumed to be better if it causes repeated retries or lower-quality outcomes. Use representative fixtures and privacy-safe evaluations to find the useful minimum.
+
+Make minimization observable. Record a data manifest, transformation version, policy decision, provider boundary, and retention class in request lineage. Expose a safe summary to operators and clients. This allows support teams to explain what was sent without revealing the content itself.
+
+The practical pattern is simple: define the task, classify data, minimize before routing, use purpose-bound transformations, enforce provider boundaries, isolate attachments and tools, minimize logs and derived artifacts, measure utility and cost, and preserve evidence of what policy allowed. Data minimization works when every downstream system receives the least information it needs and no more.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
