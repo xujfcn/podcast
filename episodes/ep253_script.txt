@@ -1,0 +1,45 @@
+EP253: AI API Gateway Output Validation - Make Responses Safe to Consume
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about output validation in AI API gateways. An HTTP 200 response only tells us that a request completed at the transport layer. It does not tell us that the content is valid JSON, follows the application contract, cites an approved source, uses a permitted tool, or is safe for the next system to consume. The gateway needs a clear acceptance boundary between model output and application behavior.
+
+Start with the client contract. Define the response shape, required fields, types, bounds, encoding, ordering, null behavior, and error semantics. For free-form text, define what must be present and what must never be returned. For extraction workloads, use a versioned schema. For agents, define which actions may be proposed, which may be executed, and which require confirmation.
+
+Validate syntax first. Parse JSON, XML, CSV, function arguments, and streamed events with strict parsers. Reject duplicate keys, invalid encodings, unexpected nesting, oversized strings, and unknown fields where the contract requires strictness. Do not pass an unparsed model string directly into a database, shell, template engine, or downstream API.
+
+Validate semantics next. A response can be syntactically correct and still be wrong. Check dates, currencies, enum values, ranges, cross-field relationships, tenant identifiers, resource ownership, and required evidence. If a field says an action is approved, verify that approval exists in trusted server-side state. The model cannot authorize itself by emitting an approval field.
+
+Keep schemas versioned and observable. Record the schema revision, validator version, model attempt, and repair status for each response. When a contract changes, test old and new clients explicitly. A provider adapter should normalize compatible differences without hiding a semantic mismatch.
+
+Treat tool calls as untrusted proposals. Validate tool name, argument types, target scope, resource ownership, and allowed fields before execution. Construct the final request from a server-side schema and policy. Reject arbitrary URLs, headers, file paths, SQL fragments, commands, and authorization values supplied by model output.
+
+Validate tool results before returning them. Check result schemas, status codes, pagination, tenant scope, and freshness. Remove secrets and fields that the model does not need. A successful tool response from the wrong account is a failure even if every JSON field has the expected type.
+
+Citations need validation too. Check that each citation resolves to an approved source, the source is accessible to the current tenant, the version is current enough, and the cited passage supports the relevant claim when the workload requires grounding. Do not accept a list of plausible-looking URLs as evidence.
+
+Structured output controls are useful but not sufficient. Provider-side JSON mode or a response schema can reduce malformed output, but the gateway still needs local parsing and semantic checks. Provider guarantees vary, adapters can drop parameters, and a model can satisfy a schema while returning unsafe or meaningless values.
+
+Repair should have a narrow boundary. Safe repairs include trimming surrounding whitespace, normalizing a known date format, or extracting a clearly delimited JSON object when the contract permits it. Risky repairs include inventing missing fields, changing a refusal into an action, silently deleting invalid items, or coercing arbitrary text into executable arguments. If repair changes meaning, fail or request a new response.
+
+Retries need an acceptance policy. When validation fails, a retry may ask the model to correct formatting, but it should not expand permissions, reveal hidden instructions, or remove safety checks. Cap repair attempts, preserve the original failure, and count every attempt for cost, privacy, and latency budgets. If no response passes, return a stable typed error.
+
+Fallback responses require the same validator. A different provider may use different field names, stop reasons, tool syntax, or citation formats. Normalize only through an explicit adapter, then validate the normalized result. Never bypass validation because the fallback is needed for availability.
+
+Streaming complicates acceptance. Validate each event, enforce ordering, bound cumulative size, and detect premature termination. For structured streams, track parser state and do not expose a supposedly complete object before the closing structure arrives. If a client receives partial text, mark it partial and prevent downstream automation from treating it as a final decision.
+
+Cancellation must stop consumption and side effects. If the client disconnects while a model is streaming a tool call, the gateway should cancel work where possible and refuse to execute an incomplete or stale proposal. Record whether content or actions were delivered before cancellation.
+
+Output encoding is a security boundary. Escape content for its destination rather than assuming model text is safe for HTML, SQL, shell, Markdown, JSON, or logs. Prefer parameterized APIs and typed clients. Validation can reject dangerous constructs, but contextual encoding and least-privilege execution remain necessary.
+
+Watch for prompt-injection-shaped output. An answer may contain instructions addressed to an operator, hidden markup, fake policy messages, or claims that validation should be disabled. Treat all model output as data. Control flow should come from trusted gateway policy, authenticated user intent, and verified system state.
+
+Measure rejection and repair rates by route. Track schema failures, semantic failures, invalid tool calls, unsupported citations, partial streams, retries, and downstream errors. Segment by model, provider, adapter, prompt version, language, workload, and tenant tier. A low rejection rate can mean excellent quality—or a validator that is never running.
+
+Test adversarial and boundary cases. Include extra fields, duplicate keys, deeply nested objects, huge strings, wrong tenants, expired citations, invalid Unicode, malicious URLs, partial JSON, tool timeouts, provider fallback, and model text that attempts to override policy. Verify that failures are contained, explainable, and free of leaked content or credentials.
+
+Keep human review explicit. When a response is ambiguous or high impact, route it to a reviewer with the minimum necessary context. Do not let a review queue become an automatic execution path. Record the reviewer decision separately from the model proposal and validate the final action again before execution.
+
+The practical checklist is clear. Define versioned contracts, parse strictly, validate semantics, constrain tools, verify citations and tenant scope, use provider controls with local checks, keep repairs narrow, apply validation after fallbacks, handle streams and cancellation, encode for the destination, measure failures, and test the validator itself against adversarial output.
+
+The larger lesson is that model generation is only an intermediate step. A dependable gateway decides whether a response is acceptable for the next action, not merely whether bytes arrived. By making acceptance explicit, typed, observable, and fail-safe, the gateway protects clients from turning plausible language into invalid state or unintended side effects.
+
+That is it for today. Make responses safe to consume, and keep the acceptance boundary close to the system that owns the consequences. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
