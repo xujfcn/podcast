@@ -5,9 +5,9 @@ import xml.etree.ElementTree as ET
 
 root = Path('/root/.openclaw/workspace/podcast')
 ep = 282
-title = 'EP282: AI API Gateway Data Minimization - Send Providers Only What They Need'
-description = 'A practical guide to data minimization in AI API gateways: classify payloads, transform them by purpose, enforce provider boundaries, protect tools and logs, control derived data, and measure utility.'
-pub_date = 'Sat, 29 Aug 2026 17:45:00 +0000'
+title = 'EP282: AI API Gateway Output Validation - Make Responses Safe to Consume'
+description = 'A practical guide to output validation in AI API gateways: define consumer contracts, validate structure and semantics, handle partial output, protect tools, bound resources, and measure acceptance.'
+pub_date = 'Sat, 29 Aug 2026 17:15:00 +0000'
 parts = (root / f'episodes/ep{ep:03d}_script.txt').read_text().split('\n\n')
 (root / 'audio').mkdir(exist_ok=True)
 for i, part in enumerate(parts, 1):
