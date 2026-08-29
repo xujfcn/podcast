@@ -1,0 +1,29 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request replay at the AI API gateway: how to reproduce production behavior without replaying secrets, private content, or irreversible side effects.
+
+When an AI request fails in production, a screenshot and an error message rarely explain enough. The result may depend on the exact model, provider, route, prompt version, tool policy, context window, timing, and response acceptance rules. Request replay turns one difficult incident into a testable artifact, but only if that artifact is designed carefully.
+
+Begin with a replay contract. Define what “the same request” means for your system. It may include the normalized request shape, model alias, provider, gateway policy version, prompt version, tenant configuration, and relevant feature flags. It should also identify the expected invariant, such as valid JSON, a tool schema, a latency budget, or a safe refusal. Do not assume byte-for-byte equality is the only useful goal.
+
+Capture lineage at the gateway boundary. Store a request ID, route decision, provider attempt sequence, timestamps, status transitions, token counts, retry decisions, and validation outcomes. Record hashes or version identifiers for sensitive payloads rather than raw content whenever possible. This metadata helps explain what happened without turning observability into a second copy of the user’s data.
+
+Separate replayable inputs from protected inputs. Prompts, documents, images, audio, tool arguments, and headers should each have their own classification and retention policy. Replace secrets with typed placeholders, such as an API token marker or a customer identifier marker. Preserve length, type, and structural relationships when they matter to the bug, but do not preserve the original value merely because it is convenient.
+
+Use deterministic fixtures for sensitive content. A fixture can preserve the shape of a real payload while replacing names, account numbers, credentials, and private text with synthetic equivalents. For structured data, keep field types, nesting, boundary values, and invalid cases. For natural language, preserve the instruction relationships and ambiguity that triggered the issue without copying the original conversation.
+
+Treat nondeterminism as part of the evidence. Record the sampling settings, seed if supported, provider version, tool availability, timeouts, and external data dependencies. Some providers do not offer deterministic generation, and even a fixed seed may not guarantee identical output after a model update. Replay should therefore support assertions over properties and traces, not only exact text comparison.
+
+Freeze the control plane for the first replay. Pin the model mapping, adapter version, prompt template, safety policy, tool definitions, and response parser. Otherwise a replay can silently test today’s system instead of the system that failed. After reproducing the issue under a frozen configuration, run controlled comparisons against the candidate fix and record exactly which variable changed.
+
+Make side effects impossible by default. A replay must not send an email, charge a card, mutate a database, publish content, or execute an unrestricted tool call. Replace effectful tools with stubs that validate arguments and return recorded or synthetic responses. Require an explicit, narrowly scoped approval for any live integration test, and use a disposable tenant with a small blast radius.
+
+Protect replay artifacts. They can contain enough metadata to identify a customer even after the main payload is redacted. Apply access controls, encryption, short retention, audit logging, and deletion workflows. Keep a sanitized fixture in version control only when it contains no secrets or personal data. Link the fixture to the incident and policy versions rather than embedding sensitive incident notes in the test itself.
+
+Build replay in layers. A schema replay checks parsing and validation. A gateway replay checks routing, retries, budgets, and policy. A provider replay checks adapter behavior using a stub or recorded response. An end-to-end replay checks the complete user journey in a safe environment. Layering makes failures easier to localize and avoids invoking a real provider for every debugging question.
+
+Compare outcomes, not just transcripts. Useful assertions include response schema validity, refusal policy, citations or tool-call shape, token limits, latency percentiles, retry count, provider selection, and charge attribution. Store a compact diff that explains which invariant changed. A different sentence can be acceptable; a response that violates a contract is not.
+
+Use replay for prevention. Turn every high-value incident into a sanitized regression fixture with an owner, a reason for retention, and a removal date. Run the fixture in CI when routing, prompts, adapters, safety rules, or model aliases change. Track flaky cases separately so nondeterminism does not train the team to ignore real regressions.
+
+The practical pattern is this: define a replay contract, capture gateway lineage, classify every input, replace secrets with typed fixtures, record nondeterministic conditions, freeze the control plane, stub side effects, protect artifacts, replay in layers, compare invariants, and convert important incidents into sanitized regression tests. Reproduction is valuable only when it is both faithful enough to teach you something and safe enough to run repeatedly.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
