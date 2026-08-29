@@ -1,0 +1,25 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about AI API gateway evaluation: how to measure whether a routing change actually improves the work users care about.
+
+A model can look better in a benchmark and still make a production system worse. It may produce longer answers, consume more tokens, increase tail latency, fail structured output, or trigger more retries. Evaluation at the gateway has to measure the complete request path, not just a model’s isolated answer.
+
+Start by defining the unit of success. For chat, success might mean a useful answer within the deadline. For extraction, it might mean valid JSON with all required fields. For an agent, it may mean the right tool was called, the side effect was authorized, and the final response was delivered. HTTP 200 is only transport success. The gateway needs a task-level acceptance rule.
+
+Build a representative workload set. Include short and long contexts, multilingual inputs, malformed payloads, streaming requests, tool calls, structured output, retries, cancellations, and provider errors. Keep stable examples for regression, but add fresh samples so the system does not overfit to a frozen test set. Store hashes and metadata when prompts are sensitive; evaluation evidence does not require exposing raw customer content.
+
+Compare routes using several dimensions at once. Quality is necessary, but so are accepted-result rate, latency percentiles, token usage, cost per successful task, error class, retry count, and policy outcomes. A route that is five percent cheaper but ten percent less likely to produce an accepted result is not cheaper in practice. A useful scorecard makes that tradeoff visible instead of hiding it inside an average.
+
+Evaluate adapter and gateway behavior too. Send the exact payload production sends. Verify defaults, temperature handling, tool schemas, streaming delimiters, finish reasons, usage fields, and error mapping. Provider compatibility is part of effective model quality. If a model only works after silently changing the request, that transformation needs to be explicit, tested, and included in the result record.
+
+Use shadow traffic carefully. Duplicate requests only when privacy, residency, capacity, and cost rules allow it. Disable tools and side effects in the shadow route. If the original request contains secrets or personal data, redact or replace them with safe fixtures. A shadow experiment that leaks data or doubles an irreversible action has already failed, regardless of its benchmark score.
+
+For live changes, use staged exposure. Begin with an offline suite, then synthetic traffic, then a small canary cohort. Define promotion gates before looking at results: accepted-result rate must not fall, p95 latency must stay within budget, cost per successful task must improve or remain neutral, and policy violations must remain zero. Predefined gates prevent teams from rationalizing a regression because one attractive metric improved.
+
+Evaluation also needs uncertainty. Small samples can make a route appear better by chance. Report sample size, confidence intervals where appropriate, workload segments, and missing observations. Separate model variance from provider incidents and gateway failures. When a result is inconclusive, keep the route in evaluation rather than promoting it on optimism.
+
+Every evaluation should produce an evidence bundle: workload version, route configuration, model and provider identifiers, adapter version, policy version, timestamps, metrics, rejected cases, and a decision. Do not retain more prompt content than necessary. The bundle should let an engineer reproduce the decision without turning the evaluation archive into a second customer-data store.
+
+When a route is promoted, keep monitoring for drift. Production traffic changes. Prompts get longer, tools evolve, providers revise models, and prices move. Re-run a compact regression suite on every meaningful configuration change and periodically sample real outcomes through privacy-safe review. Evaluation is not a launch ceremony; it is a feedback loop between routing policy and observed user value.
+
+The practical pattern is simple: define accepted outcomes, test representative workloads, measure quality and economics together, verify exact gateway behavior, isolate shadow side effects, gate canaries, record uncertainty, and preserve a privacy-aware decision trail. That is how an AI gateway turns model choice from a debate into an operating discipline.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
