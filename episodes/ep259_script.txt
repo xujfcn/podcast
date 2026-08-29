@@ -1,0 +1,55 @@
+EP259: AI API Gateway Context Window Management - Fit Requests Without Losing Intent
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about context window management in AI API gateways. Every model has limits, but real applications rarely send a tidy prompt. They send system instructions, conversation history, retrieved documents, tool results, images, schemas, and output reservations. When the gateway handles that context poorly, requests fail, important instructions disappear, costs rise, and fallback models behave differently.
+
+Start with a context budget. Treat input tokens, output tokens, reasoning capacity, media units, and provider-specific overhead as separate resources. Reserve space for the response before accepting the request. A prompt that fits the advertised maximum may still fail after wrappers, tools, safety messages, or structured-output schemas are added.
+
+Use the resolved model, not the requested alias, to calculate capacity. Different providers count tokens differently, support different limits, and add different hidden overhead. Resolve the route first, calculate its budget, and expose a stable gateway estimate with a clear uncertainty margin. Do not promise that one model’s context limit applies to every fallback.
+
+Preserve instruction priority. If content must be removed, classify system policy, developer rules, user intent, conversation history, retrieved evidence, tool output, and incidental metadata separately. Never truncate from the front or middle without understanding what is being discarded. A shorter prompt is not a safer prompt if it loses the constraint that makes the task valid.
+
+Prefer deterministic reduction. Define ordered strategies such as removing duplicate metadata, trimming low-value history, compressing retrieved passages, summarizing older turns, and finally asking the client to narrow the request. Record which strategy ran, how many units it removed, and which policy allowed it. Hidden, variable truncation makes production behavior hard to reproduce.
+
+Summaries need provenance. A summary can omit an exception, reverse a qualification, or merge two tenants’ facts if the context boundary is wrong. Store the source range, summarizer model, prompt version, timestamp, and confidence where appropriate. Treat summaries as derived evidence, not as an unquestioned replacement for the source.
+
+Conversation history needs a lifecycle. Keep recent turns for continuity, durable user preferences only when authorized, and older details in a searchable store with explicit scope. Do not keep every turn forever just because the model can technically accept it. Retention, privacy, and relevance are context-management requirements.
+
+Retrieval should spend tokens where they matter. Rank documents by relevance, freshness, authority, and diversity. Remove near-duplicates, preserve citations, and allocate a bounded budget per source or tenant. A retrieval system that fills the entire context with similar passages can crowd out the user’s actual question.
+
+Evidence and instructions need separate channels. Retrieved text, webpages, emails, and tool output may contain instructions intended to manipulate the model. Mark them as untrusted data and preserve their source boundaries. Context reduction must not concatenate untrusted text with policy text in a way that erases the distinction.
+
+Tool results require quotas and projections. A tool may return thousands of rows when the model needs only a few fields. Apply schema projection, pagination, filtering, aggregation, and sensitivity rules before adding results to context. Keep the full result outside the prompt when possible, with an opaque reference the tool can retrieve under authorization.
+
+Structured output schemas consume budget. JSON schemas, function definitions, response formats, and tool catalogs may be large. Measure their serialized size and include it in admission calculations. Select only the tools and schema branches needed for the current operation instead of sending an entire catalog on every request.
+
+Multimodal inputs need explicit accounting. Images, audio, video, and extracted text can have provider-specific costs and limits. Record original media size, transformed representation, estimated units, and route constraints. Do not assume that resizing an image preserves every detail the task requires, or that a transcript is equivalent to the original audio.
+
+Output reservation is a policy decision. Reserving too little causes truncated answers; reserving too much rejects useful requests unnecessarily. Use operation-specific defaults, client hints within limits, and model capability data. When the requested output cannot fit, return a typed capacity error or apply an explicit reduction strategy before sending data upstream.
+
+Fallbacks need semantic budgets. A fallback may have a smaller context, different tokenizer, weaker long-context quality, or no support for a tool schema. Before failing over, recalculate the full request against the fallback contract. If the request must be reduced, record that the fallback saw a different context and avoid presenting the result as equivalent without qualification.
+
+Streaming does not remove context limits. The input must fit before the first token arrives, and the output reservation still affects admission. Track generated units, stop reasons, cancellation, and whether the client received a complete response. A stream that ends early may indicate a budget issue, a provider limit, or an intentional stop.
+
+Caching context requires exact scope. A cached summary or retrieved bundle may be reusable only for the same tenant, authorization, policy version, language, data freshness requirement, and model contract. Cache keys should include the transformation profile and source versions. Never reuse a private summary merely because two prompts have similar text.
+
+Normalization can change meaning. Converting message formats, merging system fields, stripping whitespace, or serializing JSON may alter token counts and semantics. Define canonicalization rules, test them against provider adapters, and retain the original logical structure for debugging. The gateway should know whether it changed content or only its representation.
+
+Measure the budget before and after every transformation. Record estimated input units, actual provider usage, output reservation, removed content categories, summary references, and final route. Compare estimates with provider reports to improve the estimator. A dashboard showing only total tokens cannot explain why a request was rejected or why a fallback produced a different answer.
+
+Make capacity errors actionable. Return a stable code, correlation ID, resolved model constraints, and a safe suggestion such as reducing history or selecting a larger-context route. Do not echo the entire oversized prompt in an error. Keep detailed diagnostics internal and redact sensitive content.
+
+Protect against pathological inputs. Limit message count, nesting depth, attachment count, document size, tool-result rows, and repeated content before expensive tokenization. Detect recursive retrieval, prompt stuffing, and adversarial whitespace or encoding. Resource limits should prevent a single request from consuming the gateway’s entire normalization budget.
+
+Budget policy should reflect workload value. Interactive chat may prefer recent context and low latency. Batch analysis may accept longer preprocessing. Compliance review may require complete evidence and fail closed when it cannot fit. Define profiles by operation, tenant, and data class instead of applying one global truncation rule.
+
+Test semantic preservation. Create fixtures where the decisive instruction appears early, late, in a summary, inside a retrieved document, and inside a tool result. Test duplicates, conflicting sources, long code blocks, multilingual text, images, fallback routes, and streaming output. Verify not just that the request fits, but that the answer still follows the required intent.
+
+Test provider differences. Use multiple tokenizers, context limits, schema formats, and tool conventions. Force an alias change, a smaller fallback, an unavailable tokenizer, and a provider-side limit error. Confirm that the gateway recalculates capacity, classifies the failure, and does not silently send a context it knows is invalid.
+
+Keep reduction auditable. For every shortened request, store a compact manifest of source sections, transformations, versions, and resulting estimates. Avoid storing raw sensitive content in the manifest. This gives operators a way to reproduce the route and gives customers an honest explanation when context was reduced.
+
+The practical checklist is clear. Budget input and output separately, resolve the actual model, preserve instruction priority, reduce content deterministically, give summaries provenance, bound retrieval and tools, account for schemas and media, recalculate fallbacks, scope caches, measure every transformation, protect resources, return typed capacity errors, and test semantic preservation across providers.
+
+The larger lesson is that context is a production resource, not an unlimited message field. A dependable gateway makes deliberate decisions about what the model sees, what it must preserve, what it may summarize, and what it must reject. That discipline keeps requests within limits without quietly deleting the meaning that makes the response useful.
+
+That is it for today. Fit requests without losing intent, make every reduction explainable, and treat context budgets as part of the API contract. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
