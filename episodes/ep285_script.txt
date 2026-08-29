@@ -1,0 +1,29 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about rate limit headers at the AI API gateway: how to turn a rejection into a useful capacity signal that clients can act on safely.
+
+Rate limiting is often implemented as a yes-or-no decision. The gateway returns a 429, the client waits, and everyone hopes the next attempt works. That is not enough for AI workloads, where requests vary widely in tokens, latency, and cost. Clients need to know what limit was reached, how much capacity remains, and when retrying has a reasonable chance of success.
+
+Start by defining the unit of capacity. A request limit, token limit, concurrent-generation limit, and spend budget are different resources. A client that receives “ten requests remaining” may still fail because its next request needs more input tokens or because the provider concurrency pool is full. Name the measured resource explicitly and avoid presenting one number as if it describes the entire system.
+
+Use a consistent header vocabulary. Standard HTTP rate limit fields can communicate a limit, the remaining allowance, and a reset point. A Retry-After response can tell a rejected client when to try again. If you add gateway-specific fields, document their units, scope, and clock semantics. Headers that change meaning across routes create more retry bugs than they solve.
+
+Make scope visible. A limit may apply to an API key, user, tenant, organization, model, provider, region, or shared account. The response should make the relevant scope understandable without exposing another customer’s information. When several buckets can reject a request, identify the bucket that actually caused the decision and preserve that reason in safe request metadata.
+
+Choose reset semantics carefully. A fixed-window reset is not the same as a sliding-window estimate or a token-bucket refill time. “Reset in sixty seconds” can mean the current window ends then, or that enough tokens are expected to return then. State whether the value is an absolute timestamp, a delay in seconds, or an approximate estimate. Use server time and tolerate client clock skew.
+
+Do not advertise capacity that is not reserved. Remaining request tokens are an admission hint, not a guarantee that the next call will succeed. Concurrent traffic, provider health, quotas, and request size can change the outcome. Use language and fields that communicate an estimate when appropriate, and avoid making a promise that the scheduler cannot honor.
+
+Account for request cost before accepting it. A chat completion with a long context and large output budget consumes a different amount of capacity from a short classification call. If the gateway uses weighted tokens, return units that let clients reason about that cost. If the request is rejected because its estimated cost exceeds the available budget, say so instead of returning a generic rate limit message.
+
+Coordinate retries with cancellation and backoff. A Retry-After value should be an upper bound or a useful earliest retry point according to the documented contract. Clients should add jitter, respect deadlines, and stop when the user has left. Gateways should avoid turning every 429 into a synchronized retry storm. A good header contract and a good retry policy are one design problem.
+
+Preserve provider signals without leaking confusion. Upstream services may return their own limits and reset values, but those values may refer to a provider account rather than the client’s gateway bucket. Normalize them into a clear gateway contract, retain the original signal in internal lineage, and distinguish client throttling from provider throttling, quota exhaustion, and temporary overload.
+
+Handle streaming and long-running work. A request can pass admission and still consume capacity for minutes while tokens stream. Decide whether capacity is reserved at admission, metered during generation, or reconciled afterward. If a stream is cancelled, release or reconcile the reservation promptly. Headers on the initial response should describe the contract, while usage trailers or an out-of-band usage record can report final consumption where supported.
+
+Test headers as an API contract. Verify field names, types, units, scope, reset behavior, missing-header behavior, and compatibility across successful and rejected responses. Test burst traffic, clock skew, retries, cancellation, oversized requests, provider failures, and simultaneous limits. A header that is technically present but stale, contradictory, or impossible to interpret is a broken interface.
+
+Observe the effect, not just the value. Track 429 rates by bucket, retry success, retry amplification, time spent waiting, abandoned requests, and provider utilization. Compare the advertised reset estimate with actual acceptance probability. If clients repeatedly retry too early or too late, adjust the contract and the scheduler together.
+
+The practical pattern is this: define the resource, standardize the vocabulary, expose scope and reset semantics, distinguish estimates from guarantees, account for weighted request cost, coordinate Retry-After with jitter and deadlines, normalize provider signals, reconcile streaming usage, test the fields as a contract, and measure whether clients can actually recover. Rate limit headers are useful when they describe a decision precisely enough for software to make the next decision well.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
