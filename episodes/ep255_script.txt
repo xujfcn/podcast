@@ -1,0 +1,51 @@
+EP255: AI API Gateway Provider Attestation - Prove Which Service Answered
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about provider attestation for AI API gateways. A gateway may route a request through a provider domain, an adapter, a regional endpoint, a proxy, a model alias, and several intermediate services. When the response arrives, teams often know only the friendly model name they requested. For security, compliance, billing, and debugging, that is not enough. The system should be able to prove which service answered and under which conditions.
+
+Start with the identity contract. Define the provider organization, account, endpoint, region, model family, resolved model revision, adapter, and gateway release. Preserve the difference between what the client requested and what the gateway actually used. An alias such as “fast” or “latest” is a routing instruction, not durable identity.
+
+Verify endpoint ownership. Use approved hostnames, DNS controls, TLS validation, certificate policies, and egress allowlists. Do not rely on a URL string supplied by configuration without checking its ownership and environment. A compromised adapter should not be able to redirect production prompts to an unrelated service.
+
+Regions need evidence too. Record the declared processing region, the endpoint region, and any known subprocessor or failover region. Validate that the provider contract permits the data class in that location. If a provider cannot attest to the actual processing boundary, route only workloads whose policy allows that uncertainty.
+
+Model aliases can drift silently. Resolve aliases to a provider model identifier and revision at request time or release time, then store the result with the request lineage. When the provider changes an alias, compare capabilities, safety behavior, pricing, and output contracts before accepting the new revision. Do not let a marketing label become an unreviewed production change.
+
+Credentials identify an account, not necessarily a trustworthy service. Scope provider keys to the intended account, API, model family, region, and environment. Track which credential reference authorized the attempt without logging the secret. If a credential is unexpectedly accepted by a different endpoint, treat that as an identity failure.
+
+Response metadata should be preserved and normalized. Capture provider request ID, model ID, system fingerprint where available, usage, finish reason, region hints, and adapter status. Keep raw provider metadata separate from the client response. Normalize it into a stable gateway contract while retaining enough detail for later verification.
+
+Attestation is stronger than a self-reported header. A provider may return a model name or request ID, but the gateway should validate that the response came over the authenticated connection to the approved endpoint. For high-assurance workloads, use signed response metadata or an equivalent provider-supported proof. Document exactly what is proven and what remains an assertion.
+
+Integrity and identity are different. TLS can protect the connection to a host, but it does not prove that the host ran the model revision it advertised. A signature can authenticate metadata, but it may not prove the entire generated content if the signing boundary is unclear. Keep transport, endpoint, model, and content integrity claims separate.
+
+The gateway can create a signed receipt. After validating the attempt, issue a receipt containing request ID, tenant reference, route policy revision, provider identity, model revision, region, prompt and response hashes, usage, timestamps, and transformation history. Sign the receipt with a gateway key stored outside the application. The receipt should not include raw prompts, outputs, secrets, or unnecessary personal data.
+
+Hashing needs canonicalization. If JSON field order, whitespace, Unicode normalization, or compression changes the bytes, hashes can disagree even when semantics are identical. Define whether the hash covers canonical logical content, exact wire bytes, or both. Record the canonicalization version and never silently switch it.
+
+Streaming responses require event-level evidence. A single final receipt may omit that the first part came from one attempt and the stream ended after a provider failure. Record ordered attempt and event references, completion state, cancellation, and whether the client received the full response. For high-risk workflows, sign checkpoints or a final digest that covers the event sequence.
+
+Fallbacks complicate identity. If the primary provider times out and a fallback answers, the delivered response must identify the fallback in the lineage. Preserve both attempts, their endpoint evidence, policy checks, and cancellation status. Do not report only the requested model when a different service supplied the content.
+
+Shadow traffic must be labeled clearly. A shadow provider may inspect a minimized request and produce a comparison result, but its output should not be confused with the delivered answer. Record shadow status, model identity, experiment revision, and retention class separately. A candidate response is not production provenance.
+
+Tools and retrieval extend the trust chain. If a model answer includes data from a database, search engine, or external API, attest to those services as well. Record tool identity, version, target, authorization scope, source snapshot, and result reference. The gateway should distinguish provider-generated language from facts returned by an authenticated tool.
+
+Adapters are part of the attested path. An adapter can change parameters, remove safety settings, map model names, retry, or transform errors. Include adapter version and configuration hash in the receipt. Contract tests should verify that the adapter sends only approved destinations and preserves the fields required for identity and policy decisions.
+
+Configuration deserves signatures and versions. Routing tables, provider capability maps, region policies, model catalogs, and feature flags determine what service receives a request. Authenticate configuration sources, validate schemas, and record the exact revision used. A correct binary with an untrusted route table is not a trustworthy execution.
+
+Attestation should affect routing. If a workload requires a specific provider account, region, model revision, or retention contract, an unverifiable route should be denied or sent to a stricter path. Do not collect identity evidence after the data has already left and call it enforcement. The gate belongs before transmission, with post-response evidence confirming the decision.
+
+Use freshness limits. A capability or identity assertion from last month may not describe the current endpoint. Set expiration and refresh requirements for provider metadata, certificates, model catalogs, and region claims. If evidence is stale, fail closed for high-assurance workloads and surface a typed route error.
+
+Monitor mismatches. Alert when requested and resolved model IDs differ unexpectedly, response metadata contradicts configuration, regions change, provider accounts vary, signatures fail, or adapter versions drift. Compare receipts with deployment records, provider invoices, and network telemetry. Identity anomalies often appear first as small inconsistencies.
+
+Privacy still applies. Provenance receipts, hashes, request IDs, and region data can reveal sensitive operational information. Scope who can read detailed receipts, separate public citations from internal identity evidence, set retention, and support deletion where required. Do not create a permanent raw-content archive merely to prove origin.
+
+Test identity failures deliberately. Use a wrong certificate, unexpected hostname, stale model catalog, altered response metadata, invalid signature, region mismatch, fallback route, proxy rewrite, and adapter downgrade. Verify that the gateway refuses unapproved transmission, marks uncertain responses, and does not present a clean attestation for a failed check.
+
+The practical checklist is clear. Define requested versus resolved identity, verify endpoints and regions, pin model revisions, scope credentials, preserve provider metadata, separate identity from integrity claims, sign compact receipts, include adapters and configuration, track streams and fallbacks, attest tools and retrieval sources, enforce freshness, monitor mismatches, protect receipts, and test failures.
+
+The larger lesson is that “the model answered” is not a sufficient production record. A dependable AI gateway should be able to explain which service ran, which version and region were selected, which policy allowed the route, what transformations occurred, and whether the evidence is cryptographically or operationally trustworthy. That proof makes reliability, security, and billing claims much easier to defend.
+
+That is it for today. Prove which service answered, keep identity claims precise, and make every route carry evidence. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
