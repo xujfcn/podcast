@@ -1,0 +1,51 @@
+EP256: AI API Gateway Workload Identity - Route Requests With Trusted Context
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about workload identity in AI API gateways. A gateway cannot make reliable decisions from a prompt alone, and it should not trust identity claims copied into model output or forwarded through an unverified proxy. To route safely across tenants, models, regions, tools, and budgets, the gateway needs a trusted answer to a basic question: which workload is making this request, for whom, and under what authority?
+
+Start by separating the actors. There may be an end user, a customer application, a gateway service, a model provider, a retrieval system, and a tool executor. Each has a different identity and different authority. Do not collapse them into one API key or one “agent” label. A model can generate a plan, but it is not automatically the principal authorized to execute that plan.
+
+Use workload identity instead of shared static credentials where possible. A service account, signed workload token, mTLS identity, or platform-native identity can bind a request to the application that initiated it. Validate issuer, audience, signature, expiry, key ID, and environment. The gateway should reject tokens intended for another service or another deployment stage.
+
+Identity is not authorization. Knowing that a request came from the billing service does not mean it may access every tenant, choose every model, or invoke every tool. Map identity to explicit permissions, tenant scope, data class, budget, region, and allowed operations. Keep authorization decisions server-side and record the policy version that produced them.
+
+Bind user and workload context carefully. An application may act on behalf of a user, but the gateway must verify that delegation rather than trust a user ID in a JSON field. Preserve the distinction between the caller, the delegated subject, the tenant, and the resource owner. When a request crosses services, carry signed context or an authenticated reference, not an editable collection of headers.
+
+Forwarded headers are untrusted until proven otherwise. Headers such as X-User, X-Tenant, X-Role, and X-Forwarded-For can be rewritten by clients or intermediaries. Define which proxy is allowed to set each header, strip incoming copies at the edge, and replace them with gateway-generated values after authentication. Never make a high-impact decision from a client-controlled identity header.
+
+Use audience and purpose restrictions. A token minted for text generation should not automatically authorize database reads or payment actions. Scope credentials to an operation, target, and time window. Short-lived, purpose-bound capabilities reduce blast radius and make accidental reuse easier to detect.
+
+Tenant context must survive normalization. Store the verified tenant reference in an internal request context that model-generated fields cannot overwrite. Ensure it survives retries, fallbacks, asynchronous jobs, streaming continuations, and tool calls. If context is missing or contradictory at any boundary, stop the workflow rather than guessing.
+
+Prevent confused deputy behavior. A low-privilege client may ask the gateway to use a highly privileged provider or tool because the gateway has access to it. Check the original caller’s authority before using the gateway’s own credentials. Do not let a customer turn the gateway into an unrestricted proxy for internal systems.
+
+Identity should influence routing. Use workload, tenant, data class, region, model capability, budget, and contract to select eligible routes. A development workload should not reach production providers by default. A regulated tenant should not silently inherit the policy of a general-purpose route. Routing is part of the authorization surface.
+
+Keep model context separate from trusted control context. The model may need task instructions and selected data, but it does not need signed identity claims, secret references, internal roles, or policy internals. Expose only the minimum task context. Let the gateway use trusted attributes for decisions without copying them into prompts.
+
+Tool execution must re-check identity. A model response can request a tool, but the executor should evaluate the original caller, delegated subject, tenant, target resource, action, and current policy. Do not allow a tool to infer authority from the model’s prose. Bind tool credentials to the verified request context and prevent cross-tenant reuse.
+
+Async work needs non-transferable context. Webhooks, queues, and scheduled jobs may execute after the original request ends. Store an opaque job reference with scope, expiry, tenant, purpose, and policy revision. Re-authenticate or re-authorize at execution time. Do not serialize long-lived bearer tokens or assume that an old authorization decision remains valid.
+
+Streaming adds lifecycle complexity. Keep the authenticated identity bound to the stream, reject unauthorized reconnects, and verify that a continuation token belongs to the same caller and request. On disconnect or expiry, cancel upstream work and prevent a later client from resuming another user’s stream.
+
+Proxies and service meshes can help or hurt. mTLS and workload attestation can establish service identity, but only if certificates, trust roots, namespaces, and rotation are managed correctly. Document which hops terminate TLS and which claims are reissued. A trusted network location is not a substitute for request-level authorization.
+
+Use key rotation without breaking identity. Support overlapping signing keys, publish trusted key sets safely, and reject expired or revoked keys according to policy. Cache verification metadata with a bounded freshness period. Record key ID and issuer, never the token contents, in audit events.
+
+Identity claims require canonicalization. Normalize tenant IDs, service names, regions, and resource identifiers before comparing them. Prevent case, encoding, Unicode, path traversal, or alternate identifier forms from creating two interpretations of the same principal. Apply the same canonicalization at authentication, authorization, routing, logging, and billing boundaries.
+
+Audit decisions, not just logins. Record authenticated principal, delegated subject, tenant, requested operation, selected route, policy revision, tool target, decision, and outcome. Use opaque references for sensitive content. A successful token verification without a record of what it authorized is insufficient for incident reconstruction.
+
+Monitor identity anomalies. Alert on impossible tenant changes, token reuse across environments, unusual provider or tool destinations, expired-token spikes, signature failures, new service identities, privilege expansion, and authorization denials followed by repeated retries. Compare gateway identity events with deployment records and service inventory.
+
+Test identity confusion deliberately. Send forged headers, wrong audiences, expired tokens, tokens from another environment, mismatched tenant fields, replayed job references, unauthorized stream continuations, and model-generated privilege claims. Verify that the gateway rejects them before data leaves or tools execute.
+
+Test failure and fallback behavior. Remove an identity provider, rotate a key during traffic, make a policy service unavailable, and trigger a provider fallback. Confirm that the gateway fails closed for high-risk operations, preserves the original caller context, and never widens permissions to keep availability.
+
+Keep identity evidence private. Detailed claims, tenant relationships, service topology, and policy decisions can be sensitive. Limit access to identity audit records, apply retention rules, and avoid returning internal principal details in client errors. Use correlation IDs and stable error categories instead.
+
+The practical checklist is clear. Separate actors, authenticate workloads, distinguish identity from authorization, verify delegation, distrust forwarded headers, bind permissions to purpose and tenant, preserve trusted context across boundaries, prevent confused deputy behavior, re-check tool and async work, secure streams, rotate keys, canonicalize claims, audit decisions, monitor anomalies, and test identity confusion and failure paths.
+
+The larger lesson is that dependable AI routing requires dependable context. Models can help interpret a task, but they should not define who is calling, which tenant owns the data, or what actions are allowed. When workload identity is authenticated, scoped, carried safely, and checked at every boundary, the gateway can make routing decisions that remain trustworthy under proxies, retries, tools, and automation.
+
+That is it for today. Route requests with trusted context, keep identity separate from model text, and make every authorization decision explainable. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
