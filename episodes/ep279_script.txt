@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request lineage in an AI API gateway: how to make every response explainable by tracing the route, policy, retries, provider, and usage decisions behind it.
+
+An AI response is the result of a chain of decisions. The gateway may authenticate a tenant, classify data, select a region, choose a model, apply a policy, retry a provider, validate the output, and calculate usage. Without lineage, an operator sees only a request ID and a final answer, then has to guess why the system behaved that way.
+
+Start with a stable request identity. Give the logical client operation a request ID, and give each provider attempt its own attempt ID. Carry the parent relationship through queues, adapters, streaming sessions, tool calls, and billing. A retry must remain connected to the original request while staying distinguishable as a separate execution.
+
+Capture decisions, not just timestamps. Record the selected route, provider, model revision, region, policy version, configuration snapshot, fallback reason, retry reason, acceptance result, and usage source. These fields explain behavior without requiring operators to reconstruct it from unrelated log lines.
+
+Keep lineage structured and queryable. Use consistent field names, enums, and timestamps. Separate high-cardinality identifiers from dimensions used for aggregation. Emit events for admission, dispatch, provider response, validation, tool execution, completion, cancellation, and billing. A single flattened log message is difficult to search and easy to misinterpret.
+
+Protect privacy and secrets. Lineage should reference prompts, files, and responses through controlled identifiers rather than copying their contents into every event. Redact authorization headers, API keys, tool arguments, and sensitive data. Apply tenant isolation to queries, and define retention based on operational value and compliance requirements.
+
+Make lineage survive asynchronous work. A request may enter a queue, cross a region, resume a stream, or trigger a tool after the initial model response. Propagate context explicitly instead of relying on thread-local state. When context is missing, record an unknown value and a propagation error; never invent a provider or policy decision after the fact.
+
+Connect lineage to cost and quality. Link provider usage, retries, repair attempts, and final acceptance to the logical request. This makes it possible to calculate cost per accepted task, identify expensive fallback paths, and explain why a cheap-looking request consumed multiple attempts. Quality evaluators can also use lineage to compare outcomes across routes.
+
+Expose a safe explanation to clients. Return the request ID, selected model or an approved alias, region class where appropriate, acceptance status, and stable error category. Do not expose internal credentials, sensitive routing rules, or provider details that policy forbids. The client should be able to report a useful ID to support without receiving the entire internal trace.
+
+Use lineage for incident response. When an error spike appears, group requests by provider, model revision, configuration hash, policy version, region, and attempt type. Compare successful and failed paths. A lineage view can distinguish provider failure from adapter failure, policy rejection, validation failure, and billing reconciliation delay.
+
+Test lineage as a contract. Send requests through retries, fallbacks, streams, cancellations, tool calls, and multi-region failover. Verify parent-child relationships, ordering, redaction, tenant isolation, and completion states. Test partial failures where the response is returned but usage or billing arrives later. Missing lineage should be an observable defect, not a silent gap.
+
+Control the operational cost. Sampling may be appropriate for healthy traffic, but errors, policy decisions, fallback attempts, and billing events usually deserve stronger retention. Store compact summaries on the hot path and detailed evidence asynchronously when possible. Ensure sampling never removes the fields needed to explain a customer-impacting failure.
+
+The practical pattern is simple: establish stable identities, trace every attempt and decision, use structured events, propagate context across async boundaries, protect private data, connect lineage to cost and quality, expose safe explanations, and test the chain under failure. An AI gateway is explainable when the final response can be traced back to the exact decisions and evidence that produced it.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
