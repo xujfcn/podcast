@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about rate-limit headers in an AI API gateway: how to turn capacity decisions into signals that clients can actually use.
+
+A gateway can reject a request correctly and still create a poor developer experience. “Too many requests” does not tell a client whether it exceeded request frequency, token capacity, concurrency, spend, or a provider limit. It also does not say when trying again might work. Good response metadata makes enforcement predictable instead of forcing every client to guess.
+
+Start by naming the limited resource. Requests, input tokens, output tokens, concurrent streams, daily spend, and provider capacity are different dimensions. A response should identify the dimension that caused the decision, while keeping internal policy details private. A client can reduce request frequency, shorten context, lower concurrency, or wait for a billing reset only if it knows which resource is constrained.
+
+Use stable headers and error types. A standard status such as 429 can be accompanied by a machine-readable error code and a Retry-After value when retrying is meaningful. For quota exhaustion that lasts until a reset time, return the reset timestamp or relative delay. For plan entitlement or policy denial, do not suggest an immediate retry that cannot succeed.
+
+Explain remaining capacity carefully. Headers such as limit, remaining, and reset are useful for a single counter, but AI usage is multidimensional and estimates can be uncertain. If remaining capacity is an estimate, say so through the contract or documentation. Do not expose a value that looks precise while reservations, retries, and delayed provider usage make it unreliable.
+
+Define the counting scope. Is the limit per request key, project, tenant, organization, model, region, or shared provider pool? Clients do not need every internal bucket, but they need to understand whether rotating keys will help. If the real policy is organization-wide, say that the quota is shared so clients do not build an ineffective workaround.
+
+Account for reservations and streams. A request may reserve output tokens before the model responds. A long-lived stream may hold concurrency until it closes or is cancelled. The next response should reflect committed capacity, not only completed requests. When a stream disconnects, release reservations only after the gateway knows whether provider work stopped or is still pending.
+
+Make retries safe. A Retry-After value is not permission to retry blindly. Clients should use bounded exponential backoff, jitter, and an idempotency key for operations that may create side effects. The gateway should distinguish overload from a durable quota state. Retrying a request that already reached a provider can duplicate work and cost even when the original client saw an error.
+
+Separate gateway limits from provider limits. The gateway may have room while the selected provider is exhausted, or the provider may recover while a tenant budget remains unavailable. Return a stable category such as gateway rate limit, tenant quota, or upstream capacity without exposing credentials or internal topology. This lets the client choose whether to wait, reduce demand, or select an eligible alternative.
+
+Support graceful degradation when the contract allows it. A client may ask for a cheaper model, a smaller context, non-streaming output, or queued batch processing after receiving a capacity signal. The gateway can advertise eligible alternatives, but it must not silently downgrade a request when model identity, quality, residency, or safety requirements matter.
+
+Observe the signals themselves. Track how often clients honor Retry-After, how many retries arrive too early, whether headers disagree with actual admission, and whether one resource dimension causes most failures. Misleading capacity signals create retry storms. Clear signals reduce load and improve the chance that recovery succeeds.
+
+Test edge cases. Verify headers on immediate rejection, partial streams, provider timeouts, queue admission, budget exhaustion, and failover. Check clock skew, reset boundaries, concurrent reservations, and multi-region behavior. Documentation examples should match real responses, including error shape and units.
+
+The practical pattern is simple: identify the constrained resource, define the counting scope, return stable error metadata, provide honest retry timing, account for reservations and streams, distinguish gateway from provider limits, support explicit degradation, and measure whether clients can act on the signal. Rate limiting works best when a rejection is also a useful instruction.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
