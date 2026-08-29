@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about maintenance windows in an AI API gateway: how to coordinate provider changes, configuration updates, and traffic movement without turning planned work into a surprise outage.
+
+Maintenance is not only downtime. A provider may change a model, rotate certificates, reduce capacity, alter pricing, or upgrade an API contract. The gateway may publish a new adapter, policy, or routing table at the same time. Each change can be safe alone and risky in combination.
+
+Start with a precise change inventory. Record the provider, model, region, dependency, expected impact, owner, rollback action, and validation signal. Include changes that appear operationally minor, such as cache invalidation, quota adjustments, schema updates, and observability migrations. If a change can alter a request’s route, semantics, cost, or data boundary, it belongs in the window plan.
+
+Define the maintenance contract for customers. Publish the affected capabilities, start and end times, expected behavior, status page location, and any client action required. Prefer continuing service with controlled degradation when possible, but say exactly what may change: slower responses, a temporary model restriction, queued batch jobs, or a tested fallback.
+
+Prepare the target state before moving traffic. Load and validate configuration, credentials, model catalogs, pricing versions, policies, and health checks in an isolated environment. Compare the target snapshot with the active state. A maintenance window should not be the first time anyone discovers that a region is missing a tool permission or a provider model.
+
+Drain traffic deliberately. Stop admitting new work to the component being maintained, allow safe in-flight requests to finish, cancel or move only what the contract permits, and preserve operation identity across the transition. Streaming requests and long-running jobs need explicit deadlines so draining does not wait forever.
+
+Use progressive exposure. Start with synthetic checks, then a small internal cohort, then a canary percentage or selected tenant group. Gate promotion on accepted-task rate, error classes, latency tails, cost, provider identity, policy outcomes, and data-boundary checks. A green process health check is not enough.
+
+Coordinate dependencies in order. If an adapter expects a new provider response, validate the provider first. If a policy depends on a new model catalog, publish the catalog before enabling the policy. If billing depends on new usage fields, test reconciliation before broad traffic. Explicit dependency order prevents partial upgrades from creating incompatible combinations.
+
+Keep rollback simple and fast. Preserve the previous configuration, adapter, route, and policy versions. Define which state is safe to revert and how to handle work already accepted under the new version. If a provider change cannot be reversed, prepare a second tested route and state that rollback means failover rather than restoration.
+
+Watch the window in real time. Assign an owner for the decision, a separate observer for signals, and a clear escalation path. Record timestamps for each phase, commands or changes applied, and evidence for promotion or rollback. If a signal is ambiguous, pause. Maintenance pressure is not a reason to declare success without evidence.
+
+Handle the end of maintenance carefully. Do not restore all traffic instantly. Confirm capacity, reconcile usage, clear temporary overrides, and remove emergency bypasses. Compare the final state with the intended configuration. Temporary flags and exceptions left behind are a common source of later drift.
+
+Learn from every window. Measure customer impact, failed attempts, queue growth, rollback time, reconciliation gaps, and support volume. Turn incidents and near misses into preflight checks and regression tests. A mature maintenance process gets shorter and safer because the system remembers what previous changes taught it.
+
+The practical pattern is simple: inventory changes, publish the contract, pre-stage and compare state, drain traffic deliberately, expose progressively, order dependencies, preserve rollback, watch with clear ownership, restore gradually, and capture evidence. A maintenance window is successful when customers experience a controlled transition rather than having to discover the change through failure.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
