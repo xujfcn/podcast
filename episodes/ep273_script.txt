@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy evaluation in an AI API gateway: how to turn intent into runtime decisions that are consistent, explainable, and safe to change.
+
+Policies decide what a request may do. They can restrict models, regions, tools, data classes, spend, retention, concurrency, and response handling. When policy is scattered across middleware, provider adapters, and application code, operators cannot easily answer why a request was allowed, denied, downgraded, or routed somewhere else.
+
+Start with a policy vocabulary. Define the subjects, resources, actions, conditions, and outcomes explicitly. A subject might be a tenant, project, API key, or workload identity. A resource may be a model, region, tool, or data class. An action could be generate, stream, retrieve, execute, or export. Clear vocabulary makes rules composable and reduces ambiguous exceptions.
+
+Separate policy intent from enforcement mechanics. “This tenant may use model family A in region B with tool C” is intent. Authentication, routing filters, budget reservations, and provider calls are enforcement. Keep the intent in a versioned policy document, then record which compiled or evaluated form produced the decision.
+
+Evaluate policies in a predictable order. Authenticate the caller, resolve tenant and workload context, classify relevant data, check entitlement and residency, evaluate model and tool permissions, reserve budgets, and only then dispatch work. The exact order may vary, but dependencies must be explicit. Do not reserve money or reveal provider details before a request is authorized to use them.
+
+Return a decision with reason codes. “Denied” is not enough for operators or clients. Use stable categories such as model not allowed, region restricted, budget exhausted, tool not authorized, data class prohibited, or policy evaluation unavailable. Expose only safe detail to clients, while retaining richer evidence internally.
+
+Fail closed or open deliberately. A missing policy, stale cache, or policy engine timeout can create a security incident or an availability incident depending on the choice. For sensitive tools, data boundaries, and regulated workloads, fail closed is usually appropriate. For low-risk metadata or a nonessential optimization, a safe fallback may be acceptable. Document the choice per policy domain.
+
+Make policy decisions atomic with the work they authorize. A request can pass a check and then wait in a queue while the tenant’s budget, region eligibility, or tool permission changes. Bind the decision to a policy version and recheck at important boundaries such as dispatch, tool execution, and long-running stream continuation.
+
+Avoid policy bypasses in retries and fallbacks. A fallback model must satisfy the same data, quality, residency, and entitlement constraints as the original route. A retry should not become a new authorization opportunity with different context. Carry the decision lineage across every attempt and record when a new evaluation was required.
+
+Treat tools as separate risk boundaries. Model permission does not automatically imply tool permission. Check tool identity, arguments, destination, side-effect class, and tenant scope. Use allowlists, sandboxing, approval gates, and idempotency for mutations. Policy evaluation should happen before the tool starts, not only after the model asks for it.
+
+Version and test policy changes like code. Use fixtures for allowed, denied, boundary, and missing-context cases. Test interactions between tenant budgets, model routing, residency, tools, and fallback. Compare decision outputs before promotion, and keep rollback available. A one-line exception can change the effective security posture for thousands of requests.
+
+Observe policy as an operating system. Track decisions by policy version, reason, tenant, model, region, and route. Alert on unexpected deny spikes, fallback decisions, evaluation latency, stale policies, and decisions made under degraded mode. Keep enough evidence to reconstruct what was evaluated without storing full prompts by default.
+
+The practical pattern is simple: define a clear vocabulary, version intent, evaluate in an explicit order, return stable reasons, choose failure modes deliberately, bind decisions to execution, protect tool boundaries, test changes, and retain privacy-aware evidence. Policy evaluation is trustworthy when the gateway can explain not only what happened, but which rule made it happen.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
