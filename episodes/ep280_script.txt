@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about change failure analysis in an AI API gateway: how to understand why a model, adapter, policy, or configuration change that looked safe still broke production.
+
+Change failure analysis is not a search for someone to blame. It is a way to connect an observed impact to the assumptions, dependencies, controls, and signals that allowed the change to reach users. AI gateways make this especially important because a small change can alter semantics, cost, latency, safety, and routing all at once.
+
+Start with the exact change identity. Record the commit, configuration snapshot, model revision, policy version, rollout window, owner, and affected routes. “We changed the provider” is too vague. You need to know which adapter, region, tenant cohort, feature flag, and fallback path were actually exposed.
+
+Build a timeline from evidence. Include approval, deployment, activation, first failure, detection, mitigation, rollback, and recovery. Use gateway lineage, provider logs, metrics, alerts, queue depth, billing events, and customer reports. Do not rely on memory or the time a dashboard happened to be checked.
+
+Describe impact in user terms. Count failed or unaccepted tasks, delayed responses, duplicate work, incorrect routing, policy violations, data-boundary risks, and unexpected charges. Separate affected and unaffected cohorts. An average error rate can conceal that one region or one high-value workflow failed completely.
+
+Compare expected and actual behavior. State what the change was supposed to do, which invariants should have remained true, and what actually happened. Check model identity, response schema, tool behavior, usage accounting, latency, retry volume, policy decisions, and fallback selection. Differences reveal which assumption failed.
+
+Trace dependencies in both directions. The direct code change may be innocent while a provider catalog, credential, quota, policy, cache, or billing parser was incompatible. Follow the request path from client to gateway to provider and back, then follow control-plane inputs that shaped the route. Dependency mapping turns a symptom into a causal graph.
+
+Examine the detection gap. Which signal should have caught the problem before customers did? Was the probe too shallow, the canary too small, the acceptance validator too weak, or the alert filtered by an aggregate average? A failed detection control is itself a finding, even if the original change was reasonable.
+
+Separate trigger, enabling conditions, and amplifiers. The trigger might be an adapter release. Enabling conditions could be stale configuration or missing contract tests. Amplifiers might be automatic retries, a broad rollout, or an unprotected fallback. This separation leads to multiple useful fixes instead of one vague action item.
+
+Check the rollback path. Ask whether rollback was available, fast, complete, and safe for work already accepted under the new version. If rollback failed, determine whether state, billing, queues, or provider-side effects made restoration difficult. A rollback that exists only in documentation is not a control.
+
+Turn findings into durable controls. Add a contract test, a readiness probe, a lineage field, a canary gate, a policy fixture, a billing reconciliation check, or a rollout limit. Assign an owner and deadline, and define the evidence that will prove the fix works. Avoid action items such as “be more careful,” which cannot be verified.
+
+Look for recurring patterns. Repeated failures around model upgrades may indicate missing semantic tests. Repeated regional issues may indicate configuration drift. Repeated billing gaps may indicate asynchronous usage assumptions. Group incidents by failure mechanism, not only by service name, to find systemic weaknesses.
+
+The practical pattern is simple: identify the exact change, build an evidence-based timeline, measure user impact, compare expected and actual invariants, trace dependencies, analyze detection and rollback gaps, separate triggers from amplifiers, and install verifiable controls. A change failure analysis is valuable when the next similar change has fewer ways to surprise production.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
