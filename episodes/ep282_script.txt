@@ -1,0 +1,29 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about output validation in an AI API gateway: how to stop responses that are malformed, unsafe, or incomplete from reaching the code that depends on them.
+
+An AI response is an input to another system. It may create a database record, call a tool, update a workflow, or make a decision. Treating model output as trusted just because it arrived from an authenticated provider turns formatting mistakes and ambiguous content into application failures.
+
+Start with an explicit output contract. Define the content type, schema, required fields, allowed values, maximum sizes, finish conditions, and semantic invariants. For a tool call, specify the tool name, argument shape, authorization scope, and side-effect class. The contract should describe what the downstream consumer can safely accept.
+
+Validate in layers. Check framing and content type first, then parse the format, validate the schema, enforce field constraints, and finally run task-specific semantic checks. Reject malformed data at the earliest useful boundary. Do not silently convert invalid output into defaults that look valid to downstream code.
+
+Keep validation separate from repair. A gateway may retry with a constrained prompt, use a structured-output mode, or apply a narrowly defined formatter. But a repair is a new transformation with its own failure modes. Record the original result, repair attempt, validator version, and final disposition. Never make unlimited repair attempts on the critical path.
+
+Handle partial and truncated output explicitly. A stream can end before the JSON object closes, a provider can report a length limit, or a client can disconnect after only part of the response. Mark the result partial or unknown unless the contract explicitly permits partial data. Do not infer completion from a plausible first paragraph.
+
+Validate tool calls before execution. Check that the tool is allowed for this tenant and route, arguments match the schema, destinations are permitted, and the requested action is within its risk budget. Use idempotency for mutations and require approval for sensitive operations. Model intent is not authorization.
+
+Use bounded resource controls. Validation itself can consume CPU, memory, tokens, and time. Set limits for nesting depth, string length, array size, output bytes, parser time, and evaluator concurrency. Apply limits before expensive semantic analysis. A validator must not become a new denial-of-service surface.
+
+Design safe failure behavior. Depending on the task, return a structured validation error, retry with a bounded budget, route to an eligible fallback, or ask the client to resubmit. Preserve the request ID and stable failure category. Do not expose internal prompts, hidden policy rules, or sensitive response content in an error message.
+
+Measure validators as production controls. Track invalid-output rate, failure category, repair success, accepted-task rate, latency, token usage, and fallback frequency by model, provider, route, and task type. A sudden drop in validation failures may mean the model improved, or it may mean the validator stopped running. Monitor execution health separately.
+
+Version contracts and evaluators. When a schema, business rule, safety check, or parser changes, record the version that made the decision. Run old and new validators against representative fixtures before rollout. Keep compatibility rules clear for clients that consume different contract versions.
+
+Protect evidence and privacy. Store compact failure metadata and redacted fixtures by default. Keep raw outputs only when justified by retention policy and access controls. Hash or reference sensitive payloads rather than copying them into logs. Tenants should be able to audit their own failures without seeing another tenant’s content.
+
+Test adversarial and ordinary cases. Include valid output, missing fields, wrong types, extra fields, invalid enums, oversized values, malformed JSON, prompt injection in content, unsafe tool destinations, truncated streams, and provider error envelopes. Verify that valid responses pass quickly and invalid responses cannot reach side-effecting code.
+
+The practical pattern is simple: define the consumer contract, validate structure and semantics in layers, separate repair from acceptance, handle partial output honestly, authorize tools independently, bound validator resources, fail safely, measure the control, version evaluators, and protect evidence. Output validation works when downstream systems receive only results they are prepared to consume.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
