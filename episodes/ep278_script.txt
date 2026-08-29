@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about configuration drift in an AI API gateway: how to detect when regions, workers, and policy replicas disagree, and how to stop silent differences from changing production behavior.
+
+Configuration is part of the runtime. Provider credentials, model catalogs, routing weights, pricing tables, policies, feature flags, timeout values, and safety rules all influence a request. If two workers load different versions, the same client request can receive different models, costs, regions, or enforcement.
+
+Start with one authoritative desired state. Give every configuration object an identity, version, owner, scope, and dependency list. Store the desired state in a controlled source, then compile or distribute it to workers. Avoid treating a worker’s local file or an operator’s memory as the source of truth.
+
+Use content-addressed snapshots. A worker should report the exact configuration hash it is using, not merely a deployment label. Include component versions for routing, adapters, policies, model catalogs, pricing, and feature flags. A request lineage record can then show which snapshot made the decision.
+
+Compare desired, distributed, and active state. Desired state says what should exist. Distributed state says what the control plane sent. Active state says what the worker actually loaded and enforced. Drift can occur at any boundary: a failed rollout, stale cache, partial restart, invalid configuration, or region that never received the update.
+
+Detect drift continuously. Workers should heartbeat their versions and capabilities, while the control plane compares them against the approved snapshot. Alert on missing workers, unexpected versions, stale heartbeats, and configuration that fails validation. Do not wait for a customer to notice that one region routes differently.
+
+Validate before activation. Parse schemas, resolve dependencies, verify credentials without exposing them, check policy consistency, validate model availability, and compare pricing metadata. Reject an incomplete snapshot rather than activating a partial one. A worker should keep its last known good state when the new state is unsafe.
+
+Make rollouts atomic where possible. Load a complete snapshot, validate it, then switch the active pointer. During a transition, report whether a worker is on the old or new version. Avoid mixing a new model catalog with old pricing or a new policy with an old routing table unless the compatibility is explicitly tested.
+
+Treat regions and caches as first-class concerns. A multi-region control plane may deliver updates at different times. Cache invalidation can fail, and clock differences can confuse freshness checks. Use monotonic versions, explicit expiry, acknowledgements, and reconciliation. A region should not claim readiness if it cannot prove which snapshot it is enforcing.
+
+Connect drift to traffic management. Remove or reduce traffic to workers with unknown or incompatible state, especially for sensitive routes. Preserve capacity on known-good workers, but avoid creating a second overload incident. For data residency and tenant policy, fail closed when the active snapshot cannot prove compliance.
+
+Keep changes auditable and reversible. Record who changed the desired state, what changed, why, rollout phases, acknowledgements, and rollback results. Retain the previous known-good snapshot and its compatibility metadata. Emergency overrides should have an owner, expiry, and automatic alert so temporary exceptions do not become permanent drift.
+
+Test drift recovery. Simulate workers that miss updates, restart with stale files, lose control-plane connectivity, load malformed snapshots, or report false readiness. Verify reconciliation, safe fallback to the last known good state, traffic isolation, and eventual convergence. Include policy, billing, and provider adapter differences in the test fixtures.
+
+The practical pattern is simple: define authoritative desired state, publish immutable snapshots, report exact hashes, compare desired with active state, validate before activation, roll out atomically, reconcile regions and caches, connect drift to routing, and keep rollback evidence. Configuration is reliable when every worker can prove which rules it is enforcing and the control plane can prove that those rules are intentional.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
