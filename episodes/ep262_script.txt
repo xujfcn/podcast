@@ -1,0 +1,25 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about cost attribution in an AI API gateway: how to explain where every dollar went, and how to turn that explanation into better routing decisions.
+
+AI spending is rarely just a model price multiplied by tokens. A single user request may create retries, fallbacks, tool calls, retrieval work, cached lookups, streaming overhead, and asynchronous follow-up jobs. If the gateway records only one final provider charge, the bill may be correct in total but impossible to explain per request, tenant, feature, or outcome.
+
+Start with a stable cost identity. Every logical operation needs an identifier that survives provider attempts, retries, streams, tool calls, and delayed usage reports. Keep the logical operation separate from each execution attempt. The user should see one request, while operators can inspect every provider call that contributed to it.
+
+Record the inputs to the calculation, not only the result. Store the provider, model revision, region, pricing version, input and output usage, cached-token treatment, tool or image units, and any minimum charge. A price table can change after a request completes, so the calculation needs the version that was active at execution time. Historical bills should not silently change because today’s pricing table changed.
+
+Attribution has several useful dimensions. Attribute cost to the tenant for billing and fairness. Attribute it to the product feature for planning. Attribute it to the route and model for optimization. Attribute it to the outcome for economics. Cost per request is less useful than cost per accepted task, because failed attempts and retries are part of the real work required to produce a usable result.
+
+Retries need special care. A retry may be free at one provider and billable at another. A timeout may leave the provider processing, creating an ambiguous outcome. A fallback may produce the accepted answer while the first attempt still consumed capacity and money. Keep each attempt’s status and usage, then aggregate them into the logical operation with explicit rules. Never assume that an unsuccessful HTTP response means zero cost.
+
+Tools and side effects should be visible in the same lineage. A model call that invokes search, code execution, or an external API can have costs outside the token invoice. Record tool authorization, tool execution cost, and whether the call was shadowed, simulated, or real. If a request is replayed for debugging, mark it separately so test traffic cannot be confused with customer spend.
+
+Caching changes the economics too. A cache hit may avoid a provider charge but still consume storage, retrieval, and validation resources. A cache miss may perform work that later fails acceptance. Attribute those costs consistently, and make the policy visible: who pays for cache storage, how shared results are allocated, and whether a cached response counts as a successful task.
+
+Use reconciliation as a control loop. Compare gateway-side usage with provider invoices, usage exports, and customer ledger entries. Investigate missing, duplicated, delayed, or contradictory records. Reconciliation is not only accounting hygiene; it exposes routing bugs, unbounded retries, incorrect token estimates, and provider contract changes.
+
+Make cost data privacy-aware. Use tenant and operation identifiers, but avoid copying full prompts into financial records. Hash sensitive payloads, retain only the fields needed for audit, and separate access to customer content from access to billing metadata. A detailed bill should explain the charge without becoming a new source of data exposure.
+
+Once attribution is trustworthy, use it for decisions. Route simple tasks to cheaper models when their accepted-result rate remains high. Apply budgets to logical operations instead of individual attempts. Alert on cost per successful task, not just daily spend. Detect when a provider’s price or behavior changes. And require an explanation before a new route is promoted.
+
+The practical pattern is straightforward: identify the logical operation, record every attempt, version pricing, include tools and cache behavior, aggregate transparently, reconcile against providers, protect sensitive data, and optimize against accepted outcomes. An AI gateway becomes financially reliable when every charge can be traced from user intent to provider work and back to a decision.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
