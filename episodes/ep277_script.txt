@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about circuit breakers in an AI API gateway: how to stop provider failures from spreading through retries, queues, and fallbacks, and how to restore traffic safely.
+
+When an upstream provider starts failing, sending more requests rarely helps. Retries increase load, queues grow, timeouts consume client threads, and fallback providers can become overloaded too. A circuit breaker creates a deliberate boundary between a failing dependency and the rest of the system.
+
+Start by defining what failure means. Count transport errors, timeouts, rate limits, invalid responses, rejected validation, and excessive latency according to the route’s contract. Do not treat every failure identically. A client cancellation may be normal, while a provider authentication error should immediately question route readiness.
+
+Choose the breaker scope carefully. A single global breaker can hide that one model or region is failing. A breaker per provider, model, region, capability, or tenant isolates damage but creates more state to manage. Scope it around the smallest unit whose failure should change routing, while preserving enough traffic for meaningful evidence.
+
+Use rolling windows and thresholds. A fixed number of errors can be misleading when traffic is low or highly variable. Combine failure rates, minimum request counts, consecutive failures, latency burn, and absolute limits. Define separate thresholds for opening, half-open testing, and closing so one lucky response cannot instantly declare recovery.
+
+When the circuit opens, fail fast. Return a documented error or route only to an eligible fallback. Do not keep waiting in a queue for a dependency that the breaker has already declared unhealthy. Include a request ID, safe reason category, retry guidance, and any retry-after signal that clients can act on.
+
+Protect fallbacks from cascading failure. A fallback is not a garbage disposal for all failed traffic. Check its policy, residency, capacity, model quality, budget, and idempotency requirements before routing. Reserve fallback headroom and apply admission control so recovery options remain available for high-value work.
+
+Account for streaming and long-running operations. Opening a breaker should stop new work, but it may not be safe to terminate every in-flight stream. Define drain behavior, deadlines, cancellation propagation, and partial-result handling. A breaker decision should not create duplicate work when clients retry an interrupted operation.
+
+Make half-open probes representative but small. After a cooldown, allow a limited number of test requests through. Use safe synthetic inputs and validate the full response contract, not merely an HTTP status. Probe authentication, parsing, usage reporting, latency, and policy behavior. Gradually increase traffic only after the evidence remains healthy.
+
+Avoid breaker flapping. Provider behavior can oscillate around a threshold, causing repeated open and close transitions. Add hysteresis, minimum open duration, exponential cooldown, and a cap on half-open concurrency. Record state changes so operators can distinguish real recovery from an unstable route.
+
+Integrate breakers with budgets and routing. An open circuit spends availability and fallback budget, while repeated half-open failures spend probe budget. Routing should consider breaker state alongside cost, quality, policy, and data boundaries. Do not override an open circuit casually; require an explicit emergency action with an audit trail.
+
+Test the failure modes. Simulate slow responses, malformed output, rate limits, credential expiry, partial streams, provider recovery, low traffic, and concurrent retries. Verify that work fails fast, fallback capacity is protected, idempotency is preserved, metrics remain truthful, and the breaker eventually recovers without manual intervention when the dependency is healthy.
+
+The practical pattern is simple: define meaningful failures, scope breakers correctly, use rolling thresholds and hysteresis, fail fast, protect fallbacks, handle streams explicitly, probe recovery safely, connect state to routing and budgets, and test cascading scenarios. A circuit breaker is effective when it turns dependency failure into a contained routing decision instead of a system-wide incident.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
