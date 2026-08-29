@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about idempotency in an AI API gateway: how to stop retries from duplicating work, triggering side effects twice, or charging for the same logical operation more than once.
+
+Retries are normal in distributed systems. Clients retry after timeouts, gateways retry transient provider errors, and providers may retry internally. Without an idempotency contract, one user action can become several model calls, several tool executions, or several payments. The dangerous part is that the client may not know whether the first attempt finished.
+
+Start with a logical operation and an idempotency key. The key should identify the intended operation, not one network attempt. Require it for side-effecting requests and recommend it for expensive or long-running work. Bind the key to the tenant, endpoint, and meaningful request parameters so a key cannot be reused to retrieve an unrelated result.
+
+Define the replay behavior precisely. A duplicate request may return the original result, report that the operation is still running, or return a conflict if the payload differs. Never silently execute a second operation just because the first result is not immediately available. Clients need a stable status they can poll safely.
+
+Persist the state durably. An in-memory cache is not enough when a gateway restarts or traffic moves to another region. Store operation status, request fingerprint, result reference, expiry, and execution lineage in a durable system. Protect the result and metadata according to tenant permissions, and apply retention rules so idempotency records do not live forever.
+
+Make the key scope explicit. Is uniqueness per API key, project, organization, or account? A shared operation should remain deduplicated if a client rotates credentials, while separate environments may need independent namespaces. Document the scope so customers do not accidentally collide with their own operations or assume isolation that does not exist.
+
+Handle concurrent duplicates with a single-flight decision. The first request may become the owner that dispatches work; concurrent requests should wait, receive a running state, or obtain the completed result. Use leases and fencing so a stalled worker cannot later publish a result after another worker has taken over. Exactly-once execution is difficult, so design for at-most-once side effects or safe reconciliation.
+
+AI work has ambiguous outcomes. A provider timeout may occur after the model generated output. A stream can disconnect after a tool call. Usage may arrive later. Mark the operation as unknown when the evidence is incomplete. Do not allow the client to force a fresh execution merely by retrying a request whose first attempt may still be active.
+
+Separate pure generation from side effects. A duplicate text generation may be acceptable in some applications, though it can still cost money. A duplicate email, purchase, webhook, or database mutation is not. Use idempotency keys again at each side-effect boundary, with an outbox or transactional handoff where appropriate. The gateway key alone cannot guarantee a downstream system will deduplicate.
+
+Bind idempotency to policy and pricing. A replayed request should preserve the original model, route, data boundary, and acceptance contract unless the client explicitly asks for a new operation. Return the original usage and charge details consistently, and make diagnostic replays distinct from customer retries. Deduplication that hides billing state will create support problems later.
+
+Set expiration intentionally. A short key lifetime reduces storage but may allow a late retry to duplicate work. A long lifetime improves safety but retains more metadata. Choose the window from the operation’s real completion and client retry behavior, and tell clients how long the guarantee lasts. Expiration should produce a clear conflict or new-operation response, not a surprising silent execution.
+
+Test failure paths. Send identical requests concurrently, restart the gateway between reservation and dispatch, fail over regions, disconnect streams, delay provider usage, and retry after ambiguous timeouts. Verify that results, side effects, budgets, and charges remain consistent. Include payload mismatch, expired keys, unauthorized lookups, and provider retries in the test suite.
+
+The practical pattern is simple: identify logical operations, require scoped keys, persist state, coordinate concurrent duplicates, represent unknown outcomes honestly, protect every side-effect boundary, preserve billing and policy context, expire records deliberately, and test restarts and failovers. Idempotency is reliable when the system can answer “did this already happen?” without guessing.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
