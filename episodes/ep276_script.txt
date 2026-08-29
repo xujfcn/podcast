@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about reliability budgets in an AI API gateway: how to turn provider variance into an engineering contract that routing, operations, and product teams can actually use.
+
+An availability target by itself is too vague. AI providers vary in latency, error behavior, capacity, model quality, and usage reporting. A gateway needs a budget for the kinds of failure that matter to a workload, and it needs to spend that budget deliberately rather than discovering the limit during an outage.
+
+Start with the user outcome. Define what counts as a successful task, how much latency the user can tolerate, which fallbacks preserve meaning, and which failures are visible. A chat request, a batch embedding job, and a tool call have different contracts. One global reliability number will hide important differences.
+
+Turn the contract into measurable budgets. Track error budget, latency budget, retry budget, fallback budget, and cost budget. For some routes, an accepted response with slightly higher latency is better than a fast malformed response. For others, a late answer is equivalent to failure. Choose measures that reflect the actual product journey.
+
+Measure at the gateway boundary and the provider boundary. Gateway latency includes queueing, policy evaluation, retries, and response validation. Provider latency shows upstream behavior. Compare both, and track tail percentiles rather than averages. A route can have a good mean while its slowest users consistently miss their deadlines.
+
+Account for accepted outcomes. A provider’s HTTP success rate is not the same as task success. Include schema failures, truncation, unsafe output, missing tool calls, and rejected validation in the reliability budget. A cheaper model that needs repeated repair can consume more budget and cost than its request metrics suggest.
+
+Make retries and hedges budgeted actions. Each retry spends provider capacity, client time, and money. Hedging can reduce tail latency but may duplicate work. Give routes an attempt budget, a deadline, and an idempotency strategy. When the budget is exhausted, return a clear result instead of extending work indefinitely.
+
+Use budgets to guide routing. Prefer a provider with remaining latency and error headroom for traffic that needs it. Reduce exposure to a route whose budget is nearly exhausted, while preserving eligible fallback capacity. Routing should consider policy, data residency, model quality, and cost alongside reliability; the fastest provider is not always an allowed provider.
+
+Set burn-rate alerts. A slow budget burn may indicate gradual degradation, while a fast burn signals that the route could breach its objective soon. Alert on customer-impacting outcomes, segmented by model, provider, region, tenant, and task type. Avoid alerting on raw request volume without understanding whether the requests were accepted.
+
+Reserve capacity for recovery. If every route is driven to its maximum, there is no room for retries, failover, or urgent tenants during a provider incident. Keep explicit headroom and admission controls. Protect recovery capacity from low-priority traffic, and communicate when the system is entering a degraded mode.
+
+Connect budgets to release decisions. A new adapter, model, prompt, policy, or provider should consume a canary budget before broad rollout. Compare accepted-task rate, tail latency, cost, and failure categories against the current route. If the change spends budget too quickly, pause or roll back while the evidence is still small.
+
+Make ownership and time windows clear. Reliability budgets need a measurement period, an owner, and a response playbook. Product teams decide which user outcomes matter; platform teams operate the controls; provider managers handle upstream issues. Without ownership, a budget becomes a dashboard decoration instead of a decision mechanism.
+
+The practical pattern is simple: define user-level success, measure accepted outcomes, separate gateway and provider signals, budget retries and fallbacks, route using remaining headroom, alert on burn rate, reserve recovery capacity, and use the budget to gate changes. Reliability becomes an engineering contract when every team knows what can be spent, what must be protected, and what action follows.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
