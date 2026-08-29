@@ -1,0 +1,29 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about cancellation contracts at the AI API gateway: how to stop work when the user leaves, a deadline expires, or the caller no longer wants the answer.
+
+Cancellation is easy to describe and surprisingly difficult to implement. A client can close a browser tab while the gateway is still waiting on a provider, consuming tokens, holding a concurrency slot, or executing a tool. If the cancellation signal disappears at the first network hop, the system continues doing work that no one will use.
+
+Start with a clear contract. Define what cancellation means for the client response, gateway state, provider attempt, stream, queued work, and any tools. Decide which component owns the deadline, how cancellation is represented, and what status is returned when the request stops. A closed connection is a signal, but it should not be the only signal your system understands.
+
+Propagate cancellation through every async boundary. Carry a deadline and cancellation context from the ingress handler into routing, admission, provider adapters, streaming, and tool execution. Libraries often require an explicit context or abort signal. Passing the signal through a function signature makes ownership visible and prevents a helper from accidentally creating work that cannot be stopped.
+
+Separate deadline expiry from user cancellation. Both can stop a request, but they describe different outcomes. A user may navigate away, while a gateway deadline may indicate that the request exceeded its latency budget. Record the cause internally and expose a stable error contract to clients. This distinction is valuable for metrics, retries, and product decisions.
+
+Cancel queued work before it starts. Admission queues, connection pools, retry schedulers, and batch assemblers can all hold work after the caller has gone away. Remove cancelled entries promptly, release reservations, and ensure a worker checks the context immediately before starting. A request that is cancelled while waiting should not consume a provider attempt merely because a worker eventually noticed it.
+
+Define provider behavior honestly. Some providers support aborting an HTTP request, some stop generation only after a delay, and some continue billing after the connection closes. The adapter should report whether cancellation was accepted, sent, or merely local. Preserve provider request IDs and final usage data so the gateway can reconcile cost even when the client receives no final response.
+
+Make streaming cancellation first-class. Detect client disconnects, stream write failures, explicit cancel messages, and deadline expiry. Stop reading and forwarding tokens, close the provider stream, and release buffers. Do not wait for the stream loop to naturally finish. For long responses, a small delay in cancellation can multiply into significant token and concurrency waste.
+
+Protect side effects. Cancellation is not permission to leave a partially completed mutation in an unknown state. Classify tools as read-only, idempotent, compensatable, or irreversible. Before executing an effectful tool, establish whether cancellation can safely interrupt it. Use idempotency keys, transaction boundaries, and reconciliation records so a late provider or tool completion cannot silently duplicate work.
+
+Make races explicit. Cancellation can arrive just before admission, during a provider attempt, after a response is accepted, or while a tool is committing. Define state transitions and allow only valid ones. A cancelled request should not later become a successful client response, but its internal usage record may still need to move to reconciled after the provider reports final consumption.
+
+Avoid retry amplification. A cancelled attempt must not be retried just because it produced a transport error. Retry policy should inspect the cancellation cause, remaining deadline, idempotency state, and whether any side effect started. If the caller has gone away, the default should be to stop recovery work unless an explicitly authorized background workflow owns the result.
+
+Measure saved work. Track cancellation rate, time from signal to stop, tokens generated after cancellation, provider attempts after cancellation, queue entries removed, released capacity, tool completions, and unreconciled charges. The important metric is not merely how many cancels were received, but how much unnecessary work the system prevented.
+
+Test cancellation under pressure. Cover slow providers, blocked queues, streaming disconnects, retries, concurrent cancellation and completion, tool timeouts, provider billing, process shutdown, and network partitions. Use a fake provider and controllable clocks to prove that cancellation reaches each boundary. Add a small number of end-to-end tests to validate the real transport behavior.
+
+The practical pattern is this: define the cancellation contract, propagate deadlines and abort signals, distinguish causes, cancel queued work, report provider support honestly, stop streams promptly, protect side effects, model races as state transitions, prevent retry amplification, measure saved work, and test every boundary. Cancellation is complete only when the system stops spending resources on work that no longer has an owner.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
