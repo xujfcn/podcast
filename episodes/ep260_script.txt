@@ -1,0 +1,61 @@
+EP260: AI API Gateway Request Replay - Reproduce Production Behavior Without Replaying Secrets
+
+Welcome back to AI Dev Tools, the Crazyrouter podcast. Today we are talking about request replay in AI API gateways. Production failures are often intermittent, expensive, and difficult to reproduce. A request may depend on a specific model revision, provider response, routing policy, retrieved documents, tool results, clock, locale, and stream timing. Replaying the request can turn a vague incident into a testable case, but copying raw production traffic into a lab creates a new privacy and security problem.
+
+Start with a replay contract. Define what “reproduce” means for the workflow: the same route decision, the same provider request, the same tool sequence, the same schema failure, a comparable answer, or the same user-visible outcome. Exact text equality is often impossible because models and providers can be nondeterministic. Choose measurable invariants before collecting captures.
+
+Capture a request envelope, not just a prompt. Include gateway release, adapter version, route policy, provider account reference, resolved model and revision, region, request shape, context manifest, feature flags, and lifecycle events. Store references to sensitive payloads separately from the replay metadata. A transcript without its execution conditions is rarely enough to explain production behavior.
+
+Redact before persistence. Remove API keys, cookies, authorization headers, personal data, private documents, signed URLs, system secrets, and unrelated tenant content before a capture enters a replay store. Use the same egress and data-classification discipline applied to client responses. A replay archive should not become a shadow log of everything the gateway has ever seen.
+
+Use replacement values that preserve behavior where possible. A secret can become a stable token-shaped placeholder. A private name can become a consistent synthetic name. A document can become a generated fixture with the same schema and relevant edge cases. Record the transformation profile, but never retain the original value merely so an operator can reverse the mask later.
+
+Hash what you cannot store. For large prompts, files, and outputs, keep cryptographic hashes, sizes, content types, and structural summaries when raw content is unnecessary. Define whether the hash covers exact bytes, canonical logical content, or both. Record canonicalization and hash versions so a future replay can tell whether two captures really refer to the same input.
+
+Separate live replay from fixture replay. A live replay calls real providers or tools and can create cost, side effects, and data movement. A fixture replay uses recorded responses and local substitutes to test gateway logic without contacting external systems. Label the mode prominently and require explicit authorization for live execution.
+
+Default to no side effects. A replay should not send an email, write to a database, charge a card, delete a file, publish a post, or trigger another workflow. Replace tools with deny-by-default stubs, read-only snapshots, or deterministic simulators. If a side effect must be tested, route it to an isolated sandbox with synthetic identities and bounded permissions.
+
+Preserve route decisions. Store the input attributes and policy revision that led to the selected provider, model, region, timeout, retry budget, and fallback path. Replaying only the downstream request can hide the bug in routing logic. Replaying only the prompt can miss a configuration change that made a previously safe route ineligible.
+
+Pin versions and configuration. A capture should reference model revision, adapter build, tokenizer or serialization version, system prompt version, tool schema, retrieval index snapshot, policy bundle, and feature flags. If any dependency is unavailable, mark the replay partial rather than silently substituting the current production configuration.
+
+Context needs a manifest. List the ordered message roles, summary references, retrieved source IDs, tool results, attachments, and output reservation. Keep raw content out of the manifest when hashes or synthetic fixtures are enough. This makes it possible to compare what the model saw without copying all of the original data into every debugging environment.
+
+Retrieval replay must respect freshness. A production answer may have used documents that have since changed or disappeared. Choose whether to replay the historical snapshot, the current index, or both as a comparison. Record source versions and ranking settings. Do not call a current search result a reproduction of a historical decision without stating the difference.
+
+Tool replay should distinguish request and result. To test gateway behavior, return the recorded tool result and verify parsing, policy, and output handling. To test tool integration, call a sandbox implementation and compare its schema and failure semantics. Never let a model-generated tool request decide that a live production result is safe to use during debugging.
+
+Randomness needs honest controls. Capture seed settings when a provider supports them, sampling parameters, request order, and retry timing. Even with a fixed seed, provider infrastructure or hidden changes may produce different output. Report similarity, structured-field agreement, safety decisions, and route invariants instead of promising byte-for-byte equality.
+
+Time and environment are inputs. Record timestamps, time zone, locale, feature-flag state, certificate or key metadata, network region, and relevant service health. A request that depends on “now,” a holiday calendar, an expiring token, or a provider outage may behave differently in a lab. Freeze clocks and simulate health conditions where the test requires them.
+
+Streaming replay needs event fidelity. Capture event order, chunk boundaries when relevant, inter-event timing buckets, finish reason, cancellation, backpressure signals, and client disconnect state. A final response may look correct while the production bug occurred because the first unsafe chunk was delivered before validation. Replay the lifecycle, not just the assembled text.
+
+Compare at multiple layers. Check authentication and route selection, normalized provider payload, provider response classification, tool calls, usage, latency, stream state, redaction, and final client response. A different sentence can still be an equivalent successful result, while identical text from an unauthorized route is not a successful replay.
+
+Use differential replay for changes. Send the same sanitized capture through the old and new gateway release, adapter version, policy bundle, or provider route. Compare invariants and explain intentional differences. Keep the candidate run separate from production telemetry so a replay does not pollute SLOs, billing, customer metrics, or incident dashboards.
+
+Guard replay cost and concurrency. A capture corpus can contain thousands of requests and expensive multimodal workloads. Estimate tokens, media units, tool calls, and expected provider charges before a live run. Require budgets, rate limits, approval for high-cost routes, and cancellation controls. A debugging command should not create a second outage or an unexpected invoice.
+
+Build replay levels. A unit-level replay tests parsing and policy with no provider call. An adapter replay uses recorded provider responses. A sandbox replay uses isolated tools and synthetic data. A live canary replay tests the current provider under strict limits. Name the level in results so operators do not confuse a logic test with end-to-end evidence.
+
+Protect tenant boundaries. A capture belongs to the tenant and purpose that authorized its use. Enforce access checks when creating, viewing, cloning, exporting, and deleting captures. Do not let a developer search a global replay archive by prompt text and accidentally discover another customer’s content or operational details.
+
+Set retention and deletion rules. Keep high-value failure captures long enough to fix the problem, then delete or further minimize them. Track derived fixtures, embeddings, indexes, logs, and exported reports so deletion reaches copies. A hash can still be sensitive if it is linkable to a known document or request.
+
+Make captures tamper-evident. Sign manifests or store them in an append-only system with creator, source, transformation, and access events. Do not treat a manually edited JSON file as proof of what happened in production. If an operator changes a fixture to isolate a hypothesis, create a new capture lineage and label it synthetic.
+
+Handle missing evidence explicitly. Network failures may leave no provider response, a client disconnect may leave only partial output, and a logging policy may intentionally omit content. Record unknown fields and capture gaps. Do not fill missing values with current defaults and then claim the replay proved the original behavior.
+
+Use replay to improve incident response. Link captures to alerts, incident timelines, failure capsules, runbooks, and deployment changes. A good capture should produce a small regression test after the incident. When the fix ships, run the test against the new route and keep the result with the change record.
+
+Test the replay system itself. Try captures with malicious tool names, oversized payloads, invalid schemas, expired credentials, cross-tenant references, poisoned retrieved text, malformed streams, and fake provider metadata. Verify that the replay runner treats capture content as data, not instructions, and that it cannot escape its sandbox.
+
+Measure replay quality. Track reproduction rate, invariant match rate, missing-dependency rate, time to first useful replay, cost per replay, privacy review time, and regressions prevented. A replay system that produces many polished reports but cannot reproduce the important failures needs better capture design, not more dashboards.
+
+The practical checklist is clear. Define reproduction goals, capture execution conditions, redact before persistence, use stable synthetic replacements, hash unnecessary content, separate fixture and live modes, deny side effects, pin versions and policies, manifest context and tools, control time and randomness, preserve stream events, compare invariants, bound cost, enforce tenant access, sign capture lineage, handle unknowns honestly, and turn failures into regression tests.
+
+The larger lesson is that production evidence should be reusable without becoming dangerous. A dependable AI gateway gives engineers enough context to reconstruct a decision while keeping secrets, personal data, and side effects outside the replay loop. That balance makes difficult failures testable and makes debugging safer than copying production traffic by hand.
+
+That is it for today. Reproduce production behavior without replaying secrets, and make every capture explicit about what it proves. Visit crazyrouter.com to route your AI workloads through one dependable API gateway.
