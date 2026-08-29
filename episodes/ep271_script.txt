@@ -1,0 +1,27 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about response acceptance in an AI API gateway: why an HTTP 200 does not necessarily mean success, and how to validate whether the result is actually usable.
+
+HTTP status codes describe transport and request handling. They do not prove that an AI task produced the outcome an application needed. A provider can return 200 with an empty answer, invalid JSON, a refused tool call, truncated output, or content that violates the application’s contract. If the gateway treats every 200 as success, failures move downstream where they are harder to diagnose.
+
+Start by defining acceptance at the task level. For structured extraction, the result may need valid JSON matching a schema. For tool use, the required action may need to be selected and authorized. For classification, the label must be present and within an allowed set. For a conversational answer, the application may require citations, language, or a minimum completeness signal. Acceptance should describe what the client can safely consume.
+
+Separate transport success, provider success, and task success. Transport success means the response arrived. Provider success means the upstream call did not report an error. Task success means the output passed the application’s acceptance checks. Record all three states. This prevents a clean network trace from hiding a failed user outcome.
+
+Validate structure before content. Check content type, required fields, JSON parsing, schema compliance, tool-call shape, finish reason, and truncation markers. Reject or quarantine malformed results before they reach code that assumes the contract. A parser error is useful evidence; silently coercing malformed output into an empty object is not.
+
+Validate semantics with proportionate checks. A schema can be valid while the values are unusable. Check ranges, enum membership, required relationships, citation presence, language, safety policy, and business invariants. Do not pretend that a generic validator can determine truth or user satisfaction. Use task-specific evaluators where the risk and value justify them.
+
+Make retries acceptance-aware. Retrying every non-accepted response can multiply cost and create duplicate side effects. Retry only when the failure class is transient and the operation is safe to repeat. For tool or mutation requests, use idempotency keys and distinguish “no action occurred” from “action status unknown.” A response that failed validation may still have triggered downstream work.
+
+Choose a fallback deliberately. The gateway may repair formatting, ask the same model for a constrained retry, switch to another model, or return a clear failure. Each option changes cost and latency. Bound repair attempts, record the reason, and preserve the original response for diagnosis without exposing sensitive content unnecessarily.
+
+Streaming requires incremental acceptance. Validate chunks for framing and protocol correctness as they arrive, but defer full semantic validation until the stream closes. If the client disconnects or the provider ends with a truncation signal, mark the result partial or unknown. Do not report success merely because the first tokens looked plausible.
+
+Expose useful status to clients. A gateway can return a transport success with application metadata that says validation failed, or it can map an unacceptable result to a documented error. Whichever contract you choose, make it stable. Include a request ID, acceptance category, and safe remediation hint. Clients should not have to infer task failure from an empty content field.
+
+Measure accepted outcomes. Track acceptance rate by model, provider, route, tenant, task type, and failure reason. Also track cost and latency per accepted task, not just per request. A cheaper model that requires frequent repairs may be more expensive in practice. A high acceptance rate with poor user outcomes means the validator is checking the wrong thing.
+
+Keep evidence for improvement. Store validation rules and evaluator versions, normalized failure categories, usage, retries, and final outcome. Redact prompts and responses by default, and retain minimal fixtures for regression tests. When a model or adapter changes, rerun representative acceptance tests before promoting the route.
+
+The practical pattern is simple: define task-level success, separate transport from provider and application states, validate structure and semantics, make retries safe, handle streams explicitly, expose stable status, measure cost per accepted task, and preserve privacy-aware evidence. An AI gateway is reliable when it reports whether the response can be used—not merely whether bytes came back.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
