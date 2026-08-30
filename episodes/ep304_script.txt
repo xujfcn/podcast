@@ -1,0 +1,39 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request shape governance at the AI API gateway: how to estimate the resource shape of a request before dispatch, negotiate safe limits, and stop one oversized prompt, tool set, or media payload from creating tail latency for everyone.
+
+Request shape is the collection of properties that predicts how expensive and difficult work will be. It includes input tokens, expected output tokens, context depth, number of messages, tool definitions, attachment count, media dimensions, requested modalities, schema complexity, and streaming behavior. A request can be valid JSON and still be an unsafe shape for the route it targets.
+
+Start with a declared budget. Ask the client to provide or accept limits for input tokens, output tokens, total context, tool count, media size, processing time, and cost. Treat client estimates as hints, not authority. The gateway should calculate its own estimate, compare it with policy and route capacity, and return the effective budget that will actually be enforced.
+
+Keep shape separate from priority. A high-priority request may deserve faster service, but it should not become infinitely large. A small best-effort request may be easy to admit while a large urgent request needs negotiation or a different route. Use shape to estimate resource demand, priority to resolve contention, and deadline to test feasibility.
+
+Measure more than tokens. Token counts predict text work, but tools add validation and execution, images add decoding and vision cost, audio adds duration and sampling work, and structured schemas add constrained decoding complexity. Maintain route-specific cost factors and update them from observed usage. Do not pretend that one token equals the same work for every modality and provider.
+
+Make estimation conservative and explainable. Calculate lower and upper bounds where exact cost is unknown. Include tokenizer version, media inspection result, tool expansion, safety scanning, and expected output allowance. If the estimate is uncertain, expose the uncertainty internally and choose a bounded policy rather than quietly admitting a request that may exceed capacity.
+
+Negotiate before queueing. When a request exceeds the preferred shape, offer explicit outcomes: reduce context, lower output limits, remove optional tools, resize media, use a compatible model, wait for a later window, or reject with actionable limits. Do not queue work that the route cannot finish simply because the client is already waiting.
+
+Make transformations visible. If the gateway trims messages, summarizes history, compresses media, removes optional tool definitions, or lowers max tokens, record the before and after shape, reason, policy version, and expected semantic impact. A smaller request is not automatically equivalent. The caller should be able to tell whether the result came from the original or negotiated shape.
+
+Protect required content. Define which fields are mandatory, which messages may be summarized, which tools are essential, and which media quality is acceptable. Never trim system instructions, authorization context, safety constraints, or required schema fields merely to fit a budget. If required content cannot fit, fail clearly or select a route with enough capacity.
+
+Account for output uncertainty. An input estimate alone is insufficient when output length can dominate provider time and cost. Use max output tokens, stop conditions, schema bounds, and route-specific completion limits. Reserve enough capacity for the allowed output, then release unused capacity after completion and reconcile actual usage.
+
+Coordinate with queues. Queue admission should use the effective shape and remaining deadline, not just request count. A hundred small requests and one huge multimodal request consume different resources. Partition or weight queues by shape, prevent large work from blocking small work indefinitely, and report expected wait using the actual resource estimate.
+
+Handle retries safely. A retry repeats the shape unless a documented transformation changes it. Do not let every attempt re-expand a truncated context or reset the output budget. Carry consumed tokens, elapsed time, and remaining cost through attempts. If a smaller fallback shape is used, record it as a new negotiated attempt under the same operation.
+
+Keep provider translation honest. Different providers count tokens, context, tools, and media differently. Convert the gateway contract into provider-specific limits before dispatch and preserve the effective shape in lineage. A request that fits the gateway’s generic limit may still exceed the selected provider’s actual constraint.
+
+Use reservations and capacity signals correctly. A reserved route may protect concurrency but not unlimited context or output tokens. Combine shape demand with available token, memory, media, and provider quota signals. Do not claim that a reservation makes every shape admissible, and do not consume protected capacity for a request whose estimated cost is unknown.
+
+Prevent abuse and pathological shapes. Cap nesting depth, tool schema size, message count, attachment dimensions, and repeated content. Detect compression bombs, adversarial tokenization, and requests designed to maximize parsing or validation cost. Apply limits before expensive inspection, but retain enough metadata to explain the decision.
+
+Return useful feedback. Expose effective limits, estimated usage, rejected dimensions, retry guidance, and any negotiated transformation through stable error codes and headers or response metadata. Avoid revealing private queue occupancy or another tenant’s capacity. Feedback should help the caller make a smaller or better-targeted request, not encourage blind retries.
+
+Observe shape quality. Track estimated versus actual tokens, media cost, tool overhead, rejected dimensions, negotiated reductions, queue wait by shape, tail latency, retry amplification, fallback rate, provider limit errors, and cost per accepted outcome. Look for systematic underestimation and for routes whose shape limits are too generous to provide their promised latency.
+
+Test the boundaries. Cover tokenizer changes, maximum context, large tool schemas, multimodal payloads, required-content trimming, schema-constrained output, retries after partial generation, fallback to smaller models, deadline expiry while negotiating, reservation limits, worker restart, and malicious nesting. Assert that effective limits are enforced consistently at the edge, queue, adapter, and provider layers.
+
+The practical pattern is this: define a multidimensional request shape, calculate a conservative estimate, separate shape from priority and deadline, negotiate before queueing, make transformations visible, protect required content, budget output uncertainty, weight queues by resource demand, carry shape through retries and provider translation, combine it with real capacity, defend against pathological inputs, return actionable feedback, measure estimation error, and test every boundary. Request shape governance is how an AI gateway turns “valid input” into work the system can actually finish.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
