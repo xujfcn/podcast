@@ -1,0 +1,33 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about queue feedback contracts at the AI API gateway: how to tell clients what has been accepted, what is waiting, when it may run, and when they should cancel or choose another path.
+
+An overloaded gateway creates uncertainty before it creates an error. A client may not know whether a request is queued, dispatched, stalled at a provider, or already abandoned. If it retries blindly, the queue grows and work may be duplicated. A feedback contract turns hidden scheduler state into bounded signals clients can act on without exposing private tenant information.
+
+Start with lifecycle states. Distinguish received, admitted, queued, dispatched, streaming, completed, cancelled, expired, and rejected. Define which transitions are possible, what evidence is emitted, and whether the client may safely retry. “Accepted” must mean the gateway has durable responsibility for the work, not merely that a request passed an HTTP parser.
+
+Return useful admission feedback. Expose a request ID, lifecycle state, retry-after guidance, estimated wait band, expiration time, and a status URL or event channel where appropriate. Keep estimates coarse and honest. A range such as “under ten seconds” is better than false precision that causes clients to synchronize retries at one exact timestamp.
+
+Separate queue time from provider time. Report when work entered the queue, when it was admitted to a route, and when provider processing began. This lets clients and operators distinguish gateway saturation from provider latency. Do not promise completion based only on queue position; capacity, model size, streaming behavior, and provider health can change after admission.
+
+Make retry guidance enforceable. If work is still queued, tell the client whether polling, webhook delivery, or a long-lived connection is supported. Return a bounded retry interval and stable status semantics. A retry-after value is guidance, not a promise that capacity will exist then. Clients should use idempotency keys so a timeout or lost status response does not create duplicate work.
+
+Support cancellation as a first-class operation. Give queued jobs a cancellation endpoint or event, define when cancellation is guaranteed, and report whether provider work had already started. Cancellation should release queue reservations and prevent dispatch when possible. If work cannot be stopped, say so and record the resulting usage rather than pretending cancellation erased the cost.
+
+Keep estimates privacy-preserving. A client may need its own queue state, but it should not learn another tenant’s position, workload, model usage, or priority. Use opaque identifiers, aggregate wait bands, and tenant-scoped status views. Logs and support tools can retain richer evidence behind access controls.
+
+Define expiration and stale status behavior. A queued request with a deadline can become impossible to satisfy. Mark it expired, explain the reason, and avoid dispatching it. Status records should remain available long enough for clients to reconcile outcomes, then follow retention rules. An absent status must not be interpreted as success or cancellation.
+
+Make asynchronous delivery durable. Webhook events need signatures, event IDs, ordering rules, retries, and a way to fetch the authoritative status. Polling needs bounded frequency and clear terminal states. Streaming clients need heartbeats, disconnect behavior, and a truthful signal for whether the provider continues working after the client disappears.
+
+Connect feedback to overload policy. When admission is closed, say whether the cause is queue depth, tenant quota, model capacity, provider health, budget, or policy. Use stable reason codes and actionable alternatives such as a supported model, async mode, or later retry. Do not return a generic success-shaped response for work that was never admitted.
+
+Preserve idempotent status reads. A client may ask for status repeatedly, receive responses out of order, or reconnect after a network failure. Status transitions must be monotonic from the client’s perspective, and terminal results must be stable. Never let a late “queued” event overwrite a completed or expired state.
+
+Measure feedback quality. Track admission-to-dispatch delay, estimate error, status freshness, cancellation success, duplicate submissions, polling volume, webhook delivery, expired work, and requests abandoned after ambiguous feedback. Compare client-visible states with internal traces. The contract is working only when clients can choose safe next actions and operators can explain mismatches.
+
+Test the edges. Cover duplicate submissions, lost acknowledgements, status races, webhook duplication, out-of-order events, cancellation during dispatch, provider timeout after admission, queue expiration, clock skew, retry storms, quota exhaustion, and a worker restart. Verify that every accepted request has a recoverable status and every rejected request is clearly not accepted.
+
+Keep the contract versioned. Changes to state names, retry rules, cancellation guarantees, estimate meaning, or terminal status behavior can break clients just like an API schema change. Publish compatibility rules, include contract version in responses and events, and preserve old semantics during migration.
+
+The practical pattern is this: define lifecycle states, confirm durable admission, return bounded wait and retry signals, separate queue time from provider time, support cancellation, protect tenant privacy, make async delivery durable, expose precise overload reasons, preserve monotonic status, measure estimate quality, test races and failures, and version the contract. Queue feedback is a reliability feature when it lets clients make safe decisions instead of guessing from timeouts.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
