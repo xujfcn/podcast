@@ -1,0 +1,35 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy evaluation at the AI API gateway: how to turn tenant, data, model, tool, region, and budget requirements into decisions that are consistent, explainable, and enforceable at runtime.
+
+Policies are often written as documentation and enforced as scattered conditionals. That works until a request crosses providers, regions, tools, and billing boundaries. A policy evaluator makes the decision explicit: allow, deny, transform, route, defer, or require confirmation, with evidence showing which rules produced the outcome.
+
+Start with the decision surface. List the decisions the gateway must make before, during, and after a request: whether the identity is valid, which data may leave a boundary, which model and provider are permitted, whether a tool may run, how much capacity and budget may be consumed, and whether the response meets its contract. Keep separate decisions separate even when one request triggers all of them.
+
+Define policy inputs precisely. Useful inputs include authenticated tenant and user identity, plan entitlements, data classification, requested model, resolved route, region, provider capabilities, prompt and tool versions, request size, deadline, spend budget, and workflow context. Normalize these inputs at the gateway boundary and record their source and freshness. A missing value must not silently become an unsafe default.
+
+Use explicit precedence. Policies can conflict: a tenant plan may permit a model while data residency forbids the route, or a high-priority workflow may still be blocked from an irreversible tool. Define deny-overrides, required approvals, exception scopes, and the order in which transformations and checks occur. Ambiguous precedence produces different outcomes in different services.
+
+Separate authorization from suitability. Authorization asks whether this caller may request an action. Suitability asks whether the current data, provider, region, deadline, and budget make that action appropriate. Passing one does not imply passing the other. Keep both decisions visible so operators can explain why a permitted request was still routed, transformed, deferred, or rejected.
+
+Version every policy dependency. Store policy bundle version, rule version, tenant configuration revision, model catalog version, provider capability snapshot, and pricing version with the decision. A later audit should be able to reconstruct the evaluation using the same inputs and versions. Do not let a policy edit rewrite the meaning of historical requests.
+
+Make outcomes structured. Return a decision type, reason codes, obligations, selected route, transformations, expiry, and evidence references. Reason codes should be stable enough for clients and dashboards, while detailed rule traces remain protected for operators. Avoid returning a generic forbidden error when the client could safely correct a region, model, scope, or budget constraint.
+
+Treat transformations as obligations. A policy may require redaction, field filtering, regional routing, output validation, rate limiting, or human confirmation before the request proceeds. Record whether each obligation was applied, skipped, or failed. A policy decision that says “allow with redaction” is incomplete until the redaction is verified at the boundary where data leaves the system.
+
+Evaluate at the right lifecycle points. Some policies belong at admission, some before provider dispatch, some before a tool call, and some after response generation. Re-evaluate when material facts change, such as a fallback to another region, a tool argument becoming available, a model requesting more context, or a budget being exhausted. Do not assume a decision made at ingress remains valid for the whole workflow.
+
+Control caching carefully. Caching an allow decision can improve latency, but identity, entitlements, data classification, provider health, and policy versions can change. Bind cache keys to every material input and expire entries according to the fastest-changing dependency. Never reuse one tenant’s authorization result for another tenant or treat a stale decision as proof of current permission.
+
+Handle unknowns safely. If the gateway cannot determine provider retention, data residency, tool authorization, or budget availability, choose a documented fail-closed or bounded-degradation behavior. Make the unknown reason visible and measurable. Quietly routing because “it usually works” turns missing evidence into an unreviewed policy exception.
+
+Keep evaluation deterministic where possible. Pure rules, typed inputs, and stable reason codes make decisions testable. If a model assists with classification, isolate that suggestion from the authoritative enforcement path, constrain its output, and require deterministic checks before allowing sensitive operations. Policy should not depend on an opaque answer that cannot be reproduced.
+
+Audit without oversharing. Store request ID, decision ID, policy versions, input classifications, outcome, route, obligations, reason codes, and timestamps. Avoid raw prompts, secrets, and private tool arguments in ordinary policy logs. Provide a privileged trace for investigations with access controls, retention limits, and tenant isolation.
+
+Test conflicts and changes. Cover overlapping rules, missing inputs, stale caches, version changes, fallback routes, provider capability drift, budget boundaries, region restrictions, tool escalation, and concurrent policy updates. Use golden decision fixtures and property-based tests for invariants such as “a denied data boundary cannot become allowed through fallback.” Review policy changes like code, including rollout, metrics, and rollback.
+
+Measure policy quality. Track allow, deny, transform, defer, and approval rates by tenant, route, model, region, and reason. Measure evaluation latency, cache hit rate, unknown outcomes, exception use, false denies, policy-related retries, and incidents caused by stale or incomplete decisions. A policy engine is healthy when it is both strict where needed and understandable enough for teams to operate.
+
+The practical pattern is this: define the decision surface, normalize precise inputs, establish precedence, separate authorization from suitability, version dependencies, return structured outcomes, verify obligations, evaluate at lifecycle boundaries, bind caches to material facts, handle unknowns safely, keep rules deterministic, audit with restraint, test conflicts, and measure outcomes. Runtime policy evaluation works when every request can answer what was decided, why it was decided, which obligations followed, and which version of the rules was in force.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
