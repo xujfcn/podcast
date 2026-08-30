@@ -1,0 +1,43 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about model capability negotiation at the AI API gateway: how to verify what a route can actually do instead of treating an OpenAI-compatible endpoint as proof of complete semantic compatibility.
+
+Compatibility is not one checkbox. A model may accept chat completions but reject tools, stream text but not structured output, support images only in one region, or expose a parameter while ignoring it. If the gateway routes by model name alone, clients discover these differences in production, usually after work has started.
+
+Start with a capability vocabulary. Describe context limits, input modalities, output modalities, tool calls, parallel tools, structured output, JSON schema strictness, streaming, log probabilities, seed behavior, reasoning controls, prompt caching, batch support, token counting, safety controls, and lifecycle status. Keep “accepted by the API” separate from “honored by the model.”
+
+Make declarations versioned. Bind capabilities to an immutable model revision, adapter version, provider endpoint, region, and policy epoch. An alias can move to a different revision, and two regions can expose different features. A capability record without these dimensions is too broad to guide safe routing.
+
+Use evidence levels. Some capabilities come from provider documentation, some from adapter tests, and some from live probes. Record source, timestamp, test input class, observed behavior, and confidence. Documentation can be stale, while one successful probe may cover only a narrow case. Route conservatively when evidence is incomplete.
+
+Probe behavior, not just metadata. Send safe, minimal test requests for tools, schema enforcement, streaming termination, multimodal input, token accounting, and parameter semantics. Keep probes isolated from customer data, mark them as non-billable where the provider permits, and avoid tool effects. A probe that executes an external action is a production incident waiting to happen.
+
+Validate at the request boundary. Translate the client request into required capabilities, including hidden requirements from tools, response format, media, deadline, and privacy policy. Reject or transform the request before provider dispatch when no eligible route satisfies it. Do not wait for a provider error if the gateway already knows the capability is missing.
+
+Distinguish hard and soft capabilities. Strict JSON schema, data residency, tool approval, and required modality support may be hard constraints. Seed reproducibility, latency target, or optional reasoning controls may be preferences. Encode this difference in routing policy so a preference can degrade while a guarantee cannot silently disappear.
+
+Negotiate explicit degradation. If the requested feature is unavailable, the gateway can reject, remove an optional parameter, switch to a compatible model, or use a documented emulation layer. Tell the client exactly what changed. Never claim strict structure when the provider only produced best-effort JSON, and never emulate a tool call by guessing that a text response is an execution result.
+
+Keep adapters honest. An adapter may normalize field names and error formats, but it cannot create model behavior that does not exist. Test whether a parameter is honored, ignored, or rejected. Preserve provider-specific semantics when flattening them into a common interface, and expose a capability reason when normalization is partial.
+
+Account for context and tokenization. Context limits include system messages, tool definitions, images, and any gateway-added instructions. Token estimates vary by tokenizer and provider. Use the route’s actual tokenizer or a conservative bound, and reject requests that cannot fit rather than relying on a late provider failure.
+
+Treat tools as a capability chain. Tool support includes declaration, selection, argument generation, approval, dispatch, result insertion, parallel calls, cancellation, and retry semantics. A route that can emit a tool-shaped message but cannot preserve the full effect contract is not tool-compatible. Keep execution outside passive capability probes.
+
+Verify structured output semantically. Check schema adherence, refusal behavior, extra fields, truncation, streaming assembly, and invalid JSON under safety interventions. A successful HTTP response is insufficient. Record the validation mode and whether the provider guaranteed, constrained, or merely encouraged the format.
+
+Handle multimodal boundaries. Image, audio, and video support depends on MIME types, resolution, duration, encoding, limits, and sometimes separate provider pools. Validate media before routing, preserve privacy and residency constraints, and do not infer video support from image support. Capability keys should include the relevant media shape.
+
+Scope streaming capabilities. A route may stream text but not tool deltas, usage events, reasoning fields, or reliable terminal metadata. Define event ordering, cancellation, reconnect, and error behavior. If the client contract requires a terminal usage event, a route that omits it is not fully compatible even when tokens arrive.
+
+Invalidate quickly on change. Model rollout, provider update, adapter deployment, quota change, incident, or failed probe can change capability evidence. Bind caches to capability epochs and invalidate dependent routing decisions. During uncertainty, reduce eligible traffic or use a known-good route instead of serving stale success.
+
+Keep regional and tenant policy separate. A capability may be technically available but forbidden for a tenant, region, or data class. Combine technical capability with authorization, residency, privacy, and quality policy only at request evaluation time. Do not expose another tenant’s capability inventory through error messages or probing behavior.
+
+Make billing and observability reflect negotiation. Record required capabilities, eligible routes, selected evidence, transformations, fallback, probe status, provider usage, and any extra validation or retry cost. Customers should know when a request was degraded or switched, and operators should know whether an outage was technical incompatibility or policy exclusion.
+
+Test the matrix. Cover model aliases, revisions, regions, adapters, tools, strict schemas, streaming, multimodal limits, context overflow, ignored parameters, provider rollout, stale cache, failed probe, policy denial, fallback, and mixed capability requests. Assert that hard guarantees are never silently downgraded and that preferences degrade only according to contract.
+
+Measure capability truth. Track declaration-versus-observation mismatches, probe freshness, false-positive routes, capability-related failures, rejected requests, degradation rate, fallback success, schema validation errors, tool failures, media rejection, cache invalidation lag, and cost of compatibility layers. Optimize for accepted requests that preserve meaning, not the largest compatibility checklist.
+
+The practical pattern is this: define a precise vocabulary, version declarations, record evidence, probe safely, validate at the boundary, separate hard and soft requirements, make degradation explicit, keep adapters honest, account for context and media, model tools and streaming as full contracts, invalidate on change, apply policy, explain billing, test the matrix, and measure observed behavior. Capability negotiation is reliable when the gateway promises only what the selected route has demonstrated it can do.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
