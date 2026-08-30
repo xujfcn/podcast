@@ -1,0 +1,43 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about token-aware load balancing at the AI API gateway: how to distribute real model work instead of pretending that every request costs the same.
+
+Request-count balancing works when requests are roughly equal. AI workloads are not. One request may contain two hundred tokens and produce a short answer. Another may carry a hundred thousand tokens, images, tools, and a long stream. Sending one request to each route looks balanced on a dashboard while one provider does most of the computation.
+
+Start by defining a work unit. Input tokens, expected output tokens, images, audio duration, tool rounds, cache reads, and model-specific compute can all matter. Use a normalized cost estimate that reflects the bottleneck you are balancing. Do not call the unit a token when it includes work that tokens cannot represent.
+
+Estimate before dispatch. Use the model tokenizer when available, account for system prompts and tool schemas, inspect media dimensions or duration, and apply an output estimate based on the request limit and historical behavior. The estimate does not need to be perfect, but it must be bounded, versioned, and conservative enough to prevent obviously large requests from appearing cheap.
+
+Track committed work, not just active request count. For each route, maintain estimated input work, reserved output work, observed generation rate, queue work, retries, and long-lived streams. Release reservations as output completes or the request terminates. A slot with one enormous generation can be more loaded than ten short requests elsewhere.
+
+Separate capacity dimensions. A provider can have spare request concurrency but no token-per-minute headroom, or available text capacity but saturated vision workers. Keep request, token, media, connection, and tool limits distinct when they fail independently. A single scalar score is useful only after hard constraints have been checked.
+
+Use model-specific throughput. The same token count can cost very different amounts across model families, context lengths, quantization, and hardware. Learn service rates by immutable model revision, route, region, modality, and request shape. Reset or discount learned rates after a rollout rather than inheriting confidence from a different model.
+
+Balance predicted finish time. A practical route score combines queued work, committed work, expected service rate, network latency, policy, price, and deadline. Choose the route likely to complete safely, not merely the route with the fewest connections. Preserve deterministic tie-breaking so identical workers do not cause unstable routing.
+
+Handle long and short work deliberately. Large requests can block short interactive traffic, while always favoring short work can starve long jobs. Use size classes, weighted fair queues, or reserved capacity. Publish the contract for maximum queue delay, deadline behavior, and whether large work may be shifted to batch capacity.
+
+Account for prefix and prompt caching. A large prompt with a valid provider-side cache may be cheaper than a smaller uncached prompt, but cache locality can create route affinity. Include cache key, expected hit, freshness, and route ownership in the estimate. If the hit is uncertain, reserve for the miss and correct the accounting after the provider reports usage.
+
+Treat streaming as ongoing work. The input cost arrives early, but output work continues until completion or cancellation. Update the route’s committed load using observed token rate and remaining output estimate. Do not free capacity when the first token is sent. A healthy stream still occupies provider and connection resources.
+
+Correct estimates with actual usage. Compare predicted input, output, media, tool, and duration costs with provider-reported and gateway-observed values. Update estimators gradually and preserve the original prediction in request lineage. Large systematic errors should trigger investigation, not silent self-correction that hides a tokenizer or adapter bug.
+
+Bound estimation abuse. Clients can set an enormous output limit and consume reservations without intending to use them, or omit metadata that reveals expensive media. Apply policy caps, authenticated quotas, request-shape validation, and reservation expiry. Do not trust client-provided token counts unless the contract makes them verifiable.
+
+Coordinate with adaptive concurrency. Load balancing chooses a route; concurrency control decides whether that route can accept more work. Use the current route limit and committed work together. Do not send traffic to a route merely because its load score is low when its controller has contracted capacity after rising latency or errors.
+
+Respect policy before optimization. Residency, authorization, model allowlists, quality gates, privacy, and tenant contracts define the eligible route set. Token-aware scoring operates only inside that set. A faster route is not eligible if it violates the request’s boundary or uses an unapproved model revision.
+
+Make failover conservative. When a provider or region fails, queued and uncertain attempts may still consume capacity. Transfer only work whose state is known, reserve conservatively on the fallback, and avoid sending every large request to the same surviving route. Apply retry budgets so failure does not multiply token load.
+
+Connect balancing to billing. Record predicted work, selected route, pricing version, actual usage, retries, cache outcomes, and any route change. Customers should see why a request cost what it did, while operators should see whether routing reduced latency by choosing a more expensive provider. Optimization must remain explainable.
+
+Protect tenant fairness. One tenant’s long contexts should not consume every route while many small customers wait. Apply tenant token budgets, weighted shares, burst limits, and reservations. Fairness should use actual or reconciled work over time, not only the estimate made at admission.
+
+Test difficult shapes. Cover tiny prompts, maximum context, long output, early stop, images, audio, tools, cache hit and miss, tokenizer mismatch, provider usage delay, cancellation, retries, stream disconnect, region failover, model rollout, missing metadata, and adversarial output limits. Assert that work accounting converges and no route receives sustained hidden overload.
+
+Measure balancing quality. Track predicted versus actual work, route utilization, queue delay by size class, deadline success, token throughput, cache hit rate, estimator error, route churn, retry amplification, fairness, and cost per accepted result. Compare against request-count balancing with production-like traffic. A sophisticated score is useful only if outcomes improve.
+
+The practical pattern is this: define honest work units, estimate before dispatch, track committed work, separate hard capacity dimensions, learn model-specific throughput, route by predicted completion, protect long and short traffic, model cache locality, account for streams, reconcile estimates, prevent abuse, coordinate with concurrency control, preserve policy, fail over conservatively, explain billing, enforce tenant fairness, test difficult shapes, and measure real outcomes. Token-aware load balancing is reliable when the gateway distributes computation, not just HTTP requests.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
