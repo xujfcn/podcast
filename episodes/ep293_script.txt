@@ -1,0 +1,33 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about multi-region failover at the AI API gateway: how to move traffic during a regional outage without losing request meaning, tenant boundaries, idempotency, or billing consistency.
+
+Failover is often described as changing a DNS record or selecting another worker. That can restore reachability while breaking the request contract. The destination region may have different policy versions, provider availability, model aliases, quotas, caches, clocks, or data residency rules. A successful failover preserves behavior, not just connectivity.
+
+Start with the approved boundary. For each tenant, model, workflow, and data class, define which regions may process the request, which providers are allowed there, and which state may cross the boundary. A failover target that violates residency, contractual retention, or tenant policy is not an available target. Keep the region decision explicit and auditable.
+
+Define a region-independent request identity. Use a stable logical request ID, idempotency key, attempt IDs, and provider request IDs. Persist enough metadata in a shared or replicated control plane for a new region to recognize an in-flight request. If replication is delayed, the target must choose a conservative outcome rather than blindly start duplicate work.
+
+Preserve semantics across configuration. Replicate model aliases, prompt versions, safety policies, response contracts, rate limits, pricing rules, and feature flags with version identifiers. A failover region should either run the same approved configuration or clearly declare a degraded mode. Do not let local defaults silently rewrite the meaning of a request.
+
+Separate control state from data state. Routing policy, tenant entitlements, idempotency records, usage reservations, and incident state may need strong consistency or conflict resolution. Prompt content, attachments, caches, and transcripts may have stricter residency and retention requirements. Choose replication per data class and record when the target is operating from stale information.
+
+Make in-flight work explicit. A request can be queued, dispatched, streaming, cancelled, or awaiting a tool when a region fails. Track the last durable state and provider attempt. On failover, resume only states that are safe to resume, and use cancellation or reconciliation for attempts that may still be running in the failed region. “Unknown” is a valid state that requires investigation, not permission to retry everything.
+
+Use idempotency at every effectful boundary. A new region may not know whether the old region completed a tool call, charged usage, or received a provider response. Carry idempotency keys into providers and tools where supported, and keep a durable ledger for local side effects. For non-idempotent operations, require a confirmation or compensating workflow instead of automatic replay.
+
+Reconcile usage and billing after the switch. The old region may report provider usage late, while the new region starts a fallback attempt. Link both to the same logical request, keep attempt-level charges separate, and prevent duplicate finalization. Price and currency rules must be versioned across regions. A failover is incomplete until uncertain usage is resolved.
+
+Handle caches and context deliberately. A cache hit in one region may not be present or legally usable in another. A conversation context may be replicated, reconstructed, or intentionally unavailable. Define whether the target can serve from a shared cache, request the client to resend context, or degrade to a stateless path. Never copy private data across regions merely to preserve a convenience feature.
+
+Coordinate provider availability. The same model alias may map to different providers or revisions in different regions. Record the resolved provider, model, adapter, and attestation status. If the target must downgrade, expose the change through a stable capability or degradation signal, and ensure the response contract and billing policy still hold.
+
+Keep deadlines and cancellation alive. Failover consumes time. The target must inherit the original absolute deadline instead of granting the request a new lifetime. If the client has disconnected or the deadline has expired, cancel the transfer and downstream attempt. Otherwise an outage can turn into duplicate background work after the user has stopped waiting.
+
+Test split-brain and partial failure. Simulate lost replication, stale leases, DNS delay, provider outage in one region, network partition, duplicate delivery, clock skew, streaming interruption, and a region returning after the target has accepted ownership. Use fencing tokens or leases so an old owner cannot continue making decisions after a new owner takes over.
+
+Measure failover quality. Track detection time, decision time, traffic movement, recovery time, error rate, deadline misses, duplicate attempts, unknown states, data-policy rejects, cost variance, and usage reconciliation age. Segment results by tenant, region, model, and workflow. A fast switch with a high semantic regression rate is not a healthy failover.
+
+Practice the operator path. Keep runbooks for declaring a region unhealthy, freezing risky retries, selecting a compliant target, verifying configuration parity, monitoring capacity, communicating degradation, and returning traffic safely. Failback should be a controlled ownership transfer, not an automatic reversal that creates another split-brain event.
+
+The practical pattern is this: define approved regional boundaries, use stable identities, replicate versioned configuration, separate control and data state, model in-flight work, enforce idempotency, reconcile usage, handle caches and context deliberately, attest provider changes, preserve deadlines and cancellation, test partial failure and fencing, measure semantic outcomes, and practice failback. Multi-region reliability is successful when the user’s request remains governed by the same contract even after the infrastructure serving it changes location.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
