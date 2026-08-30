@@ -1,0 +1,41 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about adaptive concurrency control at the AI API gateway: how to adjust the number of in-flight requests using queue, latency, error, and resource signals, instead of trusting one fixed limit for every model and provider.
+
+A fixed concurrency limit is easy to configure and often wrong in production. One provider may handle many short requests, while another slows dramatically under a few long generations. A limit that is safe for text may overload vision or tools. Adaptive control turns observed system behavior into a bounded operating decision: how much work should enter this route right now?
+
+Start with a clear control boundary. Decide whether the limiter governs edge requests, queued work, provider attempts, tokens, tool workers, or all of them. Keep separate budgets when resources differ. A request with three retries or a long stream may consume more than one unit of pressure. Count the resource that actually causes failure.
+
+Measure useful signals. Track in-flight work, queue wait, time to first token, total latency, tail latency, provider errors, rate-limit responses, cancellations, output size, token throughput, CPU, memory, connection saturation, and quota headroom. Use a stable observation window and distinguish client cancellation from provider overload. Noisy or incomplete signals should reduce confidence, not trigger wild limit changes.
+
+Use a bounded controller. Set a minimum and maximum concurrency, a safe starting point, an increase step, a decrease step, cooldown, and recovery threshold. The controller may probe upward when latency and errors are healthy, then back off when a target signal worsens. Never let feedback produce an unbounded limit or oscillate faster than the system can respond.
+
+Choose the right target. You may optimize for a latency percentile, deadline success, provider error rate, token throughput, or cost per accepted response. These goals can conflict. Define a primary objective and guardrails. Higher throughput is not an improvement if tail latency breaches the customer contract or retries multiply provider work.
+
+Separate routes and shapes. A single global limit hides differences between model revisions, regions, modalities, context sizes, streaming, and tool use. Keep dimensions that materially affect service separate, or weight requests by estimated cost. Reuse observations only when the workloads share the same bottleneck and contract.
+
+Coordinate with provider limits. The gateway’s limit must respect provider concurrency, rate, token, connection, and account quotas. Leave headroom for retries, health probes, and critical reservations. A local controller that ignores a provider’s shared quota will look healthy until every region receives a 429 at once.
+
+Combine with admission and queue policy. Adaptive concurrency decides how much work can be in flight; it does not decide which tenant or priority class deserves that work. Apply authorization, request shape, deadline, reservation, and fairness rules first. Then use the current limit to admit compatible work without letting a large request monopolize the pool.
+
+Handle retries explicitly. Count attempts against the relevant budget, and cap retry concurrency separately if needed. A provider failure should not cause every request to retry simultaneously while the controller sees only the original workload. Carry operation identity, remaining deadline, and retry budget through the controller.
+
+Protect critical traffic. Shared adaptive limits can be consumed by noisy tenants or low-value background work. Partition capacity, reserve minimum shares, or use weighted tokens for critical classes. When the limit contracts, shed best-effort work before protected work. Do not allow a controller optimized for aggregate throughput to erase a business guarantee.
+
+Avoid oscillation and herd behavior. Synchronized workers can all increase or decrease at once, creating a sawtooth load pattern. Use jitter, centralized epochs, or carefully bounded local controllers. Smooth observations, but do not smooth away a real provider outage. Recovery should be gradual and evidence-based.
+
+Account for long-lived streams. A streaming request may hold a slot while producing tokens slowly. Use separate concurrency or token budgets for streams and short calls, and define fairness between them. Do not raise the limit merely because requests are alive; measure useful progress and provider capacity.
+
+Treat cancellation as feedback. Client disconnects can release work and capacity, but a high cancellation rate may indicate the queue or first-token latency is already unacceptable. Separate intentional cancellation from timeout and provider failure. Clean up slots promptly while retaining enough evidence to diagnose why work was abandoned.
+
+Make failover safe. A region or provider failure can move work to a route whose learned limit is not valid for the new capacity. Reset or cap the controller during failover, warm it carefully, and account for competing traffic and reservations. Never copy a high concurrency limit into a smaller or differently constrained pool without verification.
+
+Persist learning carefully. A controller may retain a limit across worker restarts, but learned state must be tied to model revision, provider, region, adapter, and policy. Expire old observations and start conservatively after a meaningful change. Historical success is not evidence for an untested route.
+
+Make decisions explainable. Record the current limit, target, observations, adjustment, confidence, route dimensions, policy version, and reason for admission or rejection. Operators should be able to tell whether traffic slowed because the controller detected provider saturation, a reservation protected capacity, or an unrelated policy denied the request.
+
+Test controller behavior. Cover cold start, steady state, sudden latency increase, 429s, provider outage, recovery, long streams, large shapes, retries, cancellations, worker restart, region failover, clock skew, missing metrics, noisy metrics, synchronized workers, and tenant contention. Assert that limits stay within bounds, critical work retains its guarantee, and recovery does not create a second overload.
+
+Measure control quality. Track limit over time, target error, settling time, oscillation, saturation, deadline success, tail latency, provider errors, retry amplification, utilization, rejected work, fairness, and cost per accepted outcome. Judge the controller by user-visible reliability, not by how frequently it changes a number.
+
+The practical pattern is this: define the control boundary, measure the true bottlenecks, use bounded feedback, choose a target with guardrails, separate route shapes, respect provider quotas, combine with admission and fairness, count retries, protect critical traffic, prevent oscillation, handle streams and cancellation, reset safely during failover, expire learned state, explain every adjustment, test failure and recovery, and measure user outcomes. Adaptive concurrency is reliable when it learns how much work a route can carry without learning to hide overload.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
