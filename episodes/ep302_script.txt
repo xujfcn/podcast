@@ -1,0 +1,39 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request coalescing at the AI API gateway: how to share identical work that is already in progress, avoid duplicate provider calls and charges, and still preserve tenant boundaries, permissions, deadlines, and result isolation.
+
+When many clients ask for the same expensive inference at nearly the same time, forwarding every request independently can create a stampede. The provider sees a burst, the gateway pays repeatedly, and latency gets worse for everyone. Request coalescing turns one compatible in-flight operation into a leader and a set of followers that may share its result.
+
+Start by defining what identical means. A coalescing key may include normalized model revision, messages, parameters, output schema, tools, policy version, data boundary, locale, freshness requirement, and other behavior-changing inputs. Never key only on a prompt string or model name. Omit a meaningful field and you may return one caller’s answer to a request that needed different behavior.
+
+Separate shareability from equality. Two requests can be syntactically identical but not safely shareable because their tenant policy, authorization, residency, retention, budget, or tool permissions differ. Include those boundaries in the key or require an explicit sharing policy. The default should be private to a tenant and workload scope, with broader sharing enabled only when the contract permits it.
+
+Choose a leader carefully. The first request may become the leader, but it should not grant its permissions to followers. The leader’s credentials, data access, tools, and billing identity remain its own. Followers receive a result only after their own authorization and shareability checks pass. A coalescing layer must not become an authorization bypass.
+
+Carry the strictest constraints. If followers have different deadlines, the shared operation should respect the earliest viable deadline or decide that sharing is unsafe. Combine cancellation rules explicitly: one follower leaving should not cancel work needed by others, while cancellation of the final follower should release work when the provider contract allows it. Do not turn one client’s patience into another client’s deadline.
+
+Bound the coalescing window. Joining is useful only while the leader is in a compatible phase. Set limits for join latency, queue length, token budget, context size, and total operation age. A follower that arrives too late may be better served by a fresh request, especially when the data must be current or the leader is near expiration.
+
+Handle streaming with care. Sharing a completed response is simpler than sharing a live token stream. For streams, decide whether followers can join from the current point, receive a buffered prefix, or must start a separate operation. Preserve event ordering, finish reasons, usage data, and interruption semantics. Never pretend that a follower saw tokens that were emitted before it joined.
+
+Keep tools and effects private by default. A model response that proposes a tool call may be shareable, but executing the tool is usually a separate effect boundary. Validate each follower’s authorization and arguments, and never replay a leader’s side effect for another caller without idempotency and approval. Coalesce computation, not unreviewed mutations.
+
+Propagate outcomes honestly. If the leader gets a timeout, malformed output, policy violation, provider error, or uncertain side effect, followers need a classified result, not a misleading generic success. Decide which failures may be shared and which require independent retry. Do not let every follower retry at once and recreate the original stampede.
+
+Make retries and fallback key-aware. A provider retry for the leader should remain one shared operation if its semantics are preserved. A fallback to another model, region, or provider may change the coalescing key because output, cost, residency, or quality semantics changed. Followers should know whether they joined the original route or received a separately resolved fallback.
+
+Assign billing deliberately. If ten followers share one provider call, the gateway needs a documented allocation rule. Charge the leader, split cost, charge per accepted result, or treat the work as a shared pool, but make usage and savings explainable. Track leader, followers, provider attempts, token usage, and any result transformation. Never hide duplicate work behind a single invoice.
+
+Protect result isolation. A shared result should be copied or safely referenced so one caller cannot mutate data observed by another. Remove caller-specific metadata, private annotations, and credentials before fan-out. Apply each follower’s response filtering, redaction, safety policy, and acceptance checks independently when those checks are not identical.
+
+Avoid cache confusion. In-flight coalescing is not the same as a durable semantic cache. The leader result may be valid only for a short freshness window, while a cache may serve it later under different policy. Keep lifecycle, freshness, invalidation, and observability distinct. A completed operation should leave the coalescing map promptly and enter a cache only under its own contract.
+
+Design failure cleanup. Use an atomic claim for the leader, bounded memory, join timeouts, cancellation cleanup, worker restart recovery, and a way to remove abandoned entries. If the leader process dies, followers need a deterministic outcome and controlled re-election or retry. A stale in-flight entry can block valid work just as effectively as a provider outage.
+
+Prevent abuse. Attackers can manufacture near-identical requests to occupy shared work, inflate follower counts, or infer whether another tenant is asking for a particular input. Rate-limit joins, cap fan-out, avoid revealing occupancy, and keep keys scoped. Do not expose “someone else is already generating this” as a side channel.
+
+Observe the right signals. Measure coalescing attempts, join success, leader duration, follower wait, fan-out, avoided provider calls, avoided cost, key mismatch, cancellation, stale entries, restart recovery, and shared-result rejection. Compare coalesced and independent quality and latency. High join rates are not success if followers receive late or semantically wrong results.
+
+Test the edges. Cover simultaneous arrivals, different tenants, permission changes, distinct schemas, different deadlines, streaming joins, leader cancellation, follower cancellation, provider timeout, malformed output, tool proposals, tool effects, fallback, worker restart, key normalization bugs, freshness boundaries, and a thundering herd after failure. Assert that no caller receives a result outside its authorization or contract.
+
+The practical pattern is this: define complete equality, enforce shareability boundaries, keep leader permissions private, carry strict deadlines, bound the join window, specify streaming behavior, separate computation from effects, classify shared failures, make retries key-aware, account for usage, isolate results, separate coalescing from caching, clean up abandoned work, prevent side channels, measure avoided work and semantic correctness, and test contention. Request coalescing is valuable when it removes duplicate work without merging identities that were never allowed to share.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
