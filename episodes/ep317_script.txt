@@ -1,0 +1,45 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about context compaction governance at the AI API gateway: how to fit long conversations, tool results, and system instructions into a model window without silently deleting the information that makes the request safe and correct.
+
+Long-context systems fail in an uncomfortable way. The request may be accepted, the model may answer fluently, and yet an earlier constraint, tool result, user correction, or safety instruction was removed during trimming. Context management is therefore not just a token optimization problem. It is a correctness and policy boundary.
+
+Start by classifying context. Separate system policy, developer instructions, user intent, conversation turns, tool calls, tool results, retrieved documents, model reasoning fields, and gateway metadata. Each class has different retention, trust, privacy, and compression rules. Do not treat the entire prompt as an undifferentiated string.
+
+Define non-droppable facts. Safety policy, authorization boundaries, current task, user constraints, tool approvals, financial limits, data residency, and unresolved commitments may need exact preservation. Attach provenance and priority to these facts. A summary that sounds equivalent is not sufficient when the original wording carries a hard guarantee.
+
+Use structured conversation records. Store messages with stable IDs, parent relationships, roles, timestamps, tool-call identity, citations, and content hashes. Compaction should produce a new context version that references source records, not overwrite history. This makes rollback, audit, and dispute investigation possible without sending the full history to the model.
+
+Choose compression by semantics. Recent-window trimming is simple but can discard important early constraints. Summarization is flexible but can hallucinate or omit details. Retrieval can recover selected facts but may miss implicit context. A practical policy combines protected facts, hierarchical summaries, recency, relevance, unresolved tasks, and explicit user preferences.
+
+Keep summaries typed and bounded. A summary should identify what it covers, which source messages were included, what was intentionally omitted, its model and prompt version, confidence, creation time, and token size. Avoid an unbounded recursive chain of summaries summarizing summaries without source references.
+
+Preserve tool state. A tool call and its result are not interchangeable with a sentence saying that a tool was used. Keep call ID, arguments digest, approval, result status, side-effect status, and citations. Compress verbose read-only results aggressively, but never turn an unknown or irreversible effect into an unverified fact.
+
+Protect against prompt injection. Retrieved documents, tool output, and old assistant messages may contain instructions that should not outrank current policy. Preserve trust labels and authority boundaries through compaction. A summary must not promote untrusted text into system or developer instruction merely because it appears important.
+
+Handle contradictions explicitly. Conversations contain corrections, changed preferences, and conflicting tool results. Record supersession and validity intervals. Do not merge contradictory facts into a vague statement that hides uncertainty. When the conflict affects a hard requirement, ask for clarification or fail safely.
+
+Account for tokenization correctly. System additions, tool schemas, media references, summary headers, and output allowance all consume context. Estimate with the selected route’s tokenizer when possible, and reserve space for the response and tool rounds. A compacted prompt that leaves no room for the required output is not a successful compaction.
+
+Coordinate with prompt caching. Changing a summary or moving messages can destroy provider prefix-cache locality. Preserve stable prefixes where possible, version summary boundaries, and compare the cost of cache reuse with the risk of stale context. Never reuse a cached prompt after authorization, policy, or user state has changed.
+
+Keep privacy and retention separate. Raw conversation history, summaries, embeddings, and audit references may have different retention requirements. Redact credentials and sensitive data before sending or storing derived context, but retain enough provenance to explain what was removed. Do not place private history in a shared summary or cross-tenant retrieval index.
+
+Make compaction policy-aware. Tenant plan, model capability, residency, safety mode, tool grant, and quality tier can change what may be retained or summarized. A lower-cost route must not receive a weaker safety context simply because its window is smaller. If policy cannot fit, reject or route to a compliant alternative.
+
+Expose compression decisions. Response metadata or internal evidence should identify context version, source range, protected facts, summary version, tokens before and after, dropped classes, retrieval hits, and any uncertainty. Operators need to know whether a bad answer came from the model or from an overaggressive gateway transformation.
+
+Validate before dispatch. Run checks for missing protected facts, broken tool references, orphaned citations, duplicated instructions, invalid role transitions, context overflow, and summary drift. If validation fails, expand from source records, switch strategy, or return an explicit context-limit error. Do not dispatch a known-invalid compacted prompt.
+
+Handle streaming and retries consistently. The context used by an attempt must be identified and immutable for that attempt. A retry may use a newer compacted version only if the contract permits it and the change is recorded. Do not let a stream reconnect with a different hidden context and claim it is the same generation.
+
+Make user controls meaningful. If users can pin a message, delete history, correct a fact, or request no-memory handling, compaction must honor those controls. Deletion should remove or quarantine derived summaries and retrieval artifacts according to policy. A hidden copy in a summary violates the user’s expectation even if the original message is gone from the active prompt.
+
+Connect compaction to billing. Record input tokens before and after, summary generation cost, retrieval calls, cache hits, validation work, and provider usage. A smaller prompt may require an extra summarization request, and a bad summary may trigger retries. Customers and operators should see the cost of context management without exposing private content.
+
+Test information loss. Cover early safety instruction, late user correction, contradictory facts, long tool output, irreversible tool effect, prompt injection in retrieval, deleted message, pinned message, summary model failure, tokenizer mismatch, cache boundary change, context overflow, retry, stream reconnect, tenant isolation, and regional retention policy. Assert that hard facts survive and uncertainty is not erased.
+
+Measure compaction quality. Track tokens saved, latency, summary cost, cache impact, protected-fact retention, citation integrity, tool continuity, contradiction rate, context-limit failures, answer-quality regression, privacy violations, deletion lag, and fallback frequency. Optimize for useful and safe outcomes, not the smallest prompt.
+
+The practical pattern is this: classify context, mark non-droppable facts, store structured records, compress by semantics, version bounded summaries, preserve tool state, carry trust labels, surface contradictions, count tokens correctly, coordinate caching, protect privacy, apply policy, expose decisions, validate before dispatch, keep attempts consistent, honor user controls, reconcile billing, test information loss, and measure quality. Context compaction is reliable when it reduces tokens without changing what the model is authorized and expected to know.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
