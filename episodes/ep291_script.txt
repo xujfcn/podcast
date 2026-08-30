@@ -1,0 +1,31 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about provider attestation at the AI API gateway: how to prove which service, model version, region, and attempt actually produced a response.
+
+An application may request a friendly model alias, but the gateway can route that request through an adapter, a regional endpoint, a fallback provider, or several attempts. If the final response says only “model completed,” operators cannot explain behavior, customers cannot audit usage, and incident teams cannot tell whether a model change caused the regression.
+
+Start with a precise identity record. Capture the logical model requested, the resolved provider, provider model identifier, model revision when available, adapter version, endpoint region, account or project scope, and provider request ID. Keep the client-facing model alias stable while preserving the resolved identity in a traceable internal record.
+
+Separate claims from evidence. A client-supplied header is a claim, not proof. A provider response field is useful evidence, but it may be incomplete or normalized by an adapter. Stronger evidence can include a signed provider response, a provider request ID, an authenticated account context, a deployment revision, and an immutable gateway record linking the response to the attempt.
+
+Define the attestation boundary. Decide what the gateway can prove directly, what it learns from the provider, and what remains an unverified claim. The gateway can prove which adapter sent a request and which endpoint returned bytes. It may not be able to prove the internal model weights or every processing step inside a provider. State that limitation clearly instead of turning metadata into a guarantee.
+
+Record every attempt, not only the winner. Retries and fallbacks can produce multiple provider interactions, with one response accepted and others rejected, cancelled, or partially billed. Give each attempt its own identity, timestamps, route decision, status, usage record, and evidence. Link the winning attempt to the logical request and preserve the losing attempts for audit and reconciliation.
+
+Protect integrity across the response path. Compute hashes over canonical request and response envelopes where appropriate, include contract and policy versions, and make changes to attestation records append-only. A hash proves consistency with the bytes that were hashed; it does not prove that the original bytes were truthful. Pair integrity checks with authenticated transport and controlled key management.
+
+Use signatures with operational discipline. Signed evidence needs an issuer identity, key version, algorithm, creation time, expiration or validity window, and a verification procedure. Rotate keys without making historical records unverifiable. Store enough metadata to distinguish a missing signature, an invalid signature, an unknown key, and a valid signature from an untrusted issuer.
+
+Handle provider limitations honestly. Some providers expose a model name but not a revision. Some return a request ID only in headers. Some route internally across regions or infrastructure without revealing the final location. Represent unknown values explicitly, preserve the raw evidence under access control, and avoid filling gaps with the requested alias.
+
+Make attestation useful to clients. Return a safe response metadata object or header with the resolved model, provider label, region class, attempt identifier, and verification status when the contract allows it. Do not expose credentials, internal topology, private account IDs, or information that helps one tenant infer another tenant’s traffic. The client should be able to distinguish verified, gateway-observed, provider-reported, and unknown fields.
+
+Connect evidence to billing and quality. The same attempt identity should link to usage, charge calculation, latency, response acceptance, safety decisions, and evaluation results. This lets a support team answer which provider generated a disputed response and which price or policy was applied without searching unrelated logs.
+
+Treat attestation as sensitive telemetry. Request and response hashes, provider IDs, timestamps, and model metadata can still reveal user behavior or commercial relationships. Apply tenant isolation, least-privilege access, retention limits, encryption, and audit logs. Redact payload content by default and separate customer-visible evidence from privileged forensic detail.
+
+Test the verification path. Cover missing fields, conflicting model names, duplicate attempt IDs, altered response bytes, expired signatures, rotated keys, unknown issuers, provider fallback, retries, partial streams, clock skew, and replayed evidence. Verify that a tampered record fails closed for the relevant trust decision while still preserving enough information to investigate.
+
+Avoid false certainty. Attestation is not a claim that a provider’s answer is correct, safe, or unbiased. It establishes provenance and integrity for defined parts of the path. Keep provenance, quality evaluation, safety validation, and authorization as separate controls that can be combined in a final acceptance decision.
+
+The practical pattern is this: define identity records, separate claims from evidence, state the attestation boundary, record every attempt, protect integrity, operate signatures carefully, represent unknowns honestly, expose safe metadata, connect provenance to billing and quality, protect telemetry, test verification failures, and avoid confusing provenance with correctness. A trustworthy gateway can explain not only what answer arrived, but which service and attempt produced it and how much of that statement is actually verified.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
