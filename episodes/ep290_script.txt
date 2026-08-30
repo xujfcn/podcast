@@ -1,0 +1,31 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about timeout budgets at the AI API gateway: how to divide one request deadline across queueing, connection setup, provider work, streaming, and retries.
+
+A single timeout is a blunt instrument. If the gateway gives every request sixty seconds, a slow queue can consume the entire budget before a provider attempt starts. Or a retry can begin with only a fraction of the deadline left and guarantee another failure. Timeout budgets make the request’s remaining time visible and actionable at every stage.
+
+Start with one end-to-end deadline. The caller should state how long the result remains useful, and the gateway should record the deadline using a monotonic clock. Do not reset the timeout at every hop. A downstream service may have its own limit, but it must inherit the remaining budget rather than receive a fresh lifetime.
+
+Separate deadline from idle timeout. A deadline is the absolute point by which the request must finish. An idle timeout limits how long a connection can produce no bytes. A streaming response can stay alive while making progress, while a stuck provider can send occasional meaningless data. Define both so a long useful generation is not confused with a hung request.
+
+Allocate budget by stage. Queueing, admission, DNS, connection setup, TLS, provider time to first token, generation, tool calls, validation, and response delivery each need a bound. These bounds should be budgets or maximums derived from the remaining deadline, not promises that every stage gets the same share. Leave a small margin for serialization and network transit.
+
+Use historical latency carefully. Percentiles can inform an initial allocation, but they are not guarantees. A provider’s p99 may change during an incident, and a long context can shift generation time dramatically. Combine recent measurements with request cost, route health, model behavior, and the caller’s remaining slack. When the budget is impossible, fail early or choose a safe fallback.
+
+Make retries budget-aware. Before starting another attempt, reserve time for connection, provider work, response validation, and delivery. Apply exponential backoff only when the remaining budget can support it. A retry that cannot finish before the deadline is wasted work and may create duplicate charges. Pair this with idempotency and cancellation contracts.
+
+Treat streaming as a living budget. Track time to first token, inter-token gaps, total generation time, and final validation time. A stream may meet its first-token objective while still running beyond the caller’s deadline. Propagate cancellation when the deadline expires, stop forwarding data, and reconcile any provider work that continued after the stop signal.
+
+Reserve time for tools and validation. A model response that requests a tool may consume only part of the request budget, but the tool call and follow-up generation still need time. A structured response may arrive quickly but fail validation and require repair or fallback. Estimate these branches before committing to a route, and avoid accepting work that cannot complete its contract.
+
+Expose timeout causes clearly. Distinguish queue timeout, connection timeout, provider time to first token, generation deadline, tool timeout, validation timeout, client disconnect, and gateway shutdown. Return a stable client error while preserving detailed internal lineage. This lets callers decide whether to retry, degrade, ask the user, or stop.
+
+Coordinate budgets across services. If the gateway gives a backend forty seconds but the backend gives its provider fifty, the backend can outlive the caller. Pass an absolute deadline or a signed remaining-budget value, and enforce a maximum at every boundary. Clock skew and network transit require a safety margin. Never trust a client to enforce a deadline on its own.
+
+Avoid timeout storms. When a provider slows down, synchronized deadlines can cause many requests to expire and retry together. Add jitter to backoff, use admission control, cap concurrent attempts, and prefer fast failure or degradation when capacity is gone. A timeout policy should protect the system as well as the individual request.
+
+Measure budget efficiency. Track allocated versus consumed time by stage, deadline misses, early rejections, retries started with low slack, cancellation delay, first-token latency, total completion latency, and work performed after expiry. These measurements reveal whether the budget is too generous, too rigid, or being spent in the wrong place.
+
+Test with controlled clocks and slow dependencies. Cover queue saturation, DNS and TLS delays, slow first tokens, slow inter-token gaps, tool hangs, validation failures, retries, client disconnects, provider failover, and clock skew. Verify that every stage sees the same deadline and that no background task survives without an explicit owner.
+
+The practical pattern is this: establish one end-to-end deadline, distinguish it from idle timeouts, allocate stage budgets from remaining slack, use latency evidence without treating it as a guarantee, make retries and streams budget-aware, reserve time for tools and validation, expose timeout causes, coordinate deadlines across services, prevent timeout storms, measure budget efficiency, and test slow boundaries. A timeout is useful when it explains what the request could still accomplish and stops work before the result is no longer worth producing.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
