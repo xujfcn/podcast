@@ -1,0 +1,31 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request priority at the AI API gateway: how to decide what should run first when demand exceeds capacity, without turning urgency into an unfair or unpredictable queue.
+
+When every request is treated equally, a sudden burst can make the whole system slow. When priority is added without a contract, the largest customer or the loudest retry loop can consume the shared pool. A useful priority system connects business importance, deadlines, resource cost, fairness, and the actual ability of the system to deliver a result.
+
+Start with explicit classes. Define a small number of priority levels with clear meanings, owners, and eligibility rules. For example, interactive user requests, time-bounded workflows, background jobs, and batch evaluation may have different objectives. A priority label should describe the service commitment, not merely give callers a button that says urgent.
+
+Separate priority from authorization. A tenant may be allowed to submit high-priority work, but that does not mean every request from that tenant should bypass safety policy, quotas, or concurrency controls. Check identity, plan, product context, and workflow authorization before accepting the priority claim. Never trust a client-provided number without validating who may use it.
+
+Make the scheduling objective concrete. Priority can mean lower queueing latency, a stronger deadline guarantee, a higher chance of admission, or preference during provider selection. These are different outcomes. Document which objective applies and measure it directly. Otherwise teams will argue about whether the scheduler is working while using incompatible definitions of success.
+
+Account for request cost. One short classification request and one long multimodal generation should not consume the same scheduling budget. Estimate input tokens, output allowance, media size, expected runtime, and tool work before admission. Use weighted fairness or cost-aware scheduling so a high-priority label cannot hide an extremely expensive request.
+
+Use deadlines, not urgency alone. A request with a real deadline can be ranked by remaining slack: the time until the deadline minus estimated service time and queue delay. This makes priority responsive to time and avoids permanently favoring a class that was marked urgent hours ago. Reject or downgrade impossible deadlines instead of allowing them to distort the entire queue.
+
+Preserve fairness across tenants. Use per-tenant quotas, weighted fair queues, concurrency caps, and aging for work that has waited too long. Aging should improve a request’s chance over time without allowing an unlimited backlog to overwhelm interactive traffic. Review fairness by tenant, class, region, model, and cost rather than relying on one global average.
+
+Coordinate priority with admission control. A scheduler cannot create provider capacity that does not exist. When the system is overloaded, decide which work to admit, defer, shed, downgrade, or route to a cheaper or faster model. Return a clear response when a request cannot meet its declared service class. Quietly accepting work that will certainly miss its deadline is worse than refusing it early.
+
+Make preemption safe. Preempting a queued request is simple; interrupting a generation or tool call may waste tokens or leave a side effect in progress. Define which stages are preemptible and which must drain. Use cancellation contracts, idempotency keys, checkpoints, and compensating actions where necessary. A priority boost should not create duplicate charges or partial mutations.
+
+Avoid priority inversion. A low-priority request may hold a scarce connection, lock, batch slot, or tool resource that a high-priority request needs. Track resource ownership and bound how long a lower class can block a higher class. Sometimes the right solution is not preemption but reserving capacity, splitting pools, or making the lower-priority operation release resources at safe checkpoints.
+
+Expose safe capacity signals. Clients need to know whether they were queued, admitted, deferred, downgraded, or rejected, and which deadline or budget influenced the decision. Combine this with rate limit headers and Retry-After semantics. Do not expose internal tenant rankings or sensitive workload details, but provide enough information for clients to stop retrying blindly.
+
+Observe outcomes by class. Track queue delay, time to first token, completion rate, deadline misses, downgrade frequency, cancellation waste, provider cost, and tenant fairness. A priority system that improves one percentile by causing background work to starve is not necessarily healthy. Compare declared priority with delivered service and inspect the cases where they diverge.
+
+Test adversarial behavior. Simulate a tenant that marks everything urgent, synchronized retries, large requests behind tiny ones, impossible deadlines, provider outages, cancellation races, and a long low-priority backlog. Verify that quotas, safety policies, and fairness remain effective under pressure. Run these tests with realistic token and concurrency costs, not only request counts.
+
+The practical pattern is this: define a small set of priority classes, validate authorization, state the scheduling objective, account for cost, rank by deadline slack, preserve tenant fairness, coordinate with admission control, preempt only at safe boundaries, prevent priority inversion, expose actionable outcomes, measure delivered service, and test abusive or overloaded conditions. Priority is not a shortcut around capacity. It is a contract for deciding which work gets scarce capacity and why.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
