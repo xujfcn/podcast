@@ -1,0 +1,37 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about priority inheritance at the AI API gateway: how urgency stays consistent across queues, retries, asynchronous jobs, and service boundaries, while preventing clients from forging a high priority and taking capacity from critical work.
+
+Priority is useful only when it survives the path a request actually takes. A request may enter at the edge, wait in a queue, create provider attempts, invoke tools, spawn an asynchronous child job, and cross several workers. If each hop invents its own interpretation, urgent work can become ordinary, or ordinary work can become an outage for everyone else.
+
+Begin with a trusted priority contract. Let the caller express business context, deadline, service class, and perhaps a requested urgency, but do not treat those fields as authority. The gateway should resolve them against tenant entitlements, workflow policy, reservation status, and verified authentication. Store both requested priority and effective priority so operators can explain what changed.
+
+Use a bounded priority scale. A small number of documented classes is easier to enforce than arbitrary integers. Define what each class promises, which workloads qualify, maximum rates, burst rules, and behavior under overload. Priority should influence ordering and admission, not bypass authorization, safety, residency, budget, or model compatibility.
+
+Separate priority from deadline. A request can be low priority but have a hard deadline, or high priority with a flexible completion window. Carry both signals. Use priority for contention policy and deadline for feasibility. Never promote a request simply because its deadline is already impossible; reject, degrade, or renegotiate clearly.
+
+Propagate priority with provenance. When a service creates a child operation, record the parent identity, requested class, effective class, reason for inheritance, and any policy transformation. A child should not automatically inherit the parent’s highest privileges. Define whether it inherits urgency, deadline, budget, data boundary, and cancellation, and cap each independently.
+
+Handle retries as the same intent. A retry should preserve the effective priority and remaining deadline unless policy explicitly changes it. Do not let a failed request climb the queue on every attempt. Count retry budget and attempt age against the original workload, and prevent retry storms from converting one urgent operation into unbounded priority traffic.
+
+Treat fallback carefully. A fallback to another region, provider, or model may have a different capacity pool and cost. Carry the business urgency, but re-evaluate the candidate against policy, capability, residency, budget, and reservation rules. A high-priority label is not permission to cross a forbidden boundary or consume another tenant’s protected allocation.
+
+Design queue fairness. Strict priority can starve lower classes, while pure fairness can miss critical deadlines. Use bounded priority, aging, weighted shares, minimum service, and maximum wait policies. Measure service by tenant and class. Make the scheduler’s rule deterministic enough that two operators can predict why one request ran before another.
+
+Prevent priority forgery. Accept priority claims only through authenticated server-side attributes, signed workflow tokens, approved service identities, or policy-backed plan data. Validate token audience, scope, expiry, and parent linkage. Ignore or downgrade unknown values. Never trust a client-controlled HTTP header merely because its name sounds authoritative.
+
+Protect against confused deputies. A downstream service may receive a high-priority token from an upstream caller, but it must verify that the upstream identity is allowed to delegate that class. Bind delegation to a specific operation, resource, tenant, and time window. Prevent a privileged service from becoming a general-purpose priority escalator.
+
+Keep reservation interaction explicit. A reservation can guarantee capacity for a workload, while priority can order work within or outside that reservation. Define whether reserved work keeps its class during borrowing, whether borrowed work can be preempted, and how failover affects the guarantee. Do not let priority silently consume reserved capacity that belongs to another contract.
+
+Carry priority through asynchronous work. Queue messages, scheduled jobs, webhooks, and callbacks need authenticated priority metadata and an expiry. Persist effective class and deadline with the job, not only in transient headers. On resume, re-check authorization, freshness, and remaining budget. A job that waited overnight should not retain yesterday’s urgency without a policy decision.
+
+Make cancellation and expiration reduce pressure. When the caller leaves or the deadline passes, remove the work from priority queues and stop downstream attempts where possible. Release its reserved slots and prevent late callbacks from re-entering at the old class. Priority is not a reason for expired work to survive indefinitely.
+
+Observe every transition. Log requested class, effective class, issuer, parent, policy version, queue, admission decision, preemption, aging, retry, fallback, and final outcome. Redact sensitive payloads while retaining enough evidence to investigate abuse. Alert on unexplained promotions, cross-tenant delegation, starvation, and priority changes after dispatch.
+
+Measure whether priority works. Track deadline success by class, wait time, queue share, starvation time, promotion and downgrade rates, forged claims, retry amplification, reserved-capacity usage, preemption, and cost per accepted outcome. A class is not effective because it appears first in a dashboard; it is effective when its documented service objective is met without making other objectives impossible.
+
+Test inheritance and abuse. Cover forged headers, expired tokens, unauthorized delegation, nested child jobs, retries after partial success, fallback across regions, reservation borrowing, queue starvation, worker restart, clock skew, cancellation, and a deadline that expires while waiting. Assert that priority never grants forbidden access, unlimited retries, or a route that violates the original contract.
+
+The practical pattern is this: authenticate priority claims, separate requested from effective class, bound the scale, keep deadline distinct, propagate provenance, preserve priority across retries, re-evaluate fallbacks, combine priority with fairness, verify delegation, define reservation interaction, persist asynchronous metadata, expire stale urgency, audit transitions, measure outcomes, and test forgery and starvation. Priority inheritance is reliable when urgency can travel across the system without becoming a privilege escalator.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
