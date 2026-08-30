@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request budget allocation at the AI API gateway: how to divide time, tokens, money, attempts, and concurrency across the stages of one request so preparation work does not consume the resources needed for the final answer.
+
+An AI request is often a workflow, not one provider call. It may authenticate, classify data, retrieve documents, invoke tools, call a model, validate output, retry an attempt, and stream the result. If every stage draws from one unstructured pool, a slow search or verbose tool response can leave no deadline or token budget for the core generation.
+
+Start with a total commitment. At admission, resolve the request deadline, maximum spend, input and output token limits, attempt count, tool budget, retrieval budget, and concurrency allowance. Bind these commitments to tenant policy, model capability, route, and response contract. A budget is useful only when the gateway can explain what it protects.
+
+Partition by stage. Reserve explicit amounts for admission, retrieval, tool calls, provider attempts, validation, retries, cleanup, and response delivery. Some budgets are hard ceilings, while others are targets or shared pools. Keep the distinction visible. A target can be reallocated; a safety or spend ceiling cannot be casually borrowed.
+
+Reserve the core path first. Protect enough time, tokens, and money for the primary model attempt and response delivery before starting optional enrichment. If retrieval or a tool consumes the reserve, stop or degrade that stage. The system should preserve the central user journey instead of producing an elaborate preamble with no answer.
+
+Propagate remaining budgets. Every child operation receives remaining deadline, remaining spend, remaining tokens, remaining attempts, and its parent identity. Do not give a tool the original request budget and assume it will behave. A child that ignores prior consumption can independently exceed the customer commitment.
+
+Track actual consumption. Record estimated and final tokens, provider usage, tool duration, retrieval calls, output bytes, retries, queue time, validation time, and cancellation. Estimates are needed for admission; final accounting is needed for reconciliation. Never hide gateway-added prompts, schemas, or summarization work inside an unexplained model charge.
+
+Make allocation dynamic but bounded. A request may not need its full retrieval reserve, while a complex tool call may need more. Permit controlled borrowing from optional pools with minimum and maximum bounds. Reallocation must preserve hard limits, policy, deadline, and the protected core reserve.
+
+Budget retries explicitly. A retry consumes time, provider capacity, tokens, and potentially money. Set an attempt budget and a retry reserve before the first call. Check remaining value and deadline before retrying. Do not use the entire budget to recover a low-value transient error while a valid partial answer could still be returned.
+
+Separate admission from execution. Admission decides whether the request can fit under current policy and capacity. Execution consumes the granted budget and reports changes. If conditions worsen, the gateway may shed optional work, shorten output, or reject a new attempt, but it must not silently expand the customer’s commitment.
+
+Account for token shape. Input tokens, output tokens, reasoning tokens, tool schemas, retrieved passages, media units, and cached tokens have different costs and limits. Estimate with the selected route’s tokenizer and pricing model where possible. Reserve output space before adding retrieved context or tool descriptions.
+
+Budget retrieval by value. Limit document count, bytes, ranking work, latency, and downstream calls. Stop when additional context is unlikely to improve the answer or would threaten the core reserve. Record which retrieval budget was used and whether the final prompt was truncated or degraded.
+
+Budget tools by risk. A read-only lookup can receive a different time and spend limit from a payment, messaging, or mutation tool. Include approval, idempotency, effect count, and result size in the budget contract. Never let a tool use a generous read budget to create multiple unpriced side effects.
+
+Handle streaming budgets continuously. Streaming needs separate budgets for time to first token, total duration, output tokens, event rate, and finalization. A client may disconnect, or a provider may stall after partial output. Stop according to the remaining contract and record whether the stream ended by completion, cancellation, timeout, budget exhaustion, or provider failure.
+
+Preserve validation budget. Output checking, schema validation, safety classification, citation verification, and redaction take resources after generation. Reserve enough time and tokens for these checks. A response that fits the provider budget but cannot pass the required gateway contract is not a successful request.
+
+Make fallback budgets independent. A fallback should have a defined reserve and eligibility rule. Do not launch a second provider attempt unless remaining time, spend, contract, and side-effect state support it. A cheaper fallback may still be wrong if it cannot satisfy the required capability or output guarantee.
+
+Respect tenant and plan policy. Different tenants may have different per-request spend, token, latency, tool, and concurrency limits. Apply these before dynamic borrowing. A client-provided budget request is input, not authority to exceed a plan or obtain priority over another tenant.
+
+Coordinate shared budgets. Organization spend, provider quota, regional capacity, and route concurrency are shared resources. A request-level allocation must reserve from the correct parent pool and release unused capacity. Avoid double reservation across gateway, worker, and provider layers, or the system will appear full while resources sit idle.
+
+Use leases for reservations. A budget reservation should expire or be released when the operation ends, is cancelled, or loses ownership. Bind reservation updates to operation and attempt generations so an old worker cannot return or spend another worker’s budget. Unknown provider outcomes require reconciliation before releasing funds.
+
+Align policy snapshots and pricing. The budget should carry the policy version, price schedule, model revision, and route decision used for admission. If a rule changes during execution, define which commitment remains valid and which live controls still apply. Customers need a stable explanation for why a request was allowed and what it cost.
+
+Expose budget decisions. Record granted, reserved, consumed, released, borrowed, denied, and exhausted amounts by stage. Report safe summaries such as remaining time, output limit, retry availability, and degradation reason. Keep sensitive prompts and tool arguments out of ordinary telemetry.
+
+Define failure semantics. When a stage exhausts its budget, choose deliberately among skipping optional work, returning a partial result, falling back, cancelling, or failing with a typed error. Do not convert budget exhaustion into a generic provider outage. The user and operator should know whether the system ran out of capacity, time, money, or contract room.
+
+Test budget races. Cover retrieval consuming the reserve, tool timeout, retry near deadline, provider usage arriving late, dynamic borrowing, cancellation during a tool call, stream disconnect, worker takeover, region migration, pricing change, shared-pool contention, duplicate reservation, unknown provider outcome, validation failure, partial output, and tenant limit enforcement. Assert that total consumption never exceeds hard commitments.
+
+Measure budget accuracy. Track admission rejection, reserve utilization, unused allocation, overshoot, estimation error, retry spend, optional-work suppression, deadline misses, token truncation, fallback rate, validation starvation, shared-pool contention, reconciliation corrections, and customer-visible budget errors. Optimize for predictable outcomes and useful work, not for consuming every granted unit.
+
+The practical pattern is this: define total commitments, partition by stage, protect the core path, propagate remaining budgets, track estimated and actual use, allow bounded reallocation, reserve retries and validation, budget retrieval and tools by value and risk, handle streams continuously, make fallbacks explicit, apply tenant policy, coordinate shared pools, lease reservations, align pricing and policy, expose decisions, define exhaustion semantics, test races, and measure accuracy. Request budgets are reliable when optional work can flex without starving the answer the customer actually requested.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
