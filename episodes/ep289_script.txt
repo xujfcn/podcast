@@ -1,0 +1,31 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about usage reconciliation at the AI API gateway: how to make requests, responses, provider usage, and customer charges explainable as one connected record.
+
+An AI request can pass through retries, fallbacks, streaming, caching, and multiple providers before the client sees a result. If billing is derived from only one of those steps, the invoice may disagree with the user’s experience. Reconciliation connects what the gateway attempted, what the provider consumed, what the client received, and what the system charged.
+
+Start with a stable identity model. A client request ID is not enough when one request creates several provider attempts. Use a parent request ID, attempt IDs, provider request IDs, usage record IDs, and a billing event ID. Store the relationships explicitly. Idempotency keys and transaction IDs prevent retries, delayed callbacks, or duplicate workers from creating duplicate charges.
+
+Define the accounting events. Useful events include admission, provider dispatch, first token, completion, cancellation, provider usage receipt, response acceptance, cache hit, fallback, and charge finalization. Each event should have an immutable timestamp, route, model, tenant, status, and source. Do not overwrite history when a late provider record corrects an earlier estimate.
+
+Separate estimates from final usage. Before a request runs, the gateway may estimate input tokens, output allowance, media cost, or provider price. During streaming, it may maintain a provisional total. After completion, the provider may report authoritative usage. Label each value clearly and record the version of the pricing rule used. An estimate is useful for admission; it is not automatically suitable for billing.
+
+Reconcile at the attempt level. A logical request may fail on one provider, succeed on another, and still incur cost on both. Track each attempt independently, including prompt tokens, completion tokens, cached tokens, media units, status, and provider-side fees. Then derive the customer charge from the documented policy for failed, cancelled, retried, and fallback attempts.
+
+Make pricing versioned and deterministic. Store the model identifier, provider, currency, unit prices, discounts, markup rules, rounding mode, and effective pricing version with every finalized charge. Never recalculate old invoices using today’s price table. If a correction is needed, create an adjustment linked to the original event rather than mutating the past.
+
+Handle streaming and cancellation explicitly. A client may disconnect after receiving part of a response, while the provider continues briefly and later reports final usage. Reconcile tokens generated after disconnect, gateway cancellation time, provider stop time, and any minimum charge. The customer-facing result and the internal financial record may complete at different times, but both must remain linked.
+
+Give caches their own accounting rules. A cache hit may have no provider token cost but still consume storage, retrieval, or platform capacity. A cache miss may create a provider charge that must be attributed to the requesting tenant. Define whether cached responses are free, discounted, or charged according to the original generation, and keep the policy stable and visible.
+
+Treat corrections as normal. Provider invoices can arrive late, usage can be rounded differently, and a webhook can be duplicated or omitted. Use a reconciliation job that compares gateway attempts, provider records, usage exports, and billing events. Make it safe to rerun. Classify differences as missing, duplicated, delayed, mismatched, or pricing-related, and route material discrepancies for review.
+
+Protect tenant attribution. A shared batch, cache, or retry worker must not assign usage to the wrong customer. Carry tenant identity and authorization context through every asynchronous queue. When attribution is uncertain, place the amount in a clearly labeled suspense state instead of silently charging a plausible tenant.
+
+Make the invoice explainable without exposing secrets. A customer should be able to see time, model, provider or route label, usage units, unit price, discounts, and charge status. Do not expose provider credentials, raw prompts, private tool arguments, or another tenant’s metadata. Support teams need a deeper audit view with access controls, while the customer view should remain safe and useful.
+
+Test accounting invariants. For every finalized charge, prove that there is one authorized billing event, one or more linked attempts, a pricing version, a currency, and a deterministic calculation. Test duplicate callbacks, missing usage, late cancellation, fallback success, partial streams, cache hits, retries, rounding boundaries, and concurrent finalizers. Reconciliation is a correctness system, not a report generated after the fact.
+
+Measure financial reliability. Track unmatched attempts, duplicate events, pending usage age, correction volume, invoice disputes, charge latency, and the difference between estimated and final cost. Set objectives for how quickly usage becomes final and how much unresolved value can remain in suspense. Financial observability deserves the same operational attention as latency and error rates.
+
+The practical pattern is this: define stable identities, record immutable accounting events, separate estimates from final usage, reconcile every provider attempt, version pricing, handle streams and cancellation, define cache policy, make corrections rerunnable, protect tenant attribution, expose safe explanations, test invariants, and measure discrepancies. A trustworthy AI gateway can answer not only “what did we charge?” but also “which work produced this charge, what did the provider report, and why does the calculation follow the policy?”
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
