@@ -1,0 +1,33 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about batch scheduling at the AI API gateway: how to combine compatible work for better throughput without breaking latency, freshness, priority, cancellation, or cost guarantees.
+
+Batching can make expensive model calls more efficient, but it is not free. A request that waits for a batch is trading latency for utilization. Requests may have different prompts, output limits, deadlines, tenants, data boundaries, and acceptance contracts. A safe batch scheduler decides what may be combined, when to close a batch, and how to explain the result.
+
+Start with the workload contract. Define whether the workflow is interactive, asynchronous, or offline; its maximum queue delay; freshness requirement; ordering guarantees; cancellation behavior; and acceptable partial failure. A batch job that can wait an hour should not share a scheduler policy with a user waiting for the next token.
+
+Choose a compatibility key. Requests may be batchable only when they share a model revision, provider, region, safety policy, prompt template, output schema, tool policy, and data handling boundary. Do not combine requests merely because they use the same model alias. Configuration drift inside a batch can make individual results impossible to audit.
+
+Bound the batch window. A short window improves responsiveness but may produce small, inefficient batches. A long window improves packing but increases tail latency and cancellation waste. Use a maximum wait, maximum batch size, maximum token budget, and maximum media budget. Close the batch when any bound is reached, and reserve time for provider processing and response delivery.
+
+Pack by cost, not only by count. Ten tiny prompts and ten long multimodal requests are not equivalent. Estimate input tokens, output allowance, context size, media units, and expected runtime. Use weighted capacity limits and leave headroom for provider constraints. A batch that fits by request count can still exceed context, memory, or time limits.
+
+Preserve fairness and priority. A large tenant should not fill every batch while smaller tenants wait indefinitely. Apply per-tenant quotas, weighted fair queues, aging, and priority rules before packing. Keep interactive traffic isolated from background work when their objectives conflict. Batching is a scheduling optimization, not a license to erase service classes.
+
+Handle cancellation before dispatch. A request may be cancelled while waiting for the window to close or while the batch is being assembled. Remove it promptly, release its reserved tokens, and avoid sending an empty or stale item. After dispatch, cancellation may require filtering the result, stopping the whole batch, or accepting unavoidable provider work according to the provider contract.
+
+Define partial failure semantics. One item can fail validation, exceed its output limit, or trigger a provider error while other items succeed. Return per-item status, usage, error category, and retry eligibility. Do not convert a mixed batch into one ambiguous success or failure. Preserve item identities through packing, provider response ordering, and final billing.
+
+Keep ordering explicit. Some batch APIs return results in input order; others use item IDs or complete items out of order. Assign durable item IDs and verify that every response maps to exactly one input. Never rely on array position after retries, partial failures, or provider-side reordering.
+
+Protect data boundaries. Batch packing must not mix tenants or data classes unless policy explicitly allows it and the provider contract supports it. Shared prompts, cached prefixes, embeddings, and logs can create cross-tenant exposure even when response items are separated correctly. Treat batch envelopes, provider traces, and intermediate buffers as sensitive data.
+
+Make retries item-aware. Retrying an entire batch can duplicate successful work and charges. Retry only eligible items with idempotency keys, or use a provider feature that guarantees item-level deduplication. Rebuild the batch under the remaining deadline and current policy. A retry that waits for another batch window may be worse than a direct fallback.
+
+Reconcile usage and cost per item. The provider may report aggregate batch tokens, discounts, or shared prefix usage. Define an allocation rule that is deterministic, versioned, and visible. Link each item to its batch ID, provider attempt, usage record, pricing version, and charge. If allocation is uncertain, record suspense rather than silently assigning cost to a convenient tenant.
+
+Measure the tradeoff. Track batch fill rate, queue delay, time to dispatch, provider utilization, throughput, p50 and p99 latency, cancellation waste, partial failure rate, retry amplification, cost per accepted item, and fairness by tenant and class. A higher fill rate is not an improvement if it causes deadline misses or makes users abandon the workflow.
+
+Test boundary conditions. Cover an empty batch, one oversized request, mixed priorities, cancellation during packing, provider reordering, duplicate results, partial timeout, schema rejection, tenant isolation, token budget overflow, clock skew, and a provider outage. Use deterministic fake providers and verify that item identity and accounting survive every path.
+
+The practical pattern is this: define workload objectives, pack only compatible requests, bound the window and resource budgets, estimate cost, preserve fairness and priority, remove cancelled items, specify partial failures and ordering, protect data boundaries, retry individual items safely, reconcile usage per item, measure the latency and cost tradeoff, and test the edges. Batch scheduling is successful when it improves utilization while every request still receives the contract, identity, and accounting it was promised.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
