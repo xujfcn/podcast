@@ -1,0 +1,37 @@
+Welcome to the three-hundredth episode of the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request intent preservation: how an AI API gateway keeps the meaning of a request intact as it passes through parsing, policy checks, routing, retries, fallbacks, tools, providers, responses, and billing.
+
+Three hundred episodes is a useful moment to step back. A gateway is often described as a proxy that forwards JSON. In production, it is closer to a meaning-preservation system. It decides what the caller asked for, what constraints must remain true, which transformations are safe, and whether the final result still satisfies the original purpose.
+
+Start by separating syntax from intent. A request body contains fields, but intent may also include an output schema, deadline, modality, tool permissions, data boundary, freshness requirement, budget, streaming expectation, and acceptance rule. Parse these into a typed internal request contract before provider-specific translation. If a constraint cannot be represented, mark it unsupported instead of silently dropping it.
+
+Give intent a durable identity. Assign a request ID, workflow ID, attempt ID, and operation identity with clear scopes. Retries and fallbacks create new attempts, not new user intent. Tool calls and asynchronous jobs may create child operations, but they should link back to the parent contract. This lineage lets operators distinguish a legitimate transformation from accidental semantic drift.
+
+Make transformations explicit. A gateway may normalize message roles, convert schemas, trim context, redact fields, change a model alias to a revision, or translate tool definitions. Record what changed, why it was allowed, which policy version authorized it, and whether the transformation can affect quality, privacy, cost, or side effects. “Compatible format” is not the same as “equivalent meaning.”
+
+Preserve constraints through routing. A fallback is valid only if it supports the required modality, context, tools, output contract, region, retention policy, deadline, and budget. A cheaper or healthier model is not automatically a valid replacement. Evaluate candidates against the original contract, then record which constraints were preserved, relaxed, or caused rejection.
+
+Keep retries semantically honest. A retry may repeat a safe inference, but it can duplicate a tool effect, notification, payment, or other mutation. Carry idempotency and effect boundaries across attempts. If the provider outcome is unknown, do not pretend the operation is safe to replay. Ask for confirmation, reconcile state, or return an explicit uncertain result.
+
+Respect deadlines and freshness. A request that asked for current information or completion before a deadline cannot be treated as equivalent after the relevant window has passed. Pass remaining time to every stage, reject stale work before dispatch, and label late results honestly. A response that is syntactically correct but too late may fail the request’s intent.
+
+Preserve data and policy boundaries. Redaction, regional routing, tenant isolation, retention, and provider restrictions are part of meaning, not optional middleware. A fallback that sends more data, crosses a forbidden region, or changes retention terms has changed the operation even if the model answer looks better. Re-evaluate boundary-sensitive constraints whenever route or provider changes.
+
+Treat tools as semantic boundaries. A model may propose an action, but the gateway must validate arguments, authorization, freshness, idempotency, and user confirmation before execution. Keep the distinction between suggestion, approval, dispatch, completion, and observed effect. Never infer that a tool succeeded because the model emitted a well-formed tool call.
+
+Define response acceptance in terms of intent. Check schema, required fields, citations where applicable, tool result linkage, finish state, safety policy, model capability, and task-specific quality. HTTP 200, valid JSON, or non-empty text is not enough. If a response is repaired, truncated, or degraded, expose that fact and preserve the original acceptance decision.
+
+Keep streaming truthful. Partial output can be useful, but the gateway should identify whether the stream is provisional, complete, interrupted, or cancelled. Do not emit a final-looking event before validation and provider completion semantics support it. If a client disconnects, apply the cancellation contract and record whether provider work continued.
+
+Make accounting follow intent. Link requested model, resolved route, every attempt, tokens, retries, tool work, discounts, and accepted outcome to one operation. If a fallback changes cost or usage semantics, disclose it according to the product contract. A bill that cannot explain why a request used two providers is evidence that intent and accounting were separated too early.
+
+Version the meaning. Model aliases, prompt templates, schemas, provider adapters, policy bundles, pricing, and capability catalogs all affect interpretation. Attach their versions to the request and response record. When a contract evolves, define compatibility, migration, and rollback instead of assuming that identical field names preserve identical behavior.
+
+Test preservation properties. Do not test only individual adapters. Create end-to-end fixtures that assert invariants across routes: forbidden data never crosses its boundary, a deadline never becomes longer on retry, an effect is not duplicated, an output schema remains enforced, a fallback does not add unauthorized tools, and every charge maps to an actual attempt. Use differential tests to compare intended and observed contracts.
+
+Observe semantic drift. Track dropped constraints, transformed fields, fallback reasons, late results, tool mismatches, response repairs, uncertain provider outcomes, billing exceptions, and customer corrections. Review incidents by asking not only “which service failed?” but also “at which hop did the request stop meaning what the caller intended?”
+
+Use safe degradation. When the full intent cannot be preserved, choose a documented outcome: reject, ask for confirmation, return a partial result, route to a compatible slower path, or mark the result degraded. Do not silently relax important constraints to make a dashboard look healthy. A clear refusal can preserve trust better than a plausible answer to a different question.
+
+The practical pattern is this: parse intent separately from syntax, assign durable identity, make transformations visible, route only among compatible candidates, carry idempotency and deadlines across attempts, preserve data and policy boundaries, treat tools as effects, validate responses against the original purpose, keep streams and billing truthful, version all meaning-bearing dependencies, test invariants end to end, observe semantic drift, and degrade explicitly. After three hundred episodes, the central lesson is simple: an AI gateway earns trust when every hop preserves what the caller meant, not merely what the JSON happened to say.
+
+Thanks for listening to the Crazyrouter Podcast, and thank you for joining us for episode three hundred. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
