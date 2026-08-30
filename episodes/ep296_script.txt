@@ -1,0 +1,33 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about configuration drift at the AI API gateway: how to detect when regions, workers, adapters, and control planes stop enforcing the same intended rules.
+
+Configuration drift is not limited to a changed environment variable. A model alias can point to a different revision, a safety policy can be one version behind, a worker can carry an emergency override, or a region can miss the latest provider capability update. The result is that identical requests receive different treatment depending on where they land.
+
+Start with a declared configuration model. Identify the settings that define request behavior: routes, model aliases, provider credentials references, policy bundles, prompt versions, rate limits, timeouts, pricing, data boundaries, feature flags, and adapter versions. Separate behavior-affecting configuration from operational metadata so the baseline reflects what can change a user-visible outcome.
+
+Create an immutable desired state. Store configuration as versioned, reviewable artifacts with an owner, source, effective time, and rollback reference. Avoid making a live worker the source of truth. A desired-state record should be complete enough to reproduce the intended behavior and should identify which secrets or external references are required without embedding secret values.
+
+Canonicalize before hashing. Different ordering, whitespace, default expansion, and serialization formats can produce different bytes for equivalent configuration. Normalize keys, types, defaults, and references before computing a digest. Hash each logical component as well as the complete bundle, so an operator can see whether drift affects routing, policy, pricing, or only a harmless annotation.
+
+Compare all enforcement points. Check the control plane, regional replicas, edge workers, provider adapters, caches, schedulers, and background consumers. A control plane may report the right version while a worker continues serving an older in-memory snapshot. Record observed version, digest, load time, source, and health for every enforcement point.
+
+Distinguish drift from intentional override. Incident responders may need an emergency route or a temporary rate limit. Require the override to carry an owner, reason, scope, creation time, expiration, and approval. Make it visible in the effective configuration and exclude it from the desired-state comparison only through an explicit, time-bounded rule.
+
+Detect drift continuously. Compare desired and observed state on deployment, startup, a schedule, and important request paths. Do not block every request on a remote control-plane read. Cache signed or versioned configuration locally, fail according to the risk of the setting, and emit an alert when a worker is serving stale state beyond its allowed age.
+
+Make stale behavior safe. A stale pricing rule, data-residency policy, or authorization bundle may require fail-closed behavior. A stale observability label may be safe to tolerate temporarily. Classify configuration by risk and define maximum staleness per category. “The service is reachable” is not evidence that its policy is current.
+
+Roll out changes progressively. Publish a new bundle, validate it, canary it in one worker or region, compare request outcomes, and expand only after health and parity checks pass. Keep old and new versions available during the transition. A staged rollout makes the source of a behavioral difference easier to locate and limits blast radius.
+
+Verify dependencies, not only local files. A route configuration can be correct while the referenced model catalog, provider capability, certificate, secret reference, or pricing table is missing or incompatible. Resolve dependencies during validation, record their versions, and reject incomplete bundles before they reach production workers.
+
+Preserve runtime evidence. Attach configuration version and component digests to request lineage, provider attempts, policy decisions, response acceptance, and billing records. This allows an incident review to reconstruct which rules were active for a specific request instead of comparing today’s files with yesterday’s assumptions.
+
+Control auto-remediation. Automatically refreshing a safe, immutable configuration can reduce drift quickly. Automatically changing a route, authorization rule, residency boundary, or pricing policy can create a larger incident. Define which categories may self-heal, require a two-phase activation, or need human approval. Verify the post-remediation state rather than trusting the deployment command.
+
+Test drift scenarios. Simulate partial rollout, stale caches, missing replicas, conflicting overrides, clock skew, control-plane outage, corrupted bundles, incompatible dependencies, a worker restart, and a region returning after an incident. Verify that alerts identify the component, risk, age, effective behavior, and recommended action.
+
+Measure configuration health. Track drift count, drift age, affected requests, stale-serving duration, override lifetime, rollout parity, remediation success, configuration load failures, and behavioral differences between versions. Prioritize by user and policy impact rather than counting every digest mismatch equally.
+
+The practical pattern is this: declare behavior-affecting configuration, keep an immutable desired state, canonicalize and hash it, compare every enforcement point, make overrides explicit, detect drift continuously, classify stale risk, roll out progressively, verify dependencies, preserve runtime evidence, constrain auto-remediation, test partial failure, and measure impact. Configuration consistency is not a cosmetic deployment property. It is part of the AI gateway’s request contract.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
