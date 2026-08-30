@@ -1,0 +1,41 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about routing decision caches at the AI API gateway: how to avoid evaluating the full control plane on every request without allowing stale policy, model, capacity, or authorization decisions to survive beyond their validity.
+
+Routing is often more than choosing a model name. The gateway may evaluate tenant policy, region, data residency, capabilities, price, capacity, deadlines, priority, provider health, and fallback rules. Repeating that work for every request can add latency and control-plane load. Caching the decision can help, but a cached route is a claim about the world, and the world changes.
+
+Start by defining the decision. Record the selected immutable model revision, provider, region, adapter, capability match, policy result, reservation or quota source, pricing version, and expiry. A cache entry should explain why the route was selected, not just store a hostname. Preserve the request dimensions that influenced the result and reject an entry when a required dimension is missing.
+
+Build a complete cache key. Include tenant and authorization scope, model request, modality, tools, output contract, data boundary, region constraints, priority class, deadline class, budget, policy version, capability version, and any feature flags that alter routing. Never key only on the requested model. A shortcut in the key can turn one customer’s safe decision into another customer’s policy violation.
+
+Separate decision caching from response caching. A routing decision says where work should go. A response cache says what result may be reused. Their privacy, freshness, invalidation, and billing contracts are different. Do not apply response-cache assumptions to route decisions, and do not let a route cache accidentally retain prompts or model outputs.
+
+Use dependency-aware freshness. A single time-to-live is rarely enough. Credential status, provider health, quota, capacity, pricing, policy, model revision, and residency rules change at different speeds. Attach dependency versions or epochs to the entry and invalidate it when a dependency changes. Time expiry is a backstop, not a substitute for change signals.
+
+Make stale behavior explicit. When an entry is expired or its evidence is uncertain, choose a documented action: re-evaluate synchronously, use it only for low-risk work, route to a safe fallback, or reject. Do not silently treat an old success as current readiness. The more consequential the request, the stronger the freshness requirement should be.
+
+Prevent cache stampedes. When many entries expire together, single-flight evaluation, jittered expiry, bounded refresh concurrency, and stale-while-revalidate can protect the control plane. But stale-while-revalidate must have a safety limit. It is acceptable for a low-risk route under stable policy; it may be unsafe after a revoked credential, residency change, or model retirement.
+
+Keep authorization current. A cached route decision must not outlive the caller’s permission, tenant plan, tool grant, or data policy. Check revocation and sensitive policy changes through an epoch or fast invalidation path. A cache hit can skip repeated evaluation, but it cannot grant authority that no longer exists.
+
+Account for capacity. A route may have been healthy when cached and saturated now. Pair decisions with short-lived capacity evidence, admission checks, or a bounded recheck. Do not send a large request to a cached route merely because a small request previously fit. Request shape and deadline still need evaluation at admission time.
+
+Handle model and adapter changes. Aliases can move, providers can change behavior, and adapter versions can alter translation. Cache immutable revisions and bind entries to adapter and contract versions. Invalidate on rollout, deprecation, capability change, or failed quality gate. A warm route cache must not make an untested revision look production-ready.
+
+Respect regional boundaries. A decision cached in one region may be invalid in another because of latency, residency, provider availability, or local capacity. Scope entries by region and failover class. If cross-region sharing is allowed, prove that the policy and data boundary are equivalent instead of assuming route names mean the same thing everywhere.
+
+Make negative decisions useful. Caching “not allowed,” “no capacity,” or “unsupported capability” can reduce repeated work, but negative entries need shorter and dependency-specific lifetimes. A temporary provider outage should not become a long outage because a denial was cached, while a policy denial should not disappear merely because a retry arrived.
+
+Preserve explainability. Include cache hit or miss, entry age, dependency versions, invalidation reason, evaluation latency, selected route, fallback, and final admission result in request lineage. Operators should see whether a bad route came from incorrect policy evaluation or a correct decision that remained cached too long.
+
+Design distributed invalidation. Workers, regions, and control-plane replicas need a consistent way to learn about policy, capacity, model, and credential changes. Use monotonically increasing epochs, signed snapshots, or a durable change stream. Handle missed events with periodic reconciliation. Local deletion alone is not enough when another worker still serves an old entry.
+
+Keep cache contents safe. Avoid storing raw prompts, credentials, or unnecessary tenant metadata in route entries. Encrypt sensitive fields, restrict access, and apply retention to diagnostic evidence. Hash or classify request attributes carefully; even a supposedly opaque key can leak information through timing, size, or hit behavior.
+
+Connect cache decisions to billing. If a cached route selects a cheaper or more expensive provider, preserve the pricing version and effective route in usage records. A routing cache must never bypass cost policy or make charges impossible to explain. Record whether fallback or refresh changed the route during the operation.
+
+Test invalidation and races. Cover policy revocation during a cache hit, model alias movement, provider outage, quota exhaustion, region loss, adapter rollout, missed invalidation event, concurrent refresh, stale negative result, worker restart, clock skew, request shape change, and a cache entry used just before expiry. Assert that sensitive changes take effect within the documented bound.
+
+Measure cache quality. Track hit rate, evaluation avoided, decision latency, stale-hit rate, invalidation lag, stampede rate, route mismatch, fallback, capacity rejection, policy rejection, negative-cache recovery, and cost impact. Optimize for correct accepted work, not the highest hit rate. A cache that is always fresh because it is never used provides no value; one that is always used but stale creates hidden risk.
+
+The practical pattern is this: define the decision, build a complete key, separate route caching from response caching, bind freshness to dependencies, make stale behavior explicit, prevent stampedes, re-check authorization and capacity, pin revisions and regions, manage negative results carefully, preserve lineage, distribute invalidation, protect cache contents, connect decisions to billing, test races and changes, and measure correctness alongside speed. A routing decision cache is reliable when it reduces repeated reasoning without pretending that yesterday’s route is today’s truth.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
