@@ -1,0 +1,35 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about model availability states at the AI API gateway: how to distinguish a model that is listed from one that is enabled, healthy, ready, degraded, or retired before routing real work to it.
+
+A model catalog entry is not proof that a request can succeed. A model may be documented but disabled for a tenant, enabled but missing credentials in one region, healthy for text but unable to process tools, or reachable while returning an incompatible response. Treating every catalog entry as available turns metadata into a hidden production assumption.
+
+Define explicit states. Listed means the model is known. Enabled means policy permits its use for a scope. Configured means the route has valid references and adapter settings. Reachable means a safe request can reach the provider. Healthy means recent probes passed. Ready means the model satisfies the capability and contract required by a workload. Degraded means it may serve only bounded traffic. Retired means new work must not select it.
+
+Keep state dimensions separate. A model can be ready in Tokyo and degraded in Frankfurt, ready for text and unavailable for vision, or enabled for one tenant and denied for another. Do not compress region, modality, tenant policy, provider, and workload compatibility into one global boolean. Route against the dimensions that actually matter for the request.
+
+Define readiness evidence. A readiness record should include model and provider identity, adapter version, region, credential reference status, policy version, capability checks, response validation, latency budget, quota headroom, pricing version, and the time of the last successful probe. Record failures with stable reason codes and an expiration time so old evidence cannot live forever.
+
+Probe safely. Use synthetic requests with bounded tokens, no sensitive prompts, and no effectful tools. Test the behaviors the route promises: authentication, input modality, structured output, streaming, tool declaration, cancellation, usage reporting, and response shape. A shallow HTTP health check proves very little about model readiness.
+
+Separate readiness from capacity. A model can be healthy but have no available quota, concurrency, context capacity, or regional headroom. Keep health probes and capacity signals distinct, then combine them at admission time. Do not route to a “ready” model that cannot meet the request’s deadline or budget.
+
+Handle tenant and policy scope. Availability depends on authorization, data residency, plan limits, model allowlists, and provider terms. Build tenant-scoped effective availability without leaking another customer’s configuration. If a model is globally ready but not permitted for this request, return a policy reason rather than a misleading provider outage.
+
+Make stale state safe. Cache readiness to avoid probing every request, but bind the cache to model revision, region, adapter, policy, and capability version. Set different freshness windows for credentials, quotas, provider health, and contract behavior. When evidence expires, degrade to a safe fallback or fail clearly instead of treating stale success as current truth.
+
+Represent degraded operation explicitly. A degraded model may accept only short prompts, non-streaming requests, low-priority traffic, or a restricted tenant set. Encode those conditions as routing constraints. Do not let a general “available” flag silently send incompatible workloads into a route that is only partially functioning.
+
+Use state transitions with owners. Define who can enable, pause, degrade, retire, and restore a model, and what evidence each transition requires. A provider outage may move a route to degraded automatically, while a policy change may require approval. Store transition reason, actor, timestamp, previous state, and rollback reference.
+
+Prevent flapping. A single failed probe should not cause constant route changes, but repeated failures should not be hidden by a generous success cache. Use failure thresholds, recovery thresholds, cooldowns, and hysteresis. Alert on state changes and on prolonged uncertainty, not every individual probe failure.
+
+Keep routing explainable. Attach selected model state, evidence age, region, capability match, policy decision, and fallback reason to request lineage. Operators should be able to see whether a request was routed because the model was ready, tolerated because it was degraded, or rejected because readiness evidence was missing.
+
+Coordinate model revisions. A model alias can move to a new revision while probes and caches still describe the old one. Resolve aliases to immutable revisions for readiness checks and request traces. Invalidate state when the revision, adapter, provider contract, or pricing changes. Never let a warm cache make an untested revision appear ready.
+
+Test failure and recovery. Cover missing credentials, stale probes, regional disagreement, capability mismatch, quota exhaustion, provider reordering, partial outage, alias movement, policy denial, malformed output, probe rate limits, and recovery after a worker restart. Verify that no request reaches a route whose required readiness evidence is absent or expired.
+
+Measure availability quality. Track state by model, revision, provider, region, modality, tenant class, and workload. Measure time in each state, probe success, false readiness, stale-state routing, degraded traffic, fallback rate, recovery time, and requests rejected for missing evidence. The goal is not to maximize the number of models marked ready; it is to make readiness predictive of accepted work.
+
+The practical pattern is this: define explicit availability states, preserve their dimensions, require meaningful readiness evidence, probe safely, separate health from capacity, apply tenant policy, expire stale evidence, encode degraded constraints, govern transitions, prevent flapping, explain routing, resolve aliases to revisions, test recovery, and measure whether ready really means usable. Model availability is a runtime contract, not a label in a catalog.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
