@@ -1,0 +1,41 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about streaming response recovery at the AI API gateway: how to handle a client disconnect or network interruption without duplicating charges, inventing token order, or executing a tool side effect twice.
+
+Streaming changes the failure shape of an AI request. A client may receive half a response, lose its connection, reconnect through another worker, and ask what happened while the provider is still generating. The gateway needs a recovery contract that distinguishes replayable output, in-flight work, completed work, cancellation, and unknown provider state.
+
+Start with a durable stream identity. Keep the operation ID, attempt ID, stream ID, model revision, route, tenant, policy version, and response contract. A reconnect token should locate an authorized stream record, not grant access by itself. Bind it to the caller, scope, expiration, and protocol version, and reject stale or cross-tenant tokens.
+
+Give every event an ordered sequence. Use a monotonic event number within the stream, and make replay requests specify the last sequence the client has durably accepted. The gateway can resend events after that point, but it must not skip, reorder, or invent events to fill a gap. Sequence numbers are a recovery tool, not proof that the provider completed the corresponding work.
+
+Define the replay window. Buffer only the output and metadata the contract permits, for a bounded time and size. Large generations may exceed the buffer, while privacy policy may forbid retaining content. When the requested sequence is no longer available, return a clear recovery boundary and let the client choose a fresh request, a completed result, or explicit failure.
+
+Separate replay from resume. Replay sends already observed output again. Resume asks the provider or gateway to continue work from a known checkpoint, which may not be supported or semantically safe. Never call a new provider attempt “resume” unless the provider contract guarantees continuation. Otherwise, report that the operation was reconstructed or restarted.
+
+Make client acknowledgements meaningful. An acknowledgement should identify the highest sequence the client has durably processed, not merely the last packet received by a local buffer. The gateway may retain events until an acknowledgement or expiry, but it should bound memory and handle an unresponsive client without keeping work forever.
+
+Handle disconnects without premature cancellation. One lost TCP connection does not necessarily mean the caller abandoned the operation. Use a short grace period, an explicit cancellation endpoint, and a policy for whether provider generation continues. If no consumer remains and continuation has no value, cancel safely and record the provider outcome. Do not let reconnect races create two active owners.
+
+Coordinate reconnection. A client may reconnect while the old connection is still alive, or two workers may process the same recovery request. Use a stream lease or generation number, make takeover atomic, and define whether the old connection is closed, continues briefly, or becomes read-only. Only one writer should append a given stream sequence.
+
+Preserve partial-response semantics. A partial assistant message is not automatically a completed answer. Record whether the stream ended normally, was cancelled, expired, failed validation, or stopped after a provider error. On reconnect, tell the client whether it is receiving replayed partial output, a final result, or an error boundary.
+
+Keep tool calls behind an effect boundary. Token output that describes a tool call may be replayable, but tool execution must be separately authorized and idempotent. Persist tool-call identity, arguments hash, approval, dispatch, observed result, and owner epoch. A reconnect must never dispatch an effect merely because the client did not receive the earlier tool event.
+
+Make cancellation race-safe. Cancellation can arrive just after the final token, during provider shutdown, or while a tool is awaiting approval. Use an explicit state machine and compare-and-set transitions. Return whether cancellation was accepted, too late, or unknown. Do not report a clean cancellation when the provider may have completed an effect.
+
+Keep billing tied to attempts. A reconnect and replay should not create a new provider charge. A genuine restart or fallback may create new usage and must be linked to the original operation. Reconcile provider tokens, buffered output, retries, tool work, and accepted result. The customer should be able to tell whether recovery reused existing work or paid for a new attempt.
+
+Protect output and metadata. Stream buffers, reconnect tokens, event logs, and traces can contain private prompts and model output. Encrypt or restrict them according to tenant policy, redact credentials and sensitive headers, and apply retention independently to payloads and operational metadata. Do not expose provider names, queue state, or another tenant’s stream existence through recovery errors.
+
+Handle provider uncertainty. If the gateway disconnects from the provider after receiving some output but before a terminal event, the final state may be unknown. Do not blindly retry a request with tools or other side effects. Mark the attempt uncertain, reconcile through provider status if available, or return an explicit unknown outcome. An honest uncertainty is safer than duplicate work.
+
+Make failover and migration explicit. A reconnect may reach another region or worker. Verify that the stream record, buffer, policy, model revision, and provider session are available there. If only the completed output is durable, offer replay or final retrieval rather than pretending live continuation is possible. Preserve data-residency and session-affinity boundaries.
+
+Use backpressure during recovery. A reconnecting client may ask for a large replay while new output continues. Bound replay rate, buffer growth, and downstream send queues. If the client cannot keep up, pause, shed the connection, or provide a retrieval endpoint according to contract. Do not allow recovery traffic to degrade unrelated streams.
+
+Observe recovery quality. Track disconnects, reconnects, replay requests, replay gaps, buffer expiry, duplicate events, takeover conflicts, cancellation races, unknown outcomes, tool suppression, provider restarts, recovery latency, and extra cost. Measure whether clients receive exactly-once event processing at the application layer, even when transport delivery is at-least-once.
+
+Test the edges. Cover disconnect before first token, mid-token event, after tool proposal, after tool execution, before terminal event, reconnect through another worker, duplicate reconnects, stale tokens, missing buffer, sequence gaps, client acknowledgement loss, cancellation races, provider timeout, worker restart, region failover, policy change, stream expiry, and uncertain billing. Assert that events remain ordered, effects are not repeated, and final state is truthful.
+
+The practical pattern is this: persist a scoped stream identity, sequence every event, bound the replay window, distinguish replay from resume, acknowledge durable processing, delay cancellation deliberately, coordinate one writer, label partial results honestly, isolate tools as effects, make cancellation atomic, tie billing to attempts, protect buffers, classify provider uncertainty, define failover fidelity, apply backpressure, measure recovery, and test every race. Streaming recovery is reliable when a broken connection changes transport, not the meaning or accounting of the operation.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
