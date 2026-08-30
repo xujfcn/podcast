@@ -1,0 +1,43 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about evidence envelopes for AI API gateways: how to preserve a verifiable explanation of what happened during a request without storing every sensitive prompt, response, or credential.
+
+When a production request is questioned weeks later, logs often show fragments. The route may have changed, the policy may have been updated, the provider may have retried, and the original payload may be too sensitive to retain. An evidence envelope creates a durable receipt for the decision and execution, so operators can explain what happened without reconstructing the entire private conversation.
+
+Start with the purpose. An envelope may support billing disputes, security investigations, compliance audits, quality review, or incident analysis. These purposes need different retention, access, and detail. Define the minimum evidence required for each one, and do not collect full content merely because storage is available.
+
+Give every operation a stable identity. Include operation ID, attempt IDs, stream ID when relevant, tenant scope, request timestamp, and lifecycle state. Keep parent and child relationships for retries, fallbacks, tool calls, and asynchronous work. A stable identity lets auditors follow the chain without confusing a replay, a restart, or a separate customer request.
+
+Record request facts as protected summaries. Capture model request name, modality, tool presence, output contract, size classes, and policy-relevant attributes. Use cryptographic hashes or keyed digests for payloads when verification is needed, and record the canonicalization rules. A hash is useful only if two investigators know exactly what bytes and encoding were hashed.
+
+Bind the decision to versions. Store policy version, routing configuration, capability snapshot, model revision, adapter version, tokenizer version, pricing version, and dependency epochs. Version identifiers should be immutable or resolve to an immutable artifact. A mutable label such as “production” cannot prove which behavior was active at the time.
+
+Explain the route. Record eligible route dimensions, exclusions, selected route, fallback order, decision score or rule, cache hit status, freshness, and the reason for any override. Preserve enough structure to reproduce the decision with synthetic input, but avoid copying private prompt text into a general-purpose audit log.
+
+Separate observation from assertion. Mark whether a fact came from client input, gateway measurement, provider metadata, documentation, or an inferred signal. Keep confidence and timestamp for external evidence. An envelope should make uncertainty visible instead of turning an estimate into an official-looking fact.
+
+Capture attempt transitions. Record dispatch, provider acceptance, first output, usage receipt, cancellation, timeout, validation, retry, fallback, completion, and unknown outcomes. Use monotonic event numbers and authenticated timestamps where ordering matters. Do not let a late provider callback rewrite a previously issued receipt without creating a new correction event.
+
+Handle streams carefully. Record sequence ranges, acknowledgements, disconnects, replay boundaries, terminal event status, and whether output was replayed or newly generated. Do not claim a complete response when only a partial stream was observed. The envelope should distinguish transport recovery from a new provider attempt.
+
+Treat tools as separate effects. For each tool call, record call identity, arguments digest, approval state, dispatch time, result digest, side-effect status, and owner attempt. Never include a tool result in the envelope merely because text mentioned it. A tool effect needs its own evidence and idempotency relationship.
+
+Make billing provable. Record predicted usage, provider-reported usage, gateway-measured usage, price version, discounts, retries, fallback attempts, cache outcomes, and reconciliation status. Link charges to operation and attempt IDs. If a provider report arrives later or conflicts with gateway measurement, append a correction and preserve both observations.
+
+Protect envelope integrity. Chain events with hashes, sign completed receipts, or store them in append-only infrastructure with controlled correction semantics. Rotate signing keys without breaking old verification. Include schema version, key identifier, canonical serialization, and verification status. Integrity protection is wasted if consumers cannot tell which fields were covered.
+
+Minimize sensitive data. Keep prompts, completions, images, credentials, authorization headers, and raw tool arguments outside the envelope unless explicitly required. Use separate encrypted stores with independent access and retention. Redact before hashing only when the redaction rule is deterministic and documented; otherwise verification becomes ambiguous.
+
+Control tenant access. A customer may need a usage receipt while an operator needs routing evidence, and a security investigator may need a restricted payload reference. Partition views by purpose and tenant. Do not reveal provider internals, another tenant’s stream existence, or sensitive policy reasons through generic receipt endpoints.
+
+Keep corrections explicit. Clock skew, delayed usage, provider uncertainty, and human review can change the interpretation after completion. Never edit history in place. Append a correction that references the original event, explains the reason, records who or what made the change, and preserves the previous value.
+
+Support cross-region verification. An envelope may be created in one region and reviewed in another. Keep residency rules, key availability, schema versions, and clock assumptions explicit. If payload references cannot cross a boundary, the receipt should still explain the limitation without copying restricted content.
+
+Make evidence useful during incidents. Provide a compact operation timeline, dependency and policy versions, route path, failure domain, retry count, tool effects, usage state, and current uncertainty. Operators should be able to answer what happened, what may still happen, and what remains unverified without searching dozens of unrelated logs.
+
+Test tampering and loss. Cover dropped events, duplicate events, reordered callbacks, clock skew, key rotation, schema migration, partial writes, worker restart, region failover, provider uncertainty, delayed usage, tool retry, stream replay, tenant isolation, and redaction mismatch. Assert that invalid or incomplete envelopes are marked as such rather than presented as authoritative.
+
+Measure evidence quality. Track envelope completeness, verification failures, missing version links, correction rate, delayed usage, unknown outcomes, retention compliance, access denials, payload exposure, audit lookup latency, and storage cost. The goal is not maximum logging. It is the smallest durable record that can support a trustworthy explanation.
+
+The practical pattern is this: define the audit purpose, give operations stable identities, summarize inputs canonically, bind decisions to immutable versions, explain routing, label evidence sources, record lifecycle transitions, model streams and tools separately, prove billing, protect integrity, minimize sensitive data, partition tenant views, append corrections, preserve regional boundaries, support incident timelines, test loss and tampering, and measure trustworthiness. An evidence envelope is reliable when it can explain a decision later without pretending to know more than the system observed.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
