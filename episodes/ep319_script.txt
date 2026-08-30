@@ -1,0 +1,47 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about protocol semantic translation at the AI API gateway: how to adapt one client-facing contract to many provider dialects without pretending that identical JSON means identical behavior.
+
+An OpenAI-compatible endpoint can make integration easy, but wire compatibility is only the first layer. Providers differ in message roles, tool calls, streaming events, stop reasons, usage accounting, error behavior, safety controls, and supported parameters. A gateway that translates syntax while losing meaning creates failures that are difficult to see and harder to explain.
+
+Start with an explicit intermediate representation. Parse the client request into structured messages, content parts, tool declarations, generation controls, response format, metadata, deadline, policy, and requested capabilities. Do not translate by copying unknown fields through a stringly typed map and hoping the provider interprets them the same way.
+
+Define semantic categories. Some fields are required guarantees, some are preferences, some are hints, and some have no safe equivalent. For example, a JSON response requirement may be a hard contract, while a provider-specific sampling option may be best-effort. Label each field so the adapter can reject, emulate, ignore, or report it deliberately.
+
+Preserve message roles. System, developer, user, assistant, and tool messages may have different authority across providers. If a provider lacks a native developer role, define the documented lowering rule and its risks. Never merge trusted instructions with user content without preserving the original authority boundary.
+
+Translate content parts carefully. Text, images, audio, files, citations, and cached segments may have different schemas and size limits. Validate media type, ordering, encoding, and capability before dispatch. If a provider cannot preserve a content part, return a typed incompatibility or apply an explicit degradation policy rather than silently dropping it.
+
+Treat tools as a protocol, not a field. Map tool declarations, names, descriptions, JSON schemas, call IDs, arguments, approval state, parallel calls, and results. Providers may emit malformed arguments, partial calls, or different call boundaries. Validate against the gateway contract, preserve identity, and expose whether the result was native, emulated, or unavailable.
+
+Make streaming translation stateful. A provider stream may send role deltas, content deltas, tool fragments, usage trailers, finish events, safety notices, or keepalives in a different order. Normalize into a state machine with sequence numbers and terminal rules. Do not produce a client event before the gateway knows whether it is content, a tool call, an error, or a final usage update.
+
+Preserve stop semantics. A provider’s length limit, tool request, safety block, cancellation, timeout, and normal completion are not interchangeable. Map them into a stable taxonomy with the original provider reason retained as evidence. A client should not mistake a safety interruption for a successful answer simply because HTTP status is 200.
+
+Translate errors without hiding causes. Normalize authentication, invalid request, unsupported parameter, rate limit, overload, timeout, cancellation, content block, provider fault, and unknown outcome. Keep retryability, provider request ID, attempt identity, and safe diagnostic detail. Do not convert every provider failure into a generic 500 or every refusal into a transient error.
+
+Handle parameters by capability. Temperature, top-p, reasoning effort, seed, response format, tool choice, max tokens, verbosity, and modalities may differ in name, range, or meaning. Maintain a mapping table with validation and confidence. Reject unsupported hard requirements; ignore only documented optional hints, and report the decision where clients can understand it.
+
+Preserve output guarantees. Structured output can mean JSON mode, schema-constrained decoding, tool-based structure, or a prompt convention. These are not equivalent. Validate the returned object, detect truncation, preserve refusal semantics, and identify whether the provider enforced the schema or the gateway checked it after generation.
+
+Normalize usage precisely. Input tokens, cached tokens, output tokens, reasoning tokens, image units, audio seconds, and provider-specific charges may not map one-to-one. Keep raw usage alongside normalized fields, identify estimates, and bind usage to the attempt. Never invent precision that the provider did not supply.
+
+Separate translation from policy. An adapter should know what the request means, while policy decides whether it is allowed. Do not let a provider’s missing field become an implicit permission. Carry tenant, residency, safety, tool, spend, and retention constraints into the adapter and reject translations that would violate them.
+
+Version adapter behavior. Provider APIs evolve, and the same model name may change defaults across regions or dates. Pin provider API version, adapter version, schema version, and capability snapshot. Record the versions in evidence so a response can be reproduced and a semantic regression can be localized.
+
+Make lossy translation visible. For each request, record fields preserved, transformed, emulated, dropped, or rejected, with reasons. A client may accept best-effort behavior for a preference but should know when a hard feature was unavailable. Silent loss is the most dangerous adapter behavior because the response still looks normal.
+
+Test round trips and metamorphic properties. Convert client input to the intermediate form, lower it to a provider request, parse the response, and verify invariants. Test role authority, tool identity, content order, structured output, stream reconstruction, finish reason, error retryability, usage linkage, cancellation, and unknown fields. Compare equivalent requests across providers without requiring byte-identical payloads.
+
+Test provider quirks at the boundary. Cover empty deltas, duplicate events, malformed tool JSON, tool calls split across chunks, usage only in a trailer, missing usage, safety blocks, provider-side retries, out-of-order events, unknown stop reasons, unsupported parameters, media rejection, schema drift, and HTTP success with semantic failure. Keep these tests close to the adapter and run contract checks continuously.
+
+Protect observability and privacy. Provider request IDs and raw errors help diagnosis, but prompts, tool arguments, and media may be sensitive. Redact according to policy, hash where correlation is enough, and keep raw provider payloads behind restricted access. A normalized error should be useful without leaking a customer’s content.
+
+Make fallback semantics explicit. Switching providers after a translation failure is safe only when the next provider can satisfy the same hard requirements and the first attempt’s side effects and billing state are understood. Do not fall back from a structured-output route to free-form text while claiming the same contract.
+
+Align billing with translation. A gateway may add tokens for lowered instructions, tool schemas, or emulation prompts. Record client-visible usage, provider-reported usage, gateway-added work, and chargeable units separately. Customers should be able to see why a translated request cost more without receiving sensitive adapter internals.
+
+Measure semantic fidelity. Track rejected hard requirements, lossy fields, emulation rate, schema validation failures, stream normalization errors, tool-call mismatches, unknown stop reasons, usage reconciliation gaps, provider-specific error rates, fallback success, and customer-visible contract violations. The objective is not maximum provider coverage. It is trustworthy behavior across the providers that are supported.
+
+The practical pattern is this: parse into an intermediate representation, classify guarantees and preferences, preserve roles and content, treat tools and streams as stateful protocols, normalize stop reasons and errors, map parameters by capability, validate structured output, reconcile usage, separate translation from policy, version adapters, expose lossy behavior, test invariants and provider quirks, protect evidence, constrain fallbacks, align billing, and measure fidelity. Protocol compatibility is reliable when clients receive the promised semantics, not merely a familiar request shape.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
