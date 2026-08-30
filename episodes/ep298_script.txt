@@ -1,0 +1,35 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about expiration semantics at the AI API gateway: how to stop stale requests, queued jobs, retries, and intermediate state from surviving longer than the contract allows.
+
+Expiration is more precise than deletion. A request can be too old to start, a provider attempt can outlive the client deadline, a webhook can arrive after a result is no longer useful, and a cached intermediate state can preserve sensitive data beyond its purpose. If the system does not define these boundaries, expired work can still consume capacity, create side effects, or produce confusing charges.
+
+Start with separate clocks. Track client deadline, gateway admission deadline, queue expiration, provider attempt deadline, result retention deadline, webhook retry deadline, and audit retention deadline. These clocks serve different purposes and should not be collapsed into one timestamp. Store them with their source, time zone convention, and clock assumptions.
+
+Define the expiration authority. The client may provide a deadline, but the gateway must validate it against plan limits, provider capabilities, and server time. The gateway owns the final dispatch and acceptance decision. A provider timeout does not automatically prove that the client deadline expired, and a client disconnect does not necessarily cancel server-side work.
+
+Make expiration monotonic. Once a request is expired, it must not return to queued, dispatched, or retryable state without an explicit new operation. Late events should be recorded as late and ignored for execution. Status reads must show the terminal outcome consistently, even when provider callbacks or worker messages arrive out of order.
+
+Expire before dispatch. A queued request should be admitted only when there is enough remaining time for routing, provider processing, response validation, and delivery. If that budget is gone, mark the request expired and release reservations. Do not send stale work merely because a worker finally became available.
+
+Carry deadlines across retries. Every attempt needs a remaining budget derived from the original contract. A retry must not receive a fresh full timeout. Include attempt number, deadline, idempotency key, and cancellation signal in the provider request where supported. When the remaining budget is too small, fail or use a documented fallback rather than starting work that cannot finish honestly.
+
+Separate expiration from cancellation. Cancellation expresses that the caller no longer wants work. Expiration expresses that the work is no longer valid under time. Both should prevent new execution, but their user-visible reasons, billing treatment, and recovery paths can differ. Record whether the request was cancelled, expired, rejected, or lost after an unknown provider outcome.
+
+Protect effectful operations. A model response may trigger a tool call, payment, notification, or database mutation. Before executing an effect, re-check that the workflow is still authorized, unexpired, and idempotent. A generation that started before its deadline must not automatically authorize a late side effect. Use leases or operation tokens with their own expiry.
+
+Handle asynchronous results honestly. A job can complete after its client-facing deadline. Decide whether to store the result, discard it, expose it as late, or allow the client to request a new evaluation. Never present a late result as if it met the original SLA. If late provider work is billable, link it to the original request and make the reason visible.
+
+Bound intermediate state. Queues, prompt envelopes, partial streams, tool arguments, provider responses, retry records, and temporary files all need retention limits. Keep enough state to reconcile an outcome and investigate an incident, then apply deletion or redaction according to data policy. Expiration should release memory and capacity promptly, while retention policy governs what evidence remains.
+
+Make cleanup idempotent. Workers may crash during expiry, cleanup, or result publication. Use a durable tombstone or terminal record so cleanup can be retried without resurrecting work. Deleting a queue item alone is not sufficient if a retry record, object-storage file, webhook task, or provider-side operation still exists.
+
+Reconcile usage after expiry. An expired request may have consumed input tokens, generated partial output, or incurred provider minimum charges. Separate requested, dispatched, completed, accepted, and billable work. Reconcile late usage asynchronously and update the usage record without changing the client-visible terminal state. Never erase a charge simply because the client stopped waiting.
+
+Design status and recovery. Keep terminal status available for a defined period, with a stable request ID and a safe summary of why it expired. Allow clients to distinguish expired-before-dispatch from expired-during-provider-work. A recovery action should create a new request with a new deadline and idempotency scope, not silently revive the old one.
+
+Test time boundaries. Cover clock skew, a deadline during queue admission, expiration during batch packing, provider response at the exact deadline, retries with no remaining budget, worker restart, duplicate cleanup, late webhook delivery, partial stream retention, and a tool call racing with expiry. Use a controllable clock and assert that no expired operation is dispatched or executed.
+
+Measure expiration behavior. Track expired-before-dispatch, expired-in-flight, late completions, cancellation success, cleanup age, retained bytes, stale queue work, post-deadline provider spend, and recovery attempts. Break these metrics down by model, provider, route, tenant, and workload class. A high expiration rate may indicate bad estimates, insufficient capacity, or an unrealistic client contract.
+
+The practical pattern is this: define separate clocks, validate the authoritative deadline, make expiration monotonic, check it before dispatch and every retry, distinguish it from cancellation, reauthorize effectful actions, handle late results honestly, bound intermediate state, use durable tombstones, reconcile usage, expose safe recovery, test time races, and measure stale work. Expiration is a reliability and privacy control when old work stops consuming resources without making its history impossible to explain.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
