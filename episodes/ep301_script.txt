@@ -1,0 +1,37 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about capacity reservations at the AI API gateway: how to protect critical workflows with verified model, region, and concurrency capacity without turning reservations into idle cost or a fairness problem.
+
+Capacity reservation is stronger than a quota and more deliberate than a best-effort route. It is a promise that some amount of usable capacity will be available to a defined workload under defined conditions. That promise is only meaningful when the gateway can measure, enforce, and recover it.
+
+Start with the reservation contract. Define tenant or workflow scope, model and revision, provider and region, request rate, token rate, concurrency, context and media limits, latency objective, duration, priority, failover behavior, and billing treatment. State whether the reservation is hard, soft, burstable, or shared. “Reserved capacity” without dimensions is an untestable marketing phrase.
+
+Reserve the scarce resource. Requests, input tokens, output tokens, concurrent generations, context memory, multimodal processing, tool workers, provider quota, and network bandwidth can all be limiting factors. A reservation that covers requests but not output tokens can still fail long generations. Track resource dimensions separately and enforce the tightest constraint at admission.
+
+Bind capacity to compatible work. A reservation for one model revision, region, modality, or policy boundary may not serve another. Resolve aliases to immutable revisions and verify adapter, provider, data residency, safety, and output contracts. Do not count generic provider capacity as usable capacity until it passes the workload’s actual requirements.
+
+Keep a truthful ledger. Record committed, allocated, consumed, released, and available capacity with a version, owner, timestamp, and source. Distinguish provider-side quota from gateway-side concurrency and from estimated model throughput. Reconcile reservations with observed usage so a dashboard does not show protection that workers cannot actually honor.
+
+Avoid overcommitment. Statistical multiplexing can improve utilization, but it must be bounded by an explicit overcommit policy and a measured confidence level. Leave headroom for retries, long requests, failover, maintenance, and traffic bursts. If the same physical capacity is promised to several critical tenants, document the assumption and the consequence when they peak together.
+
+Design tenant fairness. Reservations should not let one customer permanently exclude everyone else. Use plan-based limits, minimum service shares, maximum reservation size, expiration, and review of unused commitments. Separate paid guarantees from internal priority, and make the allocation rule visible enough to resolve disputes without exposing private tenant data.
+
+Handle burst and borrowing. A reservation may be unused for part of the day while another workload needs temporary capacity. Allow borrowing only when the owner’s reclaim time and minimum guarantee are explicit. Track borrowed capacity, preemption rules, and notice. A borrowed slot is not free capacity if the owner can reclaim it at any moment.
+
+Protect reservations during overload. Admission control should distinguish reserved, shared, and best-effort pools. Do not let a retry storm consume reserved headroom unless the reservation contract includes retry budget. Reserve enough for the work that actually matters, including token and concurrency costs, not merely the first request attempt.
+
+Make failover honest. A regional reservation does not automatically survive a region outage. Define backup capacity, data residency constraints, model compatibility, warm-up time, and whether failover is full, partial, or best effort. Test the alternate route and account for competing reservations there. Never claim cross-region protection that has not been allocated and verified.
+
+Connect reservations to deadlines. A reserved slot is useful only if it can start and finish within the workflow’s time budget. Estimate queue, provider, generation, validation, and delivery time. Reject or degrade when the reservation cannot meet the deadline. Do not keep a request waiting simply because a nominal reservation exists on paper.
+
+Account for cancellation and expiration. Release reserved tokens and concurrency when work is cancelled or expires, but preserve enough state to reconcile provider usage. A reservation should have an expiry, renewal rules, and a cleanup path after tenant or workflow deletion. Stale reservations reduce capacity and can quietly create false scarcity.
+
+Make cost visible. Reservations can create fixed commitments, minimum provider spend, idle capacity, or priority premiums. Show committed cost, consumed cost, idle cost, burst cost, and failover cost separately. Optimize the reservation around accepted business outcomes, not a high utilization percentage that leaves critical work unprotected.
+
+Verify continuously. Run safe probes against each reserved route and compare advertised capacity with admitted, dispatched, accepted, and completed work. Validate credentials, quota, adapter behavior, output contract, latency, and billing. A reservation should move to degraded when evidence expires or capacity becomes unavailable, with a clear owner and remediation path.
+
+Test contention and failure. Cover simultaneous peak tenants, long outputs, provider quota reduction, region loss, model revision changes, reservation expiry, borrowing reclaim, cancellation, retry storms, stale ledgers, worker restart, and a reservation whose policy no longer permits the route. Verify that guarantees are isolated, accounting is explainable, and best-effort work is shed before protected work.
+
+Measure reservation quality. Track utilization, idle share, guarantee success, deadline success, reservation denial, borrowing, preemption, failover success, stale capacity, provider spend, cost per accepted outcome, and fairness across tenants. Review whether reservations predict actual protection rather than merely consuming a larger part of the capacity chart.
+
+The practical pattern is this: define a measurable reservation contract, reserve the scarce dimensions, bind capacity to compatible work, keep a truthful ledger, bound overcommitment, preserve fairness, make borrowing explicit, protect reserved pools, test failover, connect capacity to deadlines, release stale commitments, expose cost, verify continuously, test contention, and measure real outcomes. Capacity reservation is reliable when the gateway can prove who is protected, by how much, for which work, until when, and at what cost.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
