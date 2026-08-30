@@ -1,0 +1,45 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about time semantics at the AI API gateway: how to make deadlines, event order, usage settlement, callbacks, and expiration remain truthful across workers, regions, and providers with different clocks.
+
+Time appears everywhere in an AI request. The client sends a deadline, the gateway queues work, the provider accepts an attempt, tokens arrive, a tool callback returns, usage is reported later, and billing closes the operation. If those timestamps are compared casually, a late callback can revive expired work or a delayed usage report can be mistaken for a second charge.
+
+Start by separating time concepts. Wall-clock time answers when an event was observed in a calendar. Monotonic time measures elapsed duration. Event sequence expresses causal order. Provider time describes an external system’s observation. Settlement time describes when usage became billable. Keep these concepts distinct instead of storing one timestamp and asking it to answer every question.
+
+Enforce deadlines with monotonic clocks. Convert the caller’s deadline into an absolute gateway deadline with a documented clock-domain assumption, then propagate remaining duration. Do not extend a deadline because a worker’s wall clock moved backward. If clock uncertainty is material, shorten available work or return an explicit uncertainty rather than accidentally running beyond the commitment.
+
+Use event sequence for lifecycle order. Assign a monotonic sequence within each operation and attempt, and record parent-child relationships for retries, tools, streams, and callbacks. Timestamps help explain gaps, but sequence and state transitions determine whether an event is legal. A callback observed later cannot move a completed operation back to running merely because its provider timestamp is earlier.
+
+Record multiple timestamps deliberately. For an event, keep produced-at time when known, received-at time at the gateway, persisted-at time, acknowledged-at time, and settled-at time where relevant. Do not pretend these are interchangeable. The difference between provider generation and gateway receipt is useful latency evidence, while persistence and acknowledgement describe durability.
+
+Handle provider timestamps as untrusted evidence. Providers may use different time zones, precision, clock sources, and retry behavior. Validate format and reasonable bounds, preserve the raw value in a restricted record if needed, and use gateway sequence and receipt time for local state. Never let an external timestamp bypass expiration or authorization checks.
+
+Make expiration a state transition. Define when an operation becomes expired, which child work is blocked, how in-flight provider work is cancelled, and how late events are classified. A late token or usage report may be accepted as evidence without being accepted as permission to continue. Expired work must not re-enter the queue or dispatch a new tool effect.
+
+Propagate deadline budget through every hop. Send both an absolute deadline and remaining duration, with the originating clock and precision documented. Each service must reserve time for network, queue, provider, validation, cleanup, and response delivery. A child that receives a stale original deadline can continue work after its parent has already failed.
+
+Separate timeout from cancellation. A timeout means the operation missed a temporal contract. Cancellation means an authorized actor asked work to stop. They can occur together, but they have different causes and billing implications. Preserve which transition won, whether provider state is known, and whether a late response is usable for reconciliation only.
+
+Order streaming events safely. Use per-stream sequence numbers and a terminal-state rule. A disconnect, replay, duplicate event, or delayed usage event must not create a second terminal event. Reconnect may replay accepted output, but it cannot make an old partial stream current after the operation expired.
+
+Protect tool callbacks. A tool result can arrive after a model attempt timed out, was cancelled, or moved to a fallback. Bind callbacks to operation, attempt, tool-call identity, authorization epoch, and expiration. Accept a late result only according to policy, and never dispatch a new side effect because an old callback arrived out of order.
+
+Make retries time-aware. Before retrying, check remaining deadline, spend, attempt budget, capability, and provider state. Backoff must fit inside the remaining contract. If the first attempt may have completed but its terminal event is delayed, do not launch a duplicate side-effecting retry merely because the clock is inconvenient.
+
+Handle clock skew explicitly. Measure offset and uncertainty between workers and regions, use bounded leases, and prefer logical epochs for invalidation and ownership. A lease must not be extended by a machine with an incorrect clock. When uncertainty exceeds the safety bound, stop taking ownership or shorten the lease rather than risking two writers.
+
+Keep cache and policy epochs separate from time. A five-minute cache entry may be invalid immediately after a policy revocation, while a stable capability record may remain useful longer. Use dependency versions and invalidation events for semantic freshness, with time-to-live as a backstop. Do not use a timestamp alone to claim that a decision is still authorized.
+
+Define usage settlement time. Provider usage may arrive after the client received a response, after cancellation, or after the operation expired. Record when usage was generated if available, when it was received, and when it was reconciled. Link delayed usage to the original attempt, and append corrections instead of rewriting earlier billing evidence.
+
+Prevent temporal replay attacks. Reconnect tokens, callbacks, leases, and signed events need expiration, nonce or sequence checks, audience, tenant scope, and authorization epoch. An old valid token should not become valid again after a worker restart or policy change. Reject events outside the allowed temporal and causal window.
+
+Make cross-region migration precise. A request moving between regions must carry operation identity, sequence, deadline, policy epoch, and known uncertainty. The destination should verify the latest durable state before accepting ownership. Do not infer that a newer wall-clock timestamp means a newer state when event sequences disagree.
+
+Explain time in observability. Show queue delay, provider delay, gateway receipt, persistence lag, callback lateness, clock offset, remaining budget, expiration reason, and state-transition winner. Operators need to distinguish a slow provider from a skewed worker and a late usage report from duplicate work.
+
+Test temporal races. Cover clock jumps, skew beyond tolerance, duplicate callbacks, reordered events, late tool results, timeout versus cancellation, deadline during queueing, provider completion after gateway expiry, delayed usage, retry near deadline, worker restart, region migration, lease renewal, stream replay, cache invalidation, and signed-token reuse. Assert that expired work cannot create new effects and that billing remains linked to the correct attempt.
+
+Measure temporal correctness. Track deadline overshoot, clock uncertainty, event-order violations, late callback rate, expired-work suppression, duplicate attempts, callback rejection, settlement delay, correction rate, lease conflicts, stream terminal conflicts, and customer-visible timeout accuracy. Optimize for correct state transitions, not merely timestamp precision.
+
+The practical pattern is this: separate wall time, monotonic duration, event order, provider time, and settlement time; enforce deadlines monotonically; sequence lifecycle events; record observation stages; distrust external timestamps; make expiration explicit; propagate remaining budgets; distinguish timeout from cancellation; protect streams and tools; make retries time-aware; bound clock uncertainty; use epochs for semantic freshness; reconcile delayed usage; secure temporal tokens; migrate regions with durable state; explain timing; test races; and measure correctness. Time semantics are reliable when a late message can explain history but cannot rewrite what the operation was allowed to do.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
