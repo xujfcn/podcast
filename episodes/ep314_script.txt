@@ -1,0 +1,47 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request budget commitments at the AI API gateway: how to turn a caller’s deadline, cost ceiling, retry allowance, output limit, and quality requirement into an executable end-to-end contract.
+
+A request rarely has one budget. It has a deadline, a maximum spend, an attempt count, an output bound, a tool-effect limit, and often a minimum quality or capability requirement. If each hop interprets those values independently, the gateway may spend the entire deadline in a queue, retry after the customer’s deadline, or discover the cost limit only after the provider has charged more.
+
+Start by defining the contract. Give the operation a deadline, a budget currency, an attempt budget, a maximum output or work shape, a quality floor, and allowed degradation. Define whether each value is a hard guarantee, a target, or a best effort. State what happens when the gateway cannot satisfy the contract: reject, queue, downgrade, fallback, or return an explicit partial result.
+
+Compile budgets at admission. Validate caller authorization, plan limits, model policy, residency, capability, and available route capacity before accepting work. Convert relative requests such as “fast” or “cheap” into concrete bounds using versioned policy. Preserve the original request and compiled commitment so later services do not silently invent a different interpretation.
+
+Propagate remaining budget, not the original budget. Every hop should receive an absolute deadline, remaining time, remaining spend, remaining attempts, and remaining output allowance. Account for queue time, serialization, provider latency, retries, tool approval, and cleanup. A downstream service must not believe it has the full original budget after upstream work has already consumed half of it.
+
+Use monotonic clocks for time. Wall-clock timestamps help explain events, but deadline enforcement should use a monotonic source immune to clock adjustments. Carry a deadline timestamp with a clock-domain assumption, and reject or clamp invalid values. Clock skew across regions should reduce available work rather than extend a request beyond its promise.
+
+Reserve cost before work. Estimate input, output, media, tools, retries, and fallback cost, then reserve against the tenant or operation budget. Release unused reservation after reconciliation. If the provider reports usage later, keep the reservation until the charge is known. Never let simultaneous retries each assume the same remaining spend.
+
+Separate operation and attempt budgets. One logical request can have a primary attempt, fallback, retry, tool call, and validation pass. The operation budget limits the total; each attempt gets a bounded allocation. A failed attempt may consume time and money even when it returns no user-visible output. Record those costs rather than treating them as free recovery.
+
+Allocate budgets to sub-requests. Tool calls, embedding lookups, moderation, reranking, image processing, and validation may be nested under one operation. Allocate from the parent budget atomically, with a maximum depth and count. A child must not create unlimited descendants or spend the parent’s remaining budget without an owner and purpose.
+
+Tie retries to remaining deadline and value. Retry only when the remaining time, spend, and attempt budget justify it. Backoff must fit inside the deadline, and a retry should not repeat a side effect without idempotency protection. If there is no meaningful time left for a useful result, fail clearly instead of sending a doomed request.
+
+Make output budgets enforceable. A requested maximum output is a resource bound, not just a hint. Track generated tokens, streamed bytes, media size, and tool results. Stop or downgrade before exceeding the bound, and distinguish a deliberate length stop from provider truncation or validation failure. Reconcile the final usage even when the client disconnects.
+
+Protect tool and external effects. A budget may allow one tool call but not two, or permit a read but not a write. Carry effect class, approval, idempotency key, and remaining effect budget. Do not spend a budget commitment to justify an irreversible action that the caller did not explicitly authorize.
+
+Keep quality requirements explicit. A lower-cost or faster route may fail a structured-output, factuality, safety, or model-capability floor. Define which degradations are acceptable and which require failure. Do not silently exchange a quality guarantee for latency merely because the deadline is approaching.
+
+Coordinate with routing and concurrency. Budget commitments constrain the eligible route set, but they do not replace capability checks, capacity admission, or fair scheduling. A route that meets price but cannot meet the remaining deadline is not eligible. A request with a small remaining budget should not bypass protected capacity or trigger an unbounded fallback search.
+
+Handle streaming and partial results. A stream can deliver useful output before the operation completes, but partial output may not satisfy the final contract. Define whether partial results are billable, whether the client may accept them, and how much budget remains for completion or recovery. Never mark a request successful only because its first tokens arrived.
+
+Make degradation visible. If the gateway reduces output, chooses a cheaper model, skips an optional validator, or returns a partial result, include the reason and budget state in the response metadata permitted by policy. A hidden downgrade makes both debugging and billing disputes harder.
+
+Reconcile usage and commitments. Compare gateway estimates, provider usage, tool costs, retries, fallback attempts, discounts, and final charges. Keep reservation, release, adjustment, and correction events linked to the operation and attempt. A budget contract is not complete until the final spend is explainable.
+
+Treat cancellation and expiry as state transitions. When the deadline passes or the caller cancels, stop admitting child work, signal providers, and prevent late callbacks from creating new charges or effects. If provider state is unknown, record the uncertainty and reconcile it rather than declaring that no work occurred.
+
+Preserve policy across boundaries. A downstream worker must not widen the model allowlist, residency boundary, tool grant, or cost ceiling. Sign or version the compiled commitment, and reject tampered or stale budget metadata. Cross-region failover must carry the remaining contract while respecting the destination’s policy and capacity.
+
+Explain every budget decision. Record original and remaining deadline, spend, attempts, output, quality floor, route, reservation, degradation, rejection, and final outcome. Keep sensitive prompts and credentials out of general logs. The evidence should show why work was accepted or stopped without exposing the full request.
+
+Test competing consumption. Cover queue delay, slow first token, long output, retry storms, provider usage lag, fallback pricing, nested tools, cancellation races, clock skew, worker restart, region failover, partial stream, budget tampering, concurrent reservations, and estimation error. Assert that hard limits are never exceeded and that uncertainty is reported honestly.
+
+Measure commitment quality. Track budget admission rate, deadline success, spend variance, reservation utilization, retry amplification, degradation rate, partial results, rejected work, child-budget violations, late callbacks, provider uncertainty, and fairness across tenants. Optimize for useful outcomes within contract, not the number of requests accepted at the edge.
+
+The practical pattern is this: define the contract, compile it at admission, propagate remaining budgets with monotonic deadlines, reserve cost, separate operations from attempts, allocate child work atomically, bound retries and output, protect effects, preserve quality floors, coordinate routing and concurrency, handle streams and partial results, expose degradation, reconcile usage, make expiry explicit, preserve policy, explain decisions, test races, and measure outcomes. A request budget commitment is reliable when every hop spends from the same truth and the final result stays within the promise.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
