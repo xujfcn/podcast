@@ -1,0 +1,49 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about semantic cache invalidation at the AI API gateway: how to reuse safe model results without returning answers that are stale, tenant-crossed, policy-invalid, or based on tools and documents that have changed.
+
+Caching an AI response is not the same as caching a static file. The result depends on model revision, prompt, system policy, user intent, tools, retrieved documents, tenant permissions, temperature, locale, and sometimes hidden provider state. A cache hit is correct only when those semantic dependencies still support the same answer.
+
+Start by defining the reuse contract. Decide whether a cached result is an exact replay, an acceptable semantic equivalent, a suggestion for regeneration, or merely a prefix or retrieval artifact. Exact replay requires stronger identity. Semantic reuse requires explicit quality, privacy, and policy bounds. Do not call every approximate match a cache hit.
+
+Build a complete cache key. Include normalized request meaning, model and adapter version, prompt and policy versions, response format, tool and retrieval configuration, tenant scope, authorization class, locale, and relevant generation controls. Exclude irrelevant transport details, but never omit a field that can change the answer or who is allowed to see it.
+
+Separate identity from invalidation dependencies. A key identifies the requested computation. Dependency metadata explains what could make the result unsafe to reuse: model revision, policy epoch, tool schema, knowledge source version, user state, data residency, and retention rules. Store both so invalidation can target changes without scanning every request.
+
+Version semantic inputs. Prompts, system instructions, model weights, adapters, tool schemas, retrieval indexes, documents, safety classifiers, and policy rules should have stable versions or epochs. A changed dependency must produce a new identity or invalidate affected entries. Relying on a five-minute TTL to cover a policy revocation is not acceptable.
+
+Use TTL as a backstop, not as truth. Time limits bound risk when dependency events are missed, but a fresh entry can still be invalid immediately after a permission change. Combine TTL with event-driven invalidation, epoch checks, and live authorization at read time.
+
+Scope by tenant and authorization. Never let a broadly shared cache return a response containing private context to another tenant. Include tenant and access class in the key, or prove that the content is genuinely public and policy-independent. Recheck authorization before serving a hit, especially for user-specific data.
+
+Handle policy changes explicitly. A new safety rule, residency requirement, provider block, tool revocation, or retention directive may invalidate existing results even when the prompt is unchanged. Publish invalidation events with scope and version, and reject hits whose policy epoch is no longer allowed.
+
+Track retrieval dependencies. If an answer used documents, database rows, feature flags, or search results, record source identifiers and versions. Invalidate or downgrade the entry when sources change or are deleted. A cache must not preserve content after a required deletion merely because its TTL has not expired.
+
+Treat tools as effect boundaries. Cache read-only tool results separately from model responses when useful, with their own freshness and authorization rules. Never reuse a cached side-effecting tool result as proof that a new effect occurred. A model response that proposes an action is not evidence that the action was executed.
+
+Protect against cache poisoning. Authenticate writers, validate normalized keys, enforce tenant scope, cap entry size, and do not allow untrusted content to control invalidation namespaces. Verify response provenance and schema before insertion. A malicious or malformed result should not become a high-confidence answer for future users.
+
+Define freshness states. An entry can be fresh, stale-but-servable, stale-and-revalidate, invalid, quarantined, or deleted. Map each state to a clear behavior. Stale serving may be acceptable for a low-risk informational request, but not for authorization, pricing, account balance, safety decision, or tool execution.
+
+Use stale-while-revalidate carefully. A background refresh should have its own deadline, policy snapshot, tenant context, and ownership lease. It must not silently refresh a shared entry with private data or let an old worker overwrite a newer generation. Revalidation is another request with security and billing consequences.
+
+Coordinate concurrent misses. Request coalescing can prevent a stampede, but all waiters need compatible scope, policy, and output requirements. Do not merge two tenants because their normalized prompts look identical. Bind the in-flight computation to the same cache identity and ownership rules as the stored result.
+
+Handle model and provider changes. A model alias can point to new weights, a provider can change defaults, or an adapter can alter output semantics. Include resolved model revision and adapter version in cache metadata. Invalidate on semantic changes, not only on a changed public model name.
+
+Preserve streaming semantics. A partially cached stream must record sequence, terminal state, context identity, and generation version. Do not serve a completed prefix as a complete answer, and do not append a new generation to an old stream unless the protocol explicitly supports it. Reconnect must verify that the cached state is still authorized.
+
+Align response validation. Validate a cached response with the same contract checks used for a live provider response. Confirm schema, required fields, safety markers, citations, tool-call state, finish reason, and expiration. A cache should not bypass output validation merely because the original response passed once.
+
+Make cache hits observable. Record hit or miss reason, key version, dependency epochs, age, freshness state, authorization result, invalidations, revalidation, tokens saved, and source provenance. Do not log raw prompts or private answers when a digest and restricted reference are sufficient.
+
+Align billing and quotas. Decide whether a cache hit consumes request quota, output quota, model usage, or a lower cache price. Keep original provider cost, cache storage cost, revalidation cost, and customer charge separate. A stale hit that triggers background regeneration must not create an unexplained second charge.
+
+Handle deletion and privacy requests. A user or tenant deletion must reach response cache, semantic index, embeddings, summaries, and invalidation logs according to policy. Tombstones can prevent resurrection after delayed replication. Verify that a deleted dependency cannot be reintroduced by an old refresh job.
+
+Test invalidation races. Cover policy revocation during read, document update during generation, tenant permission change, model alias movement, adapter deployment, tool schema change, cache stampede, stale-while-revalidate, old worker overwrite, region replication delay, deletion during refresh, stream reconnect, malformed result, cache poisoning, and authorization failure. Assert that invalid entries cannot cross tenants or create effects.
+
+Measure semantic cache quality. Track exact and approximate hit rate, invalidation latency, stale serves, false hits, false misses, quality regression, privacy incidents, policy rejects, refresh cost, stampede rate, storage cost, deletion lag, provenance gaps, and customer-visible cache errors. Optimize for correct reuse, not the largest hit-rate number.
+
+The practical pattern is this: define the reuse contract, build complete keys, record invalidation dependencies, version semantic inputs, combine event invalidation with TTL, scope by tenant and authorization, track retrieval sources, isolate tools, prevent poisoning, model freshness states, control revalidation, coordinate misses, invalidate model changes, preserve stream state, validate hits, observe decisions, align billing, honor deletion, test races, and measure semantic quality. A cache is trustworthy when it makes reuse fast without making yesterday’s permissions, documents, or model behavior look like today’s truth.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
