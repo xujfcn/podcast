@@ -1,0 +1,47 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about fair scheduling at the AI API gateway: how to share scarce model capacity across tenants and priorities without allowing one workload to starve everyone else or turning fairness into unpredictable latency.
+
+When demand exceeds capacity, first-come first-served is rarely fair. A large tenant can fill the queue, a burst of long generations can block short requests, and a high-priority class can become a permanent bypass lane. The gateway needs an explicit scheduling contract that balances isolation, utilization, urgency, and customer expectations.
+
+Start by defining fairness. Fairness may mean weighted throughput, bounded waiting time, proportional capacity, reserved service, or equal opportunity within a class. These goals conflict. State which guarantee applies to tenants, plans, routes, regions, and priority classes instead of claiming that one queue is fair by default.
+
+Partition work by tenant and policy. A tenant queue protects identity, spend limits, residency, model access, and concurrency. Shared queues can improve utilization, but they must not erase tenant boundaries or let one customer consume another customer’s reserved capacity. Keep the scheduling key explicit and auditable.
+
+Use weighted fair service deliberately. Assign weights or shares from plan, contract, and operational policy. Measure delivered service, not just request count, because a long reasoning request and a short classification request consume different resources. Token, time, cost, and provider capacity may each need a separate accounting dimension.
+
+Prevent priority abuse. Client-provided urgency is a hint, not authority to jump the queue. The gateway should derive effective priority from tenant policy, request class, deadline, business value, and current fairness debt. Cap the range and record overrides. A client must not create an emergency by labeling every request critical.
+
+Use aging to prevent starvation. Lower-priority work should gain scheduling credit as it waits, subject to hard safety and capacity rules. Aging must be bounded so a very old request does not unexpectedly displace work whose deadline is immediate. Report why an item became eligible and which policy limited it.
+
+Account for request cost. A scheduler based only on requests can give a tenant disproportionate model time through large prompts or long outputs. Track estimated and actual tokens, expected duration, tool calls, media units, and provider cost. Reserve capacity using a conservative estimate and reconcile after completion.
+
+Protect short work from long work. Head-of-line blocking makes interactive requests wait behind large batch generations. Use size-aware or deficit-based scheduling, separate latency classes, and bounded work quanta where the provider supports streaming. Do not preempt a provider call unless cancellation and billing semantics make it safe.
+
+Keep reservations visible. Critical tenants, control-plane operations, and latency-sensitive routes may need reserved capacity. Reservations should have ownership, expiration, utilization, and release rules. Unused reservations can temporarily lend capacity to shared work, but reclaim must be bounded and predictable.
+
+Coordinate admission and scheduling. Admission decides whether a request can fit current tenant, route, provider, and regional limits. Scheduling decides which admitted work runs next. Do not admit unlimited requests and expect the scheduler to restore fairness later. Queue limits, backpressure, and typed rejection are part of the fairness contract.
+
+Handle cancellation and disconnects quickly. When a client leaves, remove queued work and cancel active work where possible. Release reservations and scheduling credit only after the provider state is understood. A cancelled request that remains counted can distort fairness and make other tenants appear to receive more capacity than they actually do.
+
+Make retries pay their share. A retry is new work against shared capacity even when it belongs to an old operation. Charge retry tokens, time, and provider slots to the correct tenant and attempt budget. Do not let an unstable client dominate the scheduler by repeatedly re-entering at the front of its queue.
+
+Control batch and interactive traffic. Batch work can improve utilization when it uses spare capacity, while interactive traffic needs bounded latency. Give each class an explicit share, borrow rules, and maximum waiting time. A batch queue should not be allowed to consume the reserve needed for user-facing requests.
+
+Use feedback without oscillation. Queue delay, service time, provider health, token demand, and fairness debt can inform scheduling weights. Smooth measurements, cap adjustment speed, and use hysteresis. If weights change every few seconds, tenants may observe unstable service and the scheduler can chase noise instead of correcting imbalance.
+
+Coordinate across workers and regions. Local queues can appear fair while the global system is not. Aggregate delivered service, reservations, and tenant debt across the relevant pool. During partition, use conservative local limits and reconcile later rather than allowing every region to spend the same shared quota independently.
+
+Preserve deadline semantics. Urgency should reflect remaining deadline, but a near-expired request is not automatically allowed to starve all other work. Decide whether to shed it, downgrade it, or spend reserved emergency capacity. Record deadline misses caused by admission, queueing, provider work, and validation separately.
+
+Make fairness policy-aware. Tenant plan, region, model capability, data residency, safety mode, and tool grants can restrict which capacity is interchangeable. A tenant’s unused share in one model or region may not be legally or technically transferable to another. Do not calculate fairness across resources that cannot serve the same contract.
+
+Handle provider limits explicitly. Rate limits, concurrency caps, token-per-minute limits, and queue depth may apply at different scopes. The gateway scheduler must reserve the correct provider resource and avoid double counting. A fair gateway queue cannot make an unfair provider quota disappear.
+
+Expose scheduling decisions. Record queue entry, effective class, tenant share, estimated cost, fairness debt, reservation use, aging credit, admission result, selection reason, wait time, and release reason. Keep customer-visible details safe, but provide enough evidence to explain why one request ran before another.
+
+Measure outcomes by tenant and class. Track weighted service share, token share, cost share, p50 and p99 queue wait, starvation, deadline miss, reservation utilization, burst recovery, fairness debt, queue abandonment, retry pressure, short-request latency, and cross-region imbalance. A good scheduler is judged by delivered guarantees, not by a fairness formula on paper.
+
+Test adversarial workloads. Cover one noisy tenant, synchronized bursts, long and short requests mixed together, priority inflation, low-priority aging, cancelled work, repeated retries, unused reservations, provider quota changes, worker failure, regional partition, clock skew, token-estimation error, batch takeover, deadline storms, and policy changes during queueing. Assert that hard limits and tenant isolation hold while capacity remains useful.
+
+The practical pattern is this: define fairness, partition by tenant and policy, use weighted service accounting, cap client urgency, age waiting work, account for real request cost, protect short traffic, expose reservations, coordinate admission, release cancelled work, charge retries, separate batch and interactive classes, smooth feedback, reconcile regions, preserve deadline meaning, respect non-interchangeable capacity, model provider limits, expose decisions, measure outcomes, and test adversarial queues. Fair scheduling is reliable when no tenant can monopolize shared capacity and no legitimate workload disappears indefinitely.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
