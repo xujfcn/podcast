@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about admission receipts at the AI API gateway: how to make an accepted request carry a clear, verifiable commitment about capacity, budget, policy, deadline, and degradation instead of treating a successful HTTP response as proof that work is guaranteed.
+
+Admission is a promise boundary. When a gateway says a request is accepted, the client needs to know whether work has merely been syntactically validated, placed in a queue, reserved capacity, dispatched to a provider, or committed to a response contract. Ambiguity here creates retries, duplicate submissions, false expectations, and difficult billing disputes.
+
+Start by defining admission states. Separate rejected, validated, queued, reserved, dispatched, running, completed, expired, cancelled, and unknown. Each state needs allowed transitions and a client-visible meaning. Do not use one accepted boolean for all of them.
+
+Create a stable admission identity. Assign request ID, admission ID, tenant, operation class, and attempt identity before the request enters shared capacity. A reconnecting client should be able to query or resume the same admission rather than create a new one because the first response was lost.
+
+State what is committed. A receipt may promise a place in a queue, a maximum wait, reserved tokens, a spend ceiling, a model capability, a policy version, a deadline, or only best effort. List each commitment separately. A gateway must not imply a provider response guarantee when it has only accepted the request for consideration.
+
+Bind commitments to a policy snapshot. Include tenant limits, model and provider allowlists, residency, safety mode, tool grants, pricing schedule, and data handling rules. The receipt should identify the immutable policy version and any controls that remain live, such as credential revocation or emergency provider disablement.
+
+Make capacity reservations real. If admission promises capacity, record the pool, region, route, amount, owner, expiry, and release condition. Do not count a soft queue position as reserved compute. Unused reservations should return to the pool, while recovery from an unknown outcome must avoid releasing capacity that is still being consumed.
+
+Include the temporal contract. Record admission time, queue expiry, execution deadline, reservation expiry, and receipt expiry separately. A receipt that remains readable after its commitment has expired should say so clearly. Do not let a stale receipt authorize new work.
+
+Define queue behavior. Tell the client whether the request can be delayed, reordered, downgraded, shed, or moved to another region. Preserve tenant and priority rules, but do not expose internal queue positions as a guarantee unless the scheduler can actually honor them.
+
+Separate acceptance from dispatch. A provider may not have seen the request when the gateway returns an admission receipt. If dispatch later fails, update the admission state with a typed reason and explain whether retry, fallback, or cancellation is allowed. The client should not infer provider execution from admission alone.
+
+Make receipts tamper-evident. Sign or authenticate receipt contents, include a version, nonce, issuance time, expiry, audience, and operation identity. A client may present a receipt to query or resume work, but cannot modify its budget, tenant, model, or deadline. Keep secrets out of customer-visible tokens.
+
+Handle receipt loss and duplicate delivery. A response can be lost after the gateway persisted admission. Queries must be idempotent and safe to repeat. Returning the same admission identity is different from creating a second request. Record delivery attempts without changing the underlying commitment.
+
+Support controlled upgrades. An admitted request may be routed to a fallback or a newer provider only when the replacement satisfies the receipt’s hard requirements. If capability, residency, price, or response format changes, issue an explicit amended receipt or fail the admission. Silent substitution breaks the contract.
+
+Define revocation and expiry. Capacity can be withdrawn by provider outage, policy change, tenant suspension, or region failure. Revocation should name scope, reason, effective time, and next action. A revoked receipt may permit observation or reconciliation, but not new side effects.
+
+Preserve budget and deadline semantics. An admission receipt should carry granted time, spend, tokens, attempts, tool, retrieval, and concurrency limits where applicable. Downstream stages consume from those commitments. A queue delay must reduce remaining execution time or trigger a documented extension process, never an invisible deadline reset.
+
+Handle cancellations. A client can cancel queued work, running work, or only response delivery. Define which resources are released, which provider attempts may continue, and how usage is reconciled. Cancellation of an admission does not automatically prove provider cancellation succeeded.
+
+Make cross-region transfer explicit. When an admission moves, verify tenant policy, residency, model capability, reservation ownership, deadline, and current state. Transfer or reissue the receipt with a new region and generation. Do not let two regions accept the same commitment independently during a partition.
+
+Align retries and recovery. A client retry with the same admission identity should query or resume according to state. A new admission is a new commitment and should consume new quota. A recovered worker must load durable receipt state before acting, and stale workers must be fenced from changing it.
+
+Expose degradation boundaries. If the gateway can reduce output length, skip retrieval, disable tools, change model quality, or return a partial answer, list which degradations are permitted. Hard requirements must cause rejection or a typed failure when they cannot be met. “Accepted” should never hide an unexpected downgrade.
+
+Connect receipts to billing. Record committed ceiling, actual provider usage, gateway work, reservation cost, discounts, and correction events. A receipt can explain why a request was allowed; it does not by itself prove that every reserved unit was consumed. Keep admission, execution, and settlement evidence linked.
+
+Make observability receipt-aware. Track admission rate, state age, queue expiry, reservation utilization, dispatch lag, revocations, amendments, duplicate queries, unknown outcomes, cross-region transfers, degraded requests, and receipt verification failures. Operators should see whether a customer complaint concerns acceptance, waiting, execution, or settlement.
+
+Keep customer-facing responses precise. Return a stable ID, state, expiry, retry or query guidance, safe remaining budget, and a short commitment summary. Do not expose other tenants, internal provider credentials, raw prompts, or sensitive routing data. Precision is more useful than a falsely reassuring success message.
+
+Test admission races. Cover response loss, duplicate retry, queue expiry during dispatch, reservation expiry, provider outage after admission, policy revocation, tenant suspension, region transfer, worker takeover, stale receipt presentation, amended capability, cancellation race, unknown provider outcome, partial degradation, billing correction, and partitioned admission stores. Assert that a receipt cannot create more authority than it granted.
+
+Measure admission correctness. Track accepted-but-never-dispatched work, commitment violations, queue wait overshoot, reservation leakage, expiry accuracy, duplicate admissions, revocation latency, amendment rate, degraded response rate, receipt query success, unknown outcomes, billing disputes, and customer-visible state confusion. The goal is not to maximize acceptance. It is to make every acceptance honest.
+
+The practical pattern is this: define admission states, assign stable identities, state each commitment separately, bind policy and time, make reservations real, distinguish queueing from dispatch, authenticate receipts, handle loss and duplicates, control upgrades, define revocation, preserve budgets, support cancellation, transfer regions explicitly, recover from durable state, expose degradation, link billing, observe state, keep responses precise, test races, and measure honesty. An admission receipt is valuable when the client can rely on exactly what the gateway accepted, for exactly how long, and with no hidden promise beyond it.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
