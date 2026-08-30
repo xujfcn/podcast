@@ -1,0 +1,43 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about failure-domain-aware routing at the AI API gateway: how to keep a fallback from returning traffic to the same hidden dependency that caused the original failure.
+
+Two routes can have different provider names and still share the same cloud region, inference cluster, network edge, account quota, identity service, model host, or billing control plane. If the primary fails and the fallback shares that dependency, the gateway has changed labels without changing risk. Reliable routing needs diversity that is proven, not assumed.
+
+Start with a dependency graph. Map each route to provider, model host, region, availability zone, network path, account, credential issuer, quota pool, storage, policy service, adapter, and gateway control plane. Include dependencies operated by third parties when known. An incomplete graph should carry uncertainty rather than an invented claim of independence.
+
+Assign failure-domain labels. A route can belong to several domains at once: physical location, provider organization, cloud platform, account, network, model family, deployment pipeline, and shared gateway component. Keep labels versioned and auditable. A single provider field cannot describe multi-layer correlation.
+
+Define the independence required by each request. Critical workloads may require a fallback in another provider and region, while lower-risk traffic may accept another cluster in the same region. Residency, model quality, latency, and cost constrain the eligible set. State which dimensions must differ instead of using a vague diversity score.
+
+Choose fallbacks before failure. Build ordered fallback sets from policy, capability, quality, deadline, price, and failure-domain separation. Validate that each route can satisfy the request contract. An independent route is not useful if it cannot support the modality, tool semantics, context length, or data boundary.
+
+Use live evidence of correlation. Compare error spikes, latency changes, rate limits, network failures, and control-plane events across routes. Routes that degrade together may share a dependency missing from the inventory. Correlation is a clue, not proof, but repeated joint failure should reduce confidence in treating those routes as independent.
+
+Distinguish common cause from shared demand. Two providers may slow together because the internet path failed, or because a product launch increased traffic everywhere. Preserve route, tenant, region, network, and workload dimensions in telemetry. Do not rewrite the dependency graph based on one coincidental spike.
+
+Keep health scoped to domains. A provider account quota failure should mark routes using that account, not every route from the provider. A regional network event should affect routes crossing that path. Domain-scoped health allows the gateway to avoid the failing dependency without discarding healthy capacity unnecessarily.
+
+Prevent retry convergence. During an outage, independent workers may all choose the same fallback and overload it. Coordinate fallback weights, reservations, retry budgets, and adaptive concurrency. Shift traffic gradually when possible, and reserve truly independent capacity for critical work rather than consuming it with speculative retries.
+
+Treat credentials and quotas as failure domains. Separate API keys may still share one organization quota or billing account. A revoked identity provider can disable credentials across multiple vendors. Record the authority and quota hierarchy behind each route, and test whether the fallback remains usable when the primary account is suspended or exhausted.
+
+Include software correlation. Two providers may be independent operationally but share the same gateway adapter, tokenizer, validation library, prompt template, or rollout. A translation bug can break both routes identically. Preserve adapter and contract versions in route lineage, and keep a fallback path that does not depend on the same faulty component when the risk justifies it.
+
+Include model-family correlation. Different endpoints serving the same model weights or architecture may reproduce the same quality defect, safety regression, or malformed tool behavior. Operational diversity does not guarantee semantic diversity. For quality-sensitive failover, define whether the backup must use another model revision or family.
+
+Make uncertainty explicit. Third-party infrastructure is often opaque. Use confidence levels for independence claims, expiration for old evidence, and conservative routing when critical guarantees depend on unknown internals. Do not market a multi-provider guarantee when both routes may use the same hidden backend.
+
+Preserve data boundaries during failover. An independent provider or region may violate residency, privacy, retention, or customer allowlists. Never relax those controls silently during an outage. If no independent compliant route exists, return a clear unavailable result and record which constraint prevented failover.
+
+Connect failure domains to routing caches. Cached decisions and fallback sets must be invalidated when dependency labels, health, policy, or confidence changes. A route chosen before an incident may no longer be independent afterward. Bind cache entries to dependency graph and health epochs.
+
+Make billing and quality transparent. Failover can change price, latency, model behavior, and tokenization. Record the original route, failed domain, fallback route, independence dimensions, attempts, usage, pricing version, and accepted result. Customers should not be charged for uncontrolled retry storms, and operators should be able to explain the tradeoff that preserved service.
+
+Test real failure domains. Simulate provider outage, account quota exhaustion, credential revocation, regional network loss, shared adapter bug, control-plane outage, model regression, storage failure, and dependency-map errors. Verify that the fallback avoids the affected domain, protected traffic retains capacity, and non-compliant routes remain excluded.
+
+Run game days with hidden correlation. Give the system a failure whose shared dependency is not fully documented and observe whether telemetry reveals the relationship. Update the graph from evidence, record the confidence change, and verify invalidation. A dependency inventory improves when incidents and exercises feed it.
+
+Measure diversity outcomes. Track requests with a valid independent fallback, dependency-map coverage, independence confidence, correlated error events, fallback success, retry amplification, convergence load, constraint-blocked failover, stale dependency data, cost change, and recovery time. Count proven survivability, not the number of provider logos in configuration.
+
+The practical pattern is this: build a dependency graph, label overlapping domains, define required independence, precompute contract-compatible fallbacks, learn from correlated telemetry, scope health precisely, prevent retry convergence, model account and software dependencies, consider semantic correlation, represent uncertainty, preserve data policy, invalidate cached choices, explain billing and quality changes, test domains, run hidden-correlation exercises, and measure proven survivability. Failure-domain-aware routing is reliable when a fallback changes the dependency that failed, not merely the endpoint name.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
