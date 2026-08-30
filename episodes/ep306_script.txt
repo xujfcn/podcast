@@ -1,0 +1,43 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about session affinity for AI API gateways: how to keep follow-up requests connected to the right worker, region, provider session, cache, or context store, while defining safe migration and failure boundaries.
+
+Many AI requests look stateless at the HTTP layer but depend on continuity underneath. A provider may keep a session, a worker may hold a conversation cache, a tokenizer or adapter may maintain state, or a workflow may require all steps to share one regional boundary. If the next request lands somewhere unrelated, the user sees lost context, extra cost, higher latency, or a response that is subtly inconsistent.
+
+Start by defining what state exists. Separate conversation history, provider session identifiers, connection pools, tool state, safety decisions, cached prefixes, rate-limit buckets, and workflow checkpoints. Do not call all of these “the session.” Each state type needs an owner, lifetime, access policy, replication rule, and recovery behavior.
+
+Define the affinity contract. Specify the stable session identity, eligible regions and workers, required capabilities, maximum idle time, maximum lifetime, migration policy, and what happens when the preferred location is unavailable. Make clear whether affinity is required for correctness, useful for performance, or merely a best-effort optimization.
+
+Use an opaque affinity key. Never put provider credentials, raw conversation content, or sensitive tenant data in a routing cookie or header. Bind the key to the authenticated tenant, workflow, policy, and expiration. Validate its issuer, audience, scope, and version. A session identifier should locate state, not grant access to it.
+
+Keep authorization independent. A valid session key from yesterday must not bypass today’s tenant policy, model allowlist, residency rule, or tool permission. Re-check authorization on every request and after migration. Session continuity is not permission continuity when the caller, policy, or resource has changed.
+
+Prefer external state when practical. Stateful workers can reduce latency, but they create placement, drain, restart, and scaling problems. Store durable conversation or workflow state in an access-controlled system when the contract requires recovery. Keep local caches as accelerators with explicit invalidation, not as the only copy of information the user expects to survive a worker failure.
+
+Handle provider sessions honestly. A provider session may expire, be region-bound, be tied to a model revision, or carry hidden server-side state. Record the provider session’s scope and last verification. If it expires, either rebuild from an approved durable representation or return a clear continuity error. Do not silently attach a new provider session and claim that no semantic change occurred.
+
+Choose the affinity level. Some workloads need worker affinity, others need region affinity, and some need provider or model-revision affinity. Use the narrowest level that preserves the contract. Overly sticky routing wastes capacity and harms balancing; overly broad routing loses the state it was meant to preserve.
+
+Design migration as a protocol. Before moving a session, quiesce new work or establish an epoch, flush durable state, transfer or rehydrate approved caches, verify policy and capability, then publish the new location. Requests carrying the old epoch should be rejected or retried safely. Never let two workers believe they both own a mutable session without conflict control.
+
+Prevent split brain. Use fencing tokens, leases, epochs, or a single authoritative owner record. A stale worker must not continue accepting tool effects or writing conversation state after ownership moves. If the state store cannot provide the required ordering, downgrade the contract or reject migration rather than relying on timing luck.
+
+Carry deadlines and cancellation. A session-routed request still has its own deadline. Do not wait indefinitely for the preferred worker if a compatible fallback exists. If the caller cancels, stop or detach the current attempt according to the provider contract, but preserve durable state consistently. A cancelled request must not leave a half-written turn that corrupts the next interaction.
+
+Handle region and provider failure. Define which state can cross regions, which data boundaries forbid movement, and whether a new provider session can be reconstructed. A failover may preserve conversation history but not hidden provider cache state or exact sampling continuity. Tell the caller whether continuity is exact, reconstructed, degraded, or unavailable.
+
+Manage expiration and cleanup. Sessions need idle timeout, absolute lifetime, size limits, retention policy, and deletion semantics. Remove expired local caches, provider sessions, leases, and routing records. Do not let a stale affinity key keep sensitive data alive. If a session is deleted, all replicas and derived caches need a verifiable cleanup path.
+
+Protect tenant isolation. Affinity maps, cache keys, session stores, and migration streams must be tenant-scoped. Avoid exposing whether another tenant has an active session or which region it uses. Scrub private metadata before logging and ensure a recycled worker cannot serve old state to a new identity.
+
+Keep tools and side effects ordered. Tool calls may depend on conversation state, but the effect itself needs idempotency, authorization, and an ownership epoch. If migration happens while a tool is running, decide whether the old owner finishes, the new owner observes and reconciles, or the operation is abandoned. Never execute the same effect just because both workers saw the same pending message.
+
+Make streaming compatible with affinity. A stream may pin a connection or worker for its lifetime, while the next turn may use a different location. Define whether disconnecting a stream preserves partial output, whether reconnect uses the same attempt, and how the session records completion. Do not append a partial assistant message as a completed turn.
+
+Track billing and usage continuity. Link session requests, provider sessions, migrations, rebuilds, cache misses, and duplicate prevention to one workflow. A migration that reconstructs context may consume extra tokens; report that according to the product contract. Usage attribution should explain whether cost came from user work, recovery, or infrastructure maintenance.
+
+Observe affinity quality. Measure stickiness rate, state-store lookups, cache hit rate, migration duration, session rebuilds, stale-owner conflicts, failover continuity, routing errors, extra tokens, session expiration, and first-request-after-migration latency. High stickiness is not success if it creates hotspots or delays recovery.
+
+Test the boundaries. Cover worker restart, lease expiry, duplicate owners, concurrent turns, provider session expiration, model revision change, region outage, policy change, tenant reassignment, cancellation during migration, partial stream, tool execution, cleanup, clock skew, and recycled worker state. Assert that no request reads unauthorized state and no side effect executes twice.
+
+The practical pattern is this: define each state type, make affinity a scoped contract, use opaque keys, re-check authorization, choose the narrowest useful placement, keep durable state authoritative, migrate with epochs and fencing, prevent split brain, preserve deadlines, define failover fidelity, expire and clean up aggressively, isolate tenants, order tools, specify streaming behavior, account for recovery cost, measure hotspots and continuity, and test ownership failure. Session affinity is reliable when continuity is explicit, bounded, recoverable, and never mistaken for authorization.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
