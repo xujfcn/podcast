@@ -1,0 +1,53 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request context propagation at the AI API gateway: how to carry identity, tracing, deadlines, priority, policy, and causality across queues, workers, provider adapters, streams, and callbacks without trusting forged metadata or leaking one request into another.
+
+An AI request rarely stays in one process. It may pass through authentication, admission, a queue, a worker, a provider connection, a tool service, and a result delivery channel. If context disappears, operators lose the story. If context is trusted blindly, clients can raise their own priority, cross tenants, extend deadlines, or inject identifiers into audit records.
+
+Start with a typed context envelope. Define request ID, operation ID, attempt ID, tenant, principal, trace and span identity, deadline, cancellation state, priority, policy revision, region, residency, idempotency scope, and sensitivity class. Give each field an owner, format, lifetime, and propagation rule.
+
+Separate identity from correlation. A client request ID can help correlate logs, but it is not proof of authorization and should not be used as a database key without scoping. Gateway-generated operation and attempt IDs should be authoritative for lifecycle and billing. Preserve the client value separately when useful.
+
+Authenticate before accepting context. Verify signed or mTLS-bound metadata at the trust boundary, then create an internal context derived from verified claims. Do not copy arbitrary headers into privileged fields. A downstream worker should trust the gateway’s authenticated envelope, not a user-supplied header that happens to have the same name.
+
+Use least propagation. Carry only the fields a downstream service needs. A provider adapter may need operation, deadline, region, and policy revision, but not a user email or internal risk score. Minimized context reduces leakage and makes ownership clearer.
+
+Distinguish immutable and mutable fields. Tenant, principal, operation identity, and residency should not change mid-request without a new authorization decision. Deadline, cancellation, retry attempt, and queue position may evolve under controlled rules. Record every mutation and its actor.
+
+Propagate deadlines as absolute time. A downstream timeout should be bounded by the original deadline minus known transport and cleanup budgets. Do not let every hop add another full timeout. Include clock assumptions and use monotonic timers locally so a wall-clock adjustment cannot resurrect expired work.
+
+Propagate cancellation deliberately. A client disconnect, explicit cancel, provider abort, or policy revocation can produce different states. Carry cancellation reason and generation, stop work at each boundary, and keep cleanup contexts alive for a bounded period. Cancellation metadata must not be mistaken for successful completion.
+
+Carry priority under policy. Priority should be signed or assigned by the gateway, bounded by tenant quota, and prevented from increasing at every hop. A worker may lower priority because of overload, but must not let an untrusted provider callback raise it. Record original, effective, and changed priority.
+
+Preserve trace relationships. Use standard trace and span concepts where possible, but keep operation and attempt IDs separate from trace IDs. Retries are new attempts under one operation; provider calls and tool calls are child spans. A sampled trace may omit payload details while lifecycle records still preserve safe state transitions.
+
+Make queue handoff explicit. Serialize the context envelope with schema version, creation time, expiry, and integrity protection. Validate it when dequeued. A queued request should not silently inherit a worker’s ambient tenant, policy, or credentials from a previous task.
+
+Prevent context bleed. Clear thread-local, async-local, connection-level, and process-level context after each operation. Avoid pooling bugs where a later request reuses authorization, trace, or cancellation state. Test concurrent requests with different tenants, priorities, and deadlines.
+
+Keep provider headers separate. Map internal context to provider-specific headers or metadata through an explicit adapter. Never forward internal authorization tokens, customer identifiers, audit details, or raw trace baggage by default. The provider-facing correlation value should be scoped and non-sensitive.
+
+Control baggage size and content. Correlation baggage can multiply across every hop. Bound field count, byte size, character set, and lifetime. Reject control characters, credentials, serialized prompts, and untrusted objects. A trace header should not become a covert data transport.
+
+Bind context to artifacts and tools. An image, file, retrieval result, or tool execution should inherit only the operation and tenant scope allowed by policy. Verify artifact access at use time and tool authorization at the execution boundary. Context propagation cannot substitute for object-level authorization.
+
+Handle retries and hedges. Keep one operation identity but assign unique attempt IDs, deadlines, provider routes, and cancellation handles. A late response from an old attempt must not overwrite the current result. Reconciliation needs enough context to determine whether work was accepted, completed, or abandoned.
+
+Support cross-region propagation. Region, residency, encryption context, and failover generation should travel with the request. A failover may create a new attempt in an allowed region, not silently mutate the original location. Reject context that requests movement outside policy.
+
+Version the envelope. Add schema version, producer, consumer requirements, and expiration. During rollout, accept a bounded compatibility window and reject unknown privileged fields. Do not let an old worker interpret a new policy field as permission to proceed.
+
+Protect context at rest and in transit. Encrypt queues and durable records, restrict access by service role, rotate signing keys, and redact sensitive values from logs. Hash or tokenize identifiers where full values are unnecessary. Traceability is not a reason to retain every piece of user metadata forever.
+
+Make callbacks safe. A webhook or asynchronous result should carry operation and event identity, sequence information where needed, and a verifiable signature. Reconstruct internal context from the stored operation record rather than trusting callback fields to choose tenant, policy, or billing scope.
+
+Connect context to billing and audit. Usage events need operation, attempt, tenant, provider, route, policy, and pricing revision. Audit events need actor, transition, and context version. Keep these references stable while excluding prompts, credentials, and private media from ordinary telemetry.
+
+Define failure behavior. Return typed errors for invalid signature, expired context, unknown schema, tenant mismatch, deadline exceeded, canceled operation, invalid priority, oversized baggage, region violation, and missing required fields. A downstream service should know whether to refresh, drop, retry, or escalate.
+
+Test adversarial propagation. Cover forged headers, replayed envelopes, expired queue messages, context bleed, tenant crossover, priority escalation, deadline extension, cancellation races, late retries, provider response confusion, region failover, schema downgrade, oversized baggage, sampling gaps, callback forgery, and worker crashes. Assert that privileged decisions use verified context at every boundary.
+
+Measure propagation health. Track missing context, invalid envelopes, schema mismatch, context bleed incidents, deadline skew, cancellation latency, priority mutation, trace join failures, queue expiry, provider correlation coverage, callback verification failures, baggage size, cross-region rejects, and audit-to-usage reconciliation gaps.
+
+The practical pattern is this: use typed envelopes, separate correlation from authority, authenticate at boundaries, propagate minimally, distinguish immutable and mutable fields, carry absolute deadlines and cancellation, bound priority, preserve trace relationships, validate queue handoffs, clear ambient state, isolate provider headers, limit baggage, bind artifacts and tools, separate retries, protect regions, version schemas, secure storage, rebuild callbacks from trusted records, connect billing and audit, return typed failures, test adversarial races, and measure every boundary. Context propagation is reliable when every hop knows what it may trust, what it must preserve, and when the context expires.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
