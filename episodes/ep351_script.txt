@@ -1,0 +1,55 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about ingress trust at the AI API gateway: how to verify request origin, proxy chains, transport identity, signatures, and replay state before untrusted traffic becomes trusted internal context.
+
+Authentication can be correct while ingress trust is wrong. A valid API key may arrive through an unapproved proxy. A forged forwarding header may claim a trusted region or client address. A replayed signed request may repeat an expensive generation or external action. The edge must establish what is trustworthy before routing begins.
+
+Start with an ingress inventory. Record public endpoints, private endpoints, load balancers, CDN edges, service meshes, partner links, webhook receivers, administrative paths, and regional entry points. Each path needs an owner, expected transport, authentication method, proxy chain, tenant scope, and allowed request classes.
+
+Define the trust boundary. Decide which component terminates public TLS, which component authenticates clients, which headers it may set, and where those assertions are verified. Internal services should not accept identity or policy context merely because a request came from a private network.
+
+Validate proxy chains explicitly. Maintain the approved proxy identities and maximum hop count. Parse forwarding headers only from trusted immediate peers, remove untrusted values, and produce one canonical client context. Never trust the leftmost address in a user-controlled header by default.
+
+Use transport identity where appropriate. Mutual TLS, workload identity, private connectivity, or signed edge assertions can identify the component that forwarded a request. Bind the identity to the expected endpoint, region, tenant class, and header permissions. Encryption alone does not establish the correct sender.
+
+Canonicalize before signing or verifying. Method, path, query, headers, body hash, content encoding, timestamp, and tenant context need one deterministic representation. Different parsers must not disagree about what was authenticated. Reject ambiguous paths, duplicate headers, conflicting lengths, and malformed encodings.
+
+Protect against replay. Use timestamps, nonces, idempotency keys, sequence numbers, or short-lived request tokens according to the workflow. Bind replay protection to client, operation, body, and destination. A nonce valid for one tenant must not authorize another tenant’s request.
+
+Handle clocks safely. Define acceptable skew, use trusted time sources, and distinguish expired signatures from server clock failure. Do not widen replay windows indefinitely because one node has bad time. Monitor and quarantine unhealthy verifiers.
+
+Separate client identity from source attributes. An API key identifies a credential, while network address, device claim, region, proxy, and workload identify context. Each signal has different confidence and lifetime. Route policy should state which combination is required for sensitive operations.
+
+Treat forwarded geography cautiously. CDN or edge metadata can help select a region, but it may be absent, stale, or forged if accepted from the wrong peer. Verify the asserting edge and retain the confidence and source. Data residency should not depend on an unchecked country header.
+
+Bind requests to endpoints and audiences. A token or signature intended for a public inference endpoint should not authorize an admin route, callback receiver, or internal batch API. Validate audience, method, path, tenant, purpose, and operation.
+
+Limit request shape at ingress. Enforce body size, header size, nesting, media type, compression ratio, file count, image dimensions, audio duration, and declared capabilities before expensive parsing or model work. Admission control begins before the provider call.
+
+Handle compression safely. Validate declared encoding, decompressed size, nesting, and processing budget. A small compressed body can expand into a memory or CPU attack. Signatures should bind the intended canonical payload and encoding behavior.
+
+Protect file and media ingress. Scan metadata, validate MIME and magic bytes, isolate parsers, constrain archives, and store uploads with tenant and purpose context. A file accepted at the edge should not become a public URL or an unrestricted tool input.
+
+Govern webhooks separately. Verify provider or partner signatures, event type, timestamp, replay state, account, and destination tenant. Treat webhook payloads as untrusted even after signature verification; the signature proves sender, not semantic safety.
+
+Control browser ingress. For browser-facing APIs, define CORS, origin, cookie, CSRF, and credential rules explicitly. Origin headers are useful in browser policy but are not a universal proof of user identity. Avoid mixing browser sessions and server API credentials on the same assumptions.
+
+Protect administrative paths. Require stronger transport identity, narrower networks, separate credentials, explicit authorization, and enhanced audit. Do not expose debug, metrics, policy reload, model management, or exception controls through the same permissive ingress as customer inference.
+
+Normalize client context once. Produce a signed or integrity-protected envelope containing principal, tenant, credential, source edge, client address class, region assertion, purpose, request ID, authentication time, and policy revision. Downstream services should consume that envelope instead of reparsing raw headers.
+
+Expire context. Long queues, retries, and asynchronous jobs must not preserve a short-lived ingress assertion forever. Define which attributes are historical evidence and which must be revalidated before execution, callback, or external side effect.
+
+Handle retries and redirects. A client retry needs stable identity and idempotency semantics. An edge redirect to another region must preserve authorization while rechecking residency, endpoint audience, and request expiry. Avoid redirecting credentials to an unintended host.
+
+Rate-limit by trustworthy dimensions. Use tenant, credential, operation, source class, and verified client context. IP-based limits alone punish shared networks and are easy to evade. Rate limiting supplements authentication and admission; it does not replace them.
+
+Observe ingress without collecting unnecessary secrets. Record endpoint, trusted edge, authentication result, canonicalization failure, replay decision, request class, bytes, latency, and rejection reason. Redact credentials, signatures, raw tokens, and sensitive payload fields.
+
+Design failure behavior. If the identity provider, nonce store, trusted proxy list, certificate verifier, or policy service is unavailable, choose fail-closed, bounded degraded mode, or quarantine by operation risk. Do not silently trust raw headers because verification is slow.
+
+Test trust confusion. Cover spoofed forwarding headers, untrusted proxies, duplicate headers, ambiguous paths, request smuggling, replay, clock skew, wrong audience, region spoofing, compressed bombs, malformed media, webhook replay, browser cross-origin requests, stale queues, certificate rotation, verifier outage, and private endpoint exposure.
+
+Measure ingress health. Track rejected proxy chains, signature failures, replay attempts, malformed requests, audience mismatch, region assertion conflicts, decompression limits, media rejections, administrative access attempts, verifier latency, degraded-mode use, and incidents caused by incorrect client context.
+
+The practical pattern is this: inventory ingress paths, define trust termination, validate proxies, use transport identity, canonicalize verification, prevent replay, govern clocks, separate identity signals, verify geography, bind audience, limit request shape, protect compression and media, govern webhooks and browsers, isolate administration, normalize signed context, expire assertions, control retries, rate-limit on trusted dimensions, observe safely, define verifier failures, test confusion, and measure every rejected claim. Ingress is trustworthy when no user-controlled attribute becomes an internal fact without a named verifier and a bounded lifetime.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
