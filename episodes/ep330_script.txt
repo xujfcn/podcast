@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request canonicalization at the AI API gateway: how to create a stable representation for signatures, idempotency, caching, routing, and audit without accidentally treating semantically different requests as the same.
+
+Two requests can look different while meaning the same thing. JSON keys may arrive in another order, optional defaults may be omitted, Unicode may use different encodings, and tool schemas may contain equivalent formatting. The reverse is also true: two requests can look nearly identical while differing in message order, whitespace inside a prompt, tool choice, image version, or policy context.
+
+Start by defining the purpose of each canonical form. A signing form, cache key, idempotency identity, audit digest, and provider payload may require different fields and rules. Do not create one universal normalized request and assume it is correct for every security and performance decision.
+
+Preserve the raw input identity. Record a bounded hash of the original bytes before parsing, along with media type, protocol version, and parser version. The raw digest helps diagnose signature and parsing disputes. It should not replace the validated semantic representation used for execution.
+
+Parse with strict limits. Bound document size, nesting, array length, number precision, string length, duplicate keys, and invalid encodings. Decide whether duplicate JSON keys are rejected rather than silently choosing the first or last. Canonicalization must not turn malformed ambiguity into valid authority.
+
+Normalize structural JSON safely. Use a documented key ordering, numeric representation, boolean and null form, and escaping rule. Preserve array order unless the contract explicitly declares a set. Sorting messages, tools, stop sequences, or content parts can change model behavior.
+
+Handle numbers carefully. One, one point zero, scientific notation, and large integers may parse differently across languages and providers. Define accepted ranges and canonical numeric encoding. Reject values that cannot round-trip without loss rather than signing or billing a value different from the one executed.
+
+Treat Unicode deliberately. Validate UTF-8 and choose a normalization policy only for fields where it is semantically safe. User prompts, code, identifiers, filenames, and passwords may distinguish characters or byte sequences that look similar. Never apply case folding, whitespace collapse, or Unicode normalization globally.
+
+Separate syntax defaults from policy defaults. A missing temperature may mean use the gateway default, the provider default, or an application policy value. Resolve the effective value with a named policy generation when required for routing or caching. Do not rewrite omission into a constant if the default can change over time.
+
+Canonicalize messages without rewriting meaning. Preserve role, order, content-part order, names, tool-call identities, and boundaries between text, images, audio, and files. Avoid merging adjacent messages or trimming prompt whitespace unless the API contract guarantees equivalence.
+
+Normalize tool definitions by contract. Canonicalize schema key order, required fields, defaults, and descriptions only where behavior is unchanged. Tool descriptions influence models, so punctuation or wording can be semantically relevant. Include tool version and execution policy in identities that can trigger external actions.
+
+Reference multimodal content by stable identity. Temporary URLs should resolve to artifact ID, content version, tenant scope, media type, and policy where authorized. A refreshed signed URL should not create a different cache identity for the same allowed artifact, while a modified file must produce a new identity even if the filename is unchanged.
+
+Build signatures over explicit fields. Include method, path, protocol version, tenant, timestamp, nonce, body digest, and selected headers in a versioned signing specification. Exclude transport headers that intermediaries legitimately change. Verify the signature before trusting canonical fields supplied by the client.
+
+Make idempotency identities operation-aware. The same request body sent to create, preview, and cancel endpoints is not the same operation. Bind tenant, endpoint, operation class, semantic payload, policy boundary, and side-effect identity. A client-provided idempotency key should select an existing operation only within its authorized scope.
+
+Design cache keys more narrowly. Include every field that can change the reusable answer: model and version, effective parameters, messages, tools, artifact versions, retrieval corpus, policy, tenant isolation, output format, and freshness dependencies. Exclude request IDs and timestamps that do not affect content. Cache equivalence is stricter than visual similarity.
+
+Keep routing identity separate. Routing may depend on capability, residency, budget, priority, deadline, provider allowlist, and health. Some fields affect the route but not the model answer; others affect both. Record the routing input digest independently so operators can explain why equivalent prompts took different paths.
+
+Version canonicalization rules. Parser fixes, Unicode policy, default resolution, schema changes, and provider adapters can alter the canonical form. Include a canonicalization version in signatures, digests, cache entries, and audit events. During migration, support a bounded set of versions and prevent cross-version collisions.
+
+Protect against normalization attacks. Test confusable characters, duplicate keys, alternate encodings, path traversal, header whitespace, numeric overflow, null-versus-missing fields, repeated query parameters, JSON pointer ambiguity, compressed payloads, and content-type mismatch. Security controls must inspect the same effective request that execution uses.
+
+Avoid canonicalization as validation. A stable form does not prove that a model exists, a tool is authorized, a budget fits, or an artifact is safe. Perform schema, policy, capability, quota, and content checks separately. Canonicalization should make decisions reproducible, not replace the decisions.
+
+Preserve evidence without leaking payloads. Store versioned digests, selected non-sensitive dimensions, parser outcomes, default sources, and transformation steps. Do not log full prompts, credentials, signed URLs, tool arguments, or private media merely to debug a hash mismatch. Controlled replay systems can retain encrypted evidence under separate policy.
+
+Connect canonical forms to billing. Usage records should identify the executed semantic request, provider payload generation, attempt, and effective pricing policy. A retry with the same idempotency identity can still create additional provider usage, while a cache hit may serve the same semantic request without new inference. Keep operation identity and consumption events distinct.
+
+Make failures precise. Return typed errors for malformed encoding, duplicate keys, unsupported canonical version, invalid signature, non-round-trippable number, unresolved artifact, conflicting defaults, and canonicalization limit exceeded. Do not reduce all failures to invalid JSON when the next safe action differs.
+
+Test equivalence and non-equivalence. Build fixtures where reordered object keys and refreshed authorized URLs should match, and where message order, prompt whitespace, tool descriptions, tenant, model version, policy, artifact content, output schema, or endpoint must differ. Property tests should confirm determinism across languages and workers.
+
+Observe canonicalization health. Track parser rejection, version use, signature mismatch, idempotency collision, cache false hit, cache false miss, cross-language digest mismatch, default resolution, unresolved artifact, duplicate key attempts, numeric rejection, and normalization latency. A canonical form is useful only when every implementation produces the same result.
+
+The practical pattern is this: define purpose-specific forms, preserve raw identity, parse strictly, normalize structure and numbers safely, treat Unicode and defaults deliberately, preserve message semantics, version tools and artifacts, sign explicit fields, scope idempotency, build complete cache keys, separate routing identity, version rules, test attacks, keep validation separate, protect evidence, distinguish billing events, return typed failures, test equivalence boundaries, and observe drift. Request canonicalization works when harmless syntactic differences disappear while every meaningful semantic difference remains visible.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
