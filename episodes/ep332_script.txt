@@ -1,0 +1,45 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about model alias governance at the AI API gateway: how to make names like latest, fast, balanced, or production resolve predictably across routing, caching, billing, rollout, rollback, and audit.
+
+Model names are often treated as strings, but an alias is a control-plane decision. It can select a concrete model version, provider route, capability set, price, region, safety policy, and quality target. When an alias changes without an observable contract, an unchanged application can receive a materially different system.
+
+Start by separating requested identity from resolved identity. Preserve the exact model string the client sent, then record the alias namespace, resolution time, resolved model version, provider route, policy generation, capability snapshot, and pricing revision. A response should be explainable without guessing what an alias meant later.
+
+Define alias scope. A public alias, tenant alias, application alias, and internal rollout label should not share an accidental namespace. Scope resolution by tenant, environment, region, and authorization. A customer should not be able to select an internal canary merely by guessing its label.
+
+Make aliases explicit objects. Store owner, purpose, allowed capabilities, target versions, weights, regions, effective time, expiration, status, and change history. Avoid aliases that are just mutable rows with no revision. Every change needs a version or immutable snapshot that workers can evaluate consistently.
+
+Choose a stability contract. Some aliases promise a fixed version for a release window. Others intentionally follow the best compatible version. Document whether latest means newest available, newest approved, newest in a region, or newest within a quality and price envelope. Ambiguous names create operational surprises.
+
+Resolve before expensive work. Alias resolution should happen before admission, token estimation, provider selection, cache lookup, and billing reservation when those decisions depend on the concrete model. If capability or price is unknown until after routing, the gateway cannot make an honest promise about the request.
+
+Keep resolution deterministic. Given the same alias revision, tenant, region, policy, and time window, independent workers should select the same eligible version. If weighted rollout is intended, derive the bucket from a stable operation identity and record the selected bucket. Random selection without evidence makes incidents impossible to reproduce.
+
+Separate eligibility from rollout. First filter versions by capability, authorization, region, health, policy, price, and compatibility. Then apply rollout weights or a stable cohort rule. A model receiving zero traffic because it is ineligible is not the same as a model receiving zero traffic because its rollout weight is zero.
+
+Treat capabilities as versioned facts. A model alias may point to a version that supports text but not vision, tools, JSON mode, streaming, or a required context length. Validate requested features against the resolved capability snapshot, not the friendly alias name. Fail before provider work when the contract cannot be met.
+
+Bind cache identity to resolution. A cache entry for an alias must include the resolved model version, alias revision, effective parameters, policy, artifacts, and output format when they affect the result. Otherwise, changing an alias can serve old-version responses under a new name, or a stable alias can unexpectedly miss every cache.
+
+Bind billing to the concrete model. Pricing must use the model and price revision actually selected. Keep requested alias, resolved version, provider attempt, token usage, discounts, and pricing policy separate. A later price change must not rewrite the explanation for a completed request.
+
+Make rollback a first-class operation. If a new target causes errors, quality regressions, latency, or cost surprises, move the alias to a previously approved revision. Do not edit the target in place and erase evidence. Rollback should preserve in-flight requests and define how queued work resolves.
+
+Handle queued work deliberately. An alias can resolve at admission, dequeue, or provider dispatch, but the choice must be explicit. Resolving too early may send stale work to a retired version; resolving too late may make admission and billing estimates false. Record the resolution point and honor any promise made to the client.
+
+Coordinate regions. An alias may resolve differently because a version is unavailable, restricted, or not warmed in a region. That can be valid only if the contract allows regional variance. Record the region and fallback reason, and do not silently use a cheaper or weaker model just because the preferred target is unavailable.
+
+Make fallback visible. A provider retry or capability fallback can change model, price, output behavior, or data residency. Keep the primary resolution and each fallback resolution as separate attempts. A response should expose a safe model identifier or trace reference when clients need to understand what answered.
+
+Protect alias changes. Require authorization, review, validation, and staged rollout for production aliases. Check that every target exists, is enabled, supports required features, has a known price, satisfies residency, and has a rollback target. Prevent deletion of the only version needed to resolve an active alias.
+
+Test alias transitions. Cover unknown alias, unauthorized namespace, expired revision, missing target, capability mismatch, provider outage, regional unavailability, weighted rollout, stable cohort assignment, cache hit after target change, price change, rollback during queueing, worker snapshot lag, concurrent edits, and fallback across residency boundaries.
+
+Version control-plane snapshots. Workers should receive an immutable alias and model catalog snapshot with a clear revision and expiry. Detect stale snapshots and decide whether to reject, refresh, or continue under a bounded grace period. Silent control-plane lag is configuration drift disguised as model behavior.
+
+Keep audit evidence useful. Record who changed an alias, why, previous and new targets, weights, validation results, effective time, affected environments, and rollback links. Request records should reference the alias revision and concrete resolution without storing sensitive prompts or provider credentials.
+
+Measure alias health. Track resolution failures, unknown targets, stale snapshots, capability rejects, cohort distribution, fallback rate, version-specific latency, quality signals, error rate, cost, cache hit rate, rollback time, and traffic still using retired revisions. Alias governance is working when operators can explain every selected model.
+
+The practical pattern is this: preserve requested and resolved identities, scope aliases, model them as versioned objects, define stability, resolve deterministically, separate eligibility from rollout, validate capabilities, bind caches and billing to concrete versions, make rollback explicit, decide when queued work resolves, coordinate regions, expose fallbacks, protect changes, test transitions, distribute snapshots, preserve evidence, and measure outcomes. A model alias is safe when it is convenient for clients but never vague for operators.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
