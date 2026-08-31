@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about verifiable deletion at the AI API gateway: how to find and remove prompts, outputs, artifacts, caches, indexes, evaluation samples, backups, and provider copies without making deletion promises the system cannot prove.
+
+Deleting one database row is not the same as deleting an AI request. A prompt can appear in queues, logs, traces, caches, provider systems, embeddings, transcripts, thumbnails, evaluation sets, support cases, and backups. A trustworthy deletion process begins with lineage, not a blind delete statement.
+
+Start with a deletion contract. Define what can be deleted, who may request it, which identifiers are accepted, what systems are in scope, expected completion windows, legal or contractual holds, provider limitations, evidence returned, and what “complete” means.
+
+Authenticate and authorize requests. A request ID, email address, or artifact URL is not proof of ownership. Verify tenant, user, role, scope, and delegation before revealing whether data exists or deleting it. Prevent one tenant from using deletion as a discovery tool against another.
+
+Resolve identity carefully. A person or tenant may use several API keys, sessions, accounts, devices, and external identifiers. Build an approved identity map with provenance and confidence. Do not merge records solely because names or email-like fields resemble each other.
+
+Use data lineage. Track raw requests, normalized payloads, provider attempts, outputs, tool results, media, embeddings, summaries, logs, traces, caches, billing records, evaluations, exports, and backups. Every derived artifact should retain a safe reference to its source and applicable deletion policy.
+
+Separate payload deletion from required evidence. Billing, fraud prevention, security, or legal obligations may require retaining limited metadata after content is removed. Minimize that metadata, isolate it, document the basis, and never claim full erasure when a lawful hold remains.
+
+Create a deletion plan before execution. Enumerate affected objects, processors, regions, replicas, retention rules, holds, and dependencies. Freeze new secondary use where appropriate so evaluation jobs, exports, or backup restores do not recreate data while deletion is in progress.
+
+Make deletion idempotent. Repeated requests should converge on the same state without creating contradictory records or errors. Use a stable deletion operation ID, object states, timestamps, and retry-safe worker behavior.
+
+Model deletion as a state machine. Useful states include received, identity verified, scoped, blocked by hold, scheduled, deleting, waiting for provider, verifying, complete, partially complete, and failed. Expose meaningful progress without revealing internal topology or sensitive data.
+
+Delete caches and indexes. Response caches, semantic caches, routing caches with payload fragments, vector stores, search indexes, and content-addressed artifacts can outlive the primary record. Purge by lineage and tenant scope, then prevent stale replicas from repopulating deleted entries.
+
+Delete derived artifacts. Redacted text, embeddings, summaries, labels, transcripts, OCR output, thumbnails, and evaluation annotations may still identify or reveal the source. A transformation does not automatically remove deletion obligations. Apply a documented derivation policy.
+
+Coordinate providers and tools. Send deletion requests to providers, storage systems, human-review vendors, and external tools where supported. Record request IDs, scope, acknowledgement, stated completion, and contractual limitations. Do not translate “request accepted” into “data erased.”
+
+Handle backups honestly. Immediate physical removal from immutable backups may be impossible. Use cryptographic erasure, tombstones, restore-time suppression, bounded backup expiry, and tested procedures that prevent deleted data from returning to active systems. State the residual window precisely.
+
+Protect deletion tombstones. A tombstone may need only an opaque object identifier, tenant scope, deletion time, policy, and integrity evidence. It should not retain the content being deleted. Keep it long enough to block resurrection and demonstrate handling.
+
+Respect retention precedence. Legal hold, fraud investigation, billing evidence, incident response, and contractual retention can conflict with deletion. Define precedence and approval. Retain only what is required, restrict purpose and access, and schedule deletion when the hold ends.
+
+Handle in-flight work. Queued, retrying, streaming, batch, and tool operations may still hold the data. Cancel or quarantine work where policy permits, revoke artifact access, and ensure retries do not re-submit deleted payloads to a provider.
+
+Control race conditions. New writes can occur after the deletion plan is built. Use write barriers, version checks, tombstones, or repeated lineage scans. Completion should require a quiet or reconciled state, not one successful pass.
+
+Verify independently. Confirm absence from primary stores, caches, indexes, active replicas, exports, and accessible provider surfaces. Validate restore-time suppression. Use counts, hashes, object references, and signed receipts rather than storing deleted content as proof.
+
+Define partial completion. A provider may not support deletion, a backup may have a bounded expiry, or a legal hold may block one artifact. Report which categories are complete, pending, retained, or unverifiable. A truthful partial result is safer than a false green status.
+
+Make access fail immediately where possible. Even if physical deletion takes time, revoke URLs, credentials, cache access, search visibility, and processing eligibility promptly. Logical inaccessibility is not final erasure, but it reduces exposure during the deletion window.
+
+Test restoration and replay. Restore backups into an isolated environment and verify tombstones suppress deleted records. Test delayed queues, dead-letter messages, retries, provider callbacks, evaluation refreshes, and cache warming. Deletion that fails after restore is not complete.
+
+Audit without retaining secrets. Record requester authorization, scope, policy revision, object categories, processor acknowledgements, state transitions, holds, failures, verification results, and completion time. Protect this evidence and avoid copying prompts or outputs into the audit trail.
+
+Measure deletion reliability. Track request volume, verification latency, completion time, partial outcomes, blocked holds, provider lag, lineage gaps, cache purge failures, resurrection attempts, restore-test failures, manual intervention, and objects discovered after claimed completion.
+
+The practical pattern is this: define deletion precisely, authenticate requests, resolve identity with evidence, maintain lineage, separate content from required metadata, plan before execution, use idempotent state machines, purge caches and derivatives, coordinate processors, handle backups honestly, preserve minimal tombstones, govern holds, stop in-flight work, control races, verify independently, report partial states, revoke access quickly, test restoration, audit minimally, and measure resurrection risk. Deletion is trustworthy when the system can explain what disappeared, what remains, why it remains, and how deleted data is prevented from returning.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
