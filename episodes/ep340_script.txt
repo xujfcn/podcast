@@ -1,0 +1,53 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about structured output contracts at the AI API gateway: how to evolve JSON schemas and typed responses across models, providers, tools, streams, retries, and clients without turning a harmless schema change into a production outage.
+
+Structured output is more than asking a model to return JSON. A real contract defines shape, types, required fields, nullability, enums, ordering where it matters, semantic constraints, error behavior, and version compatibility. The gateway must make that contract meaningful across providers with different levels of support.
+
+Start with a contract registry. Give each schema a stable name, version, owner, purpose, compatibility policy, and test suite. Store canonical schema bytes and a digest. A mutable prompt template or undocumented example is not a durable contract.
+
+Separate transport shape from business meaning. Provider-specific response wrappers, tool-call envelopes, streaming events, and usage metadata belong to an adapter layer. The client contract should expose stable domain fields while preserving provider details only when explicitly promised.
+
+Define compatibility rules. Adding an optional response field is often backward compatible; removing a required field, changing a type, narrowing an enum, or changing units may not be. Input and output compatibility have different directions. Test both old clients against new responses and new clients against old responses where migration requires it.
+
+Pin the schema used for each request. Record contract name, version, digest, model route, provider adapter, and policy revision. A client-visible version should not resolve to different semantics in different regions without an explicit compatibility guarantee.
+
+Match contracts to capabilities. Some models support strict JSON Schema, some support JSON mode, some only follow instructions probabilistically, and some providers implement only a subset of keywords. The gateway must select a route that can prove the requested contract or clearly mark the result as best effort.
+
+Build a capability matrix for schema features. Track required properties, additional properties, unions, recursive structures, formats, numeric bounds, pattern constraints, arrays, streaming fragments, and tool schemas. Validate the matrix against real provider behavior, not documentation alone.
+
+Use a staged enforcement ladder. A strict provider-native constraint is strongest. Gateway-side parsing and validation is the next layer. Repair can be useful for bounded syntax issues, but it must be explicit, limited, and observable. Prompt-only instructions should never be represented to clients as a strict guarantee.
+
+Treat repair as a new transformation. Keep the original response classification, repair algorithm and version, input digest, output digest, and reason. Do not silently change a value, invent a missing field, or coerce a dangerous type merely to satisfy a schema.
+
+Define semantic validation separately. JSON syntax and schema validation cannot prove that a currency is correct, an identifier belongs to the tenant, a date is plausible, or a tool action is authorized. Domain checks and authorization remain necessary after structural validation.
+
+Handle unknown and extra fields deliberately. Strict contracts should reject or quarantine unexpected properties when they could hide prompt injection or provider drift. Forward-compatible clients may ignore documented optional fields, but that choice should be part of the version policy rather than an accidental parser behavior.
+
+Make null and absence distinct. A missing field, explicit null, empty string, empty array, and default value can carry different meaning. State these rules in the contract and test them across providers. Do not let a serializer erase distinctions that downstream billing or workflow logic depends on.
+
+Control numbers and strings. Specify units, precision, ranges, rounding, Unicode normalization, maximum lengths, and whether identifiers are case-sensitive. A model can produce syntactically valid JSON containing an unsafe URL, an overlong value, or a number that loses precision in JavaScript.
+
+Design streaming contracts. Decide whether clients receive complete JSON, JSON patches, typed events, or incremental text that becomes structured only at the end. Every fragment needs sequence and completion semantics. Do not make clients parse half of a string or assume a disconnected stream produced a valid final object.
+
+Coordinate tool calls. A function or tool schema is part of the model interaction contract, while the tool result may have a separate client contract. Version names and argument schemas, validate arguments before execution, and keep tool errors distinct from ordinary model output. A schema-valid tool call can still violate authorization.
+
+Handle retries and fallbacks. Preserve the requested contract across attempts, but re-check provider support on every route. If a fallback cannot honor strictness, fail or downgrade with an explicit status. Never return a best-effort object under a response header that promises strict conformance.
+
+Keep errors structured. Return stable error codes for unsupported schema, incompatible version, provider capability mismatch, malformed output, semantic violation, repair limit exceeded, stream incomplete, and contract timeout. Include field paths and safe remediation, without exposing hidden prompts or internal provider traffic.
+
+Test contract boundaries. Generate valid, boundary, invalid, adversarial, deeply nested, huge, Unicode, numeric, null, extra-field, and truncated examples. Test old and new clients, schema migrations, provider subsets, streaming disconnects, repair behavior, tool arguments, retries, cache hits, and multi-region rollout.
+
+Use consumer-driven tests. Clients should publish the fields and semantics they depend on, while the gateway verifies provider adapters against those expectations. A schema registry without real consumer cases can declare compatibility while silently breaking application behavior.
+
+Version prompts and adapters with contracts. A prompt change that alters field meaning is a contract change even when the JSON shape is identical. Provider adapters can also change coercion, defaults, or error mapping. Keep these versions in the request identity and release them together when semantics are coupled.
+
+Protect schemas from injection and abuse. Treat descriptions, examples, enum labels, and field names as configuration, not model-authored instructions. Bound schema size, depth, regex complexity, and recursion. Do not allow a client to smuggle credentials or executable instructions into a schema that gets copied into privileged prompts.
+
+Cache only with contract identity. A response generated under schema version one must not satisfy a version-two request merely because the visible fields happen to overlap. Include schema digest, adapter, model, prompt, policy, and transformation versions in cache keys.
+
+Observe conformance. Track strict-provider coverage, parse failures, schema violations by field, repair rate, semantic rejection, extra-field rate, stream incompleteness, fallback downgrade, provider divergence, consumer breakage, and contract version adoption. A falling error rate can be misleading if the gateway is silently repairing more responses.
+
+Plan deprecation. Publish migration windows, dual-read or dual-write behavior, compatibility shims, client adoption metrics, and a removal date. Keep old versions available only as long as their security, cost, and operational burden is justified. A version sunset should produce a typed error, not an unexplained 500.
+
+The practical pattern is this: register canonical contracts, separate transport from meaning, define compatibility, pin versions, route by proven capability, enforce in layers, make repairs visible, validate semantics, specify nulls and numeric behavior, design streaming and tool boundaries, preserve strictness through fallback, return typed errors, test consumers and adversarial cases, version coupled prompts and adapters, bound schemas, key caches correctly, measure conformance, and deprecate deliberately. Structured output is reliable when clients can tell exactly what is guaranteed, which version delivered it, and what happens when a provider cannot comply.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
