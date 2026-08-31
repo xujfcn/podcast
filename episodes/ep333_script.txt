@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about prompt assembly governance at the AI API gateway: how to combine system instructions, developer rules, user messages, retrieved context, tool results, and multimodal content without losing source, priority, version, tenant boundaries, or security controls.
+
+The final prompt is rarely written in one place. An application supplies messages, a gateway adds policy, retrieval contributes documents, tools return data, and a provider adapter reshapes the request. Each layer can be useful, but every layer can also accidentally override instructions, leak another tenant’s data, or make an incident impossible to explain.
+
+Start with a typed intermediate representation. Represent each prompt fragment with source, role, trust level, tenant, purpose, version, creation time, expiration, and allowed transformations. Assemble from structured fragments before rendering provider-specific messages. A plain concatenated string loses too much information to enforce meaningful boundaries.
+
+Define precedence explicitly. System policy, application instructions, user intent, retrieved evidence, and tool output do not have the same authority. A document retrieved from the web is data, not a control-plane instruction. A tool result can contain text that looks like a command but should remain untrusted data unless a separate policy authorizes it.
+
+Separate control from content. Keep routing, safety, privacy, tool authorization, and output-format constraints in protected control structures where possible. Delimit user content, retrieved passages, file text, and tool results clearly. Delimiters help, but they are not authorization; downstream models can still confuse content with instructions.
+
+Version every important fragment. System prompts, policy templates, tool descriptions, retrieval templates, and output schemas should have immutable versions and owners. When behavior changes, record the fragment versions used for the request instead of relying on the current template stored in a database.
+
+Treat variables as untrusted. Tenant names, user profiles, locale, product data, URLs, filenames, and retrieved text must be escaped and inserted into typed fields. Do not interpolate arbitrary strings into executable templates or silently interpret braces, markup, XML, or JSON-looking content as control syntax.
+
+Make tenant boundaries structural. Every fragment should carry tenant and authorization scope. Retrieval results, conversation history, cached instructions, tool outputs, and memory must be filtered before assembly. A correct final prompt cannot repair a fragment that was selected from the wrong tenant.
+
+Control retrieval context. Record corpus, query, ranking policy, document IDs, versions, scores, and expiration. Treat document text as evidence and preserve citations or source references. Do not allow a retrieved document to rewrite system policy merely because it contains imperative language.
+
+Control tool results. Bind results to tool call ID, user, tenant, execution policy, and time. Mark whether a result is data, an authorization decision, or an instruction approved by policy. Tool output should be bounded, sanitized, and validated before entering the next model turn.
+
+Preserve message boundaries. Do not merge system, developer, user, retrieval, and tool messages merely to save tokens. A provider adapter may require a different shape, but it must preserve the effective precedence and provenance. Record any transformation and test that a lower-trust fragment cannot become a higher-trust role.
+
+Handle multimodal fragments explicitly. Images, audio, video, and files need artifact identity, content version, media type, tenant scope, and access policy. A caption or OCR result is derived content with its own source and confidence; it should not silently replace the original artifact or inherit more authority than the source allows.
+
+Define non-overridable constraints. Privacy, credential handling, tool permissions, data residency, safety, and billing controls may not be disabled by user text, retrieved content, or a model-generated instruction. Keep these constraints outside mutable user-controlled templates and check them again at execution boundaries.
+
+Make assembly deterministic. Given the same fragment versions, inputs, policy snapshot, and time-valid data, workers should produce the same ordered representation. Stable ordering makes cache keys, evaluations, comparisons, and audits meaningful. If time or randomness is intentional, record it as an explicit input.
+
+Use budgets before rendering. Estimate tokens, characters, tool definitions, retrieved context, media references, and expected output space before assembling the final request. Choose truncation or selection policies by source and priority. Never trim protected constraints or silently discard the user’s core intent.
+
+Define truncation semantics. Older conversation history, low-scoring retrieval passages, verbose tool results, and optional examples may be reduced under pressure. Record what was omitted, summarized, or transformed. A request accepted under one context policy should not be indistinguishable from a request that used the complete context.
+
+Defend against prompt injection. Scan and classify untrusted fragments, but do not rely on a detector alone. Enforce source boundaries, least privilege, tool confirmation, output validation, and policy checks. A phrase such as ignore previous instructions is just data unless an authorized control path gives it meaning.
+
+Protect secrets during assembly. Do not place provider credentials, signing keys, internal URLs, hidden policy details, or tenant data into model-visible text unless necessary and authorized. Redact or tokenize sensitive values before logging and before handing content to providers.
+
+Keep final-request evidence bounded. Store fragment IDs, versions, roles, hashes, selection decisions, transformations, omitted items, and policy revision. Retain encrypted snapshots only when justified. An audit record should explain assembly without becoming an uncontrolled copy of every private prompt and document.
+
+Coordinate with provider adapters. Different providers represent system messages, tools, images, JSON schemas, and citations differently. The adapter must declare what semantics it can preserve and what it cannot. Reject unsupported transformations rather than silently flattening a protected instruction into ordinary user text.
+
+Separate prompt assembly from model behavior. A well-governed prompt does not guarantee a correct answer. Evaluate response acceptance, tool authorization, citations, safety, and business invariants after generation. Assembly controls the input contract; output controls verify the result.
+
+Connect assembly to billing and privacy. Track token estimates and actual usage by fragment purpose when allowed, while avoiding raw content in usage records. Retrieval, tool calls, media processing, and prompt tokens may have distinct costs and retention policies. Explain whether a larger bill came from user history, retrieved evidence, tool schemas, or provider overhead.
+
+Test provenance and boundaries. Cover conflicting instructions, malicious documents, tool output injection, tenant crossover, stale templates, expired retrieval, missing variables, malformed markup, repeated fragments, provider role flattening, media-derived text, truncation, cancellation, cache reuse, policy revision, and adapter failure. Assert that every final fragment has an owner, scope, source, and allowed authority.
+
+Measure assembly health. Track fragment rejection, tenant-scope failures, injection detections, policy conflicts, template version usage, token allocation, truncation, missing provenance, provider transformation loss, assembly latency, secret-redaction events, cache divergence, and post-assembly policy failures. These signals show whether the gateway is composing context or merely concatenating strings.
+
+The practical pattern is this: use typed fragments, define precedence, separate control from content, version sources, treat variables as untrusted, enforce tenant scope, govern retrieval and tools, preserve boundaries, model multimodal data, protect non-overridable constraints, assemble deterministically, budget and record truncation, layer injection defenses, protect secrets, retain bounded evidence, declare adapter limits, validate outputs, connect cost to purpose, test boundaries, and measure drift. Prompt assembly is reliable when every piece of context has a source, an authority, a scope, and a reason to be present.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
