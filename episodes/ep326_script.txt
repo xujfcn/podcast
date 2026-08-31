@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request quarantine at the AI API gateway: how to isolate risky, ambiguous, or policy-conflicted work without silently dropping it, retrying it forever, or allowing it to continue through the production path.
+
+Most gateways have only two outcomes: run the request or reject it. That is too coarse for many operational situations. A request may need human review, provider reconciliation, abuse investigation, malware scanning, or a policy decision before it can safely proceed. Quarantine creates a third path with explicit authority and expiry.
+
+Start by defining quarantine triggers. Examples include suspected prompt injection, unsafe content, anomalous spend, impossible tenant behavior, policy conflict, unknown side-effect outcome, invalid credential use, provider security alert, repeated protocol violations, and evidence required for an incident. Each trigger should identify the rule, confidence, scope, and next action.
+
+Separate quarantine from rejection. Rejection means the gateway will not process the request under the current contract. Quarantine means processing is paused while a defined workflow decides whether it may resume, be transformed, be cancelled, or be retained for investigation. Do not use quarantine as an indefinite hidden error state.
+
+Assign a durable quarantine identity. Preserve tenant, request, attempt, operation, policy version, trigger, creation time, expiry, and current owner. A client retry should query the same quarantined operation when appropriate. A new request should not inherit quarantine authority or bypass the original decision.
+
+Keep the main path isolated. Quarantined work must not consume production provider capacity, invoke effectful tools, publish content, or influence shared caches unless explicitly authorized. Use separate queues, credentials, worker pools, and rate limits where risk requires it. Isolation should reduce blast radius, not merely rename the same queue.
+
+Minimize retained data. Store only what the review or reconciliation process needs. Hash or redact prompts, tool arguments, personal data, credentials, and raw provider payloads. Define retention and deletion rules by trigger type. A security workflow should not become an uncontrolled archive of customer conversations.
+
+Make quarantine states explicit. Use detected, held, awaiting review, awaiting provider status, transformed, approved, rejected, expired, cancelled, released, and deleted. Each transition needs an authorized actor, reason, timestamp, and allowed next states. A state machine is safer than a flag that anyone can clear.
+
+Define release conditions. A request may be released only when the triggering concern is resolved and all current policy, budget, capability, deadline, and authorization checks pass again. A previous approval should not survive a material change in arguments, tenant status, destination, model, or side-effect scope.
+
+Respect expiry and deadlines. Quarantine consumes time even when provider work has not started. Set maximum hold duration, client-visible expiry, review deadlines, and evidence retention separately. When a request cannot safely complete within its remaining budget, expire it rather than releasing it into a guaranteed timeout.
+
+Handle human review precisely. Reviewers need the trigger, risk summary, redacted evidence, requested action, tenant policy, expiry, and permitted decisions. Approval should be scoped to the exact request and operation. Do not ask a reviewer to approve an opaque token or a full secret-bearing payload.
+
+Use safe transformations. A quarantined request may be sanitized, stripped of tools, routed to a restricted model, reduced to a read-only operation, or converted to a user clarification. Record the transformation and revalidate the resulting request. Sanitization is not proof that every downstream risk disappeared.
+
+Protect tool boundaries. Quarantined requests must not invoke external side effects while awaiting review or provider reconciliation. If a prior tool call has an unknown outcome, query status through a restricted path and prevent a second commit. Release requires a fresh tool authorization and the original execution identity.
+
+Handle provider uncertainty. A provider may return an ambiguous error, security challenge, policy warning, or delayed status. Quarantine the operation with the provider attempt ID and last known state. Reconciliation should be idempotent, bounded, and isolated from new work. Do not turn an unknown result into an automatic duplicate submission.
+
+Prevent tenant bypass. Apply quarantine before routing, fallback, caching, shadowing, batch processing, and retry admission. A tenant must not escape a hold by changing model names, adding a new API key, opening a stream, or sending the same payload through another region. Preserve the enforcement identity across entry points.
+
+Keep quarantine fair. One noisy tenant or security event should not consume all review capacity. Use per-tenant limits, trigger-specific queues, aging, priority bounds, and reserved capacity for urgent safety or financial cases. A quarantine queue can starve just like a production queue.
+
+Control notification. Tell clients enough to choose a safe next action without revealing detection logic that enables evasion or exposing another tenant’s information. Return stable status, operation ID, expected next step, and expiry. Avoid claiming that a quarantined request was processed or that it failed when the outcome is still under review.
+
+Preserve evidence integrity. Record event hashes, policy versions, actor identity, timestamps, and chain relationships. Use append-only or tamper-evident storage for security and billing investigations. Keep the evidence envelope separate from the customer payload and limit access by role and purpose.
+
+Separate investigation from execution. Analysts may need to inspect a request, reproduce a parser issue, or compare provider responses. Investigation copies must be marked non-executable. They must not carry live credentials, invoke tools, enter production caches, or be mistaken for the original operation.
+
+Coordinate regional and worker failure. A quarantine record should survive worker loss and region transfer. Lease ownership, fence stale workers, and reconcile duplicate events. If the quarantine store is unavailable, fail closed for high-risk triggers and use bounded fallback behavior for low-risk, non-effectful reads.
+
+Connect quarantine to billing. Decide whether held time, scanning, review, provider reconciliation, and cancelled work are billable. Record reserved and actual usage separately. A request that never reached a provider should not be charged as provider inference, while a provider action with an unknown result must not be declared free without evidence.
+
+Make operations observable. Track trigger rates, hold age, queue wait, release and rejection reasons, expiry, review capacity, transformation rate, repeat bypass attempts, provider unknown outcomes, stale worker events, evidence access, false positives, and customer impact. Break metrics down by tenant, route, region, and trigger.
+
+Test quarantine races. Cover simultaneous detection, duplicate retries, stream reconnect, policy change during hold, approval expiry, argument mutation, tenant suspension, provider status lag, worker takeover, region partition, evidence deletion, tool-call ambiguity, cache admission, fallback routing, notification loss, and release during capacity failure. Assert that no path executes held work without a fresh authorized transition.
+
+Measure whether quarantine helps. Track unsafe releases, missed triggers, false holds, hold-to-decision time, expired work, bypass success, duplicate side effects, review backlog, evidence completeness, data retention violations, and recovery correctness. A good quarantine system reduces risk without becoming a silent source of abandonment or unfairness.
+
+The practical pattern is this: define triggers, distinguish hold from rejection, assign durable identity, isolate the main path, minimize retained data, use explicit states, define release conditions, enforce expiry, scope review, record transformations, protect tools, reconcile provider uncertainty, preserve tenant identity, keep review fair, notify safely, protect evidence, separate investigation, survive failures, reconcile billing, observe operations, test races, and measure outcomes. Quarantine is reliable when risky work is paused with a clear owner, bounded lifetime, and no hidden authority to resume itself.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
