@@ -1,0 +1,57 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about sensitive data tokenization at the AI API gateway: how to replace personal information and business secrets before model processing, restore values only where authorized, and keep token mappings controlled across prompts, tools, streams, logs, caches, and deletion.
+
+Redaction removes data. Tokenization replaces data with a controlled reference. That distinction matters when a workflow still needs to discuss a customer, account, address, order, or internal identifier without exposing the original value to every provider and tool.
+
+Start with a data inventory. Identify names, contact details, government identifiers, payment fields, account numbers, health data, credentials, internal project names, contract terms, source code secrets, and tenant-defined sensitive fields. Record where each type may be detected, tokenized, restored, stored, and deleted.
+
+Define the purpose. Tokenization should reduce exposure while preserving enough structure for the task. Decide whether the model needs equality, category, format, ordering, partial display, or no semantic information at all. Do not preserve more information than the workflow requires.
+
+Classify before replacing. Use structured schemas, tenant configuration, deterministic rules, and bounded detectors. Machine-learning detection can help with free text, but confidence must be explicit. A low-confidence match should not silently corrupt a legal document or code sample.
+
+Prefer structured fields. When the client can label email, phone, account, or customer fields directly, use those labels instead of rediscovering them in prose. Keep detector provenance so operators can explain why a value was transformed.
+
+Choose token properties deliberately. Tokens may be random, deterministic, format-preserving, scoped, single-use, or time-limited. Deterministic tokens support equality checks but can reveal repeated values. Format-preserving tokens may help legacy systems but leak shape. Select the least revealing form that still supports the task.
+
+Scope tokens tightly. The same source value should not automatically produce the same token across tenants, purposes, environments, or retention periods. Include tenant, data class, purpose, and policy revision in the tokenization context. This prevents correlation across unrelated workloads.
+
+Protect the mapping store. Separate it from prompts, logs, caches, analytics, and model-accessible tools. Encrypt mappings, use narrow service identities, audit restoration, limit retention, and isolate tenants. Possession of a token must not imply permission to retrieve its value.
+
+Bind restoration to authorization. Validate tenant, principal, purpose, operation, destination, policy, and token lifetime. A support tool may restore a customer name while an external model may not. Restoration decisions need their own evidence and denial reasons.
+
+Tokenize before external processing. Apply transformations before provider adapters, retries, queues, debug capture, and third-party tools. If raw content is logged or queued first, later tokenization does not undo the exposure.
+
+Preserve prompt meaning carefully. Replace entities with typed markers such as customer, account, address, or secret rather than arbitrary strings when the model needs role context. Avoid token formats that resemble instructions, markup, code, or executable tool arguments.
+
+Defend token integrity. Use authenticated token formats or server-side opaque identifiers. Reject invented, modified, expired, wrong-tenant, and wrong-purpose tokens. Models can generate plausible placeholders, so restoration must never accept a token merely because it matches a pattern.
+
+Handle streaming. Sensitive values can span chunks, Unicode boundaries, or partial JSON fields. Use bounded buffering and stateful detection where required. Do not release a chunk that may contain an incomplete sensitive value before classification is possible.
+
+Handle structured output. Tokenize and restore at schema-aware field boundaries. Validate that tokens appear only in approved fields and that restoration preserves type and constraints. Avoid global string replacement that can alter unrelated content.
+
+Govern tool calls. Inspect tool names, argument schemas, destination, and data purpose before restoring tokens. Restore only the fields the approved tool needs, as late as possible, and prevent the tool response from echoing raw values into the model context.
+
+Control output detokenization. Some clients may be authorized to receive restored values, while others receive tokens or redacted output. Apply authorization after output validation and before delivery. A provider response must not decide its own restoration privileges.
+
+Avoid accidental semantic leakage. A typed token can reveal that a prompt contains a medical condition, payment account, or privileged customer. Use broader categories or neutral references when even the data class is sensitive. Tokenization reduces exposure; it does not make context harmless.
+
+Manage collisions and identity. Two distinct values must not map to one token unexpectedly, and one token must not change meaning during a workflow. Define normalization for casing, punctuation, phone formats, and Unicode before deterministic tokenization. Preserve provenance for corrections.
+
+Handle false positives and false negatives. Measure both. A false negative leaks data; a false positive damages meaning and model quality. Use risk-based thresholds, schema hints, tenant dictionaries, test corpora, and human review for high-impact workflows.
+
+Control caches and deduplication. Cache keys and semantic indexes can leak raw values or permit cross-tenant correlation. Build them from scoped tokens or approved canonical representations. Ensure restored values never enter a cache that has broader access or retention.
+
+Coordinate retries and asynchronous jobs. Keep token context stable for the lifetime of an authorized operation, but do not extend mapping retention indefinitely. Expired jobs should fail clearly rather than silently restoring under a newer or broader policy.
+
+Integrate deletion. A deletion request should remove or disable mappings, derived indexes, caches, exports, and restoration eligibility. Keep only minimal tombstones needed to prevent resurrection. Deleting the source record while retaining a usable mapping is not complete deletion.
+
+Support incident response. Be able to revoke a token family, tenant scope, provider route, restoration service, or compromised mapping key. Record which operations may have received raw values without copying those values into the incident trail.
+
+Observe safely. Record detector version, data class, token scope, transformation count, confidence band, restoration decision, destination, latency, and error category. Never put original values or reversible token secrets into ordinary telemetry.
+
+Test adversarial cases. Cover Unicode tricks, split values, nested JSON, archives, images with OCR, audio transcripts, code, prompt injection, invented tokens, wrong-tenant tokens, expired tokens, tool echo, streaming boundaries, cache reuse, retries, mapping-store outage, key rotation, deletion, and restoration revocation.
+
+Measure effectiveness. Track exposure prevented, false positives, false negatives found in audits, restoration volume, denied restoration, raw-data destinations, detector drift, token collisions, mapping retention, cache contamination, processing latency, and incidents involving sensitive fields.
+
+The practical pattern is this: inventory data, define purpose, classify with provenance, prefer schemas, choose minimal token properties, scope by tenant and purpose, protect mappings, authorize restoration, transform before external processing, preserve meaning safely, verify token integrity, govern streams and schemas, restore tools late, control client delivery, limit semantic leakage, manage normalization, measure detector error, protect caches, expire jobs, integrate deletion, prepare revocation, observe without secrets, test adversarial inputs, and measure real exposure. Tokenization works when sensitive values are available only at the exact step that needs them, not everywhere the request travels.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
