@@ -1,0 +1,55 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about multi-model agreement at the AI API gateway: when one answer is not enough, how to use independent routes for review, disagreement detection, and safer decisions without blindly paying for duplicate inference.
+
+Ensembling is not the same as sending every request to several models. The gateway needs a clear reason for parallel inference: safety review, structured extraction, classification confidence, high-value decisions, or detection of model-specific failure. Without a defined purpose, extra calls add cost and latency without adding trust.
+
+Start with a decision contract. Define what agreement means for the task. Two answers can use different words but represent the same classification, while identical text can still contain the same mistake. Compare normalized labels, extracted fields, tool plans, citations, or bounded semantic representations rather than raw strings by default.
+
+Choose independent routes carefully. Different model families, providers, regions, prompts, or decoding settings may provide useful diversity. But superficial diversity is not independence if every route shares the same provider failure, system prompt bug, retrieval corpus, or corrupted input.
+
+Preserve request identity. Every parallel attempt needs an attempt ID, route metadata, policy revision, prompt revision, input digest, and deadline. Link all results to one parent decision while keeping provider and model identities visible.
+
+Control fan-out. Set maximum parallel calls, token budgets, provider spend, queue limits, and time windows. Use risk-based activation so routine low-impact requests use one route while sensitive operations receive stronger review.
+
+Use staged evaluation. A fast primary route can return a provisional result while a second route checks it, or a small classifier can decide whether deeper review is needed. Define whether the client may see provisional output and how corrections are delivered.
+
+Define disagreement types. Separate factual disagreement, schema disagreement, safety disagreement, tool-plan disagreement, confidence disagreement, language disagreement, and timing disagreement. A single score hides which contract actually failed.
+
+Normalize before comparing. Canonicalize labels, units, dates, field names, citations, and tool arguments. Preserve the original outputs for authorized review, but do not let formatting differences create false disagreement.
+
+Use calibrated confidence carefully. Model-reported confidence is not automatically comparable across providers. Calibrate against task-specific outcomes, monitor calibration drift, and treat unsupported certainty as a failure signal rather than a vote.
+
+Do not equate majority with truth. Correlated models can repeat the same wrong answer. Weight evidence quality, source agreement, test performance, route independence, and known failure modes. For critical decisions, escalate unresolved disagreement to a human or deterministic check.
+
+Make arbitration explicit. Define tie-breaking rules, trusted validators, source precedence, schema validators, policy checks, and human approval. An arbitrator should not silently rewrite one output into a third answer without recording how the decision was made.
+
+Validate structured results. Parse each candidate, check schema and business invariants, and exclude invalid outputs from agreement calculations. A malformed answer should not count as a dissenting opinion equal to a valid result.
+
+Compare tool plans before execution. Multiple agents may propose different tools, recipients, arguments, or side effects. Review plans and authorization before running anything. Agreement between two models does not replace permission or idempotency.
+
+Keep side effects single-owner. Never allow every agreeing route to send the email, charge the card, or modify the record. Select one authorized executor after review, attach the decision evidence, and use an idempotency key.
+
+Handle streaming deliberately. Parallel streams can waste tokens when an early route is clearly acceptable. Decide whether to stream the primary, buffer until review, or stream with a provisional marker. On disagreement, define cancellation, correction, and client-visible semantics.
+
+Respect deadlines. Parallel inference consumes one shared deadline. Allocate time for calls, validation, arbitration, and delivery. If the review route misses its budget, apply a declared fallback rather than waiting indefinitely or presenting an unreviewed result as reviewed.
+
+Control cost. Use smaller models for triage, adaptive sampling, cached evaluation artifacts, and selective escalation. Count all attempts, including canceled or partial calls, and attribute cost to the parent decision and reason for fan-out.
+
+Protect privacy. Send the minimum authorized data to every route. A review model may need a redacted representation rather than the full prompt, memory, or attachment. Bind each route to purpose, tenant, region, retention, and provider policy.
+
+Avoid leakage through comparison. Do not expose one provider’s hidden response, private rationale, or sensitive tool arguments to another model unless explicitly authorized. Compare bounded features or hashes when raw content is unnecessary.
+
+Keep evidence distinct. Store candidate outputs, normalized representations, validation results, arbitration rules, final decision, and delivery status with clear evidence levels. A model-generated summary of disagreement is not a substitute for the candidates and checks.
+
+Detect correlated failure. Monitor provider incidents, shared retrieval errors, prompt bugs, tokenizer changes, common safety policy changes, and regional outages. If all reviewers share a dependency, agreement may be falsely reassuring.
+
+Use deterministic checks where possible. Schema validation, arithmetic, permissions, allowlists, expiration, signatures, and business invariants should not be outsourced to a vote among language models. Use models for ambiguity; use deterministic logic for guarantees.
+
+Define escalation policy. Specify when disagreement blocks delivery, triggers a human review, selects a safe default, routes to a specialist, or returns an uncertainty response. The safest choice depends on the consequence of false acceptance versus false rejection.
+
+Test adversarial cases. Cover prompt injection, coordinated wrong answers, stale retrieval, missing context, formatting variation, schema repair, tool substitution, provider outage, timeout, partial stream, duplicated attempt, privacy mismatch, budget exhaustion, and a malicious route pretending to agree.
+
+Measure decision quality. Track agreement rate, disagreement by type, validated agreement, false consensus, escalation rate, review latency, incremental cost, canceled work, tool-side-effect prevention, human overrides, and downstream outcomes.
+
+The practical pattern is this: define why multiple routes are needed, specify the decision contract, choose meaningful independence, preserve parent and attempt identity, control fan-out, stage review, classify disagreement, normalize representations, calibrate confidence, reject majority-as-truth thinking, define arbitration, validate structure, review tool plans, keep one side-effect owner, design streaming and deadlines, budget cost, minimize data, isolate comparison evidence, detect correlated failure, use deterministic checks, define escalation, test adversarial cases, and measure outcomes. Agreement is useful evidence, not proof. A trustworthy gateway knows when independent models reinforce a decision, when they merely repeat one another, and when disagreement is the signal that should stop automation.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
