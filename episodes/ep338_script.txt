@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tokenizer governance at the AI API gateway: how to keep admission, context limits, truncation, caching, routing, and billing aligned when tokenizers, chat templates, tools, and multimodal accounting change.
+
+Tokens are not a universal unit. The same text can produce different counts across model families, tokenizer revisions, Unicode handling, chat templates, and provider wrappers. A gateway that counts with the wrong assumptions can accept requests that fail, reject requests that fit, or explain charges incorrectly.
+
+Start by naming the counting contract. Record model identity, tokenizer family and revision, chat template revision, provider adapter version, counting method, and observation time. “Estimated tokens” without those dimensions cannot be reproduced later.
+
+Separate raw text tokens from effective request tokens. System and role markers, message separators, tool definitions, JSON schemas, images, audio, files, reasoning controls, and provider metadata can add hidden or model-specific units. Admission must consider the effective provider request, not just visible prompt text.
+
+Pin tokenizer assets. Vocabulary files, merge rules, special-token maps, normalization behavior, and template code should be immutable and checksum-verified. A library update must not silently change production counts under the same revision label.
+
+Version chat templates independently. A tokenizer can stay constant while message framing changes. System prompts, role tokens, tool-call wrappers, and generation markers alter context use and sometimes behavior. Store the exact template revision used for each estimate.
+
+Count after semantic assembly. Prompt fragments, retrieval, tool results, and policies should be selected and assembled before final counting. Early estimates are useful for admission planning, but the gateway needs a final bounded check before provider dispatch.
+
+Preserve message boundaries. Flattening messages into one string can produce a different count and different semantics from the provider’s chat template. Count the structured representation using the same adapter rules that will construct the request.
+
+Handle tools explicitly. Tool names, descriptions, schemas, strictness flags, and allowed choices may consume substantial context. Include tool registry version and rendered schema in the count. A cached estimate must be invalidated when a description or schema changes.
+
+Treat multimodal units separately. Providers may meter images by tiles, resolution, detail level, duration, frames, or proprietary units rather than text tokens. Record each media input, transformation, provider rule, and estimated units. Do not convert everything into fake text tokens unless the contract clearly defines the conversion.
+
+Reserve output space. Input that fits exactly into a context window can still leave no room for the requested result. Reserve requested output tokens, tool-call continuation, safety margin, and provider overhead. Make the policy visible when the gateway reduces or rejects an output limit.
+
+Use conservative bounds for unknown models. When tokenizer or template details are unavailable, select a documented upper-bound estimator, apply a safety margin, and mark confidence. Do not pretend a character division heuristic is exact enough for hard admission near the limit.
+
+Calibrate with provider usage. Compare estimated input, output, cached, reasoning, media, and total units against provider-reported usage. Preserve attempt, model, route, and revision. Calibration should update future confidence and policy, not rewrite the estimate attached to a completed request.
+
+Distinguish provider reports from reconciled usage. Providers can omit fields, report asynchronously, round values, or change semantics. Keep estimated, provider-reported, gateway-measured, and billed quantities separate until reconciliation determines the authoritative charge.
+
+Bind counts to canonical request identity. Two transport encodings of the same semantic request should share a count, while changes to model, messages, tools, artifacts, template, or policy should create a new identity. Cache count results only with every relevant revision in the key.
+
+Coordinate routing. A request may fit one model but not another because context windows and tokenizers differ. Count or bound against each eligible route before selection. A fallback must repeat the check rather than assuming the primary model’s count applies.
+
+Define truncation by source and priority. If a request exceeds the budget, reduce optional examples, low-ranked retrieval, old conversation history, or verbose tool output under explicit policy. Never truncate byte sequences, JSON structures, protected instructions, or artifact references blindly.
+
+Record truncation evidence. Preserve which fragments were removed, summarized, or transformed, the before and after counts, tokenizer revision, and reason. A shortened request is a different effective input and needs a distinct cache and audit identity.
+
+Handle streaming output estimates. The final output count may be unknown until completion, and provider usage can arrive only in the final event. Track reserved, emitted, provider-reported, accepted, and delivered units separately. A client disconnect does not prove generation stopped.
+
+Protect counting services. Bound input size, nesting, schema complexity, and tokenizer CPU. Cache immutable tool and template components. A hostile request should not consume excessive memory merely to learn that it is too large.
+
+Roll out tokenizer changes safely. Compare old and new revisions on representative traffic, measure count deltas and admission changes, stage workers, and retain rollback. During migration, ensure a request is counted and executed under compatible revisions rather than mixing old admission with new rendering.
+
+Return precise errors. Distinguish unsupported tokenizer, unknown template, estimation unavailable, input limit exceeded, output reservation conflict, media limit exceeded, tool schema too large, and count changed after assembly. Include safe remediation without exposing hidden system prompts or provider internals.
+
+Test difficult inputs. Cover mixed scripts, emoji, combining characters, whitespace, code, very long identifiers, malformed Unicode, special-token text, nested tool schemas, empty messages, multimodal mixtures, template changes, fallback models, truncated retrieval, provider usage gaps, and concurrent tokenizer rollout.
+
+Measure governance quality. Track estimation error by model and revision, hard-limit provider rejects, false gateway rejects, safety-margin use, count-cache hit rate, template drift, unknown-model traffic, tool overhead, media-unit variance, truncation frequency, reconciliation gaps, and tokenizer rollout deltas.
+
+The practical pattern is this: name the counting contract, separate visible and effective units, pin tokenizer assets, version templates, count after assembly, preserve structure, include tools and media, reserve output, bound unknown models, calibrate without rewriting history, separate usage sources, bind caches to revisions, recount fallbacks, govern truncation, track streams, protect counting resources, roll out changes safely, return typed errors, test difficult inputs, and measure drift. Token counting is reliable when every estimate states exactly which model, tokenizer, template, and assumptions produced it.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
