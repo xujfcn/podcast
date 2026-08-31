@@ -1,0 +1,57 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about model behavior drift at the AI API gateway: how to detect when a route changes its answers, refusals, tool calls, structure, latency, or cost even though the endpoint and model name look unchanged.
+
+Model behavior can change without a version string changing. A provider may update weights, safety policy, tokenizer, system defaults, serving stack, or capacity. A gateway may change prompts, adapters, routing, retries, or context assembly. The result is a production contract that moves beneath the client.
+
+Start with a behavior contract. Define the properties that matter for each route: schema validity, factual checks, refusal categories, tool selection, citation shape, language, latency, token use, cost, and escalation behavior. Do not reduce behavior to one quality score.
+
+Record the route identity. Capture provider, model, deployment, region, adapter, prompt revision, policy revision, decoding parameters, tokenizer, tool catalog, and capability assumptions. A model name alone cannot explain a behavior change.
+
+Build representative probes. Use production-shaped requests with secrets removed, boundary cases, multilingual inputs, long context, structured output, tool requests, refusals, and multimodal samples. Keep a stable baseline set and rotate a separate exploratory set so the model cannot optimize for one frozen test.
+
+Compare distributions, not anecdotes. Track response length, latency, finish reasons, refusal rates, tool-call frequency, schema errors, citation patterns, token counts, and cost. One surprising answer deserves investigation, but a reliable drift signal usually comes from a distribution shift.
+
+Preserve semantic labels. Human or automated labels should describe correctness, safety, usefulness, policy outcome, and tool suitability separately. A route can become safer while becoming less useful, or cheaper while producing more invalid structured output.
+
+Control sampling. Temperature, top-p, seeds, parallel calls, provider defaults, and load conditions affect observations. Use controlled settings for comparison and production-weighted settings for impact estimation. Record every parameter used by a probe.
+
+Use shadow evaluation carefully. Send token-minimized or synthetic copies to a candidate route without exposing production side effects. Never allow shadow traffic to send emails, modify records, spend money, or call unapproved tools.
+
+Detect prompt and context drift. Changes in system instructions, developer messages, retrieved documents, tool descriptions, truncation, compaction, and ordering can look like model drift. Hash and compare assembled context metadata without retaining sensitive content unnecessarily.
+
+Separate provider change from gateway change. Compare the same request through a controlled adapter, inspect provider release notes and facts, and review gateway configuration. Attribution should remain uncertain until evidence supports it.
+
+Measure safety behavior. Track refusal and allowance changes by policy category, false-positive and false-negative rates, escalation frequency, and output redaction. A route that suddenly complies with requests it previously blocked needs immediate review.
+
+Measure tool behavior. Watch tool selection, argument validity, call ordering, retries, cancellation, destination choice, and side effects. A small change in tool-call frequency can create a large operational or financial impact.
+
+Measure structured output. Track parse failures, missing fields, extra fields, enum violations, type changes, and schema repair frequency. Validate before comparing business metrics so malformed output is not counted as a successful result.
+
+Measure cost and latency. Tokenizer changes, hidden reasoning, longer responses, retries, and provider pricing can move spend even when request volume is flat. Track p50, p95, p99, input and output tokens, attempts, queue time, and provider charges.
+
+Set thresholds by route. A chat route may tolerate stylistic variation, while a payment tool, extraction pipeline, or compliance classifier may require strict limits. Use absolute thresholds for safety and schema failures, and statistical thresholds for softer quality signals.
+
+Require evidence windows. Do not page on one random response. Define minimum sample size, comparison period, confidence, segmentation, and persistence. Conversely, do not hide a severe safety or side-effect change behind a large sample requirement.
+
+Segment drift. Analyze by tenant class, language, region, context length, model capability, tool use, and traffic source. Aggregate metrics can conceal a failure affecting only a critical customer segment.
+
+Gate promotion and routing. A candidate route should pass behavior checks before receiving production traffic. During rollout, use staged percentages, holdbacks, automatic pause, and rollback criteria. Route health includes semantics, not just HTTP success.
+
+Preserve client contracts. When behavior changes, decide whether to pin a route, update a compatibility layer, revise documentation, notify clients, or migrate them. Do not silently reinterpret a stable model alias when the output contract has materially changed.
+
+Handle known provider updates. Subscribe to trustworthy change signals, but verify them with probes. Provider announcements may be incomplete, delayed, or broad. External facts should inform investigation, not replace runtime evidence.
+
+Control feedback loops. Production corrections, user ratings, support labels, and evaluator judgments can be biased by traffic mix or recent incidents. Version datasets, labels, prompts, and scoring logic. Avoid changing the baseline every time a route fails it.
+
+Protect evaluation data. Restrict access, remove secrets, honor purpose and retention policy, and prevent benchmark prompts from becoming training or provider data without approval. Evaluation artifacts are sensitive operational data.
+
+Explain uncertainty. Report whether drift is detected, suspected, or unconfirmed; which dimensions moved; affected segments; confidence; likely causes; and current mitigation. Avoid claiming a model update caused a shift when routing or context also changed.
+
+Audit decisions. Record probe identity, route metadata, baseline revision, metrics, threshold, evidence window, reviewer, promotion decision, mitigation, and rollback. Keep enough information to reproduce the analysis without retaining raw customer content.
+
+Test recovery. Replay representative requests against the previous route, candidate route, and fallback. Verify prompt assembly, tools, schemas, billing, streaming, cache behavior, and client-visible errors. Rollback is incomplete if cached decisions or long-lived jobs still use the drifted route.
+
+Measure drift operations. Track detection latency, affected requests, false alarms, missed changes, time to pause, rollback time, route pinning, schema failures, safety regressions, tool anomalies, cost movement, and client incidents.
+
+The practical pattern is this: define behavior contracts, record complete route identity, build representative probes, compare distributions, label dimensions separately, control sampling, shadow safely, detect context changes, separate provider and gateway causes, monitor safety and tools, validate schemas, measure cost and latency, set risk-based thresholds, require evidence windows, segment results, gate rollout, preserve client contracts, verify provider updates, control feedback, protect evaluation data, explain uncertainty, audit decisions, test recovery, and measure operations. A model route is stable only when its important behavior remains within an explicit, measured contract.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
