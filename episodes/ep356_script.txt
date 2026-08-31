@@ -1,0 +1,55 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about delegated authority at the AI API gateway: how user permissions should move through agents, sub-agents, tools, and background jobs without becoming broader, longer, or harder to revoke.
+
+An agent often acts on behalf of someone else. It may call another agent, invoke a tool, schedule work, or request a provider credential. Every hop creates a delegation question: what authority was granted, by whom, for which purpose, and can the next component pass it onward?
+
+Start with the authority source. Identify the user, service, tenant administrator, policy, or workflow that approved the action. A model’s decision is not itself an authorization source. The gateway should preserve the original principal and distinguish it from every actor operating on that principal’s behalf.
+
+Represent authority explicitly. Include tenant, principal, delegate, operation, resources, purpose, data classes, destinations, budget, time window, side-effect limits, delegation depth, and policy revision. Avoid vague grants such as “use all tools” when the task needs one operation on one resource.
+
+Require attenuation. A delegated grant may be equal to or narrower than its parent, never broader. A sub-agent cannot add a tool, tenant, destination, data class, budget, or lifetime that the parent did not possess. Enforce this mechanically rather than relying on prompt instructions.
+
+Bind delegation to purpose. Permission to read a document for summarization does not imply permission to train on it, email it, store it indefinitely, or share it with another provider. Carry purpose through prompts, queues, tool calls, and audit records.
+
+Limit delegation depth. Long chains are difficult to inspect and revoke. Set a maximum depth by risk and require explicit approval before crossing it. Record the full chain or a verifiable compact representation so downstream services can evaluate where authority originated.
+
+Use short-lived capability grants. Issue scoped, audience-bound, operation-specific credentials rather than passing the user’s API key through the chain. Bind each grant to the intended delegate and endpoint, and require renewal to recheck current policy and revocation state.
+
+Protect against confused deputies. A tool or sub-agent may hold powerful credentials but receive instructions from a less privileged caller. Validate the caller, requested operation, resource owner, purpose, and parent grant before acting. Possession of an invocation path must not imply access to every capability behind it.
+
+Separate planning from execution. An agent may propose actions without holding permission to perform them. The gateway can authorize each concrete tool call or side effect after arguments are known. This reduces the risk of granting broad authority to an uncertain plan.
+
+Control tool schemas. Declare which arguments may contain delegated resources, tokens, destinations, or user data. Validate them against the grant before execution. A model-generated URL, account ID, or recipient must not silently redirect authority to a new scope.
+
+Handle data access and action authority separately. Reading a customer record, generating a recommendation, charging a card, and sending a message are different grants. Do not let access to information imply permission to act on it.
+
+Bind budgets. Carry limits for tokens, provider spend, tool calls, external transactions, storage, and execution time. Child operations consume from the parent budget rather than receiving a fresh allowance. Prevent parallel sub-agents from each spending the full original budget.
+
+Control concurrency. Delegated tasks may fan out. Track outstanding grants, aggregate resource use, and side effects across the tree. Enforce limits atomically where duplication would be harmful, and use idempotency for retryable actions.
+
+Make approval points explicit. High-impact actions may require the principal or an authorized reviewer to approve the exact operation, arguments, recipient, cost, and expiry. Approval of a plan should not become blanket approval for materially different execution.
+
+Handle asynchronous jobs. A scheduled or queued task must carry the original principal, delegation chain, grant version, purpose, budget, and expiry. Revalidate before execution and external side effects. Do not treat queue possession as continuing authorization.
+
+Expire and revoke descendants. Revoking a parent grant should invalidate its children, leases, queued jobs, cached decisions, and pending tool actions. Maintain lineage and revocation epochs so the gateway can stop a complete delegation tree without searching manually.
+
+Protect tenant boundaries. A delegate operating for multiple tenants must keep identities, grants, caches, memory, tools, and artifacts separated. Never infer tenant from a model-generated argument when the authenticated grant already defines it.
+
+Control impersonation. Downstream systems should know whether a request is from the user, an agent acting for the user, or a service acting for the agent. Preserve actor and subject separately. Do not rewrite the delegate as the original user in audit records.
+
+Support policy intersections. Effective authority is the intersection of the parent grant, delegate policy, tenant policy, resource policy, tool policy, destination policy, and current revocation state. A permissive child policy cannot override a restrictive parent.
+
+Handle model and provider changes. A route change may introduce a provider that is not approved for the delegated data or purpose. Re-evaluate provider, region, capability, and retention requirements at dispatch time rather than assuming the original planning route still applies.
+
+Minimize context sharing. A sub-agent should receive only the task context and data required for its grant. Do not forward the entire conversation, memory, credential set, or tool catalog by default. Delegating authority does not require delegating all information.
+
+Return bounded results. Validate that child outputs contain only authorized data and references. A sub-agent may accidentally include secrets, unrelated tenant context, or instructions that cause the parent to exceed its grant. Treat returned content as untrusted input.
+
+Audit the chain. Record principal, actor, parent grant, child grant, attenuation result, purpose, resources, tool, provider, budget consumption, approvals, side effects, expiry, revocation, and final outcome. Avoid storing sensitive payloads merely to prove delegation.
+
+Test escalation attempts. Cover child grants with broader scopes, longer lifetimes, larger budgets, different tenants, new destinations, extra tools, forged parent IDs, replayed approvals, parallel overspend, stale queues, revoked parents, confused deputies, provider failover, and context leakage.
+
+Measure delegation health. Track chain depth, denied escalations, grant issuance latency, expired jobs, revoked descendants, approval frequency, budget overruns prevented, orphaned grants, cross-tenant attempts, tools invoked outside scope, and side effects lacking a complete authority chain.
+
+The practical pattern is this: preserve the original principal, represent authority explicitly, require attenuation, bind purpose, limit depth, issue short-lived audience-bound grants, prevent confused deputies, separate planning from execution, validate tool arguments, split data access from action authority, share parent budgets, control fan-out, approve exact side effects, revalidate asynchronous jobs, revoke descendants, isolate tenants, distinguish actor from subject, intersect every policy, recheck routes, minimize context, validate child results, audit the chain, test escalation, and measure orphaned authority. Agentic systems are governable when every action can answer who authorized it, how that authority narrowed at each hop, and when it stops.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
