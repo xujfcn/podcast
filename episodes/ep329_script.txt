@@ -1,0 +1,53 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about multimodal artifact lifecycles at the AI API gateway: how to manage images, audio, video, and files from upload through provider delivery, result retrieval, retention, and deletion without leaving sensitive assets scattered or unusable links behind.
+
+Multimodal requests have a longer and more complicated life than a JSON request. A file may be uploaded in chunks, scanned, transformed, copied to a provider, referenced by a model, returned in a result, cached, downloaded by a client, and later deleted. Each step creates authority, storage, cost, and privacy questions.
+
+Start by assigning an artifact identity. Record tenant, request, operation, media type, content hash, size, creation time, policy generation, region, and lifecycle state. A stable identity lets retries deduplicate uploads and lets cleanup find every provider copy without relying on a temporary URL.
+
+Separate logical content from physical copies. One image may exist in gateway storage, a scan quarantine, a resized derivative, a provider upload, a cache, and a client download. Track the relationship and owner of each copy. Deleting one URL does not prove that every copy is gone.
+
+Make upload resumable and bounded. Use authenticated upload sessions, chunk limits, total size limits, expiry, and checksum verification. A reconnect should resume the same artifact, not create an uncontrolled set of partial files. Delete abandoned sessions after a bounded period.
+
+Validate metadata and content. Check declared media type against detected type, dimensions, duration, codecs, archive structure, and decompression limits. Treat filenames, embedded metadata, subtitles, and document fields as untrusted input. Do not let a file extension decide which provider or parser receives the asset.
+
+Scan before trust. Malware scanning, content safety checks, policy classification, and sensitive-data detection may be required before provider delivery. Keep untrusted assets in an isolated store and state exactly which checks passed, with model and rule versions. A scan result should expire when the content changes.
+
+Use content hashes carefully. Hashes help deduplicate and verify integrity, but a hash can become sensitive metadata when it reveals that a known private file exists. Scope lookup by tenant and authorization, avoid global existence oracles, and use separate hashes for raw content, transformed derivatives, and provider payloads.
+
+Bind access to tenant and operation. A signed URL should include audience, artifact, permitted method, byte range if applicable, region, issue time, expiry, and policy scope. Never treat possession of a URL as permanent ownership. Revoke or disable access when a tenant, request, or policy is suspended.
+
+Keep URLs short-lived and observable. Track issuance, use, expiry, range requests, failures, and revocation without logging the full secret-bearing URL. Make expired links return a clear state and provide a safe refresh path for authorized clients. Do not put sensitive prompts or credentials into query parameters.
+
+Control provider handoff. Some providers require uploads, some accept URLs, and some retain files after inference. Record provider artifact ID, endpoint, region, retention policy, upload time, and deletion capability. If the provider cannot guarantee deletion, route only data allowed by policy and disclose the limitation internally.
+
+Minimize transformations. Resize, transcode, extract pages, normalize audio, or create thumbnails only when needed. Each derivative needs its own content hash, security scan status, policy, and retention. A thumbnail can still leak sensitive information even when the original is deleted.
+
+Keep media separate from response caching. A cached model response may reference an artifact whose access policy has changed. Cache keys must include artifact identity, content version, tenant scope, tool and model policy, and output permissions. Never let a public cache serve a private media URL.
+
+Handle streaming media. Upload and download streams need backpressure, cancellation, idle and total deadlines, and partial-transfer cleanup. A cancelled client should not leave a provider upload running forever. Resume requests must verify the same artifact identity and offset checksum.
+
+Make deletion a workflow. Mark the logical artifact deleted, revoke new access, stop pending transfers, delete gateway copies, request provider deletion, remove derivatives and caches, and record completion or uncertainty. Deletion should be idempotent and observable. A failed provider deletion is not the same as a completed deletion.
+
+Define retention by purpose. Raw uploads, scan copies, provider assets, transformed derivatives, outputs, logs, billing records, and audit hashes may each have different retention rules. Keep the minimum data needed for the stated purpose and avoid extending raw-file retention merely because an audit record must remain.
+
+Handle legal and policy holds. A hold may suspend deletion for a defined scope while still revoking ordinary access. Record who placed it, why, what data it covers, and when it expires. A hold must not silently turn every related tenant file into permanent storage.
+
+Protect cross-region movement. Artifact region, residency, provider region, transfer authority, and encryption context must travel with the operation. A failover should copy only what policy allows and should create a new physical-copy record. Do not assume that a signed URL from one region is valid in another.
+
+Encrypt and isolate storage. Use tenant-aware encryption context, separate access roles for raw and derived assets, private buckets, and network controls. Keys should rotate without making lifecycle records impossible to reconcile. Support operators need metadata and status, not unrestricted file content.
+
+Connect artifacts to billing. Record upload, storage, scanning, transformation, provider transfer, inference, egress, and deletion work separately. A retry should not charge a second upload when the first copy was reused. Usage records should reference artifact and operation IDs without exposing file contents.
+
+Make outputs safe. Generated images, audio, video, and documents need provenance, content checks, access scope, expiration, and deletion behavior too. Do not assume model output is less sensitive than user input. A public result URL should be an explicit policy decision, not a default.
+
+Design provider failures. If a provider upload succeeds but the model request fails, preserve the provider artifact record for cleanup or safe reuse. If the upload result is unknown, reconcile before retrying. A new upload with a new ID can create duplicate storage and duplicate charges.
+
+Audit lifecycle transitions. Record actor, tenant, artifact ID, copy ID, state transition, policy generation, region, provider, hash version, and reason. Redact filenames, metadata, and payloads when sensitive. An audit trail should prove what happened without becoming a shadow media archive.
+
+Test lifecycle races. Cover interrupted multipart upload, duplicate chunks, checksum mismatch, scan result expiry, provider upload timeout, unknown upload result, URL replay, policy revocation, region failover, cache hit after deletion, derivative leakage, provider deletion failure, legal hold, key rotation, client cancellation, concurrent deletion, and cleanup worker takeover. Assert that no stale path restores access to deleted or unauthorized content.
+
+Measure artifact correctness. Track orphaned copies, partial uploads, scan latency, provider retention mismatch, expired URL use, deletion backlog, unknown deletion outcomes, cache leakage, duplicate transfer, storage by tenant, egress, derivative count, policy violations, and time from logical deletion to physical cleanup. Lifecycle reliability is measured across every copy, not just the gateway record.
+
+The practical pattern is this: assign identity, track physical copies, bound uploads, validate content, scan before trust, scope hashes, bind access, expire URLs, record provider handoff, minimize transformations, isolate caches, control streams, make deletion a workflow, define purpose-based retention, handle holds, protect regions and encryption, separate billing, secure outputs, reconcile failures, audit transitions, test races, and measure cleanup. Multimodal support is reliable when every byte has an owner, a policy, a lifecycle state, and a known path to deletion.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
