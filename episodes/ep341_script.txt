@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about multimodal content negotiation at the AI API gateway: how clients, gateways, models, and providers agree on text, images, audio, video, streaming formats, resolution, encoding, quality, and fallback behavior.
+
+Multimodal support is not a yes-or-no feature. A model may accept images but only certain MIME types, dimensions, detail levels, or counts. A provider may return audio in one codec, a gateway may transcode it, and a client may support only a subset. Without explicit negotiation, “supported” can mean almost anything.
+
+Start with a typed media preference. Define modality, direction, MIME type, codec, container, sample rate, channels, frame rate, dimensions, detail, language, quality target, maximum size, latency target, and whether conversion is allowed. Keep preferences separate from hard requirements.
+
+Use a clear precedence order. Client requirements constrain the result, gateway policy limits what may be accepted, model capabilities limit what can be produced, and provider capabilities determine the actual route. A convenience default must never override a declared hard requirement.
+
+Normalize media metadata early. Parse MIME types, extensions, codecs, profiles, dimensions, duration, and byte size using trusted libraries. Do not rely on filenames or user-provided content types. Verify that declared metadata matches the bytes before routing or billing.
+
+Separate input and output negotiation. The model may accept a PNG image but return a JPEG, consume audio at one sample rate but synthesize another, or accept video while producing only text. Treat each direction and each artifact independently, with its own constraints and lifecycle.
+
+Match the full capability tuple. Modality alone is insufficient. Record model, provider, region, endpoint, input limits, output formats, codec support, quality modes, streaming support, and conversion rules. A route is eligible only when it satisfies the complete requested tuple.
+
+Make conversions explicit. Resizing, re-encoding, transcoding, frame sampling, audio normalization, language conversion, and thumbnail generation change bytes, quality, latency, and sometimes semantics. Record converter, version, input and output digests, policy, and cost.
+
+Protect quality requirements. A client asking for lossless audio, a minimum image resolution, or a frame rate should receive that guarantee or an explicit failure. Do not silently downgrade quality because a provider route is cheaper or easier.
+
+Bound resource use. Apply limits for bytes, pixels, dimensions, duration, frames, channels, sample rate, decode memory, and processing time before expensive conversion. A tiny compressed file can expand into a huge image or audio buffer.
+
+Handle ambiguous formats safely. Reject unknown codecs, malformed containers, conflicting metadata, unsupported profiles, and polyglot files. Do not pass an unverified media object to a provider merely because its extension looks familiar.
+
+Negotiate streaming separately. Decide whether the client wants chunked audio, server-sent events, partial JSON, progressive images, or complete files. Define chunk format, sequence, timestamps, final marker, buffering, reconnection, and incomplete-result semantics. A stream that starts successfully may still fail the output contract.
+
+Keep text and media boundaries clear. Captions, transcripts, OCR, embeddings, thumbnails, and generated media can be related artifacts but are not interchangeable. Record source artifact, derived artifact, language, confidence, and transformation chain.
+
+Account for provider-specific wrappers. One provider may expect a data URL, another a file reference, and another multipart upload. Adapters should translate transport details without changing the negotiated semantic contract. Never expose provider-specific quirks as accidental client guarantees.
+
+Choose deterministic fallback rules. If the preferred codec is unavailable, the gateway may select a declared alternative, perform an approved conversion, or fail. The decision should be stable, visible, and bounded by client preference order, policy, region, latency, and cost.
+
+Do not confuse availability with suitability. A provider endpoint can be healthy while unable to satisfy the requested modality, duration, resolution, or quality. Route readiness must include content constraints and recent validation evidence.
+
+Price the negotiated result. Media units, image pixels, audio seconds, video frames, storage, egress, transcoding CPU, and provider processing can all affect cost. Estimate before admission, record actuals after completion, and show when a conversion or higher quality mode changed the price.
+
+Bind caching to representation. The same semantic answer encoded as WAV, MP3, AAC, or Opus is not the same cache object. Include input digest, modality, format, codec, quality, dimensions, language, converter version, model, provider, and policy in the cache identity.
+
+Handle content disposition securely. Inline display, download, temporary URL, and attachment each have different risks. Set safe filenames, content types, expiry, access scope, and download policy. Never allow media metadata or filenames to inject headers or scripts into a client.
+
+Preserve tenant and region rules. Media may contain sensitive visual or voice information and may be subject to residency restrictions. Negotiation must not select a convenient provider or conversion region that violates policy. Bind artifacts and derived outputs to the approved region and tenant scope.
+
+Coordinate client evolution. Advertise supported formats and limits through a versioned endpoint or contract. Clients should send a preference list and understand the gateway’s selected representation, conversion status, and quality outcome. New formats should be additive before old formats are removed.
+
+Validate generated media. Check container integrity, codec, dimensions, duration, sample rate, channel count, file size, malware policy, and semantic requirements before delivery. A provider success response is not proof that the artifact is usable.
+
+Test negotiation boundaries. Cover unsupported modality, conflicting preferences, missing metadata, mismatched bytes, malformed containers, decompression bombs, oversized media, quality downgrade, provider divergence, conversion failure, stream truncation, fallback, cache collision, cross-region routing, client version skew, and cost changes.
+
+Measure negotiation quality. Track rejected formats, conversion rate, conversion latency, quality downgrade, provider capability mismatch, malformed media, stream incompleteness, cache misses by representation, client fallback frequency, media cost variance, region violations, and delivery failures by modality.
+
+The practical pattern is this: define typed preferences, separate requirements from defaults, establish precedence, verify metadata, negotiate input and output independently, match complete capability tuples, record conversions, protect quality, bound resources, reject ambiguous formats, design streaming separately, preserve artifact relationships, isolate provider wrappers, make fallback deterministic, price the actual representation, key caches correctly, secure content disposition, enforce region and tenant scope, version client contracts, validate generated media, test boundaries, and measure outcomes. Multimodal APIs are reliable when every participant knows exactly what representation was requested, what was selected, what changed, and what guarantee remains.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
