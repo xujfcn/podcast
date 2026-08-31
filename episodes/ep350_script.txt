@@ -1,0 +1,49 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about egress control at the AI API gateway: how to ensure model requests, tool calls, callbacks, uploads, and telemetry can reach only approved destinations with the right tenant, purpose, region, and data handling rules.
+
+An AI gateway can have excellent authentication and still leak data through its network paths. A provider endpoint may redirect. A tool may accept an arbitrary URL. A model-generated callback may reach an attacker-controlled host. A debug export may use a destination that was never reviewed.
+
+Start with a destination inventory. Record provider endpoints, tool services, object storage, callback receivers, observability systems, update services, and administrative APIs. Each destination needs an owner, purpose, region, data classes, ports, protocols, certificate expectations, and approval status.
+
+Use explicit allowlists. Match destinations by stable identity such as provider account, service identity, authenticated endpoint, or approved certificate, not only a mutable hostname or IP address. Avoid broad wildcards and unrestricted “internet access” for workloads that process customer data.
+
+Separate route and tenant scope. A destination approved for one tenant or data class may be forbidden for another. Bind egress decisions to tenant, purpose, classification, policy snapshot, provider, model, tool, and region. Do not let a shared worker inherit the broadest destination permissions.
+
+Control DNS carefully. Resolve names through trusted resolvers, validate answers, prevent rebinding, and re-check destinations after resolution. Block private, loopback, link-local, metadata, and reserved ranges where they are not explicitly required. DNS is part of the authorization path, not merely a connectivity detail.
+
+Handle redirects and proxies. A permitted URL may redirect to an unapproved host or pass through a proxy with different data handling. Re-evaluate every hop, constrain redirect count, preserve purpose and tenant context, and record the final destination. Do not assume an approved first URL approves the entire chain.
+
+Validate URLs and requests. Normalize schemes, ports, encoded paths, Unicode hostnames, credentials, fragments, and IPv4 or IPv6 forms. Reject ambiguous or dangerous representations. Prevent user and model-controlled strings from bypassing destination policy through parser differences.
+
+Restrict protocols. Allow only the methods, ports, MIME types, upload sizes, and TLS versions needed for each integration. Block arbitrary file, gopher-like, local, or administrative protocols. Tool access should expose a narrow operation, not a general network primitive.
+
+Bind egress to purpose. Inference, tool execution, billing, abuse detection, evaluation, debugging, and telemetry have different approved destinations. A provider approved for inference is not automatically approved for logs or training data. Purpose metadata must survive queues, retries, and adapters.
+
+Respect data classification. A public request may use more destinations than confidential or regulated input. Apply encryption, residency, retention, redaction, and provider terms before opening a connection. Never lower classification because a destination is convenient.
+
+Control uploads and downloads. Inspect content type, size, archive expansion, redirects, and storage location. Use short-lived scoped URLs, bind artifact identity to tenant and purpose, and prevent a download service from fetching arbitrary internal resources. Treat extracted metadata and thumbnails as data too.
+
+Make tools destination-aware. Each tool should declare its external hosts, methods, data fields, side effects, and response classes. Validate arguments before execution and validate tool results before forwarding them. A tool result that contains a new URL must not automatically authorize a second outbound request.
+
+Protect callbacks and webhooks. Verify receiver identity, signing keys, tenant scope, event purpose, and replay protection. Avoid placing sensitive prompts or outputs in URLs. Callback retries must use the original approved destination and current policy, not whatever endpoint is present in stale job state.
+
+Control provider failover. A backup provider or region may have different terms, capabilities, and destination identities. Compute eligibility before failover and record the decision. Network reachability alone is not evidence that a fallback is approved.
+
+Isolate tenants and workers. Use separate credentials, network identities, namespaces, queues, and policy contexts where risk warrants. A compromised tool or provider adapter should not gain the egress permissions of every customer or integration.
+
+Protect credentials on the network path. Keep provider keys out of URLs and model-visible content. Inject credentials only for the approved destination and operation. Prevent redirects, logs, error bodies, and third-party proxies from receiving authorization headers intended for another service.
+
+Observe without leaking. Record destination identity, policy result, tenant scope, purpose, region, bytes, status, latency, redirects, and rejection reason. Do not log full URLs with secrets, request bodies, or sensitive query parameters. Egress telemetry should explain decisions without becoming a second exfiltration channel.
+
+Use rate and volume limits. Per-destination, tenant, tool, artifact, and purpose budgets reduce abuse and unexpected egress bills. Limit connection count, upload bytes, download bytes, redirect depth, and retry volume. Capacity controls should not be confused with authorization, so enforce both.
+
+Handle emergency changes. A provider outage, certificate incident, or compromised destination may require rapid quarantine. Define who can block or add a destination, maximum emergency duration, compensating controls, and post-incident review. Emergency allowlisting should be narrower and more visible than normal changes.
+
+Version policy and identity. Destination ownership, certificates, provider accounts, regions, and terms change. Store the policy revision and evidence used for each connection decision. Revalidate long-lived jobs, cached URLs, and scheduled exports when destination policy changes.
+
+Test bypasses. Cover DNS rebinding, encoded hosts, IPv6 forms, redirect chains, proxy changes, private ranges, metadata endpoints, malformed URLs, archive bombs, oversized downloads, tool-generated URLs, callback replay, stale jobs, failover, tenant confusion, certificate rotation, policy expiry, and worker compromise.
+
+Measure egress health. Track denied connections, unknown destinations, policy conflicts, redirect blocks, private-range attempts, bytes by tenant and purpose, emergency changes, stale credentials, tool violations, provider failover mismatches, certificate failures, and incidents involving outbound data.
+
+The practical pattern is this: inventory destinations, allowlist stable identities, scope by tenant and route, secure DNS, recheck redirects and proxies, normalize requests, restrict protocols, bind purpose and classification, govern files and tools, protect callbacks, evaluate failover, isolate workers, inject credentials narrowly, observe safely, enforce volume limits, control emergencies, version policy, test bypasses, and measure every rejection. Egress is governed when the gateway can explain not only who made a request, but exactly where each byte was allowed to go and why.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
