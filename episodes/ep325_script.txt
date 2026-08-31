@@ -1,0 +1,49 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool execution boundaries at the AI API gateway: how to separate model reasoning from external side effects so retries, streaming reconnects, failover, and human approval do not accidentally send two emails, charge twice, or write conflicting data.
+
+A model response is usually replayable. A tool call may not be. Generating a proposed calendar event is different from creating it, and producing a payment instruction is different from submitting it. If the gateway treats both as ordinary tokens, transport recovery can turn a temporary failure into a real-world duplicate action.
+
+Start by classifying tools. Pure tools read or calculate without changing external state. Effectful tools create, update, delete, send, purchase, publish, or trigger workflows. Some tools are conditionally effectful depending on arguments. Store this classification with the tool contract and enforce it at runtime.
+
+Separate planning, preview, approval, and commit. Let the model propose an action, validate arguments, show a dry-run or diff, obtain required approval, and only then submit the side effect. A successful plan is not a successful commit. The client-visible state must say which phase completed.
+
+Give every effect an execution identity. Use tenant, conversation, request, tool, operation, and idempotency key in a durable record. Retries and reconnects with the same logical operation should query or resume that record. A new operation should require a new identity and new authorization.
+
+Make idempotency provider-aware. A gateway key only protects the gateway unless the provider or target system honors the same identity. Pass a safe idempotency key downstream when supported, or use a durable execution ledger and status lookup. Never claim exactly-once behavior when the provider offers only ambiguous outcomes.
+
+Define the commit point. Before the commit point, cancellation may safely discard a plan. After it, cancellation may only stop result delivery while the external action continues. Record the precise event that means the provider accepted the side effect, not merely that a connection was opened or a request was sent.
+
+Handle unknown outcomes conservatively. A timeout or connection reset after submission can mean the effect succeeded. Do not blindly retry a purchase, message, deletion, or deployment. Query provider status, inspect the execution ledger, or require operator resolution. “Unknown” is a valid state and should be visible.
+
+Protect tool credentials and scopes. Resolve credentials at execution time from tenant and policy context. Apply least privilege, resource restrictions, destination allowlists, amount limits, and time bounds. A model-generated argument must not choose a broader credential or bypass a user’s authorization.
+
+Validate arguments twice. Validate schema and policy before approval, then validate again immediately before commit because account state, price, permissions, or destination may have changed. Bind the approved argument hash to the execution record so a later retry cannot silently alter the action.
+
+Keep approval meaningful. Approval should identify the actor, tool, target, material arguments, risk, expiry, and exact action being approved. Changes to amount, recipient, permissions, or destructive scope should invalidate approval. Do not treat a generic “yes” from an old conversation as approval for a new side effect.
+
+Separate read-after-write behavior. After a commit, a follow-up read can verify state, but it must not be confused with the commit itself. If verification fails, report “committed, verification pending” rather than retrying the write. Use provider request IDs and resource versions to confirm the result.
+
+Design for streaming. Tool calls may arrive incrementally in a stream, and reconnects may replay already-delivered deltas. Buffer and assemble arguments under a bounded state machine. Do not execute on a partial or duplicated tool-call fragment. Commit only once the tool call is complete, authorized, and uniquely identified.
+
+Control parallel tools. Parallel read tools may improve latency, but effectful calls need dependency and conflict analysis. Two updates to the same resource should have an explicit order or optimistic concurrency check. A group of actions needs a defined all-or-partial success contract; do not imply atomicity across independent providers.
+
+Use timeouts by phase. Argument validation, approval wait, provider submission, and result verification have different deadlines. A timeout waiting for approval should not submit the action, while a timeout after commit should enter reconciliation. Record the phase and remaining budget in every tool outcome.
+
+Handle retries and failover explicitly. A retry can repeat model reasoning without repeating a committed effect, but a fallback model may propose a different action. Preserve the original execution identity, approved arguments, policy, and commit state. Failover must query the existing operation before allowing a new provider or worker to act.
+
+Apply compensation where possible. Some effects can be reversed, such as creating a draft or reserving inventory; others cannot, such as sending a message or transferring funds. Declare compensation semantics in the tool contract. Compensation is a new authorized effect, not proof that the original action never happened.
+
+Keep side effects out of speculative paths. Caches, shadow evaluations, quality checks, and hedged model requests must not invoke effectful tools automatically. If a speculative path needs tool data, use a safe read or a recorded simulation. The gateway should know which execution paths are allowed to create external state.
+
+Make billing and usage precise. Charge model inference, tool execution, provider fees, and compensation separately. A failed verification does not prove that an external action was free. Link every tool attempt, provider ID, execution state, and settlement event to the logical operation.
+
+Build an audit trail without storing unnecessary secrets. Record tool version, argument hash, policy version, approval, actor, target class, commit event, provider result, and reconciliation state. Redact tokens, passwords, personal data, and full sensitive arguments while retaining enough evidence to explain what happened.
+
+Expose safe client states. Return proposed, awaiting approval, authorized, executing, committed, verification pending, completed, rejected, cancelled before commit, failed before commit, unknown outcome, and compensated. Include the operation ID and next safe action. Do not tell a client that an effect failed when the provider outcome is unknown.
+
+Test failure races. Cover duplicate stream fragments, reconnect after commit, timeout before and after submission, provider 500 with unknown effect, worker takeover, approval expiry, argument mutation, permission revocation, concurrent updates, partial batch success, compensation failure, duplicate webhook, provider status lag, failover, and cancellation races. Assert that no recovery path creates an unapproved second effect.
+
+Measure boundary correctness. Track duplicate effect attempts, unknown outcomes, commit-to-verification delay, approval invalidation, pre-commit cancellation, post-commit cancellation, tool retry rate, compensation rate, argument drift, permission failures, conflict failures, webhook duplicates, and reconciliation backlog. Reliability means external state changes are controlled and explainable.
+
+The practical pattern is this: classify tools, separate planning from commit, assign durable execution identities, use provider-aware idempotency, define the commit point, treat unknown outcomes honestly, enforce least privilege, validate before and after approval, make approvals specific, verify reads separately, assemble streaming calls safely, analyze parallel effects, time each phase, preserve state across retries, declare compensation, block speculative effects, reconcile billing, audit carefully, expose precise states, test races, and measure duplicates. At the AI gateway, the safest tool call is one whose authority, identity, commit state, and recovery path are all explicit.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
