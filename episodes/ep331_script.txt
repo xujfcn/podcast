@@ -1,0 +1,49 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request compression at the AI API gateway: how to reduce JSON, prompt, tool, and multimodal transfer size without changing request meaning, breaking signatures, buffering streams, or exposing the gateway to decompression attacks.
+
+AI requests can be large before the model sees a token. Long conversations, repeated tool schemas, retrieval context, base64 media, and batch inputs create expensive transfers between clients, gateways, proxies, and providers. Compression can reduce bandwidth and latency, but only when every layer agrees on what was encoded and which representation was authorized.
+
+Start by separating transport compression from semantic compaction. Gzip or Brotli changes bytes on the wire and should restore the same payload after decompression. Removing messages, shortening schemas, or summarizing context changes model input and belongs to a different policy. Do not report semantic reduction as lossless compression.
+
+Define supported encodings explicitly. Publish which request content encodings, response encodings, media types, protocol versions, and size limits the gateway accepts. Reject stacked or unknown encodings unless deliberately supported. A permissive decoder creates ambiguity and expands the parser attack surface.
+
+Apply limits to compressed and expanded size. Bound compressed bytes, decompressed bytes, expansion ratio, nesting, object count, string length, and processing time. Stop decompression as soon as a limit is exceeded. Checking only the upload size leaves the gateway open to compression bombs and memory exhaustion.
+
+Stream decompression where possible. Feed bounded output into the parser instead of buffering the entire expanded request. Preserve backpressure and cancellation from the client. A disconnected upload should stop decompression, parsing, scanning, and provider preparation promptly.
+
+Choose the signing representation. A client may sign compressed bytes, canonical decompressed content, or both under a versioned contract. Verify transport integrity before parsing and semantic identity after canonicalization where needed. Do not let an intermediary recompress a signed body without a rule that preserves verification.
+
+Keep content length honest. Distinguish compressed transfer length, expanded payload length, decoded media length, and provider payload size. Enforce each limit at the correct stage. Billing and admission decisions should not mistake a small compressed body for a cheap model request.
+
+Handle JSON predictably. Compression should occur after the client produces valid encoded JSON and before transport. The gateway should decompress, validate encoding, parse strictly, and canonicalize according to its versioned rules. Recompression must not reorder fields or change numbers when byte-level signatures matter.
+
+Avoid base64 when binary transport exists. Base64 expands media before compression and consumes parser memory. Prefer artifact uploads, multipart protocols, or stable signed references for images, audio, video, and files. When base64 is accepted, enforce decoded-size limits and scan the resulting artifact independently.
+
+Treat tool schemas as semantic content. Repeated schemas compress well on the wire, but removing descriptions or deduplicating definitions can alter model behavior. Cache or reference schemas only through a versioned tool registry whose identity and authorization are part of the request contract.
+
+Coordinate with proxies and load balancers. Some intermediaries decompress requests, strip content-encoding headers, enforce limits before or after expansion, or reject compressed uploads entirely. Test the complete route. The gateway must know which representation reached each hop and avoid double decompression.
+
+Adapt to provider support. A provider may accept compressed JSON, only uncompressed bodies, or compressed file uploads under different rules. Decompress and re-encode at the gateway only when the provider payload remains semantically identical. Record provider transfer size separately from client transfer size.
+
+Protect caches and idempotency. Cache keys and operation identities should normally use the canonical semantic request, not the chosen compression level. Two encodings of the same authorized payload should not create duplicate work. Different expanded content must never collide because their compressed metadata looks similar.
+
+Control CPU cost. Compression saves bandwidth but consumes gateway and client CPU. Set minimum payload sizes, choose bounded levels, avoid recompressing already compressed media, and account for concurrent compression work. Under overload, a lower compression level may be safer than spending the request deadline on marginal byte savings.
+
+Use content-aware decisions. Textual JSON, repeated prompts, and tool schemas often compress well. JPEG, MP3, MP4, and many document formats may not. Detect media type and existing encoding rather than compressing every body. Never infer safety or validity from a good compression ratio.
+
+Preserve deadlines. Upload, decompression, parsing, validation, provider re-encoding, and response compression all consume the request budget. Record phase latency and stop when the core operation cannot complete. A timeout during decompression is a gateway input failure, not a provider model timeout.
+
+Handle retries carefully. A client may retry with a different compression level but the same operation identity. Deduplicate based on authorized semantic content and endpoint, while preserving attempt-level transfer metrics. Do not let decompression failures trigger provider retries when no provider request was sent.
+
+Make errors precise. Return typed failures for unsupported encoding, malformed compressed data, checksum mismatch, compressed limit exceeded, expanded limit exceeded, expansion ratio exceeded, decompression timeout, decoded media limit exceeded, and intermediary incompatibility. Each error needs a safe client action.
+
+Keep logs safe. Record encoding, compressed and expanded sizes, ratio, decoder version, phase time, limit decision, and request identity. Do not log raw compressed bodies, expanded prompts, credentials, tool arguments, or media. A compressed payload can contain the same sensitive data as the original.
+
+Connect compression to admission and billing. Admission should consider expanded tokens, media units, tool definitions, provider payload, CPU, and memory, not just network bytes. Network egress and compression CPU may be metered separately from model usage. Explain which dimensions affected cost and rejection.
+
+Test adversarial cases. Cover truncated streams, checksum failure, nested encodings, expansion bombs, misleading content length, duplicate encoding headers, proxy decompression, double decompression, client cancellation, slow uploads, invalid UTF-8 after expansion, base64 overflow, already-compressed media, provider rejection, retries with another encoding, signature mismatch, and mixed-version workers. Assert that limits hold before expensive allocation.
+
+Measure compression outcomes. Track compressed and expanded bytes, ratio by content type, compression and decompression latency, CPU, memory, cancellation latency, limit rejects, malformed payloads, proxy mismatches, provider transfer savings, retry amplification, signature failures, and end-to-end latency. Savings matter only when they improve the whole request path.
+
+The practical pattern is this: separate wire compression from semantic compaction, publish encodings, limit compressed and expanded data, stream safely, define signing order, measure every size, parse JSON strictly, prefer binary artifacts, preserve tool semantics, verify intermediaries, adapt providers, canonicalize identities, control CPU, choose by content, preserve deadlines, deduplicate retries, return typed errors, protect logs, admit on real work, test attacks, and measure end-to-end value. Request compression is reliable when fewer bytes cross the network and exactly the same authorized meaning reaches the model.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
