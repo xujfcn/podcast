@@ -1,0 +1,55 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about API compatibility governance: how an AI gateway can evolve models, providers, schemas, streaming behavior, and features without making existing clients guess what changed.
+
+Compatibility is more than accepting the same HTTP request. A provider change can alter defaults, error codes, token accounting, tool behavior, output shape, latency, safety handling, or streaming events. A client may continue receiving status 200 while its assumptions quietly stop being true.
+
+Start with a compatibility contract. Define the request fields, response fields, error semantics, ordering, timing, usage accounting, retry behavior, streaming events, and side effects that clients may rely on. Mark each behavior as guaranteed, best effort, provider-specific, or experimental.
+
+Separate wire compatibility from semantic compatibility. A JSON payload can remain valid while its meaning changes. A field may keep its name but change units, default, precision, nullability, or interpretation. Test both parsing and behavior.
+
+Build a compatibility matrix. Map client version, API version, model alias, provider adapter, capability set, region, output format, tool mode, and policy revision. Record supported combinations and known limitations. “Compatible with OpenAI” is not a sufficient matrix entry.
+
+Choose a versioning strategy. URL versions, headers, media types, model revisions, feature flags, and capability negotiation each have tradeoffs. Make the source of truth clear and avoid allowing several version signals to disagree silently.
+
+Keep defaults stable. Defaults are part of the contract even when clients omit fields. Changes to temperature, max tokens, system behavior, safety settings, timeout, retries, or output format can be breaking changes. Version or explicitly announce default changes.
+
+Govern additive changes. Adding an optional response field is often safe, but clients may use strict decoders, signature checks, or snapshot tests. Adding new stream event types, enum values, headers, or error details can also break consumers. Test real client behavior before calling a change additive.
+
+Govern removals and deprecations. Publish affected endpoints, fields, models, aliases, and dates. Provide replacement behavior, migration examples, telemetry for remaining usage, and a minimum support window. Do not remove a route merely because the replacement exists.
+
+Use capability negotiation. Clients should be able to ask whether a route supports tools, vision, audio, structured output, streaming, seed control, reasoning parameters, or batch operations. A capability response needs scope, version, limits, and expiry, not just a boolean.
+
+Prevent capability lies. The gateway should validate capability declarations with contract tests and live probes where appropriate. If a provider supports a feature only for certain models, accounts, regions, or request shapes, represent that boundary explicitly.
+
+Normalize carefully. An adapter may translate field names and formats, but it must preserve meaning. If the provider cannot represent a client option, return a typed unsupported error or apply a documented downgrade. Silently dropping a parameter creates the most difficult compatibility bugs.
+
+Preserve error semantics. Stable error categories, retryability, parameter paths, request IDs, and provider provenance help clients recover. Do not map authentication failure, policy denial, overload, timeout, invalid output, and unsupported capability into one generic error.
+
+Treat usage as an API. Prompt tokens, completion tokens, cached tokens, image units, audio seconds, and provider charges need stable definitions and versioned accounting. A client that budgets or bills users from usage fields depends on their semantics.
+
+Treat streaming as a separate contract. Define event names, sequence, heartbeats, finish reasons, usage timing, cancellation, reconnect behavior, partial output, and error delivery. Adding a final usage event or changing chunk boundaries can affect clients even when the final text is unchanged.
+
+Handle multimodal compatibility. Text, image, audio, video, files, and embeddings differ in MIME types, dimensions, codecs, metadata, limits, and asynchronous behavior. Specify representations and conversion rules. A client asking for an image should know whether it receives a URL, bytes, an artifact ID, or a provider-specific object.
+
+Protect tool compatibility. Tool schemas, argument validation, call IDs, parallel calls, approval states, and result messages must remain coherent across providers. A model that emits a valid-looking call with changed argument semantics can break an application more severely than a 500 error.
+
+Keep policy compatibility visible. Safety, privacy, residency, data classification, and exception policy can change what a route accepts or returns. Clients need stable denial categories and migration guidance without receiving sensitive internal rules. A stricter policy is still a compatibility event when behavior changes.
+
+Test golden contracts. Maintain request and response fixtures, stream transcripts, error cases, usage examples, tool calls, and multimodal samples. Run them against every adapter, model revision, region, and policy change. Include negative cases and deliberately unsupported features.
+
+Use consumer-driven tests. The gateway team cannot predict every client assumption. Let important consumers publish contracts for fields, event order, retry behavior, and error handling. Review changes against those contracts before promotion.
+
+Canary compatibility changes. Use shadow traffic, versioned routes, test tenants, and percentage rollout. Compare parse failures, semantic mismatches, retries, abandonment, tool errors, usage deltas, quality, latency, and support contacts. A low server error rate does not prove compatibility.
+
+Make migrations observable. Track clients by API version, model alias, feature use, SDK version, and last successful compatible request. Warn before deprecation, provide headers or dashboard notices where safe, and measure migration progress rather than assuming documentation was read.
+
+Support dual behavior briefly. During migrations, a gateway may accept both old and new forms, translate between them, or serve two response versions. Bound the compatibility window, document precedence, and remove the bridge after usage falls below an explicit threshold.
+
+Define rollback. Keep old adapters, schemas, policies, and route versions available long enough to recover. A rollback must restore semantic behavior and usage accounting, not only HTTP reachability. Record which clients were exposed to each version.
+
+Test provider churn. Cover renamed fields, changed defaults, missing capabilities, altered error bodies, stream differences, tokenization changes, rate limits, region restrictions, model alias movement, tool schema drift, multimodal conversion, policy tightening, partial rollout, and provider failover.
+
+Measure compatibility health. Track contract failures, client parse errors, semantic mismatch reports, unsupported-feature rates, deprecated usage, migration completion, rollback frequency, stream disconnects, tool argument failures, usage discrepancies, error-category changes, and incidents by client and route version.
+
+The practical pattern is this: define the contract, separate wire and semantic compatibility, map a real matrix, choose explicit version signals, stabilize defaults, govern additive and breaking changes, negotiate capabilities, validate adapters, preserve error and usage semantics, version streaming and multimodal behavior, protect tools and policy boundaries, test golden and consumer contracts, canary changes, observe migrations, bound dual behavior, keep rollback paths, test provider churn, and measure client outcomes. Compatibility is trustworthy when a client can upgrade on purpose instead of discovering change through production failure.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
