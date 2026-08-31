@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about observability sampling governance at the AI API gateway: how to choose which requests, errors, slow paths, tenants, models, and provider routes receive detailed traces without copying sensitive prompts and outputs into a second uncontrolled data lake.
+
+At low traffic, teams can record almost everything. At production scale, that becomes expensive, slow, and risky. Uniformly sampling one percent of requests also misses the failures that matter: rare tool errors, tenant-specific regressions, long tails, policy denials, and provider-specific incidents.
+
+Start with a sampling contract. Define what is sampled, at which boundary, with which decision, retention, redaction, and access policy. A trace sample, a metric sample, a payload capture, and an audit record are different products and must not inherit the same defaults.
+
+Sample decisions, not secrets. Trace IDs, model, route, status class, latency bucket, token counts, policy revision, and error category can often support operations without storing prompts or outputs. Payload capture should be a separate, explicitly authorized path with stronger controls.
+
+Use head and tail sampling together. Head sampling makes a fast early decision, while tail sampling can retain a trace after seeing an error, timeout, high latency, retry storm, policy denial, or incomplete stream. Propagate the sampling decision so downstream spans agree instead of creating disconnected fragments.
+
+Prioritize rare and important events. Keep all typed failures, extreme latency, abandoned streams, provider disagreement, billing anomalies, tool side effects, cross-region rejects, and security-relevant policy outcomes within a bounded budget. Do not let a flood of ordinary successes evict the only evidence of a rare incident.
+
+Set fair tenant and route budgets. One noisy customer, model, provider, or region should not consume the entire detailed-trace quota. Allocate minimum coverage, burst limits, and adaptive shares. Sampling must preserve enough visibility to detect that a tenant or route is being disproportionately affected.
+
+Make sampling deterministic where useful. Hash a scoped operation or stable customer key to create consistent cohorts for experiments and regressions. Never use a raw email, API key, or unscoped identifier as the hash input. Rotate or salt identifiers according to privacy policy.
+
+Separate rates from guarantees. “One percent sampled” is a statistical target, not a promise that every error appears. Define guarantees for event classes such as all authorization failures, all provider 5xx responses, or at least one trace per incident window, then monitor whether the system actually meets them.
+
+Coordinate across retries and hedges. Keep one sampling decision for an operation while retaining attempt-level spans when a retry, hedge, or fallback explains the outcome. A sampled final response without its slow failed attempt can hide the real latency and cost story.
+
+Sample queues and waits intentionally. Queue delay, admission rejection, lease expiry, worker handoff, and cancellation races often occur before a provider span exists. Carry sampling state through these boundaries and emit compact lifecycle events even when full tracing is disabled.
+
+Control high-cardinality fields. Model names, error messages, tool names, customer IDs, and provider request IDs can explode metric storage and leak identifiers. Use bounded labels, normalized categories, hashed references, and exemplars that point to protected traces rather than embedding raw content.
+
+Redact before export. Apply field-aware redaction at the earliest boundary that understands the data. Remove credentials, authorization headers, personal data, private media URLs, prompts, outputs, and tool arguments unless an approved capture policy says otherwise. Redaction after a third-party exporter has received the payload is too late.
+
+Prevent accidental payload capture. Disable automatic request and response body logging in SDKs, proxies, HTTP clients, error reporters, and database drivers. Test exception paths, debug flags, sampling overrides, and provider adapter logs, where sensitive content often escapes the intended policy.
+
+Use exemplars for depth. Metrics can retain counts and distributions, while a limited set of trace references explains representative slow, failed, or unusual requests. Bind exemplars to expiry, access policy, and a safe operation reference. Avoid turning every metric label into a joinable personal identifier.
+
+Handle adaptive sampling carefully. Increase coverage when error rate, tail latency, or provider variance rises, but cap the rate and add hysteresis so an incident does not create a storage or cost outage. Record the policy revision and reason for every material sampling change.
+
+Preserve incident windows. When an alert fires, temporarily increase coverage for affected routes, tenants, regions, or providers, with explicit start, end, and maximum volume. Backfill only metadata or bounded samples that policy permits. A temporary debugging mode needs an automatic expiry.
+
+Align sampling with SLOs. If latency SLOs use a particular request population, the sampled traces and metrics must identify that population. Do not use a convenient sample that excludes streaming, retries, large prompts, free-tier tenants, or failed requests and then call the result representative.
+
+Keep traces joinable but scoped. Operation, attempt, queue, provider, tool, and delivery references should connect spans across services. Use internal IDs that cannot authorize access by themselves. A trace link should resolve through an access check and tenant scope, not expose data to anyone who guesses an identifier.
+
+Version sampling policies. Store policy revision, evaluator version, decision reason, and effective window. During rollout, compare old and new decisions on a shadow cohort, measure coverage changes, and retain a rollback path. A missing trace can be caused by a policy change, not a provider failure.
+
+Measure sampling bias. Compare sampled and unsampled populations by status, latency, model, provider, tenant tier, token size, media type, stream usage, and region. Look for false confidence caused by under-sampling expensive, private, multilingual, or failure-prone traffic.
+
+Define exporter failure behavior. If a trace backend is slow or unavailable, the request path must not wait indefinitely or fall back to exporting raw payloads. Buffer bounded metadata, drop according to priority, expose loss counters, and keep authorization and inference independent from telemetry health.
+
+Test adversarial and rare paths. Cover sampling floods, error bursts, tail latency, retries, hedges, queue expiry, stream disconnect, tool side effect, redaction failure, exporter outage, policy override, tenant starvation, high-cardinality injection, debug mode, clock skew, and incident-window expiry. Assert that sensitive bodies never appear in exported traces.
+
+Measure observability quality. Track coverage by outcome, tail coverage, rare-event retention, sampling bias, dropped spans, exporter lag, payload-redaction violations, budget fairness, policy override count, incident-window volume, trace join failures, and telemetry cost per useful investigation.
+
+The practical pattern is this: define separate sampling products, sample decisions instead of secrets, combine head and tail sampling, prioritize rare events, budget fairly, make cohorts deterministic, distinguish statistical rates from guarantees, preserve retry and queue context, bound labels, redact before export, disable accidental body capture, use exemplars, adapt with caps, expire incident modes, align with SLOs, scope trace joins, version policies, measure bias, isolate exporter failures, test rare paths, and measure useful coverage. Observability is reliable when the traces you keep are the traces most likely to explain reality, and the data you do not need never leaves the request boundary.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
