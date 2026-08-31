@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about purpose limitation at the AI API gateway: how to bind data to approved uses such as inference, caching, evaluation, debugging, human review, or training, and prevent a legitimate request from becoming an unauthorized secondary use.
+
+Access control answers who may touch data. Data classification answers how sensitive it is. Purpose limitation answers why it may be processed. A support engineer might be authorized to operate the platform but not to inspect prompts for product research. A provider may be approved for inference but not for model training.
+
+Start with a purpose taxonomy. Define operational purposes that actually change behavior: fulfill the request, execute tools, retain conversation state, cache a response, calculate billing, detect abuse, debug an incident, evaluate quality, review manually, improve prompts, or train a model. Avoid broad labels such as “service improvement” that authorize almost anything.
+
+Attach purpose at collection. Record the requested purpose, legal or contractual basis where relevant, tenant policy, data class, source, owner, effective time, expiry, and permitted processors. A purpose inferred later from convenience is not equivalent to one established when data entered the system.
+
+Separate declared purpose from authorization. A client can state why it is sending data, but the gateway must verify whether the tenant, user, workflow, and policy permit that purpose. Free-text metadata must never create permission for training, human review, or export.
+
+Use purpose-specific routes. A provider approved for live inference may not be approved for batch evaluation or storage. A region valid for request processing may not be valid for an analytics export. Compute provider, model, region, tool, cache, and retention eligibility from both data class and purpose.
+
+Minimize data for each purpose. Billing needs usage and price evidence, not full prompts. Abuse detection may need bounded signals rather than raw output. Debugging may need a short protected capture. Evaluation may need sampled, redacted examples. Send each processor only what its purpose requires.
+
+Prevent silent secondary use. Production prompts should not flow into evaluation sets, prompt libraries, training corpora, demos, or support tickets merely because they are useful. Require a separate approved transition with evidence, scope, and retention.
+
+Track derived artifacts. Embeddings, summaries, labels, traces, screenshots, transcripts, redactions, and aggregate metrics can preserve sensitive meaning. Carry source purpose and restrictions into derivatives unless a documented transformation proves a narrower artifact can be used differently.
+
+Handle consent and tenant controls precisely. Record what was accepted, by whom, for which data and purpose, under which notice, and until when. Support withdrawal and policy changes. Do not turn one user’s consent into permission for an entire tenant or historical dataset.
+
+Distinguish required and optional purposes. Request fulfillment and security may be necessary to provide the service. Training, broad analytics, and product research may be optional. Clients should be able to decline optional uses without unexpectedly breaking the core API unless the contract explicitly says otherwise.
+
+Bind purpose to retention. Keep data only as long as the approved purpose requires. Operational request data, billing evidence, incident captures, evaluation samples, and training datasets have different clocks. An expired purpose should trigger deletion, transformation, or renewed authorization rather than indefinite storage.
+
+Recheck purpose on every boundary. Queues, retries, provider adapters, tools, caches, logs, data lakes, backups, exports, callbacks, and human review systems must validate the current purpose. A downstream service must not assume that authenticated data is approved for its own use.
+
+Control observability. Logs and traces are secondary processing systems. Define which metadata is necessary for reliability, which payload capture is allowed for debugging, and which purposes prohibit content logging. Sampling must not expand the purpose attached to a request.
+
+Govern human access. Manual review should require a specific reason, role, case or incident ID, narrow data scope, time-bound access, and audit evidence. Browsing production data for curiosity, training, or convenience is not an operational purpose.
+
+Govern evaluation. Evaluation datasets need provenance, approved purpose, redaction state, representativeness, retention, reviewer access, and deletion handling. A high-quality benchmark does not justify using data that was collected only for request fulfillment.
+
+Govern training and improvement. Distinguish provider training, gateway model training, fine-tuning, prompt optimization, retrieval indexing, and human labeling. These are separate purposes with different processors and risks. A generic “no training” flag should map to enforceable behavior across all of them.
+
+Make provider terms executable. Store whether each provider retains data, trains on it, supports zero retention, permits regional processing, or uses subcontractors for a particular operation. Route only when provider behavior matches the request purpose and tenant policy.
+
+Handle purpose changes explicitly. A new use requires a transition record: source dataset, proposed purpose, authority, compatibility assessment, additional notice or consent if required, redaction, retention, processors, and rollback. Do not overwrite the old purpose field and lose history.
+
+Support deletion and withdrawal. When authorization ends, find raw and derived artifacts across caches, indexes, evaluation sets, exports, backups, and provider systems. Record completion and known limitations. Prevent deleted data from being reintroduced by restore or dataset refresh.
+
+Keep purpose metadata trustworthy. Sign or integrity-protect critical context, version the taxonomy and policy, restrict who can alter purpose, and retain decision evidence. Do not expose sensitive legal or incident details to every downstream component; use opaque purpose IDs with resolvable policy.
+
+Return typed denials. Distinguish purpose not declared, purpose not permitted, processor not approved, consent missing, retention conflict, secondary use blocked, human review denied, training prohibited, and authorization expired. Give clients a safe remediation path without revealing internal controls.
+
+Test misuse paths. Cover production data entering evaluation, cache reuse across purposes, debug mode, support access, provider training defaults, derived embeddings, backup restore, withdrawn consent, policy changes, stale queues, retries after expiry, region changes, dataset export, human review, and an internal service that strips purpose metadata.
+
+Measure purpose governance. Track processing by purpose, undeclared or denied purposes, optional-use opt-outs, secondary-use requests, human review access, training prohibitions, expired purpose records, retention violations, derivative lineage gaps, deletion completion, provider mismatches, and incidents caused by purpose drift.
+
+The practical pattern is this: define actionable purposes, attach them at collection, verify authorization, route by purpose, minimize data, block silent secondary use, carry restrictions into derivatives, record consent precisely, separate required and optional uses, bind retention, recheck every boundary, govern observability and human access, isolate evaluation and training, encode provider terms, review purpose changes, support withdrawal and deletion, protect metadata, return typed denials, test misuse paths, and measure drift. Data is governed only when being allowed to process it for one reason does not quietly become permission to use it for every reason.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
