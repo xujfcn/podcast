@@ -1,0 +1,49 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about encryption context governance at the AI API gateway: how to bind tenant, region, purpose, artifact version, and policy to every encryption operation so data cannot be accidentally shared, decrypted in the wrong place, or made impossible to recover.
+
+Encryption protects bytes, but the key alone does not explain who may decrypt them or why. The same tenant may have raw uploads, prompts, outputs, logs, backups, and billing records with different sensitivity and retention. A shared key with broad access can turn a small authorization mistake into a large disclosure.
+
+Start with a typed encryption context. Include tenant, data class, purpose, artifact or operation identity, region, residency policy, key version, environment, and lifecycle state. Use a canonical representation and bind it as authenticated metadata, not as an informal comment next to the ciphertext.
+
+Separate key identity from authorization context. A key says which cryptographic material was used; context says which encrypted object and purpose it is valid for. Require both for decryption. A worker that has access to a key should not automatically decrypt every ciphertext protected by that key.
+
+Choose context fields that are stable and non-secret. Do not put prompts, credentials, personal data, or full URLs into associated data. Context should be sufficient to prevent unintended substitution while remaining safe to log as a digest or selected metadata.
+
+Bind ciphertext to object identity and version. If an image is replaced, a prompt snapshot changes, or a result is regenerated, create a new content version and context. Do not let an old encrypted blob decrypt successfully as the current artifact merely because the tenant and key are the same.
+
+Bind purpose tightly. Encryption for provider transport, durable storage, cache, queue, backup, audit evidence, and export should have distinct purposes. Prevent a ciphertext created for a temporary provider handoff from being accepted by a long-term download path.
+
+Enforce tenant and region scope. Include residency and region in authorization decisions where required. A failover worker should use a key and context approved for the destination, not copy a source-region ciphertext and assume geography no longer matters. Record every cross-region transfer.
+
+Use envelope encryption carefully. A data key encrypts the payload, while a key-encryption key protects the data key. Store key version, algorithm, nonce, associated-data digest, and wrapping metadata with the ciphertext. Keep the data key inaccessible outside the intended cryptographic service boundary.
+
+Design key rotation without losing lifecycle control. New writes can use a new key version while old data is rewrapped or lazily migrated. The context must preserve original object identity and policy. Rotation should not silently broaden who can decrypt historical data.
+
+Handle revocation and deletion. Disabling a key can affect many objects, so define whether revocation blocks new reads, all reads, or only a purpose. Deleting keys can make data unrecoverable, which may be correct for an expired artifact but dangerous for an active result. Use explicit holds and approvals for destructive key operations.
+
+Avoid plaintext gaps. Decrypt only inside the narrowest service boundary, keep buffers bounded, clear memory where practical, and prevent plaintext from entering logs, traces, crash dumps, temporary files, or swap. A protected database does not compensate for plaintext copied into an observability system.
+
+Protect queues and caches. Queue messages should carry encrypted payloads and separately authenticated routing metadata. Cache entries need tenant, purpose, policy, artifact version, and expiry binding. A cache hit must fail closed if context does not match, even when the ciphertext can technically be decrypted.
+
+Coordinate provider handoff. If a provider needs plaintext or its own encrypted upload, record the handoff purpose, endpoint, region, provider artifact ID, and retention capability. Do not reuse a storage ciphertext as a provider payload unless the encryption contract explicitly allows it.
+
+Bind tools and workers to purpose. A tool that needs to inspect an image should receive the minimum authorized representation, not a general decryption capability. Worker roles should be separated for scanning, inference preparation, delivery, backup, and deletion. Each role gets only the context combinations it needs.
+
+Make context validation fail closed. Reject missing fields, unknown versions, wrong tenant, wrong region, expired purpose, unsupported algorithm, nonce reuse, mismatched artifact version, and policy revision conflicts before decryption. Do not “try another key” broadly when context validation fails.
+
+Prevent substitution and replay. Authenticated context should cover ciphertext identity, operation, version, and purpose, while nonces must be unique under the key. A copied ciphertext or old wrapped data key should not be accepted for a newer request simply because the bytes remain valid.
+
+Keep cryptographic metadata observable but bounded. Record key version, algorithm, context version, purpose, region, result, and failure class. Hash sensitive identifiers where full values are unnecessary. Never log plaintext, key material, authorization tokens, or complete associated data when it contains private metadata.
+
+Connect encryption to retention. Data deletion should remove payload copies, revoke access, and apply the appropriate key lifecycle. Audit and billing records may retain non-content evidence under a different key and purpose. Do not retain a decryption path merely because a digest must remain for accounting.
+
+Handle backups and exports. Backups inherit data classification, tenant, region, retention, and deletion rules. Exported data should use a distinct purpose, short-lived access, recipient binding, and an explicit expiry. Restoring a backup must not reintroduce objects whose policy or legal hold has changed.
+
+Make migration safe. When changing algorithms, KMS providers, regions, or context schemas, support a bounded compatibility window and verify plaintext-equivalent content hashes after re-encryption. Keep old ciphertext and new ciphertext identities distinct until validation completes.
+
+Test key and context boundaries. Cover wrong tenant, wrong purpose, wrong region, stale artifact version, cache substitution, queue replay, nonce collision, key rotation during read, revoked key, deleted key, backup restore, provider handoff, worker role escalation, missing context, schema downgrade, partial migration, and concurrent deletion. Assert that technically decryptable data is still denied when policy context is wrong.
+
+Measure encryption health. Track decrypt failures by class, context mismatch, stale key use, rotation backlog, plaintext exposure events, KMS latency, key-cache age, cross-region rejects, backup restore failures, provider handoff volume, deletion completion, and objects without a valid lifecycle path. Security depends on correct context enforcement, not just encryption percentage.
+
+The practical pattern is this: use typed non-secret context, separate keys from authorization, bind identity and version, distinguish purpose, enforce tenant and region, use envelope encryption, rotate safely, define revocation, minimize plaintext, protect queues and caches, control provider handoff, limit worker roles, fail closed, prevent substitution, observe bounded metadata, connect keys to retention, govern backups and exports, migrate with verification, test every boundary, and measure lifecycle health. Encryption is reliable when ciphertext is accepted only in the exact context for which it was created.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
