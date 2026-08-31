@@ -1,0 +1,49 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about provider change governance at the AI API gateway: how to discover, verify, version, and operationalize changes to model capabilities, data terms, pricing, regions, quotas, and deprecation status.
+
+An AI gateway makes providers look uniform, but provider reality changes constantly. A model gains vision, a region disappears, a retention term changes, a price is updated, a quota is tightened, or an alias points somewhere new. If those facts enter routing informally, production behavior drifts without a clear decision trail.
+
+Start with a provider fact model. Track provider, endpoint, model, capability, modality, context limit, output limits, tool support, structured output behavior, regions, data handling terms, retention, training use, price, quotas, support status, and lifecycle state. Every fact needs a source, observation time, effective time, expiry, and confidence.
+
+Separate observed, declared, and verified facts. A provider documentation page is a declaration. A live probe is an observation. A contract review or approved test can verify a specific property. Do not treat a marketing label or a successful request as proof of every capability or processing guarantee.
+
+Use multiple evidence sources. Combine official documentation, API schemas, pricing pages, status feeds, contracts, provider notifications, account-level quota responses, and controlled probes. Resolve conflicts explicitly. A single stale page should not silently overwrite a recent contractual restriction.
+
+Assign ownership. Product, legal, security, finance, and platform teams may own different facts. Define who can approve data terms, prices, residency, capability claims, and production route eligibility. A fact without an owner becomes an assumption that survives too long.
+
+Version the inventory. Store a complete snapshot and a change event. Include source, parser or collector version, reviewer, evidence reference, policy revision, and effective time. A route decision should be reproducible from the inventory snapshot used at admission.
+
+Detect changes continuously. Poll documentation and APIs where permitted, consume webhooks or status feeds, compare schemas, inspect pricing, and run scheduled probes. Use hashes and semantic diffs so a cosmetic page change does not look like a capability change while a changed retention clause does not look cosmetic.
+
+Verify before promotion. A detected change should enter an untrusted or pending state. Validate capability with representative requests, confirm output semantics, check limits, test region and residency behavior, and obtain approval for contract-sensitive facts. Do not route all production traffic from a newly parsed page.
+
+Model uncertainty and expiry. Facts become stale at different speeds. Price may change quickly, a capability may be stable, and a status page may be delayed. If a critical fact expires, downgrade eligibility, require a fresh check, or fail closed according to risk. Never treat missing data as unrestricted support.
+
+Connect facts to route eligibility. A model can be technically available but ineligible for a tenant, data class, region, tool, or output contract. Compute eligibility from the current fact snapshot and policy, then retain the reasons for every allowed or rejected route.
+
+Protect data-processing decisions. Provider training use, retention, subprocessors, residency, encryption, and deletion terms can change independently of API behavior. Bind these facts to data classification and tenant policy. A model capability update must not accidentally bypass a stricter processing requirement.
+
+Handle price and quota changes safely. Price changes affect budgets, cost attribution, and optimization. Quota changes affect admission, retries, and failover. Stage updates, simulate representative traffic, and alert when a change makes an existing route uneconomic or unable to meet its SLO.
+
+Treat aliases as moving references. A friendly model name may resolve to a new revision with different quality, tokenizer, context, price, safety behavior, or output format. Record the resolved version at request time and require compatibility checks before updating the alias target.
+
+Govern capability claims. Support for vision, audio, JSON schema, tools, streaming, batch, seed, reasoning controls, or image output may vary by endpoint and account. Probe the exact operation and record known limitations. “Model supports feature X” is too coarse for routing.
+
+Make changes reversible. Keep the previous inventory, route configuration, policy decision, and evidence. Support rollback, hold, quarantine, and allow-with-warning states. A rollback should restore a known-good fact snapshot, not merely edit a current value by hand.
+
+Coordinate rollout. Use shadow evaluation, canary tenants, regional staging, traffic percentages, and explicit observation windows. Compare latency, errors, quality, costs, capability behavior, and data-handling evidence. A provider change is complete only after post-rollout verification.
+
+Handle emergency changes. A provider outage, compromised endpoint, accidental data exposure, or contract violation may require immediate quarantine. Define who can suspend a provider, which routes fail over, how existing work is handled, and what evidence is preserved. Emergency controls should be audited and reviewed afterward.
+
+Avoid automation traps. A scraper can misread tables, a schema can omit undocumented limits, a probe can pass on a low-risk request, and a status feed can lag reality. Automation should propose and validate changes, while high-impact facts retain approval and evidence requirements.
+
+Notify the right consumers. Route owners need compatibility changes, finance needs pricing, security needs processing and incident changes, and customers may need migration or disclosure notices. Notifications should include impact, effective time, affected routes, recommended action, and confidence—not just “provider updated.”
+
+Track downstream dependencies. One fact can affect model aliases, capability routing, budgets, failover, caches, SDK behavior, documentation, and customer commitments. Build dependency links so a changed context limit or region term triggers the correct impact review.
+
+Test drift and disagreement. Cover stale documentation, conflicting sources, parser errors, provider silent changes, schema changes, price precision, quota exhaustion, alias movement, region loss, capability regression, contract restriction, collector outage, probe false positives, rollback, quarantine, and partial rollout.
+
+Measure provider fact quality. Track freshness, expired critical facts, source conflicts, verification latency, false change alerts, missed changes, probe coverage, approval age, route decisions by snapshot, quarantines, rollback frequency, pricing drift, quota surprises, and incidents caused by incorrect inventory.
+
+The practical pattern is this: model provider facts, separate declaration from observation and verification, use evidence sources, assign ownership, version snapshots, detect semantic changes, verify before promotion, expire uncertainty, compute eligibility, bind terms to data policy, stage price and quota updates, resolve aliases carefully, probe exact capabilities, preserve rollback state, canary changes, define emergencies, constrain automation, notify consumers, map dependencies, test drift, and measure inventory quality. Provider-aware routing is trustworthy when every external fact has a source, a lifetime, an owner, and an auditable path to runtime behavior.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
