@@ -1,0 +1,55 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about inference decision traceability at the AI API gateway: how to explain why a request took a route and produced a result without exposing private reasoning or pretending that a generated explanation is proof.
+
+Modern inference is a chain of decisions. The gateway identifies a tenant, applies policy, selects a provider, assembles context, chooses tools, retries or streams, validates the response, and records usage. When something goes wrong, “the model said so” is not enough to investigate.
+
+Start by separating execution evidence from explanation. Execution evidence records what actually happened: inputs and policy references, route choice, provider response, tool calls, validations, and timings. An explanation is a human-readable summary of that evidence. Never replace the evidence with a plausible narrative generated after the fact.
+
+Define the trace contract. Specify the fields required for each request, attempt, tool call, policy decision, transformation, and final response. Include stable identifiers, timestamps, versions, outcomes, and relationships. Make the contract useful for debugging, billing, safety review, and customer support.
+
+Preserve decision lineage. Link the client request to authentication, tenant policy, data classification, model capability checks, routing, provider attempts, tool execution, response validation, and delivery. A trace should show the sequence without requiring raw prompts or private model internals.
+
+Record route reasons as structured facts. Capture eligible routes, rejected routes, the policy rules that applied, capability requirements, capacity signals, cost constraints, and the selected route. “Best model” is not an adequate routing explanation.
+
+Version every important input. Store prompt template revision, policy revision, adapter version, model and provider identifiers, tokenizer, decoding parameters, tool catalog, schema, and feature flags. A decision cannot be reproduced when its governing inputs are anonymous or mutable.
+
+Protect private reasoning. Do not log hidden chain-of-thought, internal scratchpads, or unrestricted model deliberation merely to make systems seem explainable. Prefer concise decision codes, citations to policy and evidence, tool inputs and outputs where authorized, and externally verifiable artifacts.
+
+Distinguish model claims from system facts. A model may say it used a source, checked a rule, or called a tool, but the gateway should verify these claims against logs, tool receipts, retrieval records, and provider metadata. Treat generated rationales as untrusted output.
+
+Trace context assembly. Record which documents, memories, system instructions, developer messages, and tool descriptions were selected, along with identifiers, versions, and filtering decisions. Hash sensitive content or store references when raw text is unnecessary.
+
+Explain data decisions. Show why a field was included, removed, masked, tokenized, or restored. Bind each transformation to classification, purpose, tenant, policy, and authorization. This makes privacy behavior reviewable without duplicating sensitive payloads.
+
+Trace provider attempts. Record attempt ID, provider, account, region, model deployment, request time, status, retries, timeout, cancellation, and response classification. Preserve failed attempts rather than presenting only the final successful provider as if it were the original plan.
+
+Trace tool decisions. Capture requested tool, authorization result, argument validation, policy revision, approval, execution result, side-effect receipt, and linkage to the parent response. A tool call must be explainable independently because its consequences may outlive the model response.
+
+Trace transformations. Adapters may normalize messages, change field names, trim context, convert schemas, compress content, or repair output. Record each intentional transformation, its version, reason, and before-and-after digest where appropriate. Do not claim byte identity after a semantic rewrite.
+
+Trace streaming. Record stream ID, sequence ranges, chunk counts, interruption, resume point, finalization, and client acknowledgement. A final answer without delivery evidence cannot explain whether the user received the complete result.
+
+Handle caching. Explain cache hits and misses with key dimensions, age, policy revision, tenant, model identity, and validation status. A cached response should carry enough lineage to show why it was safe to reuse and which original request produced it.
+
+Make billing explainable. Link usage, provider charges, retries, hidden or reported tokens, discounts, and final attribution to the same request and attempt lineage. A trace that explains quality but not cost is incomplete for an API gateway.
+
+Use evidence levels. Mark each trace field as observed, verified, inferred, or generated. Observed means the system recorded it; verified means it passed an independent check; inferred means a correlation was calculated; generated means a model or formatter described it. Keep these categories visible to operators.
+
+Support redaction and access control. Different audiences need different traces. A customer may see route, latency, usage, and policy outcome; an operator may see adapter and provider evidence; a security reviewer may see authorization lineage. Enforce field-level access and redact secrets before export.
+
+Avoid cardinality explosions. Trace identifiers should be stable and searchable, but labels must not include arbitrary prompt text, user content, or unbounded tool arguments. Use structured attributes, bounded vocabularies, sampled payload references, and separate secure stores.
+
+Choose retention by purpose. Debug traces, billing evidence, security records, and customer-visible explanations have different retention requirements. Apply deletion, legal hold, tenant isolation, and residency rules independently rather than keeping every payload forever.
+
+Make traces tamper-evident. Protect timestamps, sequence, policy revision, route identity, and outcome with authenticated logs or chained digests. Integrity protection does not make a trace true by itself, but it helps prove whether the record changed after execution.
+
+Test missing evidence. Simulate provider timeouts, partial streams, adapter failures, dropped telemetry, duplicate events, clock skew, retried tools, cache poisoning, and logging permission errors. The system should say “unknown” instead of inventing a complete explanation.
+
+Test explanation accuracy. Compare human-readable summaries with structured execution evidence. Reject summaries that claim a tool ran when it did not, cite a policy that was not applied, confuse a fallback with the primary route, or attribute provider behavior to the gateway.
+
+Make customer explanations useful. Return stable reason codes, route metadata where safe, request IDs, usage details, policy outcomes, and links to support documentation. Do not expose internal topology or sensitive evaluation data merely to appear transparent.
+
+Measure trace quality. Track missing fields, unverifiable claims, orphan spans, delayed events, duplicate events, trace access denials, redaction failures, explanation mismatches, retention violations, and percentage of requests with complete lineage.
+
+The practical pattern is this: separate evidence from explanation, define a trace contract, preserve decision lineage, record route reasons as facts, version governing inputs, protect private reasoning, verify model claims, trace context and data transformations, preserve provider attempts, capture tool authorization and side effects, record adapters and streams, explain cache and billing decisions, label evidence strength, control access and cardinality, retain by purpose, make records tamper-evident, test missing data, compare explanations with evidence, give customers safe reason codes, and measure trace quality. A trustworthy explanation is not a story about what the model might have thought. It is a bounded account of what the system actually did and what the evidence can support.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
