@@ -1,0 +1,45 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about provider capability declarations at the AI API gateway: how to make context length, vision, tools, structured output, streaming, batch, and rate capabilities verifiable enough for routing and safe enough for production.
+
+A model name is not a capability contract. A provider may expose the same name with different context limits, tool behavior, regions, quotas, or feature flags. Documentation can be stale, adapters can be incomplete, and a capability can depend on the exact endpoint or account.
+
+Start with a typed capability record. Include model and provider identity, endpoint, region, protocol, feature, limit, quality of support, source, observed time, expiry, confidence, and catalog revision. “Supports tools” is too vague; distinguish declaration, tested support, partial support, and unsupported combinations.
+
+Separate declared from observed capability. Documentation, provider metadata, adapter code, synthetic probes, and production evidence have different trust levels. Keep them all, choose an effective value through policy, and record why. An observed failure should not silently rewrite a provider contract without review.
+
+Version capability facts. Context limits, image input, tool schemas, JSON mode, audio, streaming, reasoning controls, and output limits can change independently. Tie each fact to a provider revision, endpoint revision, adapter version, and policy generation. A stale capability should expire rather than remain true forever.
+
+Model combinations, not isolated flags, determine support. Vision plus tools, streaming plus structured output, batch plus file references, or long context plus a specific region may behave differently from each individual feature. Represent constraints and combinations explicitly and test the paths customers actually use.
+
+Validate before routing. Inspect requested features, estimate size, check residency, compare required limits, and select only eligible routes. Do not send a request to a provider merely because the model string exists. Reject an impossible combination before spending upload, queue, or provider budget.
+
+Make partial support visible. A provider may accept a tool schema but ignore strict mode, stream text but not usage, accept images only by URL, or return JSON that is syntactically valid but violates the requested schema. Record the exact supported subset and let the adapter enforce it.
+
+Probe safely. Capability probes should use synthetic, non-sensitive inputs and bounded cost. Test one feature and important combinations, capture request and response shape, latency, errors, and provider headers, then clean up any created artifacts. Probes are evidence, not permission to send customer data.
+
+Respect account and region scope. A feature enabled for one account, project, model tier, or region may be unavailable elsewhere. Include credentials scope and endpoint in the capability key, while never exposing credentials in logs or catalog output. Fail closed when a required scope is unknown.
+
+Use capability snapshots for a request. Routing, admission, token estimation, provider translation, and billing should agree on one immutable snapshot. If a worker refreshes its catalog halfway through a request, it can make inconsistent decisions. Record snapshot revision and expiry with the operation.
+
+Define stale-data behavior. When a capability fact expires, decide whether to refresh synchronously, use a bounded grace period, route only proven-safe features, or reject. A stale “supports structured output” fact can be worse than a temporary unavailable result. Make the tradeoff explicit by feature risk.
+
+Tie limits to measurement. Context length, maximum image size, output tokens, file duration, batch count, and request rate need units and enforcement points. Distinguish provider hard limits from gateway safety limits. Reconcile advertised and observed limits without hiding the stricter boundary from clients.
+
+Coordinate adapters. Provider adapters translate capability facts into request construction and response validation. An adapter must declare what semantics it preserves, emulates, or drops. If a provider lacks native JSON schema enforcement, do not label emulation as equivalent without a separate quality and failure contract.
+
+Handle fallback honestly. If the primary route lacks a requested capability, fallback can change model, cost, latency, privacy, output format, or residency. Compare the fallback against explicit client and policy requirements. Never downgrade a required feature silently just to return HTTP 200.
+
+Make routing explainable. Store requested capabilities, rejected routes, selected route, snapshot revision, and the reason for each exclusion. A useful trace can say that a route was rejected for context length or region, without storing the full prompt or private artifact.
+
+Protect aliases and catalogs. Friendly model aliases should resolve only to targets whose capability facts satisfy the alias contract. Do not advertise a broad alias capability if one weighted target lacks it. Catalog changes need validation, staged rollout, and a rollback revision.
+
+Connect capabilities to billing. A vision request, tool call, long-context request, or structured-output route may have different pricing and provider usage. Reserve against the selected capability path and reconcile actual usage. Capability metadata should explain a route choice without becoming a substitute for usage records.
+
+Test negative paths. Cover missing metadata, stale snapshots, regional mismatch, account restrictions, unsupported combinations, provider behavior drift, partial streaming, tool schema rejection, context off-by-one limits, image URL expiry, structured output violations, adapter fallback, and concurrent catalog updates. The important assertion is that unsupported work never reaches a route that cannot honor it.
+
+Keep evidence bounded. Store capability hash, source, observation ID, probe version, response classification, and expiry. Avoid retaining sensitive provider responses or customer payloads. When a capability dispute occurs, use synthetic fixtures and controlled traces to reproduce it.
+
+Measure capability quality. Track unknown facts, stale use, probe failures, false positives, false negatives, route rejection, fallback rate, feature-specific error rate, catalog propagation lag, adapter mismatch, provider drift, and customer-visible capability errors. A capability catalog is healthy when its predictions match production behavior.
+
+The practical pattern is this: use typed facts, separate declared and observed support, version everything, model combinations, validate before routing, describe partial support, probe safely, scope by account and region, use immutable snapshots, define staleness, measure limits, coordinate adapters, make fallback explicit, explain routing, protect aliases, connect choices to billing, test negative paths, retain bounded evidence, and measure prediction quality. A capability declaration is valuable when it is a tested promise with a scope and an expiration date.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
