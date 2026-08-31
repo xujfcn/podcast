@@ -1,0 +1,53 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about credential leases at the AI API gateway: how to bind short-lived provider authorization to the exact request, tenant, region, and policy that should use it, so stale workers and long retries cannot keep acting with revoked authority.
+
+An API key is often treated as a static configuration value. In a real gateway, authorization changes while work is waiting, running, or recovering. A tenant can be suspended, a provider key can rotate, a region can become restricted, or a tool permission can be removed. If credentials live longer than the work they authorize, old execution paths can outlast policy.
+
+Start by defining the lease. A credential lease should name the tenant, operation, provider, region, capability, policy generation, issuance time, expiry, maximum use, and revocation source. A lease is permission for a bounded purpose, not a general-purpose copy of a secret.
+
+Separate identity from authorization. The gateway request identity says who asked and what operation is being performed. The credential lease says which authority may perform it downstream. Preserve both through workers, provider attempts, streams, retries, and audit events. Never use a provider key as the only record of tenant identity.
+
+Issue leases as late as practical. Validate request policy and admission first, then mint or select provider authorization near dispatch. This reduces the time a credential exists and prevents queued work from holding authority it may never use. Do not issue a broad lease merely because a request entered a queue.
+
+Bind scope tightly. Include provider, endpoint class, model or capability, region, tenant, operation class, data policy, tool permissions, token and spend limits, and execution identity. A lease for text generation should not authorize image generation, and a lease for one region should not silently authorize another.
+
+Use short expiry with useful margins. The lease must cover connection setup, provider submission, streaming, and safe cleanup, but should not remain valid indefinitely after the request deadline. Include clock tolerance and renewal rules. Expiry must stop new provider actions even if a worker still has the old credential in memory.
+
+Make revocation authoritative. Tenant suspension, credential compromise, policy change, provider disablement, and region restrictions should be able to revoke leases. Workers must check revocation at dispatch, renewal, and effectful boundaries. A cached positive check must have a bounded lifetime and a defined fail-closed behavior.
+
+Handle rotation without a traffic cliff. New work should receive the new credential generation while in-flight requests finish under the old lease when policy permits. Drain old connections and leases with a deadline. If a provider rejects the old credential, classify the failure as authentication or authorization, not as a model failure.
+
+Protect queued work. A request can wait longer than the credential that was selected at admission. Refresh authorization before dispatch and recheck tenant status, budget, residency, model access, and tool grants. Never copy a credential into a durable queue payload just to avoid a later lookup.
+
+Control renewal. Renewal is not automatic permission to extend every request. Re-evaluate the request, policy generation, remaining budget, deadline, provider status, and operation state. A committed side effect may require a different reconciliation path from a pure model retry.
+
+Keep secrets out of logs and receipts. Store lease ID, generation, scope hash, and outcome, not raw keys or authorization headers. Memory handling, crash dumps, tracing, support exports, and error messages must not expose credential material. Customer-visible responses should identify authorization state without revealing provider secrets.
+
+Use lease generations and fencing. A worker holding generation four must not continue after generation five revokes or supersedes it. Include the lease generation in dispatch records and provider attempt state. Reject stale renewals and late callbacks that present an old generation.
+
+Coordinate multiple providers. A gateway may use separate leases for primary, fallback, embedding, moderation, retrieval, and tool services. Do not let a fallback lease inherit the primary provider’s scope or price assumptions. Every attempt should declare which authorization was used and whether the policy permits that substitution.
+
+Handle streams carefully. A stream can outlive the initial authorization check. Define whether expiry permits existing bytes to finish, requires immediate termination, or allows a bounded grace period. A reconnect must obtain a fresh lease and resume only the same authorized operation, never start a broader request.
+
+Respect provider and tenant rate limits. Lease issuance can become a hidden form of authorization amplification if every retry mints unlimited new capacity. Apply per-tenant, provider, region, and capability limits to issuance and renewal. Record rejected lease requests separately from provider rate-limit failures.
+
+Make failover authorization-aware. Moving an operation to another region or provider requires a new scope check, lease, endpoint, residency decision, and budget. Do not move a live credential across regions unless that transfer is explicitly allowed. If authorization cannot be established, hold or fail the operation rather than sending with a stale key.
+
+Integrate with tool boundaries. Read-only tools and effectful tools need different lease scope and expiry. An approval for an external action should bind to the credential generation and argument hash used at commit. Credential renewal must not silently turn an expired approval into a fresh authorization.
+
+Handle unknown provider outcomes. If a request may have been accepted before a credential error or connection reset, preserve the lease and attempt identity for reconciliation. Do not automatically submit again with a new credential until the provider state and side-effect contract are understood. Authentication failure does not prove that no work happened.
+
+Make policy changes visible. Include policy generation, credential generation, and lease status in internal state transitions. A request admitted under one policy may be denied at dispatch under a newer policy. Explain the transition and distinguish policy revocation from credential failure.
+
+Design worker recovery. A recovered worker should load durable lease state and verify current authority before acting. Lease ownership should be fenced so an old worker cannot renew or dispatch after takeover. If the lease store is unavailable, use conservative behavior based on operation risk and remaining deadline.
+
+Audit every use. Record lease issuance, lookup, renewal, revocation, dispatch, provider response, expiry, and cleanup with actor, tenant, operation, generation, scope hash, and timestamps. Link these events to request, attempt, connection, billing, and policy records. The audit trail should show not only which key was used, but why it was valid then.
+
+Connect credentials to billing and data handling. Provider cost, regional routing, data residency, and discount eligibility can depend on the lease scope. Record the authorization context used for each attempt and reconcile corrections when a stale or wrong lease was rejected. Never charge a tenant for provider work performed outside the allowed contract without an explicit correction path.
+
+Test credential races. Cover queue delay past expiry, revocation during dispatch, rotation during streaming, stale worker renewal, duplicate lease issuance, provider key rejection, region transfer, fallback scope mismatch, tenant suspension, policy generation change, clock skew, lease-store outage, reconnect, ambiguous provider outcome, tool approval expiry, crash recovery, and secret exposure in logs. Assert that old authority cannot create new work.
+
+Measure lease correctness. Track issuance latency, lease age at dispatch, expiry rejects, revocation propagation, stale-worker attempts, renewal rate, authentication failures, scope mismatches, unauthorized failover, secret-redaction violations, queue waits past authorization, unknown outcomes, and policy-versus-credential classification accuracy. Short-lived credentials help only when lifecycle evidence is measurable.
+
+The practical pattern is this: define leases, separate identity from authorization, issue late, bind scope, expire deliberately, revoke authoritatively, rotate gradually, protect queues, re-evaluate renewal, keep secrets out of evidence, fence generations, isolate providers, govern streams, limit amplification, authorize failover, bind tools, reconcile unknown outcomes, version policy, recover workers safely, audit every use, link billing and data handling, test races, and measure violations. Credential security at the gateway is not just key storage. It is ensuring that every provider action has current, bounded, explainable authority.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
