@@ -1,0 +1,51 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about response integrity at the AI API gateway: how to verify that provider output remains the same across adapters, retries, caches, streams, and client delivery.
+
+Encryption protects a response while it travels, but integrity is the stronger question: did the gateway receive the bytes it expected, transform them according to policy, and deliver exactly what it claims? A successful HTTP status is not proof that content was not truncated, substituted, duplicated, or altered.
+
+Separate integrity from provenance. Provenance says where content came from. Integrity says whether content changed after that point. A provider signature may help prove origin, while hashes, authenticated envelopes, sequence numbers, and client acknowledgements help prove the path.
+
+Define the response contract. Specify which fields are authoritative, which transformations are allowed, how usage and finish reasons are preserved, whether ordering matters, how errors are represented, and what the client can verify. Do not sign an unstable serialization and expect signatures to survive harmless formatting changes.
+
+Canonicalize before hashing or signing. Define JSON field ordering, number representation, Unicode normalization, whitespace, media metadata, compression behavior, and header treatment. Different serializers must produce the same authenticated representation or the gateway will create false integrity failures.
+
+Use authenticated envelopes. Carry request ID, attempt ID, provider, model, policy revision, sequence, payload digest, usage digest, and integrity metadata in a protected envelope. Bind the envelope to tenant, purpose, destination, and operation so a valid response cannot be moved into another context.
+
+Verify at provider boundaries. Check TLS identity, provider signatures where available, response schema, content length, checksums, request correlation, and usage fields. Transport success without correlation can still attach one request’s response to another.
+
+Handle adapters carefully. Protocol translation can change field names, defaults, token usage, finish reasons, tool-call arguments, and content ordering. Keep a distinction between original provider bytes, normalized representation, and client representation. Record each intentional transformation and authenticate the resulting form.
+
+Protect against substitution. Verify model, provider account, region, request ID, and attempt ID. A cached or retried response must not be accepted merely because its shape is valid. Bind cache keys and response envelopes to the exact request semantics that produced them.
+
+Preserve stream integrity. Streaming needs sequence numbers, chunk hashes or an authenticated stream summary, explicit start and end markers, and a final usage or completion record. Detect missing, duplicated, reordered, and late chunks. A TCP connection ending cleanly does not prove the application stream completed.
+
+Make reconnection safe. When a client reconnects, identify the stream and last acknowledged sequence. Resume only from an authenticated boundary or restart with clear duplication semantics. Never concatenate two streams just because they share a request ID.
+
+Validate structured output. Parse JSON or schema-constrained content before delivery, reject invalid structure, and bind the validated representation to its digest. Ensure validation does not silently rewrite content after the integrity value was computed.
+
+Treat tool calls as high risk. Verify tool name, call ID, argument digest, sequence, authorization context, and policy revision. A modified tool argument can create an external side effect even if the surrounding response appears intact. Require a fresh authorization check before execution.
+
+Protect multimodal responses. Verify image, audio, video, and file length, codec, dimensions, metadata, content digest, and declared relationship to the request. Do not trust a filename or MIME type as an integrity proof. Hash the bytes that the client will actually receive.
+
+Control caches and stores. Store integrity metadata with cached responses, artifacts, embeddings, and transcripts. Validate on read, bind entries to tenant and policy, and quarantine mismatches. A cache hit is useful only when its content and authorization context remain valid.
+
+Handle compression and encryption layers. Decide whether integrity applies before compression, after compression, before encryption, after decryption, or at every boundary. Authenticated encryption should be verified before parsing plaintext. Avoid multiple ambiguous digests that operators cannot interpret.
+
+Coordinate retries and failover. Each provider attempt needs its own identity and digest. If the gateway switches provider or region, do not hide the change behind one undifferentiated response. Preserve attempt lineage and ensure the final result satisfies the client contract.
+
+Prevent response mixing. Isolate buffers, queues, connection pools, caches, and serialization state by request and tenant. Concurrency bugs can combine prefixes, usage data, or tool calls from different responses. Use property-based and stress tests to expose cross-request contamination.
+
+Sign where the trust boundary requires it. Internal signatures can detect accidental corruption between services, while client-facing signatures can help customers verify delivery after the gateway. Use key rotation, key IDs, expiration, algorithm restrictions, and revocation without requiring clients to understand internal topology.
+
+Manage client verification. Publish a stable verification format, key discovery method, clock rules, algorithm policy, and failure behavior. Clients should distinguish an unverifiable response from an empty or valid response. Do not make verification optional for operations where integrity is a safety requirement.
+
+Define partial delivery. For streams, files, and multimodal output, state whether a partial result is usable, retryable, or invalid. Do not mark a truncated response complete because an upstream socket closed or an adapter emitted a finish reason.
+
+Audit without duplicating sensitive content. Record digests, sequence ranges, boundary identities, schema result, transformation list, key ID, verification result, and failure reason. Keep raw prompts and outputs out of integrity logs unless separately authorized and protected.
+
+Test corruption and attack cases. Cover byte flips, truncation, duplication, reordering, stale signatures, wrong keys, wrong tenants, provider substitution, cache poisoning, retry mixing, stream reconnect, invalid JSON, tool argument changes, media metadata mismatch, compression confusion, key rotation, revocation, and client clock skew.
+
+Measure integrity health. Track verification failures, schema failures, missing chunks, duplicate chunks, digest mismatches, cache quarantines, provider correlation errors, transformations, replays, client verification failures, partial deliveries, key age, and time spent verifying.
+
+The practical pattern is this: define the response contract, separate integrity from provenance, canonicalize representations, use authenticated envelopes, verify provider boundaries, record intentional adapter changes, sequence streams, resume safely, validate schemas and media, protect tool calls, verify caches, clarify compression layers, preserve attempt lineage, isolate buffers, sign the right boundaries, give clients usable verification, report partial delivery honestly, audit digests without secrets, test corruption, and measure every mismatch. A response is trustworthy when the gateway can prove not only where it came from, but that the exact bytes and decisions delivered to the client are the ones that passed validation.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
