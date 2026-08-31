@@ -1,0 +1,53 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about data classification routing at the AI API gateway: how to identify public, internal, confidential, regulated, and high-risk content, then bind that classification to model choice, region, provider, logging, caching, tools, and retention.
+
+An API key identifies a caller, but it does not tell the gateway what a request contains. A harmless public question and a request containing health data, source code, financial records, or credentials may come from the same tenant. They cannot safely share the same routing and observability defaults.
+
+Start with a small, operational taxonomy. Define classes by handling consequences, not abstract labels. For each class specify allowed providers, regions, encryption, retention, logging, caching, tool access, human review, and export rules. If a label does not change a decision, it is probably not useful.
+
+Separate declared, inferred, and enforced classification. A client declaration can help with intent but must not be trusted as proof. The gateway may infer signals from fields, metadata, detectors, tenant policy, or workflow type. Enforcement should use the highest-confidence applicable restriction and record uncertainty.
+
+Fail safely under uncertainty. If a detector cannot decide whether content is regulated or sensitive, route it through the stricter policy, request an explicit classification, or reject it. Never treat “unknown” as public merely because classification adds latency.
+
+Classify before provider selection. Model and provider eligibility depends on data class, residency, training and retention terms, incident posture, encryption path, and contractual approval. A healthy endpoint is not automatically an eligible endpoint for confidential input.
+
+Keep classification scoped. A request can contain public instructions and confidential retrieval results. A response can include generated text and sensitive tool output. Classify each artifact and the combined operation, preserving the strictest necessary handling without unnecessarily labeling all tenant data as highly restricted forever.
+
+Bind classification to context. Carry class, source, detector version, confidence, policy revision, region, purpose, and expiry through queues, workers, provider adapters, tools, streams, caches, and callbacks. A downstream process must not silently fall back to its own default classification.
+
+Avoid leaking the classified content. Detectors should return labels, evidence types, confidence, and safe references rather than copying the entire prompt into logs. Redact matched values and protect classifier traces as sensitive metadata.
+
+Use layered detection. Combine structured field declarations, tenant workflow metadata, pattern rules, file and media metadata, DLP detectors, and model-assisted classification where appropriate. No single detector is perfect, and a model-generated label should not be the sole authorization for a less restrictive route.
+
+Control detector errors. Measure false positives and false negatives by data class, language, modality, tenant, and workflow. High false positives create unnecessary cost and degraded capability; false negatives can cause provider, logging, or residency violations. Maintain reviewed test sets and a process for correcting labels.
+
+Handle mixed and transformed data. OCR, transcription, translation, summarization, embeddings, thumbnails, and extracted metadata can preserve or alter sensitivity. Derived artifacts inherit restrictions unless a documented transformation policy proves otherwise. A redacted summary may have a lower class, but that decision needs evidence.
+
+Protect prompts and outputs. System instructions can contain confidential business logic, retrieval can contain personal data, and model output can reproduce both. Classify the complete effective input and output handling path, not only the user-visible message.
+
+Make tools classification-aware. A tool should receive only the fields and representation allowed for its class. Tool results can raise the operation’s classification. External side effects require authorization under the resulting class, not the original request label.
+
+Govern caching. Cache keys, values, and metadata must carry tenant, data class, purpose, policy, region, and expiry. Public responses may be broadly cacheable; confidential responses generally need strict tenant scope or no caching. A cache hit must re-check current access and classification policy.
+
+Govern logging and tracing. Public and internal requests may support richer diagnostics, while regulated or high-risk data should produce metadata-only telemetry or protected captures. Sampling, debugging, incident modes, and provider error logs must not bypass classification rules.
+
+Choose region and provider deliberately. Residency, contractual processing terms, subcontractors, training use, and retention windows can vary by provider and geography. Store the eligibility decision and the terms version used. Do not infer compliance from a provider brand name alone.
+
+Connect classification to cost and latency. Strict routes may have fewer providers, higher encryption or inspection overhead, and less cache reuse. Estimate the tradeoff before admission and explain it to operators. Optimization must not quietly lower data protection to meet a latency or price target.
+
+Support user corrections. Clients and authorized operators need a way to dispute a classification, provide evidence, and request reprocessing. Corrections should affect future routing and explicitly governed replays, not rewrite the historical decision attached to a completed request.
+
+Version classifiers and policies. Store classifier model or rule revision, taxonomy version, policy revision, and effective time. Shadow-test changes on representative traffic, compare route and retention decisions, and roll out gradually. A label change can alter provider exposure and must be treated like a production policy change.
+
+Define retention by class and artifact. Prompt, output, tool result, media, embeddings, traces, billing evidence, and classifier metadata may have different retention needs. Deleting payloads must not leave an uncontrolled derived copy in a cache, backup, vector store, or analytics export.
+
+Handle escalation and downgrade. Classification may rise when a tool returns sensitive data, but a downgrade should require a specific transformation, detector result, and policy approval. Do not let a client header or a prompt phrase lower restrictions mid-request.
+
+Return useful errors. Distinguish missing classification, low confidence, forbidden provider, region unavailable, retention conflict, tool restriction, cache denial, export blocked, and policy version mismatch. Explain the safe next step without revealing detector rules that would make evasion easier.
+
+Test adversarial inputs. Cover obfuscation, multilingual text, encoded secrets, images with embedded text, audio, mixed tenants, prompt injection into retrieved data, classifier outage, detector disagreement, policy rollout, tool escalation, cache collision, provider failover, region shortage, debug mode, backup restore, and deletion completion.
+
+Measure classification governance. Track unknown rate, confidence distribution, false positive and negative estimates, strict-route share, provider eligibility rejects, region rejects, policy overrides, classification escalations, downgrade approvals, sensitive payload logging incidents, cache denials, detector latency, and deletion gaps by artifact type.
+
+The practical pattern is this: define an actionable taxonomy, separate declarations from inference and enforcement, fail safely under uncertainty, classify before routing, scope labels to artifacts, propagate verified context, minimize detector evidence, combine detection layers, test error rates, inherit restrictions through transformations, bind tools and caches, govern telemetry, select providers by terms and region, price the protection path, support corrections, version classifiers, define artifact retention, control escalation and downgrade, return typed errors, test evasion, and measure every exception. Data classification is reliable when the label changes real runtime decisions and those decisions remain visible from ingress to deletion.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
