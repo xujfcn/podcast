@@ -1,0 +1,57 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about review queue governance at the AI API gateway: what happens after an automated decision needs a human, and how to preserve context, priority, privacy, and accountability without turning review into an unbounded bottleneck.
+
+Human review is not a single feature. It is a queueing system with intake, triage, assignment, evidence, decision, timeout, escalation, and feedback. If any step loses the request’s purpose or risk context, the reviewer may make a decision that is impossible to trust or reproduce.
+
+Start with an escalation contract. Define which conditions create a review task: policy uncertainty, safety ambiguity, high-value side effect, unresolved model disagreement, missing evidence, customer appeal, or compliance requirement. Record the trigger and distinguish mandatory review from optional consultation.
+
+Preserve the decision context. Carry tenant, principal, purpose, risk class, request ID, model and provider attempts, policy revision, relevant evidence, proposed action, budget, deadline, and required decision scope. Do not forward the entire conversation by default.
+
+Minimize reviewer exposure. Redact secrets, personal data, unrelated tenant content, and hidden credentials before presenting a task. Use tokenized fields or secure references when the reviewer can decide without seeing the original value.
+
+Make the queue multi-tenant safe. Partition tasks by tenant, authorization, region, and review team. A reviewer’s access to one customer’s case must not expose another customer’s prompts, artifacts, or policy data through search, batching, or adjacent tasks.
+
+Classify by risk and urgency. A request involving an external side effect, vulnerable user, regulated data, or expiring deadline may need different handling from a low-risk quality appeal. Use explicit priority rules instead of letting arrival order decide everything.
+
+Prevent starvation. Reserve capacity for urgent classes, enforce aging, and monitor queue time by segment. A queue that processes easy tasks first can leave high-risk cases waiting until their decision is no longer useful.
+
+Avoid duplicate reviews. Use an idempotency key and case identity. Retries, browser refreshes, provider callbacks, and multiple escalation signals should update one task or create a deliberate linked task, not several independent decisions.
+
+Assign by capability. Match language, domain, policy, tool, and authorization requirements to qualified reviewers. Do not route a financial or safety-sensitive case to a general queue merely because it is available.
+
+Separate reviewer identity from customer identity. Record who reviewed, which role they held, and under what authorization, but do not reveal unnecessary reviewer personal information to the customer. Preserve accountability without creating a new privacy risk.
+
+Show evidence, not persuasion. Present structured facts, policy references, model outputs, tool proposals, validation results, and uncertainty. Do not ask a generated summary to convince the reviewer. Mark observed, verified, inferred, and model-generated evidence separately.
+
+Make decisions bounded. A reviewer should choose from explicit outcomes such as approve, deny, modify, request more information, route to specialist, or expire. If free text is allowed, validate that it cannot silently grant a broader permission or create an unapproved side effect.
+
+Bind approval to the exact action. Include resource, recipient, arguments, amount, data scope, policy revision, and expiry. Approval of a plan is not approval of a later plan that changed materially.
+
+Revalidate before execution. A review decision can become stale while waiting in a queue. Check tenant status, revocation, policy, provider, route, resource, budget, and current request state immediately before applying it.
+
+Handle timeouts honestly. Define what happens when a reviewer misses the deadline: safe deny, safe default, specialist escalation, client-visible pending state, or automatic expiration. Do not treat silence as approval unless the policy explicitly says so.
+
+Support handoffs. When a task moves between reviewers or teams, preserve the case ID, evidence version, prior decisions, open questions, and reason for transfer. Avoid forcing the next reviewer to reconstruct the case from raw logs.
+
+Control reviewer workload. Limit active cases, batch only compatible tasks, provide pause and handoff controls, and track fatigue indicators. Fast decisions are not necessarily good decisions when queue pressure encourages rubber-stamping.
+
+Protect against adversarial content. Prompts, attachments, tool results, and model-generated recommendations shown to reviewers are untrusted. Isolate instructions from evidence, clearly label user content, disable unintended links or scripts, and prevent a document from impersonating the review system.
+
+Keep side effects single-owner. After approval, one authorized executor should perform the action with an idempotency key and a fresh authorization check. Do not let both the reviewer interface and the original agent execute the same approved operation.
+
+Handle partial and streaming requests. A review may be triggered after some output reached the client or after a stream partially executed. Record what was delivered, what remains blocked, and whether correction, cancellation, or notification is required.
+
+Make customer status useful. Return a stable case reference, expected state, safe reason code, and next step. Do not expose internal reviewer notes, other customers’ data, or sensitive detection logic merely to appear transparent.
+
+Control appeals. An appeal should reference the original decision and add new evidence or a valid challenge. Avoid sending every disagreement back to the same reviewer and avoid allowing unlimited appeals to bypass queue controls.
+
+Feed outcomes back safely. Human decisions can improve prompts, policies, routing, and evaluation, but they are not automatically training data. Version labels, record purpose and consent, remove sensitive content, and distinguish policy decisions from subjective preferences.
+
+Audit the complete lifecycle. Record trigger, case creation, priority, assignment, evidence version, access, handoffs, decision, approval scope, revalidation, execution, timeout, appeal, and final outcome. Keep raw content only where necessary and permitted.
+
+Test queue failure modes. Cover duplicate escalation, stale approvals, expired tasks, priority inversion, tenant leakage, reviewer access loss, team outage, adversarial attachments, partial delivery, executor retry, policy change, revocation, clock skew, and database or notification failure.
+
+Measure review quality. Track time to assignment, time to decision, aging, abandonment, escalation rate, duplicate cases, reversal rate, reviewer disagreement, false approvals, false denials, revalidation failures, side effects prevented, privacy incidents, and outcome quality by risk class.
+
+The practical pattern is this: define escalation triggers, preserve bounded context, minimize reviewer exposure, partition tenants, classify risk and urgency, prevent starvation and duplicates, assign by capability, separate identities, show evidence, bound decisions, bind approval to exact actions, revalidate before execution, define timeout behavior, preserve handoffs, control workload, isolate adversarial content, keep one side-effect owner, handle partial delivery, expose safe status, govern appeals, use feedback carefully, audit the lifecycle, test failure modes, and measure outcomes. Human review becomes a reliable control when the queue preserves the meaning of the original request and makes every approval narrow, current, and accountable.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
