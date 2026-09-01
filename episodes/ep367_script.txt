@@ -1,0 +1,57 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision explanations at the AI API gateway: how to explain why a request was routed, transformed, denied, quarantined, or blocked from using a tool without exposing sensitive policy internals.
+
+An unexplained decision is hard to debug and hard to trust. But a fully exposed decision trace can reveal security thresholds, private tenant rules, sensitive attributes, or attack paths. Good explanation design must serve users and operators without turning policy into a map for bypass.
+
+Start with a decision contract. Define the decision type, protected resource, subject, tenant, requested operation, evaluated facts, policy revision, outcome, obligations, reason codes, evidence references, audience, and retention requirements.
+
+Separate the decision from the explanation. The policy engine should produce a stable decision record first. User-facing text, developer diagnostics, reviewer context, and audit evidence should be derived from that record for different audiences.
+
+Use stable reason codes. Codes such as unsupported capability, expired authority, region restriction, safety risk, budget exceeded, stale evidence, tool scope denied, or review required are easier to automate and test than free-form model explanations.
+
+Make reasons composable. A request may be denied because the data is sensitive, the selected provider is outside the approved region, and no compliant fallback is available. Preserve the relevant chain rather than returning one arbitrary reason.
+
+Record evaluated facts carefully. Include typed references to tenant, purpose, data class, model capability, provider status, cost limit, risk level, and approval state. Avoid copying raw prompts, secrets, or personal data into every decision record.
+
+Bind every explanation to policy versions. Store the policy bundle, model catalog, provider facts, classifier versions, tenant configuration, and exception set used at evaluation time. A reason without versions cannot reliably explain a historical decision.
+
+Preserve rule provenance. Identify which organization owns the rule, whether it came from law, contract, tenant policy, product policy, or temporary exception, and when it became effective. Do not expose confidential rule text to unauthorized callers.
+
+Use audience-specific explanations. End users may need a concise correction path. Developers need machine-readable codes and fields. Operators need dependency and policy details. Auditors need signed evidence. Security teams may need protected detection signals.
+
+Provide actionable next steps. Explain whether the caller can choose another model, remove unsupported content, refresh consent, request approval, reduce cost, retry later, or contact an administrator. Never suggest a workaround that defeats the policy’s purpose.
+
+Do not claim certainty the engine did not have. Distinguish denied, conditionally allowed, review required, unavailable evidence, conflicting policy, and policy service unavailable. An operational failure must not be presented as a substantive safety judgment.
+
+Explain routing decisions. Record required capabilities, excluded providers, regional and retention constraints, health state, cost class, latency objective, fallback eligibility, and selected route. Reveal only the subset appropriate for the caller.
+
+Explain transformations. If the gateway redacts, summarizes, removes operational detail, changes modality, disables tools, or switches to a safer model, identify the applied obligation and the material effect on the response.
+
+Explain tool denials separately from answer denials. The model may be allowed to discuss an action while the gateway refuses to execute it. Make clear whether content, authority, arguments, recipient, side-effect risk, or approval caused the block.
+
+Protect against inference attacks. Repeated requests can use detailed explanations to discover thresholds, hidden classifiers, provider arrangements, or protected account state. Rate-limit probes, coarsen sensitive reasons, and monitor systematic boundary testing.
+
+Avoid sensitive attribute disclosure. A decision may depend on age class, location, account risk, data classification, or protected policy context. Explain the controlling requirement without exposing an attribute the caller is not authorized to know.
+
+Keep model-generated prose subordinate. A model can render a friendly explanation, but it should receive approved reason codes and safe fields. It must not invent reasons, expose hidden facts, or reinterpret a deny decision as permission.
+
+Make explanations deterministic where possible. The same decision record and audience should produce equivalent codes, obligations, and correction paths. Cosmetic wording may vary, but operational meaning must remain stable.
+
+Sign high-impact decision evidence. For regulated or financially material workflows, preserve digests, timestamps, policy identifiers, and decision receipts so later review can verify that the explanation matches the executed policy.
+
+Handle policy conflicts explicitly. Tenant rules, product policy, jurisdiction constraints, user preferences, and temporary exceptions can disagree. Record precedence, conflict outcome, and whether review or fail-safe behavior was required.
+
+Support replay. Operators should be able to re-evaluate a stored fact set against the historical policy revision and against the current policy. Label the results clearly so a modern replay is not mistaken for the original decision.
+
+Support appeals without changing history. A reviewer may overturn, narrow, or approve an exception, but the original decision record should remain immutable. Link the new decision, authority, scope, expiry, and reviewer evidence.
+
+Measure explanation quality. Track unknown reason codes, generic fallbacks, user correction success, repeated denials, operator time to diagnosis, appeal overturns, explanation-policy mismatches, sensitive-detail leaks, and decisions missing historical versions.
+
+Test every audience. Verify that end-user messages are useful, developer responses are stable, operator views are complete, auditor evidence is reproducible, and security details remain protected. Test localization without changing policy meaning.
+
+Test adversarial cases. Cover conflicting rules, stale provider facts, classifier disagreement, revoked exceptions, policy outages, repeated boundary probes, unauthorized audit requests, model-invented reasons, missing versions, replay differences, and partial transformations.
+
+Fail safely when explanation generation fails. The underlying decision must remain enforced. Return a stable generic reason code and correlation identifier, preserve the decision record, and avoid replacing a denial with an allow because the explanatory layer is unavailable.
+
+The practical pattern is this: create stable decision records, separate decisions from presentations, use composable reason codes, preserve typed facts and policy versions, track rule provenance, tailor explanations by audience, offer legitimate correction paths, represent uncertainty honestly, explain routing, transformations, and tool denials, protect against inference and sensitive disclosure, keep model prose subordinate, make operational meaning deterministic, sign high-impact evidence, expose conflicts, support historical replay and appeals, measure quality, test every audience and adversarial case, and fail safely. Policy becomes operable when every important outcome can answer what was decided, which approved facts and rules controlled it, and what the authorized next step is.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
