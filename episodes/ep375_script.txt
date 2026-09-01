@@ -1,0 +1,65 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision state governance at the AI API gateway: how to distinguish a temporary permission, a pending review, an executed action, a revoked decision, and a truly final outcome.
+
+Many systems reduce policy to allow or deny, then lose the lifecycle around that answer. An allow may still need approval. A tool action may be accepted but not completed. A response may be generated but not delivered. A decision may be revoked while work is queued. Without explicit states, retries and caches can turn an intermediate result into permanent permission.
+
+Start with a decision state machine. Define states such as evaluated, allowed, denied, pending facts, pending approval, admitted, executing, partially completed, completed, delivery pending, revoked, expired, failed, quarantined, compensated, and closed.
+
+Give every transition a cause. State changes should identify the triggering event, policy snapshot, actor, evaluator, timestamp, previous state, next state, and required obligations. Do not let workers mutate state through untracked booleans.
+
+Separate decision state from operation state. Policy may say an action is permitted while the provider is unavailable, a tool is executing, or delivery has not begun. Keep authorization, execution, and delivery as related but distinct state machines.
+
+Define terminal states carefully. Denied, expired, revoked, completed, compensated, and closed do not mean the same thing. A completed decision may still require retention cleanup, billing reconciliation, notification, or deletion verification.
+
+Distinguish provisional from final permission. A preliminary allow may authorize preparation but not provider dispatch, external side effects, or client delivery. Attach an explicit capability boundary to each state.
+
+Use typed outcomes. Represent allow, deny, review, unavailable, unknown, admitted, executing, partial, and completed as structured values with validity, obligations, and next actions. Avoid forcing every lifecycle event into a policy boolean.
+
+Define retry eligibility. A transport failure may retry an admitted operation. A pending approval must not be retried as though approved. A revoked or expired decision requires a new evaluation unless a documented cleanup action is being performed.
+
+Make idempotency state-aware. Repeated requests should locate the existing decision and operation state before creating work. Prevent duplicate provider charges, tool effects, approvals, notifications, and compensating actions.
+
+Control decision caching. Cache a final decision only when its scope, facts, obligations, validity, and terminal semantics permit reuse. Never cache pending review, unknown, unavailable, or provisional allow as ordinary permission.
+
+Control result caching separately. A generated response may be reusable only if the original policy permits reuse for this subject, purpose, tenant, data class, and policy version. A completed inference does not automatically authorize a new delivery context.
+
+Define admission semantics. An admitted request has crossed a gateway boundary, but it may not yet have reached a provider or tool. Record what admission guarantees and what later checks remain mandatory.
+
+Track obligation completion. A request should not enter a terminal completed state while required redaction, retention assignment, delivery receipt, audit evidence, or external notification remains unresolved.
+
+Handle partial completion honestly. If a batch has ten items and three finished before policy revocation, preserve item-level states. Do not summarize the batch as simply allowed or denied.
+
+Handle unknown outcomes. A network timeout after a tool call may leave the external state unknown. Do not blindly retry a possibly completed side effect. Query, reconcile, or use an idempotency key before continuing.
+
+Model revocation transitions. A revoked decision should identify whether queued work is canceled, executing work is paused, output delivery is blocked, or already completed effects require cleanup or compensation.
+
+Model expiration transitions. Expiration may stop new work while allowing a bounded cleanup or delivery step. Define this explicitly rather than allowing workers to infer that every expired request must be abandoned.
+
+Separate failure from denial. A policy engine outage, provider timeout, missing evidence, and rule-based denial require different state transitions, retry behavior, alerts, and user explanations.
+
+Protect state monotonicity. Some transitions should never move backward, such as completed to evaluated. Corrections should create a new event or compensating state, not rewrite history.
+
+Use event history as the source of truth. Store append-only decision events and derive current state from them. Include correlation IDs linking policy evaluation, provider attempts, tool calls, reviews, deliveries, billing, and cleanup.
+
+Make concurrency explicit. Multiple workers may observe the same pending request. Use compare-and-set versions, leases, or transactional transitions so only one owner performs a state-changing action.
+
+Handle human review. A reviewer approval should be scoped to the exact decision, subject, purpose, operation, and validity window. Reject duplicate, stale, transferred, or broadened approvals.
+
+Handle policy changes during execution. If a new policy activates, define whether existing decisions remain valid, require reauthorization, or enter a draining state. Keep the answer consistent across retries and regions.
+
+Keep user-facing explanations aligned. Tell users whether work was denied, waiting, accepted, running, partially completed, delivered, or stopped. Do not report success merely because the gateway created a job.
+
+Reconcile external state. For provider calls, payments, messages, file writes, and tool actions, compare gateway state with the external receipt and final status. Mark unknown or mismatched outcomes for recovery instead of guessing.
+
+Define closure criteria. A decision is closed only when execution, delivery, obligations, billing, retention, notifications, and recovery tasks reach their required states. Closure should be policy-specific and auditable.
+
+Support safe replay. Replaying an event stream should reproduce the same current state without sending provider requests or repeating external effects. Separate state reconstruction from side-effect execution.
+
+Test transition properties. Verify idempotence, no duplicate side effects, no permission expansion during retry, no delivery after revocation, correct handling of unknown outcomes, and preservation of completed effects.
+
+Audit state transitions. Record the original decision, every event, actor, version, evidence, side effect, failure, retry, reviewer, revocation, compensation, and closure reason. Minimize sensitive payloads in the event log.
+
+Measure lifecycle health. Track time spent in pending states, provisional allows, stale decisions, duplicate transitions, unknown external outcomes, post-revocation work, incomplete obligations, partial completions, recovery time, and decisions closed without complete evidence.
+
+The practical pattern is this: define an explicit state machine, separate authorization from execution and delivery, distinguish provisional from final permission, type outcomes, make retries and caches state-aware, record admission guarantees, track obligations, preserve partial and unknown results, model revocation and expiration, separate failures from denials, enforce monotonic transitions, use event history, control concurrency, scope human approvals, define policy-change behavior, align explanations, reconcile external state, establish closure criteria, replay safely, test invariants, audit every transition, and measure lifecycle health. A policy decision is complete not when it returns allow, but when its permission, execution, obligations, external effects, and final evidence all reach an intentional state.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
