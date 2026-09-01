@@ -1,0 +1,81 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy evaluation cost governance at the AI API gateway: how to measure the work a policy requires, budget it before publication, and degrade safely when real requests approach the limit.
+
+Policy cost is easy to ignore because the result is usually a small allow or deny. Behind that result may be thousands of rules, remote facts, nested evaluations, regular expressions, joins, classifiers, and retries. A new policy can be logically correct and still consume the gateway’s capacity.
+
+Start with a cost model. Count rule visits, predicate operations, graph traversals, collection sizes, fact lookups, dependency latency, cache misses, regex complexity, nested calls, memory allocations, and output obligations. The model should describe work, not just elapsed time.
+
+Separate fixed and variable cost. Parsing and loading a policy are mostly fixed; evaluating a wildcard against a large tenant set or fetching a risk signal is variable. Budget both publication-time preparation and request-time execution.
+
+Measure worst-case cost. Average requests hide adversarial or rare paths. Estimate maximum rules visited, fan-out, recursion depth, collection expansion, dependency calls, and memory use for every reachable branch.
+
+Use representative cost tests. Run common, high-risk, boundary, adversarial, cold-cache, slow-dependency, and nested requests. Record distributions and tail behavior rather than one benchmark number.
+
+Budget by request and tenant. A single request needs a CPU, memory, dependency, and latency budget. Tenants and applications also need aggregate quotas so a high-volume workload cannot turn individually cheap evaluations into a shared outage.
+
+Budget nested work. Tool authorization, response filtering, provider checks, billing, and fallback decisions may call policy evaluation again. Pass a child budget and reserve room for mandatory controls.
+
+Reserve safety capacity. Revocations, emergency denies, sensitive-data checks, and control-plane operations must still run when ordinary policy traffic is expensive. Do not spend every worker on optional evaluations.
+
+Set complexity limits. Bound rule count, inheritance depth, exception count, wildcard breadth, collection size, regex length, expression nesting, dependency fan-out, and compiled artifact size. Reject or review policies beyond those limits.
+
+Charge cost to the right owner. Attribute policy preparation and runtime evaluation to policy version, tenant, application, route, and dependency. A global average hides which change created the load.
+
+Distinguish latency from cost. A fast cache hit may consume memory; a slow remote lookup may be inexpensive in CPU but expensive in tail latency and failure exposure. Use multiple resource dimensions.
+
+Model dependency cost. Record calls, timeouts, retries, payload size, rate limits, and failure behavior for identity, consent, classification, risk, provider capability, and billing services. A policy cost includes the systems it makes necessary.
+
+Model cache behavior. Estimate cold and warm paths, invalidation bursts, stampedes, entry size, and cross-tenant partitioning. A policy that is cheap only with a perfectly warm cache is not predictable.
+
+Model short-circuiting carefully. First-match or deny-overrides may reduce average work, but a policy update can move expensive rules earlier or remove a shortcut. Benchmark both favorable and unfavorable branch order.
+
+Model unknown and retry paths. Missing facts, evaluator timeouts, dependency retries, and fallback checks can multiply work. Budget the safe error path, not only the successful allow path.
+
+Avoid attacker-controlled amplification. Request fields, tool arguments, resource lists, and batch sizes must not control unlimited policy work. Normalize, cap, summarize, or reject oversized inputs before evaluation.
+
+Control collection operations. Membership checks, joins, set expansion, and inherited group resolution can become quadratic or worse. Use bounded indexes, cardinality limits, and explicit cost estimates.
+
+Control pattern matching. Unbounded regular expressions, recursive patterns, and content-dependent classifiers can create pathological work. Use safe engines, timeouts, complexity checks, and tested limits.
+
+Control remote fan-out. One request should not trigger an uncontrolled set of provider, region, identity, or data-policy calls. Batch safely, cache only when valid, and cap fan-out with typed incomplete results.
+
+Make budgets policy-aware. High-risk operations may receive more validation work but stricter execution guarantees. Low-risk paths may use a cheaper prefilter, but they must not bypass mandatory restrictions.
+
+Define safe over-budget behavior. Depending on operation risk, pause for review, return unknown, deny, use a previously approved constrained path, or ask the client to narrow the request. Never silently skip a required control.
+
+Do not turn budget fallback into an allow. A failed optimization or truncated evaluation must not be interpreted as permission. Preserve deny, review, and unknown as distinct outcomes.
+
+Make degradation observable. Return stable reason codes, budget identifiers, policy versions, and retry guidance without exposing sensitive rule internals. Operators need to know whether a request was denied by policy or by resource protection.
+
+Account for admission. Evaluate estimated cost before admitting work to a queue or stream. A request that cannot fit its policy and execution budgets should not consume downstream capacity first.
+
+Account for long-running work. Reserve or refresh budget across streams, queued tasks, tool plans, and retries. Reauthorization should include remaining cost and time, not just permission.
+
+Account for batch requests. Charge each item and the shared setup separately, bound batch size, and prevent one tenant from hiding huge work behind a single API call.
+
+Account for policy compilation. Compilation, indexing, schema expansion, and dependency precomputation can create control-plane spikes. Schedule and rate-limit expensive preparation independently from request serving.
+
+Use cost-aware publication gates. Block policies with unbounded branches, excessive tail cost, unsafe dependency fan-out, insufficient reserve capacity, or unexplained regressions. Approval should include resource evidence, not only semantic correctness.
+
+Compare versions. Measure old and new cost across the same request corpus. Highlight rule visits, cache behavior, dependency calls, memory, latency, and budget failures that change materially.
+
+Use cost witnesses. For every important policy branch, store a minimized request that exercises its expensive path and a worst-case context that tests its declared bound. Do not rely on average synthetic traffic.
+
+Test cost under failures. Slow or fail dependencies, empty caches, expire facts, force retries, disable regions, and trigger fallback routes. Verify that bounded work and safe decisions survive degraded conditions.
+
+Test cancellation. Disconnect clients, expire deadlines, cancel queued tasks, and abort nested evaluations. Confirm that budgets are released and no background work continues without an owner.
+
+Test concurrency. Run expensive policies across tenants and routes, combine cold-cache bursts with ordinary traffic, and verify fair scheduling, reserved capacity, and tail latency boundaries.
+
+Test policy mutations. Add wildcards, widen collections, deepen inheritance, reorder rules, add dependencies, and increase nesting. The pipeline should detect cost growth before activation.
+
+Test accounting integrity. Retry requests, replay decisions, hit caches, and use aliases. Ensure cost attribution does not double-charge or hide work behind the wrong tenant or policy version.
+
+Observe cost continuously. Track evaluation CPU, memory, queue time, dependency calls, cache misses, recursion, rule visits, budget exhaustion, safe degradations, and tail latency by bounded dimensions.
+
+Review cost drift. Providers, classifiers, fact stores, evaluator versions, hardware, and traffic shape can change without a policy diff. Rebaseline cost when dependencies or environments change.
+
+Keep security ahead of optimization. Never remove a required check solely because it is expensive. Simplify predicates, precompute safe facts, narrow scope, or allocate capacity; do not convert security into an optional feature.
+
+The practical pattern is this: build a multidimensional cost model, separate fixed and variable work, estimate worst-case reachable paths, benchmark representative and adversarial contexts, budget requests, tenants, dependencies, nested calls, queues, streams, batches, and compilation, reserve safety capacity, cap complexity and attacker-controlled amplification, model caches, retries, unknowns, and failures, define typed over-budget behavior, gate publication on cost evidence, compare versions with cost witnesses, test cancellation, concurrency, outages, mutations, and accounting, observe resource use continuously, and rebaseline when the environment changes. A policy is production-ready when its decision semantics and resource behavior are both bounded, explainable, and safe under stress.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
