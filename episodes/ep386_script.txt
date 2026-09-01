@@ -1,0 +1,65 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy priority governance at the AI API gateway: how to resolve conflicts between platform, region, tenant, project, request, provider, and emergency rules without letting a convenient override erase a critical safeguard.
+
+Many policy systems have layers. A global rule sets a baseline, a tenant adds restrictions, a project adds workflow requirements, and a request carries context. Without explicit priority semantics, the result depends on evaluation order, implementation detail, or whichever rule happens to run last.
+
+Start with a policy layer model. Name each layer, its owner, its authority, its scope, its allowed effects, and the layers it may constrain or override. A layer should never gain authority merely because it is closer to the request.
+
+Separate grants from constraints. A tenant or request rule may narrow an operation, add an obligation, or require review. It should not automatically remove a global deny, bypass data handling requirements, or grant a capability that its authority does not own.
+
+Define precedence as semantics. Document whether rules use deny-overrides, permit-overrides, first-match, most-specific, priority weights, or an explicit combining algorithm. Avoid leaving precedence to file order, network timing, or evaluator traversal.
+
+Protect non-overridable invariants. Emergency blocks, legal restrictions, tenant isolation, credential revocation, sensitive-data boundaries, and mandatory obligations should be represented as constraints that lower layers cannot cancel.
+
+Use bounded override scopes. An override should identify the exact subject, tenant, operation, model, provider, region, data class, purpose, time window, and effect it changes. Broad wildcard overrides are difficult to review and easy to misuse.
+
+Require an authority match. The author of an override must own the dimension being changed. A project administrator should not be able to override a platform-wide security restriction, and a provider adapter should not be able to grant customer permissions.
+
+Model conflict explicitly. If one rule allows and another denies, produce a structured conflict with sources, priorities, scopes, obligations, and the chosen resolution. Do not hide the losing rule or reduce the result to an unexplained boolean.
+
+Preserve obligations from every applicable layer. A request may be allowed only if global logging, tenant redaction, regional storage, project approval, and provider restrictions all survive the merge.
+
+Define combination for each effect. Permissions, denials, obligations, rate limits, budgets, routes, data destinations, and retention periods may need different merge rules. One universal priority number is rarely enough.
+
+Use restrictive composition for limits. For quotas, token budgets, concurrency, retention, geographic scope, and data exposure, combine toward the safer bound unless an explicitly authorized policy says otherwise.
+
+Use union only when safe. Combining allowed models, tools, regions, or providers by union can expand authority. Require an authority check and an explicit purpose before a union increases the available set.
+
+Handle specificity carefully. A more specific rule should not automatically outrank a safer global rule. Specificity can refine scope, but it must remain inside the parent layer’s non-overridable constraints.
+
+Control temporary overrides. Every exception needs an issuer, reason, scope, start time, expiry, review owner, and automatic removal behavior. Temporary priority should not become permanent authority through repeated renewal.
+
+Control emergency priority. An emergency rule may stop work or add restrictions immediately. Granting new access during an incident requires stronger authorization, explicit expiry, and independent review.
+
+Avoid priority inversion. A low-priority rule should not trigger an expensive path that delays a high-priority safety decision, and a low-risk request should not be able to consume the evaluation budget needed for revocation or emergency blocking.
+
+Keep priority separate from scheduling. A policy’s authority to affect a decision is not the same as a request’s queue priority. Do not let a high-priority workload bypass authorization semantics.
+
+Make priority stable across systems. Gateways, sidecars, batch workers, tool executors, regional evaluators, and offline analyzers must use the same layer identifiers, combining algorithms, and conflict rules.
+
+Version the priority model. Changing layer order or combining semantics can change every decision even when policy artifacts remain unchanged. Treat the priority model as a governed artifact with compatibility and migration checks.
+
+Use semantic diffs for priority changes. Show which conflicts resolve differently, which obligations may disappear, which overrides gain or lose authority, and which populations can change behavior.
+
+Build a conflict test matrix. Cover global deny versus tenant allow, tenant deny versus request allow, emergency block versus every grant, provider restriction versus model preference, data boundary versus route override, and multiple obligations with incompatible requirements.
+
+Test associativity and ordering. If policies are merged in different orders, the result should remain the same wherever the declared semantics require it. Order-dependent behavior is a portability and security defect.
+
+Test monotonic restrictions. Adding a valid deny, reducing a data scope, shortening an expiry, or adding an obligation should not accidentally create a broader permission elsewhere in the merge.
+
+Test unknown and conflict states. Missing priority metadata, unsupported layers, duplicate priorities, contradictory obligations, and invalid authority should produce review, restricted, or deny outcomes according to policy—not an arbitrary winner.
+
+Protect against priority injection. Do not accept client-provided priority, system labels, or “admin override” fields as authoritative. Resolve priority from trusted policy metadata and authenticated authority.
+
+Protect generated rules. If an agent proposes an override or assigns a priority, validate the requested scope against its delegated capability. A generated number such as priority zero must not become a privileged bypass.
+
+Explain the winning result. Return source identifiers, layer names, conflict resolutions, preserved obligations, and reason codes without exposing secret policy content. Operators need to know why a rule won.
+
+Monitor priority behavior. Track overrides, conflicts, non-overridable blocks, priority changes, unexpected winners, obligation drops, scope expansions, and decisions whose outcome depends on a temporary rule.
+
+Audit effective policy. Store both the individual rules and the resolved decision context. Later investigation must be able to reconstruct which layer constrained or enabled the request.
+
+Review orphaned and shadowed rules. A rule that can never win may be dead configuration; a rule that always loses may indicate an incorrect priority or missing authority. Both deserve cleanup or explicit documentation.
+
+The practical pattern is this: define layers and authority, separate grants from constraints, specify combining semantics, protect non-overridable invariants, bound override scopes, match authority to the changed dimension, expose conflicts, preserve obligations, define effect-specific merges, compose limits restrictively, control temporary and emergency rules, prevent priority inversion, separate authority from scheduling, standardize semantics across evaluators, version the priority model, use semantic diffs, test conflict matrices, ordering, monotonic restrictions, unknowns, and injection, explain winners, monitor behavior, audit effective decisions, and clean up shadowed rules. Priority governance is successful when every evaluator can explain not only which rule won, but why it was allowed to win and which protections were never eligible to be overridden.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
