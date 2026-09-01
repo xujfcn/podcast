@@ -1,0 +1,65 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy continuity at the AI API gateway: how to keep authorization safe when the policy control plane, evaluator, fact service, or regional connection is unavailable.
+
+Policy is part of the request path. If it disappears, the gateway may stop all traffic, reuse an unsafe stale decision, or bypass authorization to preserve availability. Continuity defines which protections survive failure and how long disconnected components may keep acting.
+
+Start with a continuity objective. Define which policy operations must remain available, which may degrade, which must pause, and how quickly every region must recover. Availability requirements should be tied to risk, not one global percentage.
+
+Separate control plane from data plane. Policy authoring, approval, compilation, publication, and distribution belong to the control plane. Request evaluation and enforcement belong to the data plane. A control-plane outage should not automatically remove the last verified runtime policy.
+
+Distribute immutable policy bundles. Each runtime should hold a signed artifact containing policy, schemas, dependency declarations, obligations, compatibility metadata, activation time, expiry, and rollback reference.
+
+Verify bundles locally. Check signatures, digests, issuer authority, compatibility, activation scope, and expiration before use. A cached artifact is not trustworthy merely because it was downloaded earlier.
+
+Define a last-known-good policy. Select it through successful validation, activation, runtime evidence, and health criteria. Do not equate the most recent bundle with the safest fallback.
+
+Bound staleness. Give every artifact and dependency a maximum disconnected lifetime based on operation risk. Public low-risk inference may tolerate more staleness than privileged tools, sensitive data, payments, or cross-region transfer.
+
+Use explicit stale modes. Distinguish fresh, disconnected-valid, grace, restricted, expired, and unavailable states. Each state should define allowed operations, obligations, alerts, and recovery actions.
+
+Restrict capability as confidence falls. A disconnected runtime may continue a narrow set of already approved operations while blocking new privileged scopes, exceptions, provider destinations, tool grants, or sensitive data classes.
+
+Do not reuse request decisions as policy continuity. A cached allow for one identity and purpose cannot replace the policy engine for a new context. Continuity should preserve verified evaluation capability, not broad permission results.
+
+Support local evaluation. Package the evaluator, policy artifact, schemas, and bounded facts needed for critical decisions. Remove unnecessary network dependencies from the hot authorization path.
+
+Classify facts by continuity behavior. Stable facts may be cached with long validity. Revocation, consent, identity risk, provider status, and emergency blocks may require short validity or online confirmation.
+
+Use revocation channels independent of normal publication. Emergency deny lists, credential revocation, tenant suspension, provider quarantine, and regional blocks need a narrow, highly available path that can reduce authority during a broader control-plane outage.
+
+Make emergency controls monotonic. An emergency message may restrict or stop operations but should not grant new permission, remove obligations, or broaden scope without the normal approval and publication path.
+
+Replicate policy safely. Use multiple independent stores, regions, and distribution routes. Validate that replicas contain the same signed bundle and activation epoch before declaring convergence.
+
+Avoid split-brain authorization. If regions cannot agree on the active policy, define whether requests pin to an admitted snapshot, use the more restrictive compatible result, route to a healthy region, or stop high-risk work.
+
+Preserve policy context in queues. Queued work should carry its admitted policy snapshot, expiry, scope, and reauthorization requirements. A recovering worker must not execute stale work under whichever bundle happens to be local.
+
+Handle long-running sessions. Define checkpoints for reauthorization when policy freshness, identity, consent, region, provider, tool arguments, or data classification changes during a conversation or agent workflow.
+
+Design safe evaluator failover. A secondary evaluator must support the same semantics, schemas, operators, obligations, and reason codes. If compatibility is incomplete, return a typed restricted or unavailable result rather than reinterpret the policy.
+
+Protect dependencies. Replicate critical fact stores, cache validated snapshots, apply circuit breakers, and bound fan-out. Track source, version, freshness, and conflict for every fact used during degraded operation.
+
+Distinguish outage types. Publication failure, artifact-store failure, evaluator crash, fact-service timeout, network partition, clock skew, corrupted bundle, and revoked signing key require different responses.
+
+Keep clocks defensible. Artifact activation, expiry, leases, and grace windows depend on time. Use synchronized clocks, monotonic elapsed time, skew bounds, and conservative behavior when time trust is lost.
+
+Test cold starts. A new worker or region must not accept privileged traffic until it has a verified compatible bundle, required facts, revocation state, keys, and enforcement adapters.
+
+Test isolated operation. Disconnect a region from the control plane and fact services. Verify allowed cohorts, restricted paths, expiry transitions, alerts, emergency revocation, audit evidence, and eventual shutdown behavior.
+
+Test recovery convergence. Restore connectivity with queued publications, changed dependencies, revoked identities, and expired work. Confirm ordering, signature checks, reauthorization, cache invalidation, and consistent activation.
+
+Reconcile degraded decisions. Compare requests evaluated during the outage with the restored policy and facts. Identify decisions that would differ, then block delivery, notify, compensate, revoke, or document according to impact.
+
+Do not retroactively rewrite history. Preserve the artifact, facts, stale mode, outage state, and evidence that governed each decision. A later policy update does not change what the runtime actually knew.
+
+Communicate status accurately. Tell clients whether a request was denied, restricted, queued, or unavailable. Do not claim normal policy freshness when the gateway is operating under a disconnected bundle.
+
+Monitor continuity health. Track artifact age, regions in stale mode, disconnected duration, emergency revocation latency, evaluator availability, dependency freshness, split-brain events, restricted requests, expiry shutdowns, and reconciliation differences.
+
+Set recovery objectives. Measure time to restore verified evaluation, time to distribute restrictions, maximum stale authorization window, accepted degraded risk, and time to reconcile affected decisions.
+
+The practical pattern is this: define continuity by risk, separate control and data planes, distribute signed immutable bundles, verify locally, select a true last-known-good artifact, bound staleness, use explicit degraded states, reduce capability as confidence falls, evaluate locally, classify fact freshness, maintain an independent restriction channel, replicate safely, prevent split brain, preserve queued context, checkpoint sessions, require evaluator compatibility, protect dependencies and clocks, test cold starts, isolation, and recovery, reconcile degraded decisions, preserve history, communicate accurately, monitor freshness, and set recovery objectives. A resilient policy system keeps enforcing known safe boundaries during failure without pretending that stale authority can remain valid forever.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
