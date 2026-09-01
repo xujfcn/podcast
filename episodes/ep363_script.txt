@@ -1,0 +1,59 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about agent memory governance at the AI API gateway: how to control session memory, long-term memory, retrieval results, and cached context so old or untrusted information cannot quietly steer future work.
+
+Memory changes the security model of an agent. A prompt arrives once, but a memory may influence hundreds of later requests. If the gateway cannot explain who wrote it, why it was stored, when it expires, or which tenant may read it, memory becomes an invisible control plane.
+
+Start with memory classes. Separate short-lived conversation state, user preferences, task state, retrieved documents, tool results, summaries, embeddings, cached responses, and system policy. Each class needs different authority, retention, freshness, and deletion rules.
+
+Define write authority. A user message, tool result, reviewer decision, model-generated summary, and administrator policy should not have equal power to create durable memory. Require an explicit source, purpose, scope, confidence, and approval rule before writing.
+
+Keep instructions out of facts. Content retrieved from a document or produced by a tool may contain instructions, but it should not automatically become a system or developer message. Store provenance and type separately from the text, and enforce role boundaries during context assembly.
+
+Bind memory to a principal and tenant. A personal preference, shared workspace fact, service account state, and global policy are different scopes. Never let a broad semantic search return another tenant’s memory merely because the text looks relevant.
+
+Record provenance. Store source identity, author or actor, creation time, evidence reference, transformation history, policy revision, and confidence. A memory without provenance should be treated as untrusted context or rejected from durable storage.
+
+Use purpose limitation. Permission to remember a delivery preference does not imply permission to use it for profiling, marketing, unrelated task planning, or provider training. Attach purpose codes and enforce them at read time.
+
+Control freshness. Facts decay at different rates. A user’s preferred language may last months, while an inventory count or access decision may expire in minutes. Include valid-from, expires-at, refresh requirements, and stale behavior.
+
+Do not let stale memory override current input. Current authenticated policy and explicit user instructions should have defined precedence over old summaries or embeddings. When values conflict, surface the conflict or require revalidation instead of silently selecting one.
+
+Protect memory reads. Retrieval should filter by tenant, principal, purpose, sensitivity, region, consent, and current authorization before ranking for relevance. Relevance is not permission.
+
+Separate retrieval from authority. A document being retrieved does not make its instructions executable. A memory being highly similar does not make it true. Pass retrieved content through classification, provenance checks, and policy evaluation before it influences tools or routing.
+
+Control summaries. Summaries compress context but can introduce omissions, false certainty, or instruction injection. Preserve source references, uncertainty, excluded content, and summary version. Rebuild or invalidate summaries when source authority changes.
+
+Govern embeddings. Embeddings can retain sensitive information and may be difficult to inspect. Bind vectors to source lineage, tenant, purpose, retention, and deletion state. Do not assume that deleting the original text automatically removes every derived representation.
+
+Handle memory poisoning. Test for malicious user content, compromised tools, polluted documents, fabricated preferences, repeated false facts, and cross-tenant retrieval. Limit write frequency, require corroboration for high-impact facts, and quarantine suspicious entries.
+
+Use confidence carefully. Confidence should describe evidence and freshness, not merely model certainty. Keep confidence separate from authorization. A highly confident model-generated claim is still not an approved policy.
+
+Protect sensitive memory. Classify secrets, personal data, health or financial information, access decisions, and business-confidential facts before storage. Prefer references, tokenization, or minimal attributes over copying full source content.
+
+Set retention by class. Conversation memory, task state, audit evidence, user preferences, embeddings, and cached outputs may need different lifetimes. Expiration should trigger reads to stop, refresh requirements, deletion workflows, and downstream invalidation.
+
+Make deletion complete enough. Deleting a memory should address indexes, embeddings, summaries, caches, replicas, exports, queued jobs, evaluation datasets, and provider copies where applicable. Record deletion status without retaining the sensitive value as proof.
+
+Handle withdrawal and scope changes. A user may revoke a preference, a tenant may remove shared access, or a policy may narrow permissible use. Propagate the change to retrieval, context assembly, active sessions, background agents, and derived artifacts.
+
+Prevent memory from changing control paths. Retrieved or remembered text must not alter tenant identity, authorization, tool allowlists, provider choice, billing account, or safety policy unless a separately authenticated control-plane update authorizes it.
+
+Make writes idempotent. Retries, concurrent agents, and repeated summaries can create duplicates or conflicting memories. Use stable memory IDs, version checks, conflict rules, and one clear owner for updates.
+
+Handle concurrency. Multiple agents may observe different facts and write at once. Use optimistic concurrency, causal versions, conflict queues, and explicit merge rules. Last write wins is unsafe for permissions, identity, and high-impact state.
+
+Audit memory influence. Link each retrieved memory to the request, context position, purpose decision, model attempt, tool call, and final outcome. Record references and digests where possible instead of raw content.
+
+Explain retrieval. Operators and users should be able to see why a memory was selected, its source, freshness, scope, and authority status. Do not expose unrelated memories or sensitive source text merely to explain relevance.
+
+Test context assembly. Verify role ordering, tenant filtering, expiration, conflict handling, summary expansion, token limits, cache reuse, provider routing, and tool boundaries. A correct memory store can still fail if assembly places untrusted text in a privileged position.
+
+Fail safely. If the memory service is unavailable, use only bounded cached context when policy allows, ask for clarification, or continue without memory. Do not silently treat an old snapshot as current authorization.
+
+Measure memory health. Track unauthorized reads and writes, stale retrievals, provenance gaps, cross-tenant blocks, poisoning signals, conflict rates, deletion lag, derived artifacts without lineage, cache invalidations, memory-induced tool calls, and requests that continue safely without memory.
+
+The practical pattern is this: classify memory, define write authority, separate facts from instructions, bind scope to principal and tenant, record provenance, attach purpose, control freshness, define precedence, filter retrieval by permission, separate relevance from authority, version summaries, govern embeddings, detect poisoning, separate confidence from authorization, minimize sensitive storage, set retention, propagate deletion and withdrawal, keep memory out of control paths, make writes idempotent, handle concurrency, audit influence, explain selection safely, test assembly, fail safely, and measure health. Memory becomes a reliable capability when every stored fact has a source, scope, purpose, lifetime, and controlled path back into context.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
