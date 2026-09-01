@@ -1,0 +1,67 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy runtime safety at the AI API gateway: how to keep policy evaluation bounded, isolated, and resistant to malicious inputs, runaway rules, and unsafe dynamic dependencies.
+
+Policy is executable logic. If it can recurse without a limit, query an unbounded dataset, call a slow service, allocate excessive memory, or interpret user input as code, the policy layer can become an outage or an authorization bypass.
+
+Start with a policy threat model. Identify untrusted policy authors, tenant administrators, generated rules, external facts, model-produced parameters, plugin code, dependency responses, and operators with emergency access. Define what each actor may influence.
+
+Separate policy data from policy code. Values such as tenant names, model IDs, prompts, tags, and user attributes must be treated as data. They must not alter operators, property paths, query structure, templates, or executable expressions without explicit validation.
+
+Use a constrained policy language. Prefer a small, typed, declarative language with a documented grammar, bounded operators, and no arbitrary code execution. Every feature added to the language expands the security and availability surface.
+
+Compile before production. Parse, type-check, lint, normalize, and compile policies into a safe intermediate representation. Reject ambiguous syntax, unreachable branches, unsupported constructs, excessive nesting, and unsafe dynamic behavior before activation.
+
+Set evaluation deadlines. Every evaluation needs a bounded wall-clock budget and, where appropriate, a CPU budget. A policy that misses its deadline must return a typed timeout or unavailable result, not continue indefinitely or silently allow.
+
+Bound memory and output size. Limit expression state, collection sizes, intermediate values, reason text, obligations, and decision metadata. A valid request must not be able to cause an enormous policy result or audit record.
+
+Bound recursion and graph depth. Limit nested expressions, imports, inheritance, references, dependency chains, and obligation expansion. Detect cycles at compile time and again when dynamic references are resolved.
+
+Bound iteration. Collection filters, joins, maps, and aggregations must have explicit cardinality limits. Do not let a tenant-controlled list or external directory turn one decision into an unbounded scan.
+
+Control dynamic data access. Policies should declare which facts and services they may read. Enforce query shape, tenant scope, freshness, result size, timeout, and rate limits at the fact-access layer.
+
+Keep evaluators side-effect free. Policy evaluation should not send messages, call tools, write files, change permissions, charge accounts, or mutate shared state. Return obligations for separately authorized and controlled executors.
+
+Isolate evaluators. Run untrusted or tenant-specific policies with separate processes, containers, sandboxes, or capability-limited workers. Restrict network, filesystem, environment variables, credentials, and runtime reflection.
+
+Use capability-based access. If an evaluator needs a fact service, provide a narrow capability for that service and scope. Do not expose a general network client or production credential to a policy runtime.
+
+Prevent policy injection. Treat policy text, templates, imported fragments, and generated conditions as separate artifacts with independent validation and approval. A user-supplied string must not become a new predicate merely because it appears in a field named rule.
+
+Validate generated policies. If an agent or automation system proposes policy, require schema validation, static analysis, risk classification, human or workflow approval, signing, and staged rollout. Generation is not authorization.
+
+Protect against expression confusion. Define escaping and quoting for strings, identifiers, regular expressions, paths, URLs, and serialized values. Reject mixed-language fragments and ambiguous interpolation rather than guessing the author’s intent.
+
+Control regular expressions and parsers. Limit pattern length, nesting, backtracking, recursion, and input size. Prefer safe regex engines or precompiled patterns. A policy check must not enable catastrophic backtracking on attacker-controlled text.
+
+Control joins and lookups. Define whether missing records, duplicate records, stale records, and conflicting records produce deny, review, unknown, or another explicit state. Prevent a broad lookup from crossing tenant or regional boundaries.
+
+Control imports and inheritance. Pin imported versions, limit depth, detect cycles, and preserve source provenance. A policy should not change meaning because an unpinned shared fragment was updated elsewhere.
+
+Keep dependency calls deterministic and bounded. Record service identity, schema, freshness, timeout, result fingerprint, and error state. Cache only validated facts, never arbitrary authorization outcomes from an uncontrolled dependency.
+
+Protect concurrency. Limit parallel fact requests, evaluator workers, queue depth, and per-tenant resource consumption. Prevent one expensive policy from monopolizing shared capacity.
+
+Apply fairness and budgets. Assign evaluation cost budgets by tenant, policy, operation, and risk. Reject or review work that exceeds its declared complexity instead of letting high-cost rules crowd out safety-critical requests.
+
+Separate compile-time from runtime checks. Static analysis can catch cycles, types, and complexity. Runtime guards must still enforce deadlines, result sizes, dependency scope, revocation, and resource limits because inputs and environment change.
+
+Fail safely and transparently. If evaluation is interrupted, resource-limited, sandboxed, or missing a fact, return a typed outcome with a safe default, reason code, and recovery path. Do not convert evaluator failure into an ordinary allow or hide it as a generic denial.
+
+Protect against denial of service. Rate-limit policy publication, compilation, test execution, probe traffic, complex evaluation, dependency fan-out, and audit emission. Apply circuit breakers to abusive or repeatedly failing policy paths.
+
+Test hostile cases. Include deeply nested expressions, cycles, huge collections, pathological strings, slow dependencies, malformed facts, oversized outputs, repeated retries, concurrent evaluations, sandbox escapes, and policy updates during execution.
+
+Use fuzzing and mutation. Fuzz parsers, compilers, serializers, query builders, and policy adapters. Mutate operators, limits, scope checks, and dependency errors to verify that tests detect unsafe changes.
+
+Monitor runtime behavior. Track evaluation latency, CPU, memory, depth, fan-out, timeouts, rejected complexity, sandbox violations, dependency failures, output size, per-tenant consumption, and policy paths that approach their limits.
+
+Keep security evidence. Record policy artifact, evaluator version, resource limits, dependency fingerprints, termination reason, sandbox identity, and enforcement outcome. Minimize sensitive inputs while retaining enough evidence to investigate abuse or drift.
+
+Roll out limits carefully. Shadow new limits, measure affected policies, provide migration guidance, and canary enforcement. A sudden limit can break legitimate high-value workflows, but silently raising it can remove a safety boundary.
+
+Review language evolution. New operators, loops, network access, imports, aggregation, and dynamic references require threat analysis, resource modeling, compatibility tests, and explicit ownership. Convenience features should not bypass the sandbox model.
+
+The practical pattern is this: threat-model policy inputs, separate data from code, use a constrained typed language, compile before activation, bound time, memory, depth, iteration, output, and dependency access, keep evaluation side-effect free, isolate runtimes, grant narrow capabilities, prevent injection, validate generated rules, control parsers and lookups, pin imports and dependencies, protect concurrency, budget cost, combine static and runtime checks, fail safely, rate-limit abuse, fuzz hostile inputs, monitor resource behavior, preserve evidence, canary limits, and govern language changes. A policy engine is safe when the rules can express the required control without becoming an unbounded program, a hidden network client, or a new path around authorization.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
