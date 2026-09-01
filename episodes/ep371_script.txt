@@ -1,0 +1,61 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy obligations at the AI API gateway: how to ensure that conditions attached to an allow decision are actually enforced by routing, providers, caches, tools, logs, and delivery.
+
+An allow decision is often not unconditional. It may mean allow only after redaction, allow only in one region, allow without provider training, allow with short retention, allow after human approval, or allow if the response never enters a shared cache. If downstream systems preserve only the word allow, the policy has failed.
+
+Start with an obligation contract. Give every obligation a type, scope, parameters, owner, enforcement point, deadline, evidence requirement, failure behavior, and policy version.
+
+Separate permissions from obligations. Permission answers whether an operation may proceed. An obligation describes what must happen before, during, or after that operation. Represent both explicitly instead of hiding conditions inside a reason string.
+
+Use typed obligations. Examples include redact fields, tokenize identifiers, encrypt with a named context, restrict providers, require a region, disable training, limit retention, prevent caching, require approval, log a receipt, inspect the output, or notify an owner.
+
+Reject unknown obligation types. A worker that does not understand a required control must not silently ignore it. Capability negotiation should prove that every obligation has an eligible enforcement component before execution begins.
+
+Assign one accountable owner. Redaction may belong to ingress, regional routing to the gateway, retention to storage, no-training guarantees to provider selection, and output inspection to delivery. Shared responsibility without an owner usually becomes missing enforcement.
+
+Define enforcement order. Data minimization and tokenization may need to occur before provider routing. Approval must happen before an irreversible tool action. Output safety inspection must happen before streaming reaches the client. Ordering is part of correctness.
+
+Propagate obligations with the request. Carry an immutable obligation set or snapshot identifier through queues, retries, fallback attempts, batch processing, tools, caches, and delivery. Do not reconstruct conditions from a prompt or free-form metadata.
+
+Bind obligations to attempts. A fallback provider may satisfy different controls than the original route. Re-evaluate provider, region, retention, encryption, and training obligations for every attempt instead of inheriting the first route’s approval.
+
+Compose obligations conservatively. When platform, tenant, user, jurisdiction, and exception policies add requirements, preserve the union of compatible safeguards. A lower policy layer must not erase a stronger obligation without explicit authorized semantics.
+
+Detect incompatible obligations. A request may require a region, capability, provider retention term, and encryption mode that no route can satisfy together. Return no compliant route or review required rather than dropping the inconvenient condition.
+
+Prove preconditions before dispatch. Confirm redaction completed, approval remains valid, the credential scope is correct, the provider declaration is current, and the destination satisfies region and retention requirements.
+
+Use enforcement receipts. Record obligation ID, executor, input reference, policy snapshot, start and completion time, result, evidence digest, and relevant resource version. A log message saying filtered is not sufficient proof.
+
+Avoid duplicating sensitive content as evidence. Store digests, field counts, transformation maps, provider receipts, and protected references where possible. Proof of redaction should not recreate the unredacted payload in an unrestricted audit log.
+
+Make transformations verifiable. For redaction, tokenization, summarization, or modality changes, verify that required fields were handled and prohibited fields did not survive in alternate locations, attachments, metadata, or tool arguments.
+
+Control caches explicitly. An obligation may forbid shared caching, require tenant partitioning, limit lifetime, or restrict reuse to the same purpose and policy revision. Cache eligibility must evaluate obligations, not only request identity.
+
+Control logging separately. Operational logs, traces, evaluations, abuse monitoring, and billing may each have distinct minimization and retention obligations. A provider-safe request can still leak through gateway telemetry.
+
+Apply obligations to derived artifacts. Embeddings, summaries, classifications, thumbnails, transcripts, and evaluation samples inherit relevant scope, retention, deletion, and access requirements from their sources.
+
+Handle streaming carefully. Some obligations must be completed before the first token. Others require continuous inspection, buffering, truncation, or a final receipt. Define whether partial delivery is acceptable when enforcement later fails.
+
+Handle asynchronous work. Queued jobs and long-running agents must revalidate expiring approvals, revocation state, provider facts, credentials, and obligation support immediately before execution.
+
+Do not confuse provider promises with execution evidence. A contract may state that training is disabled, but the route still needs the correct account, endpoint, request flag, region, and current provider declaration.
+
+Fail closed for mandatory obligations. If redaction, approval, encryption, or compliant routing cannot be proven, stop or quarantine the operation. For lower-risk best-effort obligations, define and expose the permitted fallback explicitly.
+
+Separate enforcement failure from policy denial. Missing encryption support or an unavailable redaction service is an operational failure, not proof that the user’s request was prohibited. Preserve distinct reason codes and retry behavior.
+
+Reconcile after execution. Verify provider receipts, storage retention class, cache disposition, tool result, delivery status, and required notifications. Some obligations cannot be proven until the external system reports its final state.
+
+Handle partial fulfillment. If three obligations succeeded and one failed, retain the completed evidence, stop unsafe downstream work, and run defined cleanup or compensation. Never rewrite the record as though nothing happened.
+
+Audit obligation lineage. Link each requirement to its source rule, policy layer, request, attempt, executor, evidence, failure, reviewer, and final outcome. This makes it possible to distinguish a bad policy from a broken enforcement component.
+
+Test obligation combinations. Cover redaction plus streaming, region plus fallback, no-training plus provider alias changes, retention plus cache reuse, approval plus retries, deletion plus derived artifacts, and logging restrictions during incident response.
+
+Measure fulfillment. Track obligations issued, understood, executed, verified, failed, bypassed, expired, or missing evidence. Break metrics down by type, component, provider, tenant, policy version, and impact.
+
+The practical pattern is this: represent permissions and obligations separately, use typed controls, reject unknown obligations, assign owners, define enforcement order, propagate immutable obligation sets, re-evaluate every attempt, compose safeguards conservatively, detect incompatibility, prove preconditions, issue minimal receipts, verify transformations, govern caches, logs, derived artifacts, streams, and asynchronous work, validate provider promises, fail safely, distinguish operational failure from denial, reconcile final state, handle partial fulfillment, audit lineage, test combinations, and measure evidence. A conditional allow is trustworthy only when every required condition survives the entire request path and leaves proof that it was fulfilled.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
