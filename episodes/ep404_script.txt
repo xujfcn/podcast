@@ -1,0 +1,105 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision binding at the AI API gateway: how to ensure that a valid authorization decision is used only for the exact context it was meant to protect.
+
+A decision can be correct and still be unsafe when reused in the wrong place. An approval for one tenant may be applied to another. A redaction decision for one purpose may be reused for a different purpose. A tool authorization for one argument set may be replayed against a more dangerous action.
+
+Start with a binding contract. Define the subject, tenant, purpose, resource, operation, request shape, data class, route, provider, model, tool, region, policy epoch, dependency snapshot, and validity window that the decision covers.
+
+Use immutable decision identities. Give every evaluation a unique identifier and bind side effects, retries, approvals, leases, cache entries, and audit evidence to that identity. Do not treat a policy name or request ID as sufficient.
+
+Bind the principal. Record the authenticated subject, credential or session identity, authentication strength, delegated actor, and relevant role version. A decision for one principal must not become authority for another through a copied header or shared cache.
+
+Bind the tenant. Include tenant, project, workspace, billing account, data owner, and isolation boundary where relevant. Tenant context must come from a trusted source, not an unverified client field.
+
+Bind the purpose. Reading data for summarization is not the same as exporting it, training on it, debugging it, or sending it to a provider. Purpose changes require reauthorization even when the resource is unchanged.
+
+Bind the resource. Use canonical resource identifiers, version, ownership, and scope. Avoid ambiguous paths, aliases, wildcard expansion, and normalization that could turn a narrow resource into a broader one.
+
+Bind the operation. Read, transform, generate, publish, charge, delete, execute, and administer are different capabilities. A decision for one operation must not authorize another merely because both use the same endpoint.
+
+Bind the request shape. Include a canonical summary of fields, modality, size, tool arguments, destination, and relevant options. Do not reuse a decision when the request becomes materially broader or more sensitive.
+
+Use semantic hashes carefully. Hashes can bind content without storing it, but the canonicalization rules, algorithm, version, and covered fields must be explicit. A hash over only the visible prompt may omit dangerous tool arguments or hidden routing fields.
+
+Bind data classification. A decision for public or internal data should not authorize confidential, personal, regulated, or restricted data. Classification changes must invalidate or narrow the decision.
+
+Bind the route. Provider, model, region, modality, safety mode, and fallback path can change data handling and risk. If the route changes materially, evaluate whether the original decision still applies.
+
+Bind external destinations. For egress, record the approved provider, endpoint class, region, purpose, and payload policy. A general allow to use an AI provider is not permission to send data to every provider or destination.
+
+Bind tools and arguments. Tool authorization should cover the exact tool identity, version, operation, target, and argument constraints. Validate again immediately before the side effect.
+
+Bind time. Include decision time, activation epoch, expiration, freshness interval, and reauthorization checkpoints. A decision that was valid earlier must not remain valid indefinitely.
+
+Bind dependency versions. Identity, consent, risk, capability, quota, billing, and classification facts can change. Record the snapshots or versions that justified the result.
+
+Bind policy and evaluator identity. A friendly alias is not enough. Include policy digest, policy epoch, compiled artifact, evaluator version, and relevant configuration flags.
+
+Separate admission from execution. Admission may allow a request to enter a queue, but execution needs a binding check against current authority, obligations, freshness, and side-effect scope.
+
+Separate observation from authorization. Shadow decisions, simulations, recommendations, and historical replays must never be mistaken for active permission. Mark their state explicitly.
+
+Design cache keys from meaning. Include every context dimension that can affect the decision: principal, tenant, purpose, resource, operation, request shape, data class, route, dependency versions, policy epoch, and time bucket.
+
+Prefer cache isolation to clever reuse. If proving equivalence is difficult, do not share the decision. A cache miss is cheaper than cross-tenant authority confusion.
+
+Bind retries. A retry may preserve idempotency, but it must not silently change principal, purpose, destination, tool arguments, or policy epoch. Reject or reauthorize when the context differs.
+
+Bind queues. Carry the decision envelope, obligations, expiration, and authorization identity with each job. When a job waits beyond its freshness window or its context changes, reauthorize before execution.
+
+Bind streams and sessions. Long-lived connections can cross policy epochs, tenant changes, consent withdrawal, credential rotation, and route changes. Recheck at message, tool, data, and side-effect boundaries.
+
+Bind delegated authority. Agent tokens, leases, approvals, and capability grants need audience, subject, purpose, resource, operation, and expiry. A delegated token must not be broader than the decision that created it.
+
+Bind human approvals. Approval records should identify exactly what was approved, by whom, for which subject, tenant, purpose, resource, operation, scope, and time window. “Approved” without a subject and object is not a usable authorization fact.
+
+Bind obligations to execution. Redaction, encryption, residency, logging, consent, budget, retention, and provider restrictions must travel with the decision and be checked by every adapter and executor.
+
+Do not trust client-carried decisions. Client headers, hidden fields, browser state, and copied metadata can help correlate work, but the gateway must verify signatures, audience, issuer, epoch, scope, and freshness before treating them as authority.
+
+Use cryptographic binding where appropriate. Sign decision envelopes and bind them to an audience, purpose, key version, policy epoch, and nonce or request identity. Encryption alone does not prove that a decision belongs to this operation.
+
+Prevent confused deputy behavior. A trusted gateway, agent, worker, or tool executor must not use its own authority to perform an action merely because an untrusted caller supplied a plausible decision reference.
+
+Check audience and channel. A decision issued for one service, region, provider, tool, or execution class must not be accepted by another unless explicit delegation and translation rules exist.
+
+Control translations. Protocol adapters and provider-specific request builders must preserve the binding fields. If a provider API cannot express a restriction, fail closed or route to a compatible executor rather than silently dropping it.
+
+Bind fallback behavior. If the preferred evaluator, provider, or region fails, the fallback must receive the same or narrower decision context. Availability should not detach authority from its original subject or purpose.
+
+Handle partial context. Missing tenant, purpose, resource, tool argument, classification, or dependency data should produce unknown or review, not a broad reusable decision.
+
+Test cross-context reuse. Take a valid decision and mutate one dimension at a time: subject, tenant, purpose, resource, operation, data class, region, model, tool, argument, timestamp, or policy epoch. Every unauthorized mutation should be rejected or re-evaluated.
+
+Test confused deputy paths. Ask one tenant to reference another tenant’s decision, one agent to use a user decision, and one tool to accept a gateway decision intended for a different operation. Verify audience and subject checks.
+
+Test cache collisions. Use similar prompts, paths, model names, aliases, request IDs, and tenant identifiers. Confirm that canonicalization and cache keys do not merge distinct authority contexts.
+
+Test replay and retry. Replay decisions after expiration, revocation, consent withdrawal, credential rotation, route change, and policy migration. Verify that historical evidence is not accepted as current authorization.
+
+Test queue and stream boundaries. Pause work across an epoch change, move a session between regions, change tool arguments, and resume after a long delay. Reauthorization should happen exactly where the contract requires.
+
+Test side effects. Attempt charges, publications, data exports, tool calls, deletions, and infrastructure changes with a valid decision whose resource, purpose, audience, or arguments have changed. The executor must refuse the mismatch.
+
+Test provider translation. Send a decision through every adapter and fallback. Confirm that model, provider, region, data, safety mode, budget, and obligation bindings remain intact.
+
+Test malicious metadata. Include forged headers, duplicated claims, confusing Unicode, ambiguous URLs, nested delegation, stale signatures, audience substitution, and token swapping.
+
+Test concurrent changes. Revoke a credential, change consent, migrate a tenant, update a policy, and refresh a cache while a decision is in flight. Define precedence and ensure no stale authority wins by accident.
+
+Preserve minimal provenance. Record binding dimensions, digests, versions, audience, issuer, expiration, obligations, and mismatch reason codes. Avoid retaining raw prompts, secrets, provider payloads, or customer files when a digest is sufficient.
+
+Make mismatch errors useful. Tell authorized operators which binding dimension failed: subject, tenant, purpose, resource, operation, route, audience, freshness, epoch, or obligation. Do not disclose protected details to the caller.
+
+Monitor binding failures. Track cross-tenant attempts, stale decisions, audience mismatches, cache isolation failures, argument changes, missing context, fallback mismatches, and side effects blocked by reauthorization.
+
+Set hard enforcement gates. A decision should not authorize an external side effect until required bindings, obligations, freshness, audience, and current authority are verified at the point of use.
+
+Do not bind too little. A request ID, user ID, and policy version may look comprehensive while omitting purpose, resource version, destination, tool arguments, or data class.
+
+Do not bind too much without lifecycle design. If every minor field invalidates a decision, the system becomes unusable and operators will seek unsafe bypasses. Choose fields based on semantic impact and define controlled equivalence.
+
+Do not confuse correlation with authority. Tracing metadata helps follow work; it does not grant permission. Keep observability identifiers separate from authorization claims.
+
+The practical pattern is this: define a binding contract, give every decision an immutable identity, bind principal, tenant, purpose, resource, operation, request shape, data class, route, destination, tools, arguments, time, dependencies, policy, evaluator, audience, and obligations, separate admission from execution, isolate caches, carry envelopes through queues and streams, reauthorize delegated and external actions, sign where appropriate, prevent confused deputies, preserve bindings through adapters and fallbacks, test every context mutation, replay, collision, outage, translation, concurrency, and side-effect path, preserve minimal provenance, monitor mismatches, and enforce checks at the point of use. A decision is safe to reuse only when the system can prove that the new action is the same authorized context—or a deliberately narrower one.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
