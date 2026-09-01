@@ -1,0 +1,59 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy coverage at the AI API gateway: how to find missing facts, unmatched rules, and silent defaults before a new model, tool, tenant, or data type is accidentally treated as approved.
+
+A policy engine can return allow even when nobody intentionally approved the request. The request may have fallen through an incomplete rule set, inherited a broad default, or arrived without the facts needed to evaluate risk. Policy coverage makes those gaps visible.
+
+Start with a decision vocabulary. Separate explicitly allowed, explicitly denied, conditionally allowed, review required, missing facts, conflicting facts, unsupported operation, unmatched policy, and policy service unavailable. Do not collapse them into one boolean.
+
+Define the policy universe. List protected operations, resources, data classes, purposes, audiences, regions, providers, models, tools, tenants, identities, and side-effect classes. Coverage cannot be measured without knowing what the system is expected to govern.
+
+Require explicit ownership. Every operation and resource class should map to a policy owner, review schedule, default behavior, and escalation path. An unowned rule is likely to become stale.
+
+Distinguish missing facts from safe facts. If age class, data sensitivity, provider retention, tool recipient, or consent state is unknown, the engine must not silently interpret unknown as unrestricted.
+
+Type every fact. Use enumerations, versions, timestamps, source references, and confidence states instead of free-form strings. Distinguish not applicable, not collected, unavailable, stale, contradictory, and truly unknown.
+
+Validate fact completeness before evaluation. Define the required facts for each operation and risk class. A text-only answer may need fewer facts than a payment, external message, credential change, or sensitive-data transfer.
+
+Track rule reachability. Identify rules that never match, rules shadowed by earlier conditions, impossible combinations, duplicate decisions, circular references, and exceptions that override more cases than intended.
+
+Track unmatched requests. Record the operation, normalized fact shape, missing dimensions, default path, tenant, product, and outcome. Avoid retaining raw prompts when typed attributes are enough to diagnose the gap.
+
+Use default deny selectively and honestly. High-impact actions and sensitive processing should fail safely when coverage is incomplete. Low-risk products may use bounded defaults, but those defaults must be explicit, versioned, observable, and reviewed.
+
+Do not turn review into a universal default. Sending every unknown case to humans can overwhelm reviewers and create approval fatigue. Prioritize by impact, reversibility, exposure, and uncertainty, and improve the policy or fact pipeline that caused recurring cases.
+
+Bind coverage to capabilities. A newly registered model or tool should remain unavailable until its capabilities, regions, retention, safety properties, cost class, and authority requirements map to active policy.
+
+Bind coverage to schema evolution. New request fields, output modalities, tool arguments, provider features, and data classifications can bypass old rules if the policy engine ignores unfamiliar values. Reject or quarantine unknown schema elements where risk requires it.
+
+Handle aliases carefully. A friendly model alias may resolve to providers with different facts. Coverage must apply after resolution as well as before it, and a route change must not inherit approval from an incompatible target.
+
+Measure exception coverage. Temporary exceptions should identify exactly which rules, subjects, resources, operations, and time windows they modify. Detect broad wildcards, orphaned exceptions, expired approvals, and exceptions with no accountable owner.
+
+Use decision matrices. For important workflows, enumerate combinations of identity, purpose, data class, provider, region, tool scope, and risk. Mark expected outcomes and compare them with actual engine behavior.
+
+Add property-based tests. Generate combinations around thresholds, unknown values, new enum members, missing fields, contradictory facts, and tenant overrides. Assert invariants such as never expanding tool authority or crossing a prohibited region.
+
+Replay representative decisions. Use minimized historical fact sets and synthetic boundary cases to find newly unmatched requests, changed defaults, and policy branches that production traffic rarely exercises.
+
+Monitor coverage in production. Track requests by explicit outcome, missing fact, unmatched rule, fallback policy, exception, review queue, and policy version. Alert on sudden changes after model, provider, schema, tenant, or policy updates.
+
+Explain incomplete decisions. Return stable codes such as missing data classification, unknown provider retention, unsupported tool operation, stale consent, or no policy for requested modality. Give an authorized correction path without exposing protected rules.
+
+Prevent policy laundering. A downstream service must not convert unknown or review required into allow merely because its interface accepts only a boolean. Preserve the full decision state across queues, caches, retries, and service boundaries.
+
+Make caches coverage-aware. Include policy version, fact completeness, operation class, and relevant provider or tool facts in cache eligibility. Never reuse an allow decision for a request with additional unknown fields.
+
+Handle outages separately. An unavailable fact service or policy engine is not an unmatched rule and not an explicit denial. Use distinct operational states so reliability incidents do not corrupt governance metrics.
+
+Review coverage by impact, not only percentage. Ninety-nine percent coverage is poor if the remaining one percent contains payments, credential changes, minors, sensitive health data, or irreversible external actions.
+
+Audit coverage changes. Record newly introduced facts, operations, resources, rules, defaults, exceptions, owners, test cases, simulation results, approvals, rollout, and unresolved gaps. Keep the inventory tied to deployed versions.
+
+Test organizational boundaries. Verify that platform defaults, tenant rules, user preferences, jurisdiction constraints, and temporary exceptions combine with defined precedence. A rule can be complete locally and ambiguous when policy layers merge.
+
+Measure governance health. Track explicit decision rate, missing-fact rate, unmatched-policy rate, unknown enum values, default-path volume, stale facts, shadowed rules, unreachable rules, exception breadth, reviewer load, correction success, and high-impact operations without complete coverage.
+
+The practical pattern is this: use a rich decision vocabulary, define the governed universe, assign owners, distinguish unknown from safe, type and validate facts, analyze rule reachability, observe unmatched requests, make defaults explicit, reserve safe failure for high impact, avoid review overload, gate new capabilities and schemas, resolve aliases safely, constrain exceptions, test decision matrices and generated cases, replay representative facts, monitor production coverage, explain gaps, preserve decision states across services, make caches coverage-aware, separate outages, prioritize by impact, audit changes, test layered policy, and measure health. Policy is complete not when every request receives a boolean, but when every important request reaches an intentional, evidence-backed decision.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
