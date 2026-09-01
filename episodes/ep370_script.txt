@@ -1,0 +1,63 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy composition at the AI API gateway: how platform, tenant, user, regional, provider, and temporary exception rules combine into one safe decision.
+
+Most real systems do not have one policy. They have layers. A platform may prohibit a provider, a tenant may restrict regions, a user may withdraw consent, and an incident exception may temporarily allow a narrow operation. If each service merges those layers differently, the effective policy is unpredictable.
+
+Start with a policy composition contract. Define the layers, scope, owner, precedence, merge operator, conflict behavior, effective time, expiry, and output obligations for every policy family.
+
+Separate policy dimensions. Identity, purpose, data handling, provider eligibility, region, budget, content safety, tool authority, retention, and review requirements may have different composition semantics. Do not assume one universal priority order works for all of them.
+
+Define restrictive and additive rules explicitly. A regional prohibition may only narrow allowed routes. A tenant allowlist may add permitted models within platform limits. A temporary exception may narrow to one subject and operation, not broadly override every control.
+
+Make scope visible. Record whether a rule applies globally, to a product, tenant, user, session, request, data class, provider, tool, region, or time window. A rule without a scope is a future ambiguity.
+
+Use stable policy identities and versions. Every layer should have an immutable identifier, revision, owner, activation time, expiry, and source. Effective decisions must reference the exact revisions that were composed.
+
+Define precedence by dimension. Legal and regional constraints may override product defaults. Tenant contracts may narrow platform behavior. User preferences may control optional processing but cannot authorize a prohibited operation. Document these relationships instead of relying on file order.
+
+Avoid accidental override. A lower layer should not be able to replace a higher-level deny because it uses a generic allow field. Represent deny, allow, obligation, and unknown as typed effects with defined merge behavior.
+
+Handle conflicts as first-class results. If two applicable rules disagree and precedence cannot resolve them, return conflict or review required. Do not silently choose the newest, longest, or most specific rule without a declared basis.
+
+Prefer least privilege. When combining permissions, intersect allowed providers, regions, tools, data classes, and operations unless a documented additive rule applies. Permission should not expand merely because another layer is silent.
+
+Distinguish silence from allowance. A tenant policy that says nothing about a new tool does not approve it. An optional user preference that is absent does not override a required restriction. Preserve unknown and not-applicable states during composition.
+
+Compose obligations, not just decisions. An allow may require redaction, encryption, no-training routing, human approval, short retention, restricted output, or audit logging. Merge obligations so one layer cannot accidentally discard another layer’s safeguards.
+
+Resolve incompatible obligations safely. If one policy requires a provider with a retention limit and another requires a region with no compatible provider, return no compliant route or review required. Do not satisfy one obligation by violating another.
+
+Handle exceptions narrowly. Every exception should identify the exact subject, operation, resource, provider, region, reason, approver, effective period, and compensating controls. Broad wildcard exceptions should require stronger approval and continuous monitoring.
+
+Keep exceptions from becoming inheritance. A temporary approval for one incident should not flow into retries, unrelated tenants, future sessions, or a different model alias unless its scope explicitly permits that behavior.
+
+Use policy snapshots. Build one immutable effective snapshot for a request and propagate its ID through routing, queues, retries, provider calls, tool execution, caches, and delivery. Do not let each hop fetch and merge current layers independently.
+
+Define time semantics. Consider activation delays, expiry, clock skew, scheduled changes, revocation epochs, and long-running jobs. A request should not use a policy snapshot beyond its permitted lifetime without revalidation.
+
+Handle changes during execution. If a tenant restriction tightens after dispatch, define whether the request may finish, whether delivery is blocked, and whether external actions are canceled or compensated. Do not improvise precedence during an incident.
+
+Protect tenant isolation. Composition must not leak one tenant’s policy, exception, provider arrangement, or user preference into another tenant’s effective snapshot or explanation.
+
+Separate policy from facts. Provider health, data classification, consent state, user identity, and regional availability are inputs to policy evaluation, not policy layers themselves. Version and validate them independently.
+
+Make composition deterministic. Given the same ordered policies, facts, versions, and time, every worker should produce the same effective decision and obligations. Avoid hidden environment variables, map iteration order, or service-local defaults.
+
+Test algebraic properties. Verify commutativity only where intended, associativity for safe grouping, monotonicity for restrictive updates, idempotence for repeated policy application, and non-expansion when an unknown layer is added.
+
+Test precedence matrices. Cover platform deny with tenant allow, tenant deny with user allow, region conflict with provider preference, expired exception with cached snapshot, additive model list with platform exclusion, and obligations that cannot be jointly satisfied.
+
+Explain composition safely. Return stable reason codes and the policy layers that controlled the outcome to authorized audiences. Do not reveal hidden tenant rules, sensitive user attributes, detection thresholds, or unrelated policy content.
+
+Audit the effective policy. Record layer IDs, versions, scopes, precedence decisions, conflicts, exceptions, facts, obligations, outcome, evaluator version, and snapshot propagation. Keep raw policy text and sensitive attributes behind appropriate access controls.
+
+Support replay and comparison. Reconstruct the historical effective snapshot, then compare it with the current composition. Clearly label historical and current results so operators do not mistake a later policy for what actually governed a past action.
+
+Validate policy publication. Lint unreachable rules, shadowed rules, conflicting obligations, expired exceptions, invalid scopes, missing owners, incompatible versions, and composition cycles before activation.
+
+Fail safely. If a required layer or fact is unavailable, preserve an unknown or unavailable state and apply the documented fallback. Never turn a partial policy merge into broad permission because one service returned a default allow.
+
+Measure composition health. Track conflicts, unknown layers, missing owners, expired exceptions, policy snapshot drift, non-deterministic decisions, obligation loss, high-impact default paths, tenant isolation failures, review volume, and production decisions that differ across workers.
+
+The practical pattern is this: define composition contracts, separate dimensions, type effects, make scope and versions explicit, document precedence, distinguish silence from permission, use least privilege, merge obligations, treat conflicts honestly, narrow exceptions, create immutable snapshots, define time behavior, separate facts from rules, make evaluation deterministic, test algebraic and precedence properties, explain safely, audit effective policies, support replay, validate publication, fail safely, and measure consistency. Policy governance succeeds when every request gets one effective policy snapshot whose permissions, restrictions, and obligations are intentional, traceable, and identical at every hop.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
