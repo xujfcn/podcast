@@ -1,0 +1,57 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about request semantic fidelity at the AI API gateway: how to preserve what the client meant while requests are parsed, normalized, compressed, routed, retried, translated, and assembled into model context.
+
+An API request can remain valid JSON and still change meaning. A gateway may reorder messages, truncate context, rewrite tool arguments, convert protocols, apply defaults, or retry against a different model. Reliability is not only delivering a response; it is delivering a response to the request the client actually made.
+
+Start with a semantic contract. Define which parts of a request carry intent, authority, constraints, ordering, optionality, data purpose, and expected output. Distinguish meaning-bearing fields from transport metadata, cache hints, and implementation details.
+
+Parse conservatively. Reject ambiguous types, duplicate keys, invalid encodings, conflicting fields, and unsupported combinations. Do not silently choose one interpretation when two valid parsers could produce different model context.
+
+Create an intermediate representation. Normalize provider-specific requests into a typed form that preserves roles, content parts, tool declarations, constraints, modalities, and ordering. Keep the original request and normalized form separately so transformations can be inspected.
+
+Preserve ordering. Message order, tool-call order, content-part order, and structured field order can affect behavior even when a format says some fields are unordered. Only reorder data when the contract proves that order is irrelevant.
+
+Separate defaults from client intent. A gateway may add temperature, system instructions, safety settings, or response formats. Record which values came from the client, policy, route, or provider default. A default must not overwrite an explicit client choice without a declared rule.
+
+Protect roles and boundaries. System, developer, user, tool, and assistant content are not interchangeable. Preserve role boundaries during translation and context assembly. Never concatenate content in a way that lets user text impersonate a higher-priority instruction.
+
+Handle truncation honestly. When context exceeds a limit, apply a declared policy: reject, summarize, compact, prioritize, or ask for continuation. Record what was removed or transformed. Silent truncation can delete the very constraint that made the request safe.
+
+Treat compression as transport only. Request compression should reduce bytes without changing decoded content. Verify decompression, content length, character encoding, and digest before parsing. Do not apply semantic cleanup under the label of compression.
+
+Control canonicalization. Stable identity helps caching and idempotency, but canonicalization must not change meaning. Define treatment of whitespace, Unicode, numbers, nulls, omitted fields, URLs, timestamps, and equivalent message forms.
+
+Bind retries to semantics. A retry should represent the same logical request, with the same authority, purpose, constraints, and idempotency key. If the gateway changes model, provider, region, or prompt, record the variation and verify that the client contract still holds.
+
+Translate protocols explicitly. OpenAI-compatible messages, provider-native content blocks, tool formats, streaming events, and usage fields often have different semantics. Maintain a mapping table, identify lossy conversions, and reject requests when a required meaning cannot be represented safely.
+
+Preserve tool intent. Tool name, arguments, argument types, call order, recipient, and side-effect scope are meaning-bearing. Validate generated or translated arguments against the original authorization and schema. Do not turn an omitted argument into a broad default that changes the operation.
+
+Protect structured output requirements. JSON mode, schemas, enums, strictness, field descriptions, and refusal behavior must survive routing. If a provider cannot honor the requested contract, return a clear capability error or apply an approved compatibility layer.
+
+Preserve modality. Text, image, audio, video, and files have different content boundaries and metadata. Do not flatten a multimodal request into text descriptions unless the client or policy permits that semantic loss. Record transformations and quality implications.
+
+Keep purpose and data scope attached. A field included for classification should not become available for generation, tool use, caching, or provider training by accident. Semantic fidelity includes why data was sent, not just what bytes were sent.
+
+Distinguish policy transformation from meaning transformation. Masking a secret, enforcing a safety limit, or adding a required instruction may be authorized policy behavior, but it still changes the effective request. Record the change, reason, policy revision, and affected scope.
+
+Prevent cross-tenant mixing. Keep tenant, principal, conversation, memory, and artifact references bound to the request throughout queues, retries, caches, and provider calls. A perfectly preserved prompt in the wrong tenant is still a semantic failure.
+
+Make caching semantics-safe. Cache keys should include every request property that can change the result or authorization: model, prompt revision, tools, schema, policy, tenant, purpose, locale, modality, and relevant headers. A near-match is not an equivalent request.
+
+Handle streaming semantics. Preserve event order, role transitions, tool-call fragments, finish reasons, usage, and cancellation. A client that receives a text prefix followed by an altered tool call may take a materially different action.
+
+Validate after every boundary. Compare decoded payloads, intermediate representations, schemas, digests, and policy metadata after ingress, normalization, queueing, provider adaptation, retry, and delivery. Find where meaning changed instead of blaming the final model.
+
+Use metamorphic tests. Equivalent requests should produce equivalent normalized representations, while intentionally different constraints should remain different. Test field omission, explicit defaults, Unicode variants, reordered irrelevant fields, tool argument types, long context, multimodal parts, compression, and protocol conversion.
+
+Test lossy paths. Cover unsupported modalities, missing provider fields, incompatible schemas, truncated context, conflicting defaults, duplicate messages, unknown roles, invalid tool calls, partial streams, retries after policy changes, and failover to weaker capabilities.
+
+Explain semantic differences to clients. Return stable error codes and identify which requested capability could not be preserved. Do not silently downgrade strict output, tool authorization, privacy purpose, or modality just to produce a response.
+
+Audit transformations without retaining everything. Record original and normalized digests, field-level change categories, policy and adapter versions, route attempts, lossy-conversion flags, validation results, and final contract status. Store raw content only when necessary and authorized.
+
+Measure fidelity. Track parse ambiguity, rejected transformations, lossy conversions, truncated requests, default overrides, schema downgrades, tool-argument changes, cross-tenant protection events, retry variations, cache mismatches, stream violations, and client-visible semantic errors.
+
+The practical pattern is this: define a semantic contract, parse conservatively, use a typed intermediate representation, preserve ordering and roles, distinguish defaults from intent, handle truncation honestly, keep compression transport-only, canonicalize without changing meaning, bind retries to the same logical request, map protocols explicitly, protect tools and schemas, preserve modalities, attach purpose and tenant scope, record policy transformations, make cache keys semantic, validate every boundary, test equivalent and lossy paths, explain downgrades, audit transformations, and measure fidelity. A gateway is faithful when the model receives the request the client intended—not merely a syntactically valid approximation of it.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
