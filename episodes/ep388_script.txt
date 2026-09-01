@@ -1,0 +1,67 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about authorization decision cache governance at the AI API gateway: how to reuse safe decisions without allowing an old allow, a wrong tenant, or a changed identity context to bypass policy.
+
+Caching an authorization result is not the same as caching a response. A response cache usually asks whether content can be reused. A decision cache asks whether a subject may perform an operation under a particular context. The security cost of getting that reuse wrong is much higher.
+
+Start with a decision identity. Define every input that can change the result: subject, tenant, credential, operation, resource, model, provider, region, purpose, data class, tool, arguments, policy version, fact versions, risk state, and required obligations.
+
+Build keys from trusted canonical values. Normalize case, aliases, resource identifiers, model names, regions, and operation names consistently. Never let a client choose a cache key or omit a security-relevant dimension.
+
+Do not over-key blindly. Including raw prompts, full tool arguments, or volatile metadata can destroy reuse and increase sensitive-data exposure. Use the smallest safe representation, but prove that omitted fields cannot affect authorization.
+
+Bind entries to policy context. Store policy digest, priority model, evaluator version, dependency fingerprints, decision state, obligations, and activation epoch. An allow produced under an older policy must not appear current merely because its TTL has not elapsed.
+
+Separate allow and deny behavior. Deny decisions may often be cached differently from allows, with different TTLs, invalidation rules, and user experience. Neither should be reused without the context that produced it.
+
+Use explicit decision states. Cache allow, deny, review, unknown, restricted, unavailable, and expired as distinct results. Never collapse unknown or unavailable into a reusable allow.
+
+Bind obligations to the decision. A cached allow without its redaction, logging, encryption, approval, retention, route, or billing obligations is not the same decision. Store and re-enforce obligations, or refuse to reuse the entry.
+
+Set risk-based TTLs. A low-risk model listing may tolerate a longer cache lifetime than a privileged tool, sensitive data operation, payment action, cross-region transfer, or identity-dependent decision.
+
+Use freshness for facts. Identity, consent, revocation, tenant status, provider quarantine, risk scores, and emergency blocks may need shorter validity than stable configuration. TTL must reflect the most volatile security input.
+
+Support active invalidation. Policy publication, permission removal, credential revocation, tenant suspension, data classification changes, provider quarantine, and emergency blocks should invalidate affected entries quickly.
+
+Make invalidation scope precise. A global flush is safe but expensive; a narrow invalidation is efficient but can miss aliases, derived identities, shared roles, and inherited policies. Maintain reverse indexes so changes can find all dependent entries.
+
+Design for missed invalidation. Every entry still needs a bounded TTL, and high-risk operations may require online revalidation. Invalidation is an optimization for freshness, not the only safety boundary.
+
+Prevent cross-tenant reuse. Tenant ID, organization boundary, resource ownership, and delegated authority must be part of the trusted cache context. Never use a shared cache whose namespace allows one tenant’s allow to satisfy another tenant’s request.
+
+Protect identity changes. Credential rotation, group membership updates, role removal, session changes, and delegated-authority expiry must invalidate entries for affected subjects and derived principals.
+
+Handle aliases and inheritance. A role, group, project, model alias, policy fragment, or shared classifier can affect many decisions. Track dependency relationships rather than invalidating only the literal subject or resource named in a request.
+
+Check request binding. If tool arguments, resource paths, output destinations, data purpose, or provider choice affects policy, include a canonical safe summary in the key or re-evaluate the decision before execution.
+
+Do not cache before normalization. Different spellings of the same request should resolve to one safe identity, while meaningfully different requests must not collide. Canonicalization must preserve security semantics.
+
+Protect negative caching. A stale deny can become an availability problem, but bypassing it without fresh evaluation can become a security problem. Define separate recovery and recheck behavior rather than treating deny as harmless.
+
+Protect positive caching. A cached allow may skip the very policy checks that would notice revocation or a new restriction. Require stronger freshness, active invalidation, or online confirmation for authority-expanding operations.
+
+Keep cache storage private. Encrypt sensitive metadata, restrict operators, minimize subjects and arguments, avoid storing raw prompts, and define retention and deletion. Decision metadata can reveal roles, resources, and security posture.
+
+Prevent cache poisoning. Only trusted evaluators may write entries. Validate signatures or integrity markers, enforce namespace ownership, reject client-supplied outcomes, and separate staging, tenant, and production caches.
+
+Prevent stampedes safely. Coalesce identical misses without sharing authorization context across tenants. Bound concurrent recomputation and ensure one tenant cannot force expensive policy evaluation for another.
+
+Handle partitions. If the cache is unavailable, choose a typed behavior based on operation risk. Do not make a cache outage an implicit allow path, and do not let a stale cache silently extend authority beyond its bound.
+
+Handle replicas and regions. Replicated entries need version, region, policy epoch, and freshness metadata. A local allow must not cross a regional or data-residency boundary without proving that the decision remains valid there.
+
+Handle in-flight work. A cached decision may authorize admission, but execution must recheck when a queued task, long-running stream, or tool call crosses a defined freshness or authority boundary.
+
+Observe hit behavior. Track hit rate, age, state, policy version, invalidation latency, stale-use attempts, key collisions, cross-tenant rejects, revalidation rate, and decisions that changed after a cache miss.
+
+Sample and audit hits. For high-risk paths, periodically re-evaluate cache hits against the live policy. Compare outcomes and investigate any allow-to-deny or obligation-loss transition.
+
+Test adversarial cases. Change tenant, role, credential, region, purpose, model alias, provider, tool arguments, policy version, fact freshness, and revocation state while reusing the same or similar cache keys. Verify that only safe reuse occurs.
+
+Test invalidation races. Publish a deny while an allow is being read, rotate a credential during recomputation, revoke a tenant during replication, and expire a decision during tool execution. The safer state must win.
+
+Measure security value, not just speed. Track avoided evaluations alongside stale decisions, false denials, invalidation misses, authority extensions, privacy exposure, and incident impact. A high hit rate is not success if it weakens authorization.
+
+The practical pattern is this: define a complete trusted decision identity, canonicalize inputs, include policy and dependency context, distinguish all decision states, bind and re-enforce obligations, set risk-based freshness, support precise active invalidation, retain TTL and online checks as safety boundaries, isolate tenants and identities, track aliases and inherited dependencies, bind tools and destinations, protect storage and writers, prevent poisoning and stampedes, handle partitions and regional replicas explicitly, recheck long-running work, observe hits, sample high-risk reuse, test invalidation races and key collisions, and measure security outcomes alongside latency. An authorization cache is safe when it accelerates a decision without changing who is allowed to do what, under which policy, for which purpose, and for how long.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
