@@ -1,0 +1,85 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy artifact supply-chain security at the AI API gateway: how to protect the path from source policy to compiled artifact, registry, distribution channel, and runtime loader.
+
+Policy enforcement can fail before the evaluator runs. A build may use an unexpected dependency, a registry may serve the wrong artifact, a signer may approve an unreviewed digest, or a worker may load a stale local file. The runtime decision is only as trustworthy as the artifact path that produced it.
+
+Start with a complete lineage. Link policy source, schema, dependency lockfile, compiler, plugins, generated intermediate forms, tests, approvals, signatures, artifact digest, registry record, distribution manifest, runtime, and activation event. Every handoff needs an unambiguous identity.
+
+Pin dependencies. Compilers, parsers, standard libraries, policy functions, capability registries, classifiers, and build images must resolve to known versions and digests. Floating dependencies turn a previously approved policy into a moving target.
+
+Separate source and generated artifacts. Review the human-authored policy, but also retain the exact compiled output and optimization configuration that will execute. A source diff cannot reveal every compiler or dependency change.
+
+Make builds reproducible. The same source, dependencies, compiler, flags, target, and environment should produce the same artifact or a documented equivalent. Unexpected output differences require investigation before publication.
+
+Use hermetic builds. Restrict network access, filesystem inputs, environment variables, clocks, and credentials during compilation. A build that can silently read arbitrary external state cannot provide a reliable explanation of its output.
+
+Treat compiler plugins as code. Extensions that add operators, functions, optimizations, or data access can change policy semantics and create a supply-chain risk. Review, pin, isolate, and test them like production code.
+
+Verify schemas and registries. Policy languages, model aliases, provider capabilities, tenant roles, region maps, and obligation definitions are dependencies. Capture their versions and reject compilation when a referenced definition is missing or ambiguous.
+
+Scan dependencies for risk. Vulnerability scanning helps, but policy-specific checks also need to detect unsafe operators, undeclared network access, excessive resource requirements, unsupported data classes, and code paths that can bypass obligations.
+
+Use two-person approval for high-risk changes. Separate policy authorship, compiler release, signing, publication, and production activation. No single compromised account should be able to change source, build the artifact, sign it, and activate it unnoticed.
+
+Bind approval to content. Review and approval should reference source digest, dependency lock, compiler version, test evidence, target environments, and expected obligations. Approving a title or branch is not approving the artifact that will execute.
+
+Sign source and artifacts. Sign the source revision, build provenance, compiled output, and distribution manifest where appropriate. Verification must cover the exact bytes and the intended policy lineage.
+
+Protect signing keys. Use hardware-backed or isolated key storage, short-lived signing sessions, role separation, rotation, revocation, and auditable access. A valid signature from an overpowered or compromised key is not sufficient assurance.
+
+Use threshold approval when risk warrants it. Sensitive data access, external tools, billing, infrastructure changes, and emergency exceptions may require multiple independent approvals or an explicitly bounded emergency path.
+
+Record build provenance. Capture builder identity, build image digest, source revision, dependency digests, compiler configuration, test results, timestamp source, and output digest. Provenance should be machine-verifiable, not only a human comment.
+
+Secure the artifact registry. Enforce immutable version records, digest-addressed reads, access controls, retention policy, replication integrity, quarantine, and audit logs. A mutable tag such as “latest” must never be the sole identity of a serving policy.
+
+Prevent substitution. Before loading, a worker must verify artifact digest, signature, source lineage, target runtime, policy epoch, dependency compatibility, and activation authorization. Local presence or successful download is not proof of legitimacy.
+
+Protect distribution manifests. The manifest should bind artifact, region, worker class, evaluator, dependencies, activation epoch, and required obligations. A manifest must not authorize an artifact for a target that cannot enforce its contract.
+
+Handle mirrors and caches. Regional mirrors, CDNs, sidecars, and local caches need integrity verification, freshness limits, tenant isolation, and safe behavior when their state is inconsistent with the authority.
+
+Quarantine untrusted artifacts. New, unsigned, partially built, failed-test, revoked, or dependency-incompatible artifacts should enter a non-serving state. Make quarantine visible and require a defined promotion path.
+
+Prevent rollback attacks. Reject an older artifact unless the control plane declares an authorized rollback with a valid lineage, reason, scope, and expiry. Version comparison must not rely only on filenames or timestamps.
+
+Revoke compromised artifacts. Maintain deny lists or revocation epochs for policy versions, compiler builds, plugins, keys, registries, and runtime images. Propagate revocation faster than ordinary configuration and fence workers that cannot confirm current status.
+
+Bind artifacts to runtime capabilities. A policy compiled for one evaluator, schema, region, or enforcement adapter may not be safe on another. Validate capability declarations and block loading when required obligations cannot be enforced.
+
+Avoid secrets in builds. Compilation and tests should use synthetic or minimized data. Credentials, customer prompts, provider keys, and private source material must not leak into logs, intermediate artifacts, caches, or debug bundles.
+
+Control build outputs. Generated source maps, diagnostics, test fixtures, and temporary files can expose policy internals or sensitive examples. Apply classification, access controls, retention, and deletion to all outputs.
+
+Test the trust boundary. Verify signatures, digests, source maps, dependency locks, manifest constraints, and runtime compatibility independently of the builder. The loader must not trust claims made only by the process that created the artifact.
+
+Use isolated promotion stages. Build, test, sign, publish, distribute, load, shadow, canary, and activate should be distinct transitions with evidence. A failed later stage must not leave an artifact serving because an earlier stage succeeded.
+
+Use policy-aware CI gates. Require semantic equivalence, cost bounds, reachability evidence, obligation coverage, dependency review, reproducible output checks, signature verification, and target capability compatibility before promotion.
+
+Protect CI credentials. Build runners, registry tokens, signing sessions, and deployment identities need least privilege, short lifetimes, network restrictions, and detailed audit. Do not give a test job production activation authority.
+
+Audit every handoff. Record who or what promoted, signed, copied, loaded, activated, rolled back, quarantined, or revoked an artifact. Link actions to exact digests and policy epochs.
+
+Test compromised dependencies. Replace a parser, plugin, registry response, build image, mirror, or signing key with a malicious or mismatched version. Verify detection, quarantine, alerting, and recovery.
+
+Test tampered artifacts. Alter bytes after signing, modify manifests, change source maps, replay old signatures, and serve a valid artifact for the wrong target. The loader must reject each mismatch.
+
+Test partial and interrupted flows. Stop builds, uploads, replication, downloads, loading, and activation at each stage. Incomplete artifacts must not be mistaken for ready artifacts or silently resume with mixed metadata.
+
+Test revocation and recovery. Revoke a key, compiler, plugin, policy version, or runtime image while regions are online and partitioned. Verify propagation, fencing, safe fallback, repair, and evidence of restoration.
+
+Test insider separation. Attempt to have one role author, approve, sign, and activate a high-risk change. The workflow should enforce separation and produce a visible exception if emergency authority is used.
+
+Test reproducibility drift. Rebuild with the same declared inputs, then change an undeclared environment variable, clock, network response, or base image. Unexpected changes should be detected and block promotion.
+
+Test registry and mirror failures. Return stale, missing, conflicting, or unauthorized artifacts from mirrors and caches. Verify digest checks, freshness limits, quarantine, and routing to trusted sources.
+
+Measure supply-chain health. Track reproducible-build rate, unsigned artifact attempts, verification failures, dependency drift, time to revoke, stale-serving duration, quarantine time, unreviewed promotions, and runtime compatibility failures.
+
+Keep emergency paths bounded. Emergency policy changes may need speed, but they still require content identity, authority, expiry, monitoring, and post-event review. Emergency access should not become a permanent bypass of the supply chain.
+
+Preserve minimal evidence. Retain source and artifact digests, dependency manifests, signatures, approvals, provenance, test summaries, promotions, activations, and revocations. Avoid retaining sensitive request examples when a hash or synthetic witness is enough.
+
+The practical pattern is this: build complete lineage from source to runtime, pin all dependencies, use hermetic reproducible builds, treat compiler plugins and registries as security-critical, bind approvals to exact content, sign source, artifacts, and manifests, protect keys, use immutable digest-addressed registries, verify every load against lineage and target capabilities, quarantine incomplete or incompatible artifacts, prevent rollback and substitution, propagate revocations, isolate promotion stages, restrict CI authority, audit every handoff, test tampering, compromise, interruption, revocation, insider abuse, reproducibility drift, and mirror failure, measure verification and stale-serving health, and keep emergency paths bounded. A policy supply chain is trustworthy when every executor can prove not only what it loaded, but who authorized it, how it was built, which dependencies shaped it, and why those exact bytes are allowed to serve.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
