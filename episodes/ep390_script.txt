@@ -1,0 +1,81 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy rule reachability at the AI API gateway: how to find rules that are unreachable, permanently shadowed, mutually exclusive, or neutralized by defaults before someone relies on them for protection.
+
+A policy can contain a perfectly written deny that never executes. A broader allow may match first, a condition may be impossible, a default may override the result, or a merge operator may discard the rule. The dangerous part is that the policy looks complete in a code review.
+
+Start by defining reachability. A rule is reachable when at least one valid request context can cause its effect to participate in the final decision. That context must satisfy schema, identity, tenant, resource, time, data, provider, and execution constraints.
+
+Build a rule control-flow graph. Represent rule ordering, priority, inheritance, condition branches, defaults, exceptions, combining algorithms, and terminal effects. The graph should show not only which rule can match, but whether its result can survive to enforcement.
+
+Separate matchability from effectiveness. A rule may match some requests while never changing the final outcome because an earlier deny, later override, mandatory obligation, or stronger default always wins.
+
+Detect exact duplicates. Two rules with identical predicates and effects may be harmless, but duplicates can hide conflicting metadata, different obligations, or an accidental copy that later diverges. Report duplicates with their owners and policy versions.
+
+Detect subsumption. If rule A matches every context matched by rule B and its effect terminates evaluation, rule B may be shadowed. Check effect, priority, combining semantics, and obligations before declaring the relationship safe.
+
+Detect partial shadowing. A broad rule may cover only part of a narrower rule’s domain. Compute the remaining region where the narrower rule can still matter, and make that region visible to reviewers.
+
+Detect contradictory predicates. Conditions such as region equals Japan and region equals Germany, or data class public and data class restricted, may make a rule impossible. Use constraint solving where feasible and report unknown rather than claiming proof.
+
+Detect hidden contradictions. A rule can be satisfiable in isolation but impossible after inherited tenant boundaries, required attributes, time windows, provider capabilities, or request normalization are applied.
+
+Validate defaults. Default allow and default deny are not just fallback settings; they determine the behavior of every uncovered context. Show which requests reach the default and whether the default masks a missing rule.
+
+Make unknown explicit. Missing facts, unsupported operators, stale attributes, and evaluator errors should not be silently converted into a branch that makes a rule appear unreachable. Track unknown reachability separately from proven impossibility.
+
+Analyze priority domains. For every high-priority rule, identify lower-priority rules it masks. For every lower-priority protection, determine whether any higher layer can prevent it from executing. A priority number alone does not explain actual control flow.
+
+Analyze inheritance. Global, organization, tenant, project, user, request, and emergency policies can add, restrict, or replace one another. Model the effective policy after inheritance, not only the source files viewed independently.
+
+Analyze exceptions. A temporary bypass may shadow a permanent restriction over a surprisingly broad domain. Require explicit scope, owner, reason, start, expiry, and maximum effect before accepting an exception.
+
+Analyze combining algorithms. First-match, deny-overrides, allow-overrides, permit-unless-deny, quorum, and custom mergers produce different reachability. A rule that is reachable under one algorithm may be dead under another.
+
+Track obligations separately. A rule effect can be preserved while its obligation is shadowed. For example, a later allow may survive while redaction, logging, approval, or regional routing disappears. Analyze each obligation as its own output channel.
+
+Track restrictions separately. Provider, region, model, token, budget, tool, destination, and retention limits can be lost even when the top-level decision looks correct. A rule is not effective if its critical restriction never reaches enforcement.
+
+Use witness contexts. For every important rule, generate at least one valid request that reaches it and changes or contributes to the final result. Store the minimized witness without unnecessary customer content.
+
+Use counterexample contexts. For every rule believed to be protected from shadowing, generate a context that would expose a competing rule or a default. Counterexamples make review concrete and reveal assumptions.
+
+Minimize witnesses carefully. A small context is easier to inspect, but removing a tenant boundary, fact version, or provider capability can create a false proof. Preserve every security-relevant constraint needed to reproduce the path.
+
+Check boundary values. Test empty, null, unknown, expired, maximum, minimum, Unicode, alias, and normalized forms. Shadowing often appears only when a field is absent or transformed.
+
+Check temporal reachability. A rule may be reachable only before activation, after expiry, during a grace period, or during revocation propagation. Include clock skew, delayed facts, queued work, and long-running sessions.
+
+Check data-dependent reachability. Classification, consent, purpose, redaction state, and content inspection can route requests into different branches. Verify that transformations do not move data out of the rule’s intended domain.
+
+Check provider-dependent reachability. A route restriction may be unreachable when the preferred provider is unavailable, because fallback logic chooses a path that bypasses the condition. Model capability and failure branches.
+
+Check tool paths. A rule may protect ordinary model calls while agent tool execution uses a separate evaluator or adapter. Trace every side-effecting path, including retries, queued tasks, and compensating actions.
+
+Compare source and effective policies. Show which source rule produced each effective rule, which rules were merged, which were replaced, and which were eliminated. Reviewers need provenance, not just the final flattened output.
+
+Protect analysis from configuration drift. Pin evaluator versions, schemas, combining algorithms, dependency snapshots, and normalization settings. A reachability result is meaningless if the analyzer and production disagree about semantics.
+
+Treat analyzer disagreement as risk. If two evaluators disagree about whether a rule is reachable or which effect wins, block high-risk publication or route it to review. Do not pick the more convenient answer.
+
+Review dead protections. An unreachable deny, redaction requirement, approval rule, budget limit, or provider restriction should be an actionable finding. Classify it as intentional, obsolete, incomplete, or dangerous rather than ignoring it as code hygiene.
+
+Review dead allows too. Unreachable allows can indicate stale features, but they can also reveal that a fallback or emergency path is not available when expected. Dead rules are evidence about policy intent and operational readiness.
+
+Prevent silent suppression. Require every rule to declare whether it may be shadowed, overridden, narrowed, or superseded. Make intentional shadowing explicit with owner, rationale, scope, and expiry.
+
+Gate publication. Block policies with proven unreachable critical protections, unreviewed allow expansions, obligation loss, ambiguous combining behavior, or unresolved high-risk analyzer disagreements. Permit exceptions only through the proper approval path.
+
+Test mutation. Delete, reorder, broaden, narrow, invert, and change the effect of each important rule. A useful analyzer should detect changes in reachability, witnesses, counterexamples, and final decisions.
+
+Test metamorphic properties. Reordering independent rules should not change results; adding a stricter global deny should not create an allow; narrowing a condition should not increase its witness domain; and removing a shadowed rule should not change behavior unless the shadow analysis was wrong.
+
+Observe production paths. Sample decisions by rule ID, final effect, obligation, default path, and policy version. Measure how often critical rules actually execute and compare observed paths with predicted witnesses.
+
+Investigate zero-hit rules. A rule with no production hits may be correctly rare, incorrectly scoped, shadowed, or unreachable. Combine static proof, simulation, and production evidence before deleting or trusting it.
+
+Preserve explainable findings. For each unreachable or shadowed rule, record the conflicting rule, predicate relationship, priority path, combining behavior, assumptions, witness or proof, and recommended action. Avoid a vague “dead code” label.
+
+Measure policy health. Track critical-rule reachability, default-path rate, shadowed-rule count, unresolved unknowns, analyzer disagreements, obligation reachability, witness coverage, zero-hit findings, and incidents involving missing enforcement.
+
+The practical pattern is this: model the effective policy as a control-flow graph, distinguish matchability from effectiveness, detect duplicates, subsumption, partial shadowing, contradictions, impossible inherited conditions, default masking, priority suppression, exception breadth, and combining-algorithm effects; analyze decisions, obligations, and restrictions separately; generate minimized witnesses and counterexamples; test boundaries, time, data, providers, tools, retries, and failures; preserve provenance; pin semantics; treat disagreement as risk; make intentional suppression explicit; gate publication; mutate and reorder rules; compare predicted and observed paths; and measure critical protections rather than merely counting lines. A trustworthy policy is not one that contains many rules. It is one where every important rule has a demonstrable path to the correct enforcement point.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
