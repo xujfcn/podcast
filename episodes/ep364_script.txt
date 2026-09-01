@@ -1,0 +1,57 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about claim and evidence verification at the AI API gateway: how to determine whether an answer’s citations actually support its claims, whether the evidence is current, and when missing or conflicting evidence should block delivery.
+
+A citation is not proof. A model can attach a real source to a claim the source never made, cite an outdated page, quote a nearby sentence, or combine several documents into a conclusion none of them support. Trust requires checking the relationship between claim and evidence.
+
+Start with a claim contract. Define which outputs require verification, what counts as a claim, what evidence types are acceptable, how current evidence must be, and which claims are too consequential for automated approval.
+
+Extract claims explicitly. Separate factual assertions, numbers, dates, instructions, recommendations, quotations, identities, and causal statements. Keep qualifiers such as may, usually, only, and as of a date because removing them changes meaning.
+
+Preserve claim boundaries. Do not validate a paragraph as one unit when it contains several independent assertions. Give each claim an identifier and link it to the exact evidence spans, retrieval result, model attempt, and final output location.
+
+Verify entailment. Check whether the evidence supports the claim as written, including subject, predicate, quantity, condition, time, and scope. Topic similarity is not support. A document discussing a product is not evidence for every claim about that product.
+
+Check source authority. Evaluate publisher, identity, provenance, access path, update status, jurisdiction, and trust policy. A source can be relevant but not authoritative for a regulated, contractual, or operational decision.
+
+Check freshness. Carry published-at, updated-at, retrieved-at, valid-from, and expires-at where available. Define freshness by claim type. Pricing, availability, policies, and security advisories may age differently from historical facts.
+
+Handle contradictions. Detect conflicting sources, incompatible dates, different units, and changed definitions. Do not hide disagreement by selecting the newest document blindly. Apply source precedence or return an uncertainty state.
+
+Verify quotations and numbers. Compare exact text, punctuation where material, units, rounding, currency, sign, denominator, and calculation. Generated citations often preserve the topic while changing the number or qualification.
+
+Check negative claims carefully. Proving that something does not exist or never happened usually requires a bounded search and defined corpus. If the search was incomplete, report limited evidence rather than absolute absence.
+
+Separate retrieval from verification. A retriever finds candidates; a verifier decides whether they support the claim. Do not use retrieval rank as a truth score.
+
+Keep evidence spans. Store the document identifier, version, section, offsets or page, digest, retrieval query class, and verification result. Prefer references and small excerpts over duplicating full sensitive documents.
+
+Protect against evidence injection. Retrieved pages, PDFs, tool results, and user-provided sources may contain instructions that attempt to influence the verifier. Treat source content as evidence, not control-plane instructions, and isolate it from system policy.
+
+Control source access. Enforce tenant, purpose, region, sensitivity, consent, and authorization before retrieval or verification. A source cannot be used merely because it is publicly searchable if the workflow is not allowed to process it.
+
+Verify calculations deterministically. Use code for arithmetic, unit conversion, date comparison, signatures, allowlists, and schema checks. Models can explain a calculation, but they should not be the only component deciding whether the arithmetic is correct.
+
+Handle structured output. Require claim IDs, evidence references, confidence category, freshness status, and unresolved issues in an internal representation before rendering a customer response. Reject references that do not resolve to retrieved evidence.
+
+Make uncertainty explicit. Distinguish supported, partially supported, contradicted, stale, unverifiable, and not evaluated. Do not compress all failures into a generic low-confidence label.
+
+Set risk-based gates. A casual answer may show a caveat, while a medical, financial, security, legal, or external-action workflow may require every material claim to be supported by current authoritative evidence.
+
+Control external actions. Evidence for a recommendation does not automatically authorize an email, purchase, configuration change, or account update. Verify the claim and authorize the action separately.
+
+Use multiple verifiers carefully. Independent checks can catch errors, but agreement between models is not proof. Prefer deterministic validators, source comparison, and human escalation for high-impact claims.
+
+Handle source changes. Cache evidence with version and retrieval time. Revalidate when a source is updated, revoked, moved, or marked unreliable. A previously verified claim can become stale without the answer text changing.
+
+Preserve negative results. Record when evidence was missing, inaccessible, conflicting, or rejected. An empty result must not look like successful verification in dashboards or downstream APIs.
+
+Explain failures to clients. Return stable reason codes such as unsupported claim, stale evidence, conflicting sources, inaccessible source, or verification unavailable. Give enough detail to correct the request without exposing protected documents or internal detection logic.
+
+Audit the chain. Record claim extraction version, evidence identifiers, verifier version, source metadata, policy, freshness decision, result, reviewer, rendered output, and delivery status. Keep raw content only as required and authorized.
+
+Test adversarial cases. Cover citation substitution, unsupported conclusions, outdated sources, conflicting sources, altered quotations, unit errors, missing qualifiers, incomplete negative searches, injected source instructions, inaccessible documents, source deletion, cache staleness, verifier disagreement, and partial evidence.
+
+Measure evidence quality. Track claim coverage, supported-claim rate, unsupported citations, stale evidence, contradiction rate, inaccessible sources, verification latency, human escalations, false support, false rejection, and claims delivered without a complete evidence link.
+
+The practical pattern is this: define claim contracts, extract bounded claims, preserve qualifiers, link claims to exact evidence, verify entailment, check authority and freshness, detect contradictions, validate quotations and numbers, bound negative searches, separate retrieval from verification, preserve evidence spans, isolate source instructions, enforce access, use deterministic checks, require structured evidence references, expose uncertainty, gate by risk, separate evidence from action authorization, revalidate changing sources, preserve negative results, explain failures safely, audit the chain, test adversarial cases, and measure quality. A reliable answer is not one with many citations. It is one where each important claim has current, authoritative evidence that actually supports it.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
