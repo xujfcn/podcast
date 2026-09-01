@@ -1,0 +1,63 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy reauthorization at the AI API gateway: how to revisit an earlier allow decision when the request, subject, purpose, provider, data, or execution context changes.
+
+An allow decision is not always valid forever. A user may revoke consent. A job may move to another region. A tool argument may become more powerful. A provider may change its retention terms. A queued request may be executed by a different identity. Reauthorization prevents an old decision from silently becoming permanent permission.
+
+Start with a decision validity contract. Define which facts a decision covers, how long it is valid, which changes invalidate it, which transitions require a fresh evaluation, and what happens while reauthorization is pending.
+
+Separate reauthorization from expiration. Expiration is time-based. Reauthorization is change-based. A decision can be young but invalid because its purpose, subject, destination, data class, or requested effect changed.
+
+Bind the decision to its intent. Include operation, resource, subject, tenant, purpose, audience, modality, provider class, region, tool scope, budget, and side-effect level. If any material dimension changes, compare it with the original decision rather than assuming continuity.
+
+Classify changes by risk. Cosmetic metadata may not require reauthorization. A new recipient, broader tool argument, more sensitive attachment, different provider, new jurisdiction, or irreversible action usually does.
+
+Define monotonicity. Some changes only narrow permission and may continue safely. Others expand authority or exposure and must require a new decision. Do not treat all request mutations as equivalent.
+
+Track the decision lineage. Carry the original policy snapshot, fact versions, evaluator version, authorization subject, purpose, and obligations through queues, retries, fallbacks, tools, human review, and delivery.
+
+Compare before every meaningful boundary. Recheck at admission, after queue delay, before provider dispatch, before fallback, before tool execution, before external side effects, before release of sensitive output, and before completion of long-running work.
+
+Avoid check-only races. The facts used for reauthorization must remain bound to the action they authorize. Use short-lived leases, transaction versions, conditional writes, or provider-side idempotency where a change could occur between evaluation and execution.
+
+Handle identity changes explicitly. A request created by one user, delegated to an agent, reviewed by an operator, and executed by a worker has multiple principals. Reauthorize when authority is delegated, narrowed, transferred, or used for a different subject.
+
+Handle purpose changes. A response approved for customer support may not be approved for training, marketing, profiling, or a new product feature. Preserve purpose as a typed fact and recheck when downstream use changes.
+
+Handle data growth. New attachments, retrieved documents, tool results, conversation memory, images, transcripts, or derived artifacts can raise sensitivity. Reclassify the effective input before passing it to a provider or tool.
+
+Handle destination changes. A retry or fallback may cross provider, region, account, network, tenant, or tool boundaries. Reauthorize the destination and all related obligations instead of treating transport continuity as policy continuity.
+
+Handle provider fact changes. Retention, training, encryption, capability, safety, and residency declarations can change while a request is waiting. Require fresh facts for high-impact or sensitive routes.
+
+Handle tool escalation. A tool call that begins as read-only may acquire write arguments, broader resources, higher spending, or an external recipient. Compare the proposed effect with the authority in the original decision.
+
+Handle streaming. If the request context changes while tokens are being delivered, define whether streaming pauses, terminates, buffers, or continues under a documented bounded exception. Never assume that starting a stream authorizes every later token.
+
+Handle long-running agents. Reauthorize after human approval, memory retrieval, plan revision, tool output, credential renewal, waiting periods, and material environment changes. A plan is not a permanent authorization for every step it may later invent.
+
+Use change triggers. Consent revocation, identity risk changes, policy activation, provider status changes, region movement, data reclassification, credential revocation, budget exhaustion, tool-scope expansion, and purpose changes should emit events that can invalidate active decisions.
+
+Propagate revocation efficiently. Use epochs, version counters, subscription streams, or bounded polling so workers learn about invalidation quickly. Distinguish a revocation from a temporary service outage.
+
+Define stale-read behavior. If the gateway cannot tell whether an authorization was revoked, high-impact work should pause, quarantine, or fail safely. A stale cache must not become evidence that permission still exists.
+
+Use scoped decision leases. A lease should name the operation, subject, resource, purpose, obligations, allowed route, maximum duration, and revocation epoch. Avoid generic tokens that can be replayed for unrelated work.
+
+Keep reauthorization idempotent. Repeating a check must not create duplicate approvals, charges, tool actions, notifications, or review tasks. Bind the evaluation to a stable request and transition identity.
+
+Preserve completed effects. If reauthorization fails after a provider generated output or a tool changed external state, record what already happened and invoke defined cleanup or compensation. Do not pretend that denial erases prior effects.
+
+Avoid approval fatigue. Reauthorize based on material changes and risk, not every harmless retry. Make the trigger and changed fact visible to reviewers so they can focus on the new risk.
+
+Explain the result safely. Use stable codes such as consent revoked, subject changed, purpose changed, destination not approved, data sensitivity increased, provider facts stale, tool scope expanded, or decision lease expired. Do not expose hidden risk signals or unrelated policy layers.
+
+Test mutation paths. Cover added attachments, changed recipients, provider fallback, region migration, delayed queues, identity delegation, tool escalation, consent withdrawal, policy activation, memory injection, credential renewal, stream interruption, and partial external effects.
+
+Replay historical transitions. Reconstruct the original decision and each material change, then verify whether the recorded system behavior matched the reauthorization contract. Pay special attention to work that crossed service or region boundaries.
+
+Audit every reauthorization. Record the original decision, changed facts, trigger, evaluator and policy versions, outcome, obligations, lease, executor, timestamp, and any work that occurred before failure. Minimize sensitive values in the audit trail.
+
+Measure freshness and reuse. Track decisions reused without reauthorization, invalidations detected late, stale-cache decisions, reauthorization rate by trigger, high-impact work in degraded mode, review load, false rechecks, and effects completed after authorization became invalid.
+
+The practical pattern is this: define validity, separate time expiry from change invalidation, bind decisions to intent and lineage, classify mutations, enforce monotonicity, compare at meaningful boundaries, prevent check races, govern identity and purpose changes, reclassify growing data, reauthorize destinations, provider facts, and tools, define streaming and agent behavior, emit invalidation events, use scoped leases, keep checks idempotent, preserve evidence of completed effects, avoid approval fatigue, explain safely, test mutation paths, replay transitions, audit results, and measure freshness. Authorization is trustworthy not because it was granted once, but because it remains valid for the exact action being taken now.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
