@@ -1,0 +1,59 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about action reversibility and compensation at the AI API gateway: how to recover when an agent has already sent a message, changed a record, modified configuration, or triggered an external side effect.
+
+An API response that says success does not mean the world can be put back exactly as it was. Some actions are reversible, some are compensatable, and some are effectively irreversible. A reliable gateway must know the difference before an agent acts.
+
+Start with an action contract. Define the intended effect, target, authority, preconditions, idempotency key, expected result, timeout, reversibility class, compensation action, evidence required, and human escalation path.
+
+Classify effects. A read is usually non-mutating. A draft or staged change may be reversible. A database update may be compensatable. Sending an email, publishing content, transferring money, or exposing data may be impossible to fully undo.
+
+Do not promise undo when only compensation is possible. Deleting a newly created record does not retract an email already delivered. Refunding a payment does not erase the recipient’s knowledge. Replacing a configuration does not restore unknown concurrent changes.
+
+Check preconditions immediately before execution. Verify target identity, current version, authorization, scope, deadlines, and required approvals. A plan generated earlier may no longer describe the world the action will change.
+
+Use intent and effect records. Store what the agent meant to do separately from what the provider or external system reports happened. Preserve target, arguments, policy decision, approval, request ID, idempotency key, timestamps, and response evidence.
+
+Make actions idempotent. Retries and timeouts can create ambiguity. Use stable operation IDs, provider idempotency support where available, and reconciliation before retrying. Never assume a network error means the external effect did not occur.
+
+Use a durable state machine. Track proposed, approved, dispatched, accepted, partially applied, completed, compensation requested, compensating, compensated, failed, unknown, and escalated states. Do not represent every outcome as a simple success or failure boolean.
+
+Separate planning from committing. Let the model propose an action, but require a policy-controlled commit step with validated arguments and exact scope. The text of a plan must not silently become authorization.
+
+Use staged execution. Prefer draft, preview, dry run, hold, or two-phase workflows when the provider supports them. Show the material effect, recipient, cost, and reversibility before crossing the commit boundary.
+
+Define compensation explicitly. A compensation action should have its own authority, target checks, idempotency key, deadline, risk classification, and evidence requirements. It is not automatically safe merely because it attempts to reverse the original action.
+
+Preserve the original evidence. Compensation must reference the exact operation, version, arguments, and external result it addresses. Never construct a reversal from an approximate model summary or current user message alone.
+
+Handle partial success. A batch may update seven records and fail on three. A multi-step workflow may send one notification before the second system rejects the request. Record per-effect status and compensate only the completed parts that can be safely addressed.
+
+Design for unknown outcomes. If the client times out after dispatch, reconcile with the provider before retrying or compensating. Query operation status, inspect resource version, or use a provider receipt. Unknown must be an operational state, not an invitation to duplicate work.
+
+Use sagas carefully. A sequence of local steps can have compensating actions, but compensation may itself fail or have side effects. Define ordering, retries, deadlines, and escalation for every step rather than assuming a generic workflow engine provides correctness.
+
+Protect against concurrent changes. An action can be valid when planned and unsafe when executed because another actor changed the target. Use optimistic concurrency, version conditions, compare-and-set operations, and conflict review.
+
+Keep compensation from expanding authority. An agent allowed to create a record is not automatically allowed to delete records, issue refunds, or change access controls. Grant the smallest authority needed for the specific recovery path.
+
+Respect user intent. A user who asks to cancel a task may not be asking to delete every artifact or reverse every downstream effect. Explain what can be stopped, what can be compensated, what cannot be undone, and what additional approval is required.
+
+Handle time windows. Cancellations, refunds, message recalls, and configuration rollbacks may have provider deadlines. Record expiration and stop claiming recovery is available after the window closes.
+
+Control external notifications. If a workflow is compensated, decide whether affected users, operators, or counterparties must be notified. A silent internal rollback may be misleading when an external party has already observed the original effect.
+
+Make financial effects precise. Track authorization, capture, settlement, refund, fee, currency, and ledger state separately. A model-generated statement that money was returned is not evidence that the payment processor and ledger agree.
+
+Handle secrets and data exposure. If an action sent sensitive data to an external recipient, deleting the local record is not compensation. Trigger recipient notification, access revocation, token rotation, provider deletion requests, and incident handling where policy requires.
+
+Audit causality. Link the user request, model plan, policy decision, approval, dispatched operation, provider receipt, resource version, compensation attempt, reviewer decision, and final state. Preserve enough evidence to explain what happened without retaining unnecessary payloads.
+
+Avoid autonomous cleanup loops. A failed compensation should not trigger unbounded model retries or increasingly broad actions. Bound attempts, cost, authority, and time, then escalate with a precise recovery package.
+
+Use human review at the right boundary. Human approval is most useful before irreversible effects and after ambiguous or high-impact failures. Give reviewers the original intent, exact effect, current state, available compensation, and known limitations.
+
+Test recovery, not just the happy path. Cover provider timeouts, duplicate delivery, partial batches, stale versions, concurrent edits, expired cancellation windows, compensation failure, unavailable status APIs, notification requirements, data exposure, payment disagreement, and human handoff.
+
+Measure reversibility. Track unknown outcomes, duplicate effects, compensation success rate, compensation latency, unhandled partial success, expired recovery windows, escalations, irreversible actions, reconciliation backlog, and operations lacking complete evidence.
+
+The practical pattern is this: classify effects, define action contracts, validate preconditions, separate intent from effect, make operations idempotent, use durable states, separate planning from commit, stage risky changes, define compensation with independent authority, preserve original evidence, handle partial and unknown outcomes, control concurrency, respect time windows, notify affected parties, reconcile financial and data effects, audit causality, bound autonomous recovery, involve humans at the right boundary, test failures, and measure reversibility. A trustworthy agent is not one that never fails. It is one that knows what happened, what can be repaired, what cannot be undone, and who owns the next decision.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
