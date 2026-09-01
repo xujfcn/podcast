@@ -1,0 +1,67 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy control regression testing at the AI API gateway: how to keep a previously safe decision safe after rules, dependencies, evaluators, adapters, and deployment paths change.
+
+Policy systems rarely fail because nobody wrote a test. They fail because tests covered the rule but not the queue, cache, fallback, stream, tool, tenant boundary, or obligation that surrounded it. Regression testing turns important past behavior into a durable contract.
+
+Start with a behavior catalog. List high-value scenarios for identity, purpose, data class, region, provider, model, tool, spend, rate, approval, retention, delivery, revocation, expiration, and failure handling.
+
+Give every case a stable name and owner. A test should have a reason, risk level, policy scope, expected state, expected obligations, expected destination, and expiry or review date. Anonymous tests become obsolete without anyone noticing.
+
+Store canonical inputs. Keep normalized request intent, identity claims, facts, dependency versions, policy artifact, evaluator version, time basis, and feature flags. Do not rely on today’s environment to recreate yesterday’s result.
+
+Store expected outcomes as contracts. Compare permission, decision state, reason codes, obligations, route, provider eligibility, data transformations, retry behavior, audit events, and side-effect boundaries, not only HTTP status.
+
+Separate public fixtures from protected fixtures. Use synthetic data for ordinary regression cases. Keep sensitive or customer-derived cases access-controlled, minimized, redacted, and governed by a documented retention policy.
+
+Test both allow and deny. An allow regression may break a customer workflow. A deny regression may create a security or compliance incident. The suite must detect both false rejection and false permission.
+
+Test unknown and unavailable inputs. Missing identity, stale classification, contradictory provider facts, unavailable consent, and evaluator errors should reach their documented outcomes. Never let a dependency outage silently turn into allow.
+
+Test boundary values. Include exact expiration, zero and maximum budget, rate-window edges, token limits, region boundaries, model capability thresholds, approval scope limits, and classification transitions.
+
+Test policy composition. Exercise conflicts between tenant policy, organization policy, product policy, safety policy, regional requirements, provider constraints, and temporary exceptions. Verify the expected precedence and the complete obligation set.
+
+Test reauthorization. Change identity, purpose, destination, data class, consent, provider, or tool parameters during execution. Confirm that the system rechecks the right conditions and never retains broader authority than the current context allows.
+
+Test state transitions. Verify evaluated, pending, admitted, executing, partial, completed, revoked, expired, failed, quarantined, compensated, and closed states. Assert valid transitions and reject illegal backward or privilege-expanding transitions.
+
+Test retries. Duplicate requests, messages, callbacks, and worker deliveries. Confirm that idempotency prevents duplicate inference, charges, tool effects, notifications, approvals, and compensations.
+
+Test unknown external outcomes. Timeout after provider dispatch, lost tool response, partial batch completion, and uncertain payment result should invoke reconciliation rather than blind retry or false success.
+
+Test queues and leases. Let work wait past policy expiration, authorization revocation, lease expiry, and dependency freshness limits. Confirm that consumers validate current scope before acting and that ownership does not split.
+
+Test caches. Exercise decision, prompt, response, capability, and route caches across tenants, policy versions, revocations, regions, purposes, and data classes. Verify that a hit cannot bypass a newer restriction.
+
+Test failover. Replace the primary region, evaluator, provider, adapter, or dependency with a configured fallback. Compare semantics, obligations, destination constraints, evidence, and user-visible outcome with the approved compatibility contract.
+
+Test streaming. Cover moderation, redaction, cancellation, backpressure, partial delivery, reconnect, and finalization. Verify controls apply to chunks and that a client cannot receive content after revocation or cancellation requires it to stop.
+
+Test tool execution. Use safe test tools or a simulator to validate tool name normalization, argument validation, approval scope, identity propagation, idempotency, timeout, and compensation. Ensure generated arguments cannot broaden an approved action.
+
+Test data transformations. Run cases through serialization, compression, protocol translation, batching, redaction, encryption, logging, provider adaptation, and response formatting. Compare protected attributes before and after each boundary.
+
+Test rollout states. Evaluate draft, shadow, canary, partial publication, rollback, and emergency policy paths. A policy should not pass only when fully deployed and fail when one region or worker still uses an older artifact.
+
+Use differential evaluation. Run current and candidate policy engines, compilers, adapters, and dependency versions on the same corpus. Classify every difference as intended, approved, unsupported, or unexplained.
+
+Use property-based testing. Generate combinations of tenants, scopes, facts, failures, timestamps, retries, and transformations. Assert invariants such as no permission expansion, obligation preservation, tenant isolation, and no duplicate side effect.
+
+Use mutation testing. Deliberately remove a condition, invert a comparison, drop an obligation, broaden a scope, or bypass a check. The suite should fail. If it still passes, coverage is measuring execution rather than protection.
+
+Test observability contracts. Verify decision fingerprints, enforcement receipts, actor context, policy version, dependency evidence, error codes, and audit events. A behavior that cannot be diagnosed is only partially tested.
+
+Test negative evidence. Confirm that denied requests produce no provider or tool side effect, quarantined work does not escape, and canceled streams stop. Correlate gateway results with simulated or independent downstream records.
+
+Gate changes on risk. Low-impact reason-text changes may need a narrow check. Changes to identity, scope, data handling, provider routing, tools, billing, or revocation require broader suites, review, canary evidence, and rollback readiness.
+
+Manage flaky tests explicitly. Record whether nondeterminism comes from clocks, network, model behavior, shared state, or the test itself. Quarantine a flaky test with an owner and deadline; never turn it into an ignored safety failure.
+
+Run tests at the right layers. Unit tests validate operators and normalization. Contract tests validate policy-engine interfaces. Integration tests validate queues, caches, adapters, and providers. End-to-end probes validate real enforcement paths. No single layer replaces the others.
+
+Reproduce production incidents. Convert every meaningful policy incident, bypass, disagreement, or missing receipt into a minimized regression case after sensitive data is removed. A post-incident fix is incomplete until the failure is permanently testable.
+
+Measure regression health. Track false allows, false denies, unexplained diffs, mutation score, fixture age, untested high-risk paths, flaky tests, blocked releases, probe failures, incident cases converted, and time from behavior change to detection.
+
+The practical pattern is this: build a behavior catalog, assign owners, store canonical inputs and complete outcome contracts, protect fixtures, test allow, deny, unknown, boundaries, composition, reauthorization, state, retries, external uncertainty, queues, caches, failover, streams, tools, transformations, rollouts, and observability, use differential, property-based, mutation, and end-to-end testing, gate changes by risk, manage flakiness, layer the suites, convert incidents into cases, and measure regression health. A policy system is resilient when every important safety behavior is repeatable, comparable, and difficult to lose accidentally.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
