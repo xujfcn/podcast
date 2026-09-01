@@ -1,0 +1,75 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision provenance at the AI API gateway: how to explain where an allow, deny, review, or restriction came from without storing every sensitive input that passed through the system.
+
+An audit record that says “policy denied” is rarely enough. Operators need to know which policy version was active, which rules matched, which facts mattered, how conflicts were resolved, which obligations were attached, and which executor enforced the result.
+
+Start with provenance as a chain. A decision should point to its request context, policy artifact, evaluator, rule matches, dependency facts, combining algorithm, obligations, restrictions, handoffs, and enforcement result. Each link should have a stable identifier and integrity protection.
+
+Separate provenance from raw content. The goal is to reconstruct the decision path, not to retain complete prompts, documents, tool arguments, credentials, or provider payloads. Use hashes, classifications, bounded summaries, and references wherever they preserve explainability.
+
+Record the policy identity. Store normalized policy digest, parent version, activation epoch, evaluator build, schema, combining algorithm, and relevant configuration. A filename or human label is not a sufficient identity.
+
+Record the rule path. Capture rules considered, rules matched, rules that won or were shadowed, conditions that evaluated unknown, defaults reached, and the final effect. Do not expose internal control details to every client merely because operators need them.
+
+Record decision inputs by role. Identify which subject, tenant, resource, operation, purpose, region, provider, model, tool, data class, consent, risk signal, and time boundary affected the result. Preserve values only when required and authorized.
+
+Record fact provenance. For each security-relevant fact, capture source, version, scope, freshness, retrieval time, trust level, and whether it was live, cached, or pinned. A decision based on an unknown or stale fact must remain distinguishable from one based on a verified current fact.
+
+Record transformations. Normalization, alias resolution, classification, redaction, tokenization, protocol translation, and prompt assembly can change the context evaluated by policy. Link the input representation to the evaluated representation without retaining unnecessary content.
+
+Record alternatives. If routing, fallback, or policy composition considered multiple paths, capture the candidates and why they were rejected or narrowed. This helps explain why a provider, region, model, or tool was selected.
+
+Record obligations and restrictions separately. The top-level allow or deny does not explain redaction, logging, encryption, retention, budget, provider, region, approval, or tool limits. Provenance must show where each required control originated.
+
+Record authority. Link the decision to the policy owner, proposal, approval, exception, delegation, and emergency authority that made it legitimate. Distinguish authorship, review, approval, publication, and enforcement roles.
+
+Record time semantics. Include request time, evaluation time, fact times, policy activation, expiry, reauthorization checkpoints, and enforcement time. Clock differences and queue delays can explain decisions that appear inconsistent later.
+
+Record environment. Region, worker, adapter, provider capability snapshot, key version, classifier, and dependency status may affect behavior. Capture the minimum environment fingerprint needed to reproduce the path.
+
+Use append-only events. Rather than rewriting a single mutable audit row, emit decision, dependency, handoff, reauthorization, obligation, and enforcement events linked by identifiers. Corrections should be new events with clear supersession.
+
+Protect event integrity. Chain hashes, signatures, trusted timestamps, access controls, and write-once storage can make provenance resistant to silent alteration. Integrity metadata must itself be operationally verifiable.
+
+Design for partial evidence. A dependency outage, privacy filter, or sampling decision may prevent full provenance. Mark missing links and confidence explicitly. Never fill a missing field with a plausible default.
+
+Distinguish explanation from private reasoning. Record rule IDs, predicates, reason codes, facts, and outcomes needed to verify policy behavior. Do not record hidden model deliberation or sensitive internal reasoning that is unrelated to the authorization decision.
+
+Support audience-specific views. Clients may need a safe reason code and remediation. Operators may need rule and dependency detail. Auditors may need authority and lineage. Security investigators may need protected evidence under controlled access.
+
+Prevent explanation leakage. A denial message should not reveal whether a protected resource exists, which security rule matched, or which identity attribute failed unless that disclosure is authorized. Detailed provenance belongs behind appropriate access controls.
+
+Use privacy-preserving identifiers. Tokenize subjects, tenants, resources, and request IDs in broad-access logs. Keep the mapping in a separate protected system with bounded retention.
+
+Set retention by purpose. Operational debugging, billing reconciliation, compliance, incident response, and safety analysis may need different lifetimes. Delete raw content earlier than compact provenance when possible.
+
+Handle deletion and legal holds. Provenance should reference content artifacts through controlled IDs, allowing content deletion while retaining a minimal decision record. Legal holds and deletion exceptions must be explicit and audited.
+
+Make provenance deterministic enough to replay. Record policy, evaluator, dependency, normalization, and time inputs so a safe replay can test the path without replaying external side effects or exposing customer content.
+
+Use replay carefully. A replay should be a validation tool, not an authorization mechanism. It must not call tools, charge accounts, send data, or make a provider request unless separately approved in a controlled environment.
+
+Compare original and replayed decisions. Differences can arise from policy changes, fact freshness, provider capabilities, nondeterministic classifiers, or missing context. Classify each difference rather than treating replay as absolute truth.
+
+Trace asynchronous work. Link admission, queueing, retries, execution leases, provider attempts, tool calls, compensation, and delivery. One request may create many decisions, each with a different authority and freshness boundary.
+
+Trace derived decisions. A response filter, tool guard, budget check, region check, and billing decision may be evaluated after the primary model authorization. Preserve parent-child relationships so downstream controls are not mistaken for one original decision.
+
+Trace denials and unknowns. Deny, review, unknown, unavailable, expired, and restricted outcomes can each have different causes and remediation. Provenance should explain the state transition, not collapse everything into failure.
+
+Detect provenance gaps. Alert when a decision lacks a policy digest, matched-rule path, fact source, obligation origin, handoff proof, or enforcement acknowledgment. A successful request with missing provenance may be an observability failure, not a safe success.
+
+Test tampering and omission. Remove events, reorder them, alter hashes, substitute policy versions, change timestamps, and drop obligations. Verification must detect broken chains and mark the decision untrusted.
+
+Test privacy boundaries. Confirm that clients, operators, analysts, and auditors see only the fields appropriate to their roles. Test log exports, metrics labels, support tools, and error messages for sensitive leakage.
+
+Test explanation accuracy. Create decisions with overlapping rules, unknown facts, defaults, inherited policies, retries, cache hits, reauthorization, and partial activation. Verify that the recorded path matches what the evaluator and enforcer actually did.
+
+Test missing dependencies. Fail fact providers, classifiers, policy stores, event queues, and timestamp services. Verify explicit degraded provenance and safe decision behavior without inventing evidence.
+
+Test retention and deletion. Expire raw payloads, delete referenced artifacts, apply legal holds, and rebuild indexes. Ensure the remaining provenance is honest about what can and cannot be reconstructed.
+
+Measure provenance quality. Track complete-chain rate, missing-link rate, verification failures, replay divergence, explanation disagreement, privacy incidents, retention compliance, deletion latency, and time to reconstruct a decision.
+
+The practical pattern is this: build a linked provenance chain for request context, policy artifact, rule path, facts, transformations, alternatives, obligations, authority, time, environment, handoffs, and enforcement; preserve identifiers, hashes, versions, and bounded summaries instead of unnecessary raw content; emit append-only integrity-protected events; mark partial evidence honestly; separate client explanations from protected operator views; control privacy and retention; support safe replay without side effects; trace asynchronous and derived decisions; detect gaps; test tampering, omission, privacy boundaries, explanation accuracy, outages, deletion, and replay divergence; and measure how quickly a decision can be reconstructed. A policy system is explainable when it can show not just what it decided, but the verifiable chain of authority and facts that produced the decision, without turning customer data into permanent audit material.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
