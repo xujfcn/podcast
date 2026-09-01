@@ -1,0 +1,69 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy evaluation isolation at the AI API gateway: how to keep one tenant, request, or complicated policy from contaminating another decision or consuming the evaluator’s entire capacity.
+
+Policy evaluation is shared infrastructure, but its state and resource use can affect authorization correctness. A mutable cache, reused scratch space, unbounded recursion, or noisy tenant can turn an isolated decision into a shared failure.
+
+Start with isolation domains. Define which state belongs to a request, subject, tenant, policy version, region, and evaluator process. Do not assume that process-level separation is enough when caches, fact stores, workers, or telemetry are shared.
+
+Keep evaluation state immutable where possible. Use request-scoped inputs, immutable policy snapshots, versioned facts, and bounded local state. Mutable global state is a common path for cross-request contamination.
+
+Partition caches. Key policy, fact, decision, and intermediate-result caches by every security-relevant context. If an intermediate result cannot be proven safe to share, keep it request-scoped or disable reuse.
+
+Separate configuration from runtime state. A tenant’s policy configuration must not become evaluator-wide mutable state. Compile or load it into a versioned artifact, then evaluate against an explicit context.
+
+Budget evaluation work. Limit CPU time, memory, recursion depth, rule count, graph traversal, external lookups, and intermediate objects per request and tenant. Return typed resource-exhausted results rather than hanging or silently weakening checks.
+
+Control policy complexity. Reject or review excessive nesting, cyclic references, huge exception sets, expensive regular expressions, unbounded collections, and pathological combining logic before publication.
+
+Prevent algorithmic denial of service. Treat policy expressions and request-controlled fields as potentially adversarial. Bound regexes, parsing, joins, fan-out, and dependency calls; never let a client choose unlimited evaluation work.
+
+Use fair scheduling. A large tenant or expensive request must not monopolize evaluator workers. Allocate concurrency and queues by tenant, risk, and cost while preserving priority for critical control paths.
+
+Prevent starvation. Fairness must not delay urgent revocations, emergency blocks, or high-priority safety decisions behind bulk evaluations. Reserve capacity for control-plane and safety-critical work.
+
+Isolate failure domains. A crashed evaluator, exhausted worker pool, corrupted cache, or unavailable fact provider should affect only the smallest relevant domain. Use process, queue, region, and dependency boundaries where justified.
+
+Define fail-safe behavior. If evaluation cannot complete, return unknown or unavailable and apply the operation’s explicit fallback. Never convert evaluator exhaustion into an implicit allow.
+
+Protect facts. Tenant attributes, identity data, consent, classification, and risk signals need provenance, version, scope, and freshness. A shared fact cache must not return one tenant’s value in another tenant’s context.
+
+Protect scratch data. Clear request-specific variables, temporary classifications, tool summaries, and redaction decisions between evaluations. Test worker reuse and cancellation paths, not just clean sequential runs.
+
+Handle cancellation. When a client disconnects, deadline expires, or request is superseded, stop evaluation and release budgets. A cancelled computation must not continue mutating shared state or consume capacity indefinitely.
+
+Handle nested evaluation. Tool calls, fallback routes, content checks, and response policies may invoke the evaluator again. Track parent and child budgets, prevent recursive explosions, and keep contexts explicitly linked.
+
+Handle long-running work. Reauthorization checkpoints should receive a fresh isolated context, not stale mutable state from admission. Queue delay, policy changes, and revocation must be visible at the checkpoint.
+
+Separate tenants operationally. Use tenant-aware queues, quotas, rate limits, memory accounting, and circuit breakers. A shared service can remain efficient without allowing one tenant to create global backpressure.
+
+Protect high-risk evaluations. Privileged tools, sensitive data, cross-region transfers, and billing changes may require reserved capacity, stricter timeouts, stronger dependency guarantees, or human review when resources are constrained.
+
+Avoid noisy-neighbor telemetry. Metrics and traces should identify tenant and request domains without allowing high-cardinality or attacker-controlled labels to exhaust observability systems.
+
+Minimize evaluation data. Store hashes, classifications, reason codes, and bounded summaries where possible. Isolation includes privacy: a diagnostic path must not create a shared searchable copy of sensitive prompts.
+
+Verify worker boundaries. Confirm that tenant identity, policy digest, request ID, and fact versions are reset and reloaded on every task. A worker should reject incomplete context rather than inherit values from its previous task.
+
+Test cross-context contamination. Run two tenants with similar keys, alternating identities, changing policies, conflicting facts, and concurrent requests. Verify decisions, obligations, logs, and cache entries remain correctly partitioned.
+
+Test resource attacks. Use deep policies, broad wildcards, huge lists, expensive patterns, repeated nested calls, and slow dependencies. Confirm bounded latency, clean cancellation, fair scheduling, and typed failure behavior.
+
+Test concurrency races. Change policy or revoke access while evaluations are queued, running, cancelled, retried, and reading shared facts. The result must reflect the defined snapshot and freshness semantics.
+
+Test partial outages. Exhaust one tenant’s budget, corrupt one cache partition, stop one worker pool, delay one fact provider, and fail one region. Confirm unrelated domains continue safely.
+
+Test recovery. Restart workers, drain queues, rebuild caches, and restore dependencies with newer policy versions. Verify stale state is discarded and capacity is not released as an uncontrolled burst.
+
+Make isolation observable. Track evaluation time, memory, queue wait, recursion depth, dependency calls, cache hits, cancellations, budget exhaustion, circuit breaks, cross-domain rejects, and failure containment by bounded dimensions.
+
+Use adversarial identifiers safely. Tenant names, request IDs, resource paths, and policy labels must be normalized and bounded before entering keys, logs, metrics, or routing decisions.
+
+Prove partition correctness. For each shared component, document the partition key, allowed reuse, invalidation trigger, maximum lifetime, and behavior when the key is missing or ambiguous.
+
+Review stateful optimizations. Compiled policies, memoized predicates, pooled objects, speculative facts, and shared dependency clients can improve speed but create hidden coupling. Require evidence that optimization does not cross an isolation boundary.
+
+Measure fairness and safety together. Track per-tenant tail latency, rejected work, budget use, evaluator errors, revocation completion time, emergency-rule latency, and cross-tenant incidents. Low average latency can hide severe isolation failure.
+
+The practical pattern is this: define isolation domains, use immutable versioned inputs, partition or eliminate unsafe caches, bound policy complexity and evaluation resources, prevent algorithmic denial of service, schedule fairly with reserved safety capacity, isolate failure domains, fail closed or typed-unknown when evaluation is unavailable, protect facts and scratch state, cancel aggressively, bound nested and long-running work, enforce tenant-aware quotas and circuit breakers, minimize diagnostic data, test contamination, attacks, races, outages, and recovery, document every shared component’s partition contract, and measure both fairness and containment. A policy engine is trustworthy when the hardest request in one context cannot silently change, delay, or weaken the decision made for another.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
