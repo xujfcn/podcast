@@ -1,0 +1,87 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy migration safety at the AI API gateway: how to move from an old policy to a replacement without creating protection gaps, unexpected permission expansion, or inconsistent behavior across regions.
+
+A policy migration is more than publishing a new file. Existing requests, cached decisions, queued work, delegated authority, compiled artifacts, and regional workers may still carry assumptions from the old policy. The migration must protect both continuity and change.
+
+Start with a migration contract. Define the old and new policy identities, scope, owner, authority, reason, compatibility expectations, effective epochs, affected tenants and routes, rollback limits, and evidence required for completion.
+
+Build an explicit mapping. For every old rule, obligation, exception, default, dependency, alias, and reason code, identify its replacement, intentional removal, or accepted gap. An unmapped rule is a migration risk, not a documentation detail.
+
+Compare semantics before deployment. Evaluate old and new policies against representative, adversarial, boundary, unknown, stale-fact, and failure contexts. Compare effects, obligations, explanations, routes, budgets, and side effects.
+
+Classify differences. Some changes are intended tightening, some are intended relaxation, some are neutral refactors, and some are unexplained divergence. Do not treat every difference as a failure, but never hide a permission expansion inside an aggregate pass rate.
+
+Protect against permission expansion. Any new allow, wider scope, additional tool, broader provider route, longer retention, or weaker approval requirement needs explicit review and evidence. A migration should not gain authority accidentally through default behavior.
+
+Protect against obligation loss. Redaction, encryption, residency, consent, approval, budget, logging, provider, and retention obligations must be mapped and tested independently from the top-level allow or deny.
+
+Define compatibility boundaries. Some clients can move immediately, while others depend on old aliases, schemas, reason codes, token formats, or decision states. Make incompatibility visible and route clients through a controlled migration path.
+
+Use shadow evaluation. Run the new policy beside the old one without letting it control production yet. Record differences by tenant, route, risk, policy branch, dependency state, and operation type, while minimizing sensitive request content.
+
+Use decision sampling carefully. Sample enough to expose rare branches and high-risk paths, not just high-volume traffic. Keep sampling metadata and protect any production-derived evidence.
+
+Use synthetic witnesses. Turn important differences and incidents into minimized, reusable test cases. This keeps validation repeatable without making the migration pipeline a copy of production data.
+
+Test both directions. A new policy may be stricter for one operation and broader for another. Compare old-to-new changes and new-to-old rollback behavior before trusting a canary.
+
+Migrate dependencies first where necessary. Identity, consent, classification, risk, capability, provider, and billing facts may change shape or meaning. Version and validate them before the replacement policy relies on them.
+
+Migrate schemas explicitly. Support old and new representations only within a bounded compatibility window. Ambiguous or silently coerced fields should block migration rather than produce a plausible result.
+
+Migrate aliases deliberately. Model, provider, role, tenant, region, tool, and policy aliases can hide old references. Resolve them against versioned registries and verify that each alias points to the intended replacement.
+
+Migrate compiled artifacts separately. Build, validate, sign, distribute, load, shadow, canary, and activate the new artifact as distinct stages. Do not assume a source migration succeeded because a worker downloaded a file.
+
+Coordinate regions. Track which regions, workers, caches, adapters, queues, and executors run the old or new epoch. Route requests based on state compatibility and risk rather than pretending the fleet changed atomically.
+
+Bound mixed-mode operation. If old and new policies coexist, define eligible requests, precedence, duration, reauthorization rules, cache rules, and side-effect restrictions. Mixed mode without an explicit contract becomes permanent ambiguity.
+
+Choose a stable decision authority. For a given request, decide whether the old policy, new policy, or a conservative combination is authoritative. Avoid letting a retry or regional hop silently switch semantics.
+
+Preserve the strongest obligation. When old and new decisions differ during transition, retain the stricter applicable restriction unless an authorized migration explicitly changes it. Do not merge only the allow bits and discard obligations.
+
+Migrate caches safely. Version decision keys by policy epoch, dependency state, tenant, purpose, and data class. Invalidate or isolate old approvals before they can be reused under the new policy.
+
+Migrate queued work. Jobs admitted under the old policy may execute after the cutover. Define whether they finish under the old epoch, reauthorize under the new one, or stop safely. Carry obligations and deadlines with the job.
+
+Migrate streams and sessions. Long-lived streams, agent sessions, and tool plans can cross the boundary. Recheck authority at defined checkpoints and prevent a session from retaining old permissions indefinitely.
+
+Migrate delegated authority. Tokens, leases, approvals, and agent scopes created under the old policy need expiry, translation, or reissuance. Do not let old delegation outlive the policy that granted it.
+
+Migrate external side effects carefully. Before sending data, calling tools, publishing, charging, or changing infrastructure, verify current policy, authority, freshness, idempotency, and required obligations.
+
+Use staged traffic. Start with internal or low-risk traffic, then a bounded canary, selected tenants, selected regions, and progressively broader traffic. Each stage needs entry criteria, exit criteria, abort conditions, and an owner.
+
+Use a kill switch that preserves safety. The emergency control should pause new migration traffic, fence unsafe components, and route to a trusted constrained path. It should not blindly restore an outdated broad allow.
+
+Define rollback semantics. Rollback can restore the old policy, freeze the current state, or move to a safe baseline. Decide how caches, queued work, leases, aliases, and compiled artifacts behave; application rollback alone is insufficient.
+
+Make rollback time-bounded. The old policy may contain a vulnerability, expired dependency, or retired authority. A rollback pointer needs scope, reason, expiry, and fresh approval.
+
+Monitor leading indicators. Watch permission expansions, deny spikes, review rates, unknowns, obligation failures, route changes, budget exhaustion, latency, cache misses, stale workers, and cross-region disagreement.
+
+Detect silent divergence. Compare decisions by policy epoch, evaluator, dependency versions, region, tenant, and operation. A global success rate can hide one high-risk route using the wrong policy.
+
+Explain differences safely. Clients need stable remediation messages. Operators need rule mappings, fact versions, policy lineage, and stage evidence. Avoid revealing protected resources or internal controls to unauthorized callers.
+
+Preserve migration provenance. Link decisions to old and new policy digests, evaluator, dependencies, stage, region, authority, and difference classification. Minimize raw request content.
+
+Test migration under failures. Delay propagation, drop acknowledgments, fail dependencies, empty caches, partition regions, restart workers, retry requests, and interrupt queued jobs. Verify safe state and recoverability.
+
+Test concurrent changes. Publish a policy migration while a revocation, exception, rollback, schema update, or provider capability change is in flight. Confirm deterministic ordering and no unapproved combination.
+
+Test adversarial contexts. Include stale credentials, withdrawn consent, oversized inputs, tool argument changes, alias collisions, cache confusion, prompt injection, and requests designed to reach alternate routes.
+
+Test high-risk boundaries. Validate sensitive data egress, external tools, billing, privileged models, cross-region movement, retention, and human approval before and after the cutover.
+
+Test observability loss. Remove shadow records, metrics, manifests, or regional acknowledgments. Missing evidence must pause progression, not count as a clean result.
+
+Test rollback and re-forward. Move old to new, trigger abort, restore the old path, repair state, and resume the new migration. Verify that no stale artifact, cache, lease, or alias silently wins.
+
+Measure migration health. Track mapped-rule coverage, unexplained differences, permission expansions, obligation losses, mixed-mode duration, stale decisions, canary aborts, rollback readiness, regional convergence, and post-cutover incidents.
+
+Close the migration explicitly. Confirm all references moved, old artifacts were fenced, caches invalidated, queues drained or reauthorized, leases expired, regions acknowledged, aliases updated, tests retained, rollback access bounded, and owners signed the completion evidence.
+
+The practical pattern is this: define a migration contract and complete rule mapping, compare old and new semantics, classify differences, review every permission expansion and obligation change, version dependencies and schemas, resolve aliases, build and sign artifacts separately, shadow and sample safely, coordinate regional mixed mode, version caches, reauthorize queued work, sessions, leases, and side effects, stage traffic with abort criteria, preserve the strongest obligation, make rollback explicit and time-bounded, monitor divergence and high-risk indicators, test failures, concurrency, adversarial inputs, observability loss, rollback, and re-forward, and close only with negative evidence that old paths are fenced and new paths are ready. A policy migration is safe when change is measurable, mixed states are bounded, rollback is controlled, and no request can quietly inherit the wrong authority.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
