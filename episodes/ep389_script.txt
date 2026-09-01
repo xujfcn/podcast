@@ -1,0 +1,69 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy handoff contracts at the AI API gateway: how to carry an authorization decision, its obligations, and its limits from the gateway into every adapter, queue, tool executor, provider call, and response path.
+
+A policy decision is only useful if the next component honors it. The gateway may correctly deny a tool, require redaction, restrict a provider, or impose a budget, while an adapter or worker receives only a boolean allow and quietly loses the rest.
+
+Start with a decision envelope. Define the minimum trusted context that must travel with work: subject, tenant, operation, resource, policy digest, decision state, obligations, restrictions, expiry, authority, purpose, data class, region, provider scope, and audit reference.
+
+Separate decision from enforcement. The evaluator decides what is allowed and required. Each downstream component must prove that it can enforce the relevant parts before receiving the capability to execute.
+
+Use typed contracts. Represent allow, deny, review, unknown, restricted, and unavailable as distinct states. Represent obligations and limits as structured fields, not prose that an adapter may interpret differently.
+
+Bind the envelope to the request. Include a canonical request hash, resource identity, tool arguments summary, destination, and execution scope. A downstream worker must reject an envelope presented for different work.
+
+Bind it to identity and tenant. Carry the trusted subject, tenant, delegated authority, session, and credential context. Do not let a worker substitute a local default identity because the original context is inconvenient to parse.
+
+Bind it to time. Include issued time, expiry, maximum execution duration, and reauthorization checkpoints. A decision valid at admission may not remain valid when a queued task or tool call starts later.
+
+Bind it to purpose and data class. A decision for summarization or support may not authorize training, analytics, export, or an unrelated provider. Downstream components must preserve purpose and classification.
+
+Make obligations executable. Redaction, encryption, logging, retention, approval, routing, token limits, and billing requirements need machine-readable commands, required parameters, and failure behavior.
+
+Make restrictions monotonic. A downstream component may narrow scope or add a safety requirement. It must not broaden providers, regions, tools, data destinations, budgets, or authority beyond the envelope.
+
+Use capability attenuation. Give each component only the capability needed for its stage. A provider adapter may call one approved endpoint; a tool executor may invoke one named tool with bounded arguments; neither should receive a general network or credential capability.
+
+Verify before handoff. Check signature or integrity, issuer, policy version, schema, expiry, audience, tenant, purpose, resource, and required enforcement features. Reject malformed or incomplete envelopes rather than guessing.
+
+Use audience restrictions. An envelope intended for a specific adapter, queue, region, or tool executor must not be replayable at another boundary. Include audience and stage identifiers.
+
+Prevent replay. Add nonce, request ID, attempt ID, and usage limits where needed. A one-time tool capability should not authorize repeated external actions after a retry.
+
+Handle retries deliberately. Preserve the same decision context when retrying the same work, but issue a new attempt identity and verify that the envelope remains valid. Never turn a retry into an authorization refresh by accident.
+
+Handle queues. Store the envelope with the queued item, protect it from tenant crossover, and recheck expiry, revocation, policy freshness, and resource identity when a worker claims the task.
+
+Handle streams. Carry the decision context through every chunk and checkpoint. If output classification, destination, tool intent, or identity changes, require a new evaluation before continuing.
+
+Handle provider adapters. Ensure model name, provider, region, data handling, timeout, token budget, and content transformation remain within the approved scope. An adapter must not silently substitute a different provider because the preferred route is unavailable.
+
+Handle tool execution. Revalidate tool name, arguments, resource, destination, side effects, and approval obligations immediately before invocation. A decision allowing an agent plan is not blanket permission for every later tool call.
+
+Handle response delivery. Preserve redaction, content restrictions, retention, recipient, and audit requirements through formatting, streaming, caching, and client delivery. A safe internal result can become unsafe during final transformation.
+
+Define missing-field behavior. If the downstream component cannot understand a required obligation or restriction, it must fail closed or route to review. Compatibility must never mean silently dropping fields.
+
+Version the contract. Add fields compatibly, define required versus optional behavior, and prevent an old executor from accepting a new envelope while ignoring a mandatory constraint.
+
+Negotiate enforcement capability. Before handoff, the receiver should declare supported policy states, obligations, limits, and reauthorization behavior. If capability is insufficient, choose another executor or return a typed unavailable result.
+
+Test boundary loss. Remove tenant, purpose, expiry, region, obligation, tool scope, or policy digest fields at each hop. Verify that the receiver rejects the work or applies the safe restricted behavior.
+
+Test contradictory context. Present an envelope whose tenant, resource, destination, identity, or request hash conflicts with local work. The conflict must be visible and must not be resolved by whichever value is newest.
+
+Test partial enforcement. Make an adapter enforce redaction but skip logging, or enforce provider scope but ignore region. The pipeline should detect incomplete enforcement before production activation.
+
+Test malicious handoffs. Replay envelopes, change audiences, swap tenants, extend expiry, alter arguments, downgrade policy versions, and reuse one-time capabilities. Verify signatures, binding, and usage limits.
+
+Test failures and recovery. Interrupt a handoff, restart a worker, lose the policy service, delay a queue, fail a provider, and recover with changed revocation state. Confirm that work pauses, narrows, or reauthorizes safely.
+
+Observe the full chain. Track envelope creation, verification, attenuation, rejection, obligation execution, missing fields, audience mismatches, reauthorizations, retries, and final enforcement result without collecting unnecessary sensitive content.
+
+Make evidence joinable. Use stable request, decision, attempt, and activation identifiers so operators can reconstruct where a restriction was added, preserved, rejected, or lost.
+
+Audit enforcement gaps. A successful handoff does not prove execution. Record which obligations were applied, which limits were consumed, which provider answered, which destination received data, and which component attested to the result.
+
+Measure contract health. Track rejected incompatible handoffs, dropped obligations, envelope tampering, replay attempts, cross-tenant conflicts, stale work, reauthorization failures, adapter capability gaps, and time from decision to enforcement.
+
+The practical pattern is this: define a signed typed decision envelope, bind it to request, identity, tenant, time, purpose, data class, audience, and execution scope; separate evaluation from enforcement; make obligations executable; attenuate capabilities; verify every handoff; prevent replay; preserve context through retries, queues, streams, adapters, tools, and delivery; reject missing or unsupported constraints; version and negotiate the contract; test field loss, conflicts, partial enforcement, attacks, and failures; observe the chain; join evidence; audit applied obligations; and measure gaps. A policy decision is complete only when every component that can create an external effect has received the exact constraints it must enforce and can prove that it did so.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
