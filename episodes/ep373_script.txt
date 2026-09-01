@@ -1,0 +1,61 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy dependency governance at the AI API gateway: how to control the classifiers, identity attributes, provider facts, data dictionaries, consent records, sanctions lists, and capability registries that policy decisions depend on.
+
+A policy can remain unchanged while its meaning changes underneath it. A classifier may introduce a new label. An identity service may stop returning an attribute. A provider may change retention terms. A regional mapping may be updated. If these dependencies drift silently, the same policy version can produce a different decision.
+
+Start with a dependency manifest. Every policy bundle should declare the facts, schemas, classifiers, registries, lists, services, and trust anchors it requires, along with compatible versions and freshness limits.
+
+Give every dependency a stable identity. Record its owner, source, schema, version, effective time, expiry, integrity digest, availability target, and permitted consumers. Do not refer to the latest version without constraints.
+
+Separate policy code from decision facts. Policy describes how facts produce a result. Dependencies produce, validate, or interpret those facts. Keeping the boundary explicit makes changes reviewable.
+
+Type every input. Identity assurance, data sensitivity, consent, region, provider retention, tool authority, model capability, and risk classification should use defined enumerations and states rather than loosely interpreted strings.
+
+Preserve unknown states. Missing, stale, contradictory, unavailable, not applicable, and unsupported are different conditions. A dependency failure must not become a safe value through a default conversion.
+
+Validate schemas at ingestion. Reject unexpected fields, unknown enum values, ambiguous units, incompatible timestamps, malformed signatures, and responses that claim a newer schema than the evaluator understands.
+
+Pin dependency versions where reproducibility matters. A decision receipt should identify the policy, evaluator, classifier, provider registry, identity schema, and other material dependency versions that produced the outcome.
+
+Define freshness budgets. Provider declarations, consent records, revocation lists, account state, model availability, and jurisdiction mappings may expire at different rates. Check freshness according to risk rather than one global cache lifetime.
+
+Verify provenance. Know whether a fact came from the user, tenant administrator, platform system, provider, independent assessor, classifier, or derived transformation. Policy may trust the same value differently depending on its source.
+
+Bind facts to subjects and purposes. An identity attribute for one user, consent for one purpose, or provider attestation for one account must not be reused for a different subject, purpose, tenant, region, or route.
+
+Govern classifiers as policy dependencies. Version labels, thresholds, calibration, supported languages, modalities, confidence semantics, and abstention behavior. A model upgrade can alter policy outcomes even if its API shape is unchanged.
+
+Use abstention explicitly. If a classifier is uncertain, out of distribution, unsupported, or unavailable, return an unknown state. Do not force every input into the nearest risk category.
+
+Monitor dependency drift. Compare distributions of labels, missing values, confidence, provider eligibility, identity attributes, and regional classifications over time. Sudden changes may indicate a dependency release or upstream incident.
+
+Control semantic changes. Adding an enum member, renaming a data class, changing a region boundary, or redefining a capability can be more dangerous than a schema-breaking change because old evaluators may accept it but interpret it incorrectly.
+
+Require compatibility declarations. A policy artifact should state which dependency versions it supports. A dependency release should state which policies and evaluators have been tested against it.
+
+Use contract tests. Verify examples, boundary values, unknown inputs, missing fields, contradictory sources, stale records, signatures, time semantics, tenant isolation, and expected policy outcomes before promoting a dependency version.
+
+Run shadow comparisons. Evaluate representative requests with current and candidate dependency versions while keeping the candidate side-effect free. Measure changed allows, denials, obligations, routes, reviews, costs, and unsupported cases.
+
+Stage dependency rollout. Promote through offline tests, internal traffic, selected tenants, limited regions, and wider production. Do not update a globally shared classifier or registry everywhere at once without observing decision impact.
+
+Coordinate activation. If a policy and dependency must change together, publish a compatibility set and activate them through one versioned snapshot. Avoid windows where the new policy reads old facts or the old policy misreads new facts.
+
+Handle dependency outages separately. An unavailable identity service, classifier, registry, or consent store is an operational state, not a policy denial and not permission. Define retry, cached-fact, degraded-mode, quarantine, and review behavior per risk class.
+
+Use caches carefully. Include dependency version, subject, tenant, purpose, freshness, and relevant policy scope in cache keys. Invalidate cached facts on revocation or semantic changes, not only after a time-to-live expires.
+
+Reconcile conflicting sources. Define precedence and confidence rules when user claims, tenant metadata, platform records, provider declarations, and external registries disagree. Preserve the conflict in evidence instead of silently selecting one value.
+
+Protect dependency data. Identity, consent, risk, and classification facts can be sensitive. Minimize collection, restrict access, encrypt storage, limit retention, and prevent decision traces from becoming a shadow profile database.
+
+Audit dependency lineage. Link every material fact to its source, version, retrieval time, transformation, validator, freshness result, policy snapshot, and decision. Store digests or protected references when raw values are unnecessary.
+
+Plan rollback. Keep prior dependency artifacts, compatibility metadata, cache invalidation procedures, and the set of decisions affected by the candidate version. Rolling back a classifier without rolling back cached labels may not restore prior behavior.
+
+Re-evaluate high-impact decisions when required. A revoked identity, corrected data class, withdrawn consent, or provider fact change may invalidate queued or ongoing work. Define which dependency changes trigger revalidation, cancellation, quarantine, or compensation.
+
+Measure dependency health. Track freshness violations, missing facts, unknown enum values, classifier abstentions, contradictory sources, version mismatches, shadow decision differences, cache staleness, dependency-caused reviews, and high-impact decisions made in degraded mode.
+
+The practical pattern is this: declare dependency manifests, assign stable identities and owners, type inputs, preserve unknown states, validate schemas, pin material versions, define freshness, verify provenance, bind facts to subject and purpose, govern classifiers, support abstention, monitor drift, control semantic changes, declare compatibility, test contracts, compare versions in shadow, stage rollout, coordinate activation, distinguish outages, version caches, reconcile conflicts, protect sensitive facts, audit lineage, prepare rollback, revalidate affected work, and measure health. A policy decision is trustworthy only when the dependencies that gave its rules meaning are known, compatible, fresh, and verifiable.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
