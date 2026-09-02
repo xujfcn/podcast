@@ -1,0 +1,175 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision acceptance: how an AI API gateway proves that the executor receiving an authorization can actually understand, enforce, and complete the obligations attached to it.
+
+A decision can be authentic, current, well-supported, and unconsumed, yet still be unsafe to execute. The worker may not support the required redaction mode, the provider adapter may not enforce residency, the tool may not understand the approval scope, or a version mismatch may turn a restriction into a no-op.
+
+Start with an acceptance contract. Define what an executor must verify, what capabilities it must declare, which obligations it must acknowledge, what it may reject, and what evidence proves acceptance.
+
+Separate delivery from acceptance. A queue acknowledgment proves a message was received. It does not prove the executor understood the policy decision or can enforce it.
+
+Separate acceptance from execution. An executor may accept a decision for processing, but execution requires current context, available capacity, valid authority, and point-of-use checks.
+
+Define the decision type. Bind schema, protocol, action class, policy version, and semantic version so a worker cannot interpret one kind of decision as another.
+
+Define executor identity. Include service, deployment, version, region, environment, tenant scope, and key identity. The gateway must know exactly who accepted the decision.
+
+Define the executor audience. A decision for a redaction worker should not be accepted by a publication worker. A tool executor should not accept a provider-routing decision unless explicit delegation exists.
+
+Declare capabilities. Executors should state supported modalities, providers, models, regions, data classes, tool operations, safety controls, obligation types, schema versions, and maximum payloads.
+
+Make capabilities verifiable. Use signed manifests, attested versions, health evidence, configuration digests, and expiry. A self-asserted capability string is not sufficient for high-risk work.
+
+Bind capabilities to deployment. A service may support encryption in one region and not another, or redaction in one version and not the next. Verify the actual instance receiving the work.
+
+Declare obligation support. An executor must identify which constraints it can enforce, which it can delegate, and which it cannot guarantee.
+
+Make obligations typed. Redaction, retention, residency, encryption, approval, budget, provider restriction, logging, and human review need machine-readable names, versions, parameters, and enforcement modes.
+
+Reject unknown obligations. An executor that cannot interpret a mandatory restriction must reject or route to a compatible executor. Ignoring an unfamiliar field is unsafe when the field controls authority.
+
+Reject unsupported versions. Schema compatibility must be explicit. Do not assume a newer obligation is equivalent to an older one because the field names look similar.
+
+Use capability negotiation. If the requested action exceeds executor capability, negotiate a narrower action or select another executor. Never widen the authorization to fit the worker.
+
+Preserve the safest result. Negotiation may reduce modality, data, destination, model, provider, tool scope, budget, or lifetime. It must not remove a mandatory restriction without a new policy decision.
+
+Bind negotiation to the decision. Include decision identity, request digest, purpose, tenant, policy epoch, and audience in every capability response.
+
+Make acceptance conditional. An executor can accept pending a final residency check, provider health check, quota reservation, or human approval. Conditional acceptance must not be represented as unconditional allow.
+
+Use explicit acceptance states. Accepted, accepted-with-constraints, pending, rejected, expired, incompatible, unavailable, and execution-started should be distinct.
+
+Return rejection reasons. Use stable codes such as unsupported obligation, wrong audience, schema mismatch, insufficient capacity, stale capability, missing approval, unavailable region, or untrusted deployment.
+
+Do not expose sensitive policy details. Reason codes should help routing and operations without revealing protected rules, customer data, secrets, or internal thresholds.
+
+Require executor acknowledgment. The acknowledgment should identify the decision, digest, executor version, capability manifest, obligation set, policy epoch, and acceptance state.
+
+Authenticate acknowledgments. Sign or MAC the response according to the trust boundary and bind it to the exact decision and executor instance.
+
+Verify the signer. A valid acknowledgment from an unauthorized or retired deployment is not acceptance by a trusted executor.
+
+Use acknowledgment expiry. Acceptance must not authorize indefinite future execution. Recheck capabilities and context after meaningful delay.
+
+Use point-of-use acceptance. Verify the final worker, adapter, provider, or tool immediately before a consequential action, not only when a job enters the queue.
+
+Handle capacity separately. An executor may be capable but overloaded. Capacity refusal should not be treated as policy denial, and it should not trigger a broader fallback automatically.
+
+Handle configuration drift. Compare runtime configuration digest, policy-relevant feature flags, region, safety settings, and provider credentials with the accepted capability manifest.
+
+Handle deployment changes. A rolling deployment can leave one worker on an old schema and another on a new schema. Version and capability checks must remain instance-specific.
+
+Handle adapter translation. A provider adapter must prove that each decision obligation survives translation into provider parameters, headers, routing, and post-processing.
+
+Reject lossy translation. If an adapter cannot express residency, redaction, safety mode, retention, budget, or destination constraints, it must reject or choose a compatible route.
+
+Handle provider acknowledgment. Provider acceptance means the request was accepted for processing, not that the provider accepted every gateway obligation. Verify gateway enforcement independently.
+
+Handle tool acknowledgment. Tools should acknowledge operation, target, arguments, approval, side-effect class, and safety restrictions before invocation.
+
+Validate final arguments. Templating, interpolation, retrieval, and agent planning can change a tool call after acceptance. Recompute the semantic digest and reauthorize material changes.
+
+Handle human review. A reviewer may accept a constrained action, but the approval must bind to the exact request, purpose, scope, expiry, executor, and changes since review.
+
+Handle delegation. A parent executor may delegate a subset of obligations to a child. The child must acknowledge its scope, and the parent remains accountable for proving coverage.
+
+Prevent obligation dropping. A parent cannot accept a decision and pass only the effect field to a child. The child needs the complete restrictions relevant to its work.
+
+Prevent obligation duplication. Multiple components may each believe another component enforced redaction, residency, or approval. Assign one owner per obligation and record the enforcement handoff.
+
+Prevent obligation conflict. If two components enforce different versions or parameters, choose the stricter compatible result or reject the action.
+
+Use enforcement receipts. Executors should report which obligations they applied, which were delegated, what configuration enforced them, and what evidence was produced.
+
+Do not treat receipts as retroactive authorization. A receipt proves attempted enforcement after the fact; it does not make an unsupported execution valid.
+
+Bind receipts to effects. Link receipt, decision, executor, provider operation, tool operation, route, and side-effect identity.
+
+Handle partial acceptance. If an executor can handle generation but not export, allow the generation only if the decision separates those actions and the export remains blocked.
+
+Handle streaming. Declare whether obligations apply per stream, message, chunk, token, tool call, and final output. A worker cannot accept a stream while silently omitting controls on later chunks.
+
+Handle batches. Identify whether acceptance covers the whole batch or each item. A changed item, destination, or data class requires separate validation.
+
+Handle retries. A retry must revalidate executor capability, decision freshness, audience, obligations, and side-effect identity. A previously accepted message can become incompatible after deployment or policy change.
+
+Handle queue transfers. When work moves to another worker, require fresh acceptance from that worker and fence the old owner.
+
+Handle regional failover. The destination region must acknowledge policy epoch, data residency, provider capability, and obligation support before receiving sensitive work.
+
+Handle provider fallback. A fallback provider or model must declare compatible safety, modality, region, budget, and retention behavior. Provider availability alone is not acceptance.
+
+Handle cancellation. If an executor rejects after reservation, define whether authority is released, consumed, or sent to reconciliation. A rejection must not create an untracked external effect.
+
+Handle timeouts. If acceptance times out, represent the state as unknown or unavailable. Do not assume acceptance because the message may have arrived.
+
+Handle duplicate acknowledgments. Deduplicate by decision identity, executor instance, capability digest, and acceptance version.
+
+Handle late acknowledgments. An acknowledgment arriving after expiry, revocation, transfer, or cancellation must not reopen execution.
+
+Handle crashes. On restart, recover accepted decisions, leases, capability versions, partial enforcement, provider operation IDs, and receipts before continuing.
+
+Handle executor withdrawal. A worker can lose a capability, key, region, tool, or obligation implementation after acceptance. Revoke or fence its authority and reassign safely.
+
+Handle capability revocation. A signed capability manifest may be validly signed but no longer trusted. Check deployment status, attestation, revocation, and policy epoch at point of use.
+
+Handle policy changes. A worker that accepted an old decision must not continue after a policy epoch change unless the decision remains explicitly valid and the executor still satisfies the new enforcement requirements.
+
+Use compatibility matrices. Test decision schemas against executor versions, provider adapters, tools, regions, and obligation combinations. Encode unsupported pairs as rejection, not best effort.
+
+Use admission gates. Do not admit high-risk work unless a compatible executor is available, trusted, current, and able to enforce every mandatory obligation.
+
+Use bounded alternatives. If the preferred executor rejects, route only to preapproved alternatives with equal or narrower authority and verified compatibility.
+
+Do not retry blindly. Repeatedly sending an incompatible decision to workers increases load and can create inconsistent partial effects. Classify incompatibility before retrying.
+
+Define recovery. After a capability outage or deployment issue, validate manifests, configuration, keys, schemas, policies, regions, providers, tools, and obligation enforcement before returning to normal.
+
+Drain incompatible work. Keep rejected or conditionally accepted jobs from silently entering a new executor without fresh acknowledgment and context validation.
+
+Reconcile partial enforcement. If a worker applied redaction but failed before provider submission, or provider submission occurred before a receipt was stored, recover from durable evidence rather than guessing.
+
+Preserve accountability. The policy engine decides authority, the executor accepts responsibility for enforceability, and the provider or tool reports effect state. These roles must remain distinguishable.
+
+Monitor acceptance health. Track acceptance rate, rejection codes, capability age, schema mismatches, obligation gaps, conditional states, queue transfer failures, fallback use, late acknowledgments, and point-of-use refusals.
+
+Track silent degradation. Look for executors that acknowledge decisions but omit receipts, report unsupported fields, apply default configurations, or accept broader work than their manifest allows.
+
+Alert on capability drift. Compare declared capabilities with observed enforcement, provider parameters, region, safety settings, and tool behavior.
+
+Preserve minimal evidence. Store decision IDs, digests, executor IDs, versions, capability and configuration hashes, acceptance states, obligation receipts, reason codes, and operation IDs without retaining raw prompts, secrets, or customer payloads unnecessarily.
+
+Test schema mismatch. Send old, new, unknown, missing, duplicated, and reordered fields. Verify explicit compatibility or rejection.
+
+Test unsupported obligations. Remove redaction, residency, encryption, approval, retention, budget, safety, logging, and provider restrictions from executor capability and confirm no unsafe acceptance.
+
+Test capability drift. Change deployment version, region, configuration, provider, model, tool, safety mode, and key status between acceptance and execution.
+
+Test partial acceptance. Accept one operation and reject another in the same request. Confirm the rejected action cannot be smuggled through a batch, retry, or fallback.
+
+Test obligation ownership. Make parent and child executors both claim or both omit enforcement. Verify one accountable owner and complete receipts.
+
+Test translation. Pass decisions through every adapter, queue format, protocol, serialization library, provider fallback, and tool bridge. Compare obligations and final effects.
+
+Test queue transfer and failover. Move work after acceptance, lease expiry, policy change, revocation, region partition, and executor withdrawal. Confirm fresh acceptance and old-owner fencing.
+
+Test timeout and late response. Delay acknowledgments, duplicate them, deliver them after expiry, and return contradictory states. Verify no implicit acceptance.
+
+Test crashes. Stop workers before acknowledgment, after acknowledgment, before enforcement, after partial enforcement, after provider submission, and before receipt persistence.
+
+Test final-argument mutation. Change templated values, retrieved data, tool targets, destinations, provider options, and model parameters after acceptance.
+
+Test human approval. Change scope, purpose, recipient, data, executor, and side effect after review. Require renewed approval where material.
+
+Test recovery races. Revoke capability while accepting, rotate schemas while draining, restore a region during failover, and update policy during execution.
+
+Test malicious executors. Use valid identities with false manifests, unauthorized versions, wrong regions, missing controls, and attempts to accept broader authority.
+
+Do not confuse receipt with capability. Reporting that an obligation was applied does not prove the executor was authorized or configured to apply it.
+
+Do not confuse capability with acceptance. A worker may support an operation in general but reject this tenant, region, purpose, payload, or obligation set.
+
+Do not confuse acceptance with completion. Accepted work can fail, time out, be canceled, or produce an unknown external outcome.
+
+The practical pattern is this: define acceptance separately from delivery, validity, and execution; identify the exact executor and audience; verify signed capability and configuration manifests; require typed obligation support; negotiate only toward narrower authority; use explicit acceptance states and stable rejection codes; authenticate acknowledgments; verify at point of use; assign one owner per obligation; preserve restrictions through queues, retries, streams, batches, adapters, providers, tools, delegation, and failover; issue enforcement receipts bound to effects; fence withdrawn or replaced executors; reconcile partial work; test mismatches, unsupported obligations, drift, transfers, timeouts, crashes, mutation, recovery races, and malicious manifests; and monitor silent gaps. A policy decision is safely accepted only when the actual executor has proven it can enforce the exact meaning of that decision for this exact action.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
