@@ -1,0 +1,175 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision recovery governance: how an AI API gateway rebuilds trustworthy decision state after control-plane outages, cache loss, queue corruption, replica divergence, executor restarts, or incomplete audit records.
+
+Recovery is not permission. Reconstructing a record that was lost does not grant authority to act. A recovery process must restore evidence and safe control state without inventing an allow decision.
+
+Start with a recovery contract. Define what can be rebuilt, which sources are authoritative, what evidence is required, which states remain unknown, and what actions are blocked during recovery.
+
+Separate recovery from reauthorization. Recovery restores the last defensible state. Reauthorization evaluates current context and may produce a new decision. Never silently convert one into the other.
+
+Define recovery domains. Policy artifacts, decision records, revocations, obligations, reservations, leases, effect ledgers, queues, caches, audit evidence, and provider status each need distinct recovery rules.
+
+Give every recovered object an identity. Preserve decision ID, transaction ID, effect ID, tenant, subject, purpose, resource, scope, generation, policy digest, issuer, timestamps, and provenance.
+
+Classify evidence. Mark facts as authoritative, independently corroborated, derived, stale, conflicting, missing, or unknown. A recovered value should not look identical to an original authoritative write.
+
+Use provenance chains. Record where each field came from, which version produced it, when it was observed, who attested it, and what transformations were applied.
+
+Do not use wall-clock order as the sole authority. Recovery must use durable sequence numbers, generations, commit records, fencing tokens, signed artifacts, and causal metadata where available.
+
+Find the recovery point. Identify the latest safe checkpoint, transaction boundary, policy generation, revocation generation, and effect ledger position that can be proven.
+
+Prefer a known older state over an invented newer state. If the latest state is ambiguous, restore the last state that can be verified and restrict actions until current authority is re-established.
+
+Define the recovery watermark. Track the highest policy, revocation, decision, queue, and effect sequence fully verified by the recovery process.
+
+Do not advance watermarks on observation alone. A partially read or unverified record must not make downstream systems believe recovery is complete.
+
+Use append-only records where possible. Durable intent, decision transitions, revocations, receipts, and effect events are easier to replay and audit than mutable snapshots with no history.
+
+Treat snapshots as hints until verified. Validate snapshot signatures, schema, scope, generation, checksums, and consistency with independent event history.
+
+Detect snapshot rollback. A restored backup may be older than the current state. Compare generations and revocation versions before allowing it to become authoritative.
+
+Fence stale restorers. A recovery worker using an old snapshot must not overwrite newer state or commit work with a stale fencing token.
+
+Define authority for repair. Only approved recovery roles should be able to mark records authoritative, close unknown outcomes, release reservations, or restore enforcement.
+
+Separate repair modes. Read-only inspection, evidence reconstruction, restricted serving, controlled reauthorization, and full activation should be distinct modes with explicit transitions.
+
+Start restricted. During recovery, deny high-risk effects, pause irreversible actions, and allow only low-risk work whose current authority can be independently verified.
+
+Define safe release gates. Restore normal execution only after policy artifacts, revocations, obligations, current decisions, executor versions, leases, reservations, and effect status meet documented requirements.
+
+Handle control-plane loss. If policy state is unavailable, use the last verified safe snapshot only within its scope and validity, or fail closed. Do not treat an empty policy store as allow.
+
+Handle decision-store loss. Rebuild from signed decision envelopes, durable transition events, admission receipts, and executor evidence. Missing proof remains unknown.
+
+Handle revocation-store loss. Use the latest independently verified revocation watermark and restrict work until newer revocations are checked. A missing revocation record is not proof of no revocation.
+
+Handle obligation loss. If residency, retention, approval, redaction, budget, or provider obligations cannot be recovered, stop actions that depend on them.
+
+Handle cache loss. Refill caches only from authoritative current state. Never treat a warm cache as the source of truth after recovery.
+
+Handle queue loss. Reconcile queue entries with transaction and effect ledgers. A missing queue message may represent completed, canceled, or unknown work.
+
+Handle duplicate queue entries. Deduplicate by stable transaction and effect identity, then validate generation and current authority before execution.
+
+Handle executor restart. Revalidate lease, fencing token, decision generation, policy digest, and transaction state before resuming any work.
+
+Handle reservation loss. Compare reservation records with usage, billing, quota, and effect evidence. Do not release an absent reservation while the external effect may still be active.
+
+Handle audit loss. Preserve the gap explicitly. Reconstruct only with corroborating sources and label derived evidence as reconstructed.
+
+Handle provider status loss. Query the provider by operation ID, use signed callbacks or account records, and keep outcome unknown when status cannot be proven.
+
+Handle client timeout. The client response is not authoritative for execution state. Recover from gateway and provider evidence, not from the absence of a client acknowledgment.
+
+Handle partial writes. Determine whether intent, reservation, submission, commit, settlement, and audit each completed. Do not infer all later states from one successful write.
+
+Handle split-brain control planes. Establish one authority, fence the other writers, compare generations, and merge only through explicit conflict rules.
+
+Handle replica divergence. Identify common history, divergent suffixes, policy and revocation generations, and affected transactions. Keep conflicting branches until adjudicated.
+
+Handle clock divergence. Use logical sequence and signed event times for ordering. Clock readings can support freshness checks but should not manufacture causality.
+
+Handle key rotation. Verify old signatures with the correct historical key, preserve key version, and reject records whose authenticity cannot be established.
+
+Handle schema migration. Preserve original meaning, validate required fields, and mark fields introduced by migration as derived until supported by evidence.
+
+Handle policy rollback. A restored policy artifact does not automatically restore its old decisions. Recompute or explicitly recover each decision under defined generation rules.
+
+Handle emergency freeze. Recovery must preserve emergency denies and freezes even if ordinary policy snapshots are older or incomplete.
+
+Handle revoked credentials. Do not restore credentials merely because an old snapshot contains them. Recheck current identity and revocation state.
+
+Handle tenant boundaries. Recovery queries, repair jobs, snapshots, and logs must retain tenant isolation. A cross-tenant merge is a security incident, not a harmless data repair.
+
+Handle purpose boundaries. Data recovered for audit must not automatically become available for inference, training, routing, or support workflows.
+
+Handle minimal data. Reconstruct hashes, identifiers, versions, statuses, quantities, and evidence references where possible instead of copying raw prompts, files, or secrets.
+
+Define unknown states. Recovered, partially-recovered, conflicted, unrecoverable, and outcome-unknown should be explicit states with owners and next actions.
+
+Do not close unknowns by timeout alone. A timeout can bound the recovery process, but it does not prove that an external effect did not happen.
+
+Define adjudication. Conflicting evidence needs a trusted resolver, decision rule, escalation path, and durable explanation.
+
+Define recovery transactions. Repair each object with idempotent operations, expected versions, checkpoints, and a resumable progress record.
+
+Make repair idempotent. Running the same recovery job twice must converge to the same state without repeating provider calls, refunds, releases, or tool effects.
+
+Use dry runs. Before changing authoritative state, calculate proposed repairs, affected tenants, policy scopes, transaction states, and unresolved conflicts.
+
+Require approvals for high-risk repair. Restoring an allow, releasing a hold, closing an unknown effect, or re-enabling a region needs explicit authority and evidence.
+
+Log every repair. Record actor, tool, source records, target object, previous state, proposed state, generation, reason, evidence, approval, and result.
+
+Keep original evidence immutable. Derived or corrected records should point to original events rather than overwrite them.
+
+Define repair precedence. Current revocation, emergency freeze, and explicit deny should outrank stale or weakly evidenced allow records.
+
+Preserve obligations during repair. A reconstructed allow is incomplete if its residency, retention, logging, redaction, approval, budget, and provider restrictions are missing.
+
+Revalidate at point of use. Even after recovery marks a decision usable, the executor must check current generation, revocation, scope, lease, obligations, and transaction state.
+
+Reconcile external effects before resuming. Search provider operation IDs, billing records, usage, callbacks, and tool receipts to prevent duplicate execution.
+
+Recover in dependency order. Establish keys and identity, policy artifacts, revocations, decisions, obligations, reservations, transactions, effect ledgers, queues, caches, and finally normal execution.
+
+Do not recover consumers before authorities. Rebuilding executor caches before current policy and revocation state can spread stale permission.
+
+Use a recovery barrier. Components should report verified generation, revocation watermark, schema version, lease state, and unresolved conflicts before activation.
+
+Handle regional recovery. Restore one region as a candidate, compare it with the global authority, fence stale workers, and activate only after acknowledgments and point-of-use tests.
+
+Handle provider recovery. Confirm route, model, capability, data region, idempotency, billing, and status semantics before sending new work.
+
+Handle agent recovery. Reconstruct plan and tool-call state separately. A recovered plan must not grant authority to tool calls that were never individually authorized.
+
+Handle stream recovery. Reconcile stream start, chunks, tool calls, finalization, billing, and disconnect evidence. Do not replay consequential chunks or calls without idempotency.
+
+Handle batch recovery. Reconcile each child effect and report partial or unknown results accurately. Never turn a partially recovered batch into all-success.
+
+Handle compensation recovery. Resume refunds, restores, revocations, and cleanup by stable effect identity, while retaining the original effect history.
+
+Test crash recovery. Stop services after every durable transition and before every external call. Verify restart, replay, fencing, and final state.
+
+Test snapshot rollback. Restore old backups during active revocations, policy changes, transactions, reservations, and provider work.
+
+Test split brain. Run competing control-plane writers, regional authorities, stale replicas, and delayed repair jobs. Confirm one safe authority wins.
+
+Test missing evidence. Delete callbacks, audit events, reservations, and client responses. Verify unknown states and restrictions remain explicit.
+
+Test conflicting evidence. Supply different generations, provider statuses, billing totals, policy digests, and revocation records. Verify adjudication and no silent overwrite.
+
+Test duplicate recovery. Run repair jobs concurrently, retry after crashes, redeliver repair messages, and restore the same snapshot repeatedly.
+
+Test key and schema changes. Rotate signing keys, migrate schemas, downgrade readers, and restore records from earlier versions.
+
+Test tenant isolation. Mix records, repair scopes, snapshots, cache entries, and queues from multiple tenants and purposes.
+
+Test emergency freeze. Start recovery while a broad deny or credential revocation is active. Confirm recovery cannot reopen authority.
+
+Test provider ambiguity. Recover after accepted requests with lost responses, delayed callbacks, status outages, duplicate operations, and conflicting usage.
+
+Test activation barriers. Make regions, workers, caches, revocation services, and audit stores recover at different speeds. Verify restricted serving until all required gates pass.
+
+Test operator failure. Use incomplete approvals, wrong scopes, stale tools, and interrupted manual repairs. Confirm authorization and rollback protections.
+
+Monitor recovery lag. Track checkpoint age, verified watermarks, unresolved conflicts, unknown outcomes, stale writers, repair throughput, and blocked high-risk work.
+
+Alert on unsafe repair. Watch for reconstructed allows without evidence, release-after-unknown, old snapshots becoming authoritative, cross-tenant records, stale-generation commits, and cache refill from non-authoritative sources.
+
+Track recovery debt. Measure missing audit events, unverified provider outcomes, unreconciled reservations, partial transactions, and regions below the activation barrier.
+
+Set hard gates. Normal execution requires authoritative policy and revocation state, verified generations, complete obligations, valid keys and schemas, reconciled high-risk effects, fenced old writers, and an owner for every unresolved conflict.
+
+Do not confuse availability with recovery. A service answering requests does not prove that its policy, revocations, queues, billing, and effect state are trustworthy.
+
+Do not confuse reconstruction with truth. A derived record can be useful while still carrying uncertainty and limited authority.
+
+Do not confuse replay with repair. Replaying events may rebuild state, but replaying external effects can duplicate harm unless idempotency and status are proven.
+
+The practical pattern is this: separate recovery from reauthorization, define domains and evidence classes, preserve identities and provenance, restore the latest defensible state, use watermarks and authoritative generations, fence stale writers, keep unknown and conflict states explicit, recover authorities before consumers, reconcile external effects before resuming, protect tenant and purpose boundaries, use dry runs and approvals, make repair idempotent, require point-of-use checks and activation barriers, test crashes, rollback, split brain, missing evidence, conflicting records, duplicate repair, key rotation, schema changes, emergency freezes, provider ambiguity, and operator error, and monitor recovery debt. A policy system recovers safely only when it can explain what is proven, what is reconstructed, what remains unknown, and why every resumed effect is authorized now.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
