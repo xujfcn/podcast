@@ -1,0 +1,177 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision evidence sufficiency: how an AI API gateway proves that the evidence behind an allow decision is complete, relevant, current, and trustworthy enough for this exact action.
+
+A decision can have a valid signature and still be unsupported. The evaluator may have missed a dependency, used stale identity, accepted an unverified claim, ignored a conflict, or returned an allow without the evidence required by policy.
+
+Start with an evidence contract. For every decision class, define the claims required, their sources, freshness limits, trust levels, scope, dependencies, and the conclusion each claim is allowed to support.
+
+Separate decision fields from evidence fields. The effect says what the evaluator decided. Evidence explains which facts, policies, approvals, capabilities, and constraints justify that effect.
+
+Define the minimum evidence set. An allow for a public read may need identity and resource facts. An export, charge, deletion, or tool call may also need consent, classification, destination, approval, budget, capability, and current revocation state.
+
+Do not use one evidence standard for every risk. Evidence requirements should increase with sensitivity, irreversibility, blast radius, financial impact, and external side effects.
+
+Define claim semantics. Say exactly what each fact proves, what it does not prove, its issuer, subject, scope, time window, and acceptable transformations.
+
+Bind claims to context. Evidence for one subject, tenant, purpose, resource, operation, region, provider, model, or tool must not support another context without explicit revalidation.
+
+Verify the source. A claim is not trustworthy merely because it arrived over an authenticated connection. Check issuer authority, signature, key purpose, schema, provenance, and revocation state.
+
+Check issuer scope. An identity service may prove account control but not consent. A billing service may prove balance but not permission to export data. Do not let one authority speak outside its domain.
+
+Check evidence independence. Two claims copied from the same untrusted source are not independent confirmation. Record source lineage and avoid counting duplicated evidence twice.
+
+Check evidence freshness. Every claim needs a risk-appropriate validity window. A fresh signature over an old fact does not make the fact current.
+
+Check temporal ordering. Evidence must exist before the decision or have explicit semantics for facts observed during execution. Do not use a later event to justify an earlier allow retroactively.
+
+Check time source. Use trusted timestamps, bounded clock skew, monotonic versions, and clear behavior when a clock or time service is unavailable.
+
+Check completeness. Missing evidence should be represented as unknown, not empty, false, anonymous, public, or approved.
+
+Check applicability. A fact can be authentic and current but irrelevant to this operation. Verify resource, purpose, data class, route, destination, and side-effect scope.
+
+Check granularity. Organization-level approval may not prove approval for a particular tenant, dataset, recipient, model, tool argument, or transaction.
+
+Check transitive claims. If an evaluator relies on an upstream conclusion, preserve the upstream evidence, policy version, dependencies, and limitations. Do not turn “service says allowed” into an unexplained fact.
+
+Use evidence envelopes. Carry claim value or digest, issuer, subject, scope, timestamp, expiry, version, source lineage, confidence, limitations, and verification result with the decision.
+
+Authenticate the envelope. Sign or MAC the evidence and its binding to the decision. Integrity proves the evidence was not changed in transit, not that the evidence was true.
+
+Bind evidence to the decision. Include decision identity, policy epoch, request digest, purpose, audience, and effect so evidence cannot be attached to a different result.
+
+Preserve negative evidence. A revoked credential, denied consent, unsupported capability, or failed check must remain visible. Do not discard a deny because another service returned an allow.
+
+Define evidence precedence. When sources conflict, specify whether the result is deny, review, unknown, or resolved by a trusted authority and newer version.
+
+Prefer explicit conflict states. Conflicting identity, consent, classification, residency, budget, risk, or capability should not be silently resolved by arrival order.
+
+Use conservative composition. If a mandatory claim is unknown or conflicting, preserve the stricter result unless policy explicitly defines a safe constrained path.
+
+Distinguish confidence from authority. A model confidence score, heuristic, or popularity signal is not permission. Confidence can inform review or routing, but it cannot substitute for an authoritative claim.
+
+Distinguish evidence from explanation. A human-readable reason may help operators, but prose is not a machine-verifiable basis for authorization.
+
+Distinguish provenance from truth. Knowing where a claim came from helps assess it; provenance alone does not make the claim correct.
+
+Define claim transformations. Normalization, aggregation, translation, redaction, and summarization can change meaning. Record the transformation and recheck whether the resulting claim still supports the decision.
+
+Prevent semantic widening. “User belongs to team A” does not automatically prove access to every resource owned by team A. “Data is internal” does not prove it may leave the region.
+
+Prevent subject confusion. Similar names, aliases, email addresses, tenant IDs, and provider IDs must resolve to canonical principals before evidence is accepted.
+
+Prevent resource confusion. URLs, object IDs, database names, model names, and tool targets must be canonicalized and bound to the exact resource.
+
+Prevent purpose confusion. Evidence for support may not prove permission for training. Evidence for inference may not prove publication or export.
+
+Prevent audience confusion. A claim intended for one evaluator, region, provider, or executor must not be accepted by another without a defined trust relationship.
+
+Prevent version confusion. A capability claim for model version three does not prove capability for version four. Policy and dependency versions belong in the evidence key.
+
+Use evidence thresholds. Define the minimum number, quality, recency, and independence of claims for each decision. Avoid arbitrary scores that hide which mandatory fact is missing.
+
+Use typed requirements. Mark evidence as mandatory, optional, substitutable, conditional, or prohibited. A generic list of “context” fields is too ambiguous for enforcement.
+
+Use conditional requirements. An export may require recipient verification only when the destination is external. A tool call may require approval only for destructive operations. Make conditions executable.
+
+Require evidence for obligations. If the decision includes redaction, encryption, residency, retention, approval, or budget obligations, carry evidence that each can actually be enforced.
+
+Check capability evidence. A provider or tool claim should identify version, region, safety settings, modality, limits, and verification time. Unknown capability should narrow routing.
+
+Check billing evidence. Balance, price, quota, reservation, and transaction state must be current enough for the requested operation. A positive balance is not blanket permission.
+
+Check consent evidence. Consent must identify subject, purpose, data, recipient, scope, version, issuance, expiry, and withdrawal state.
+
+Check classification evidence. Data classification must cover the actual payload after interpolation, retrieval, tool output, or aggregation, not only the original request label.
+
+Check identity evidence. Authenticate the principal, tenant, session, device, and delegation chain as required. Anonymous fallback must be explicit and narrow.
+
+Check risk evidence. Risk assessments need model or rule version, inputs, time, scope, and limitations. Unknown risk should not receive the broadest authority.
+
+Check residency evidence. Region and egress constraints must cover every intermediate, provider, cache, backup, and tool destination that can receive the data.
+
+Check approval evidence. Approval must identify approver, authority, request, scope, purpose, expiry, and whether the action materially changed after approval.
+
+Revalidate after material change. New payload fields, recipients, tools, models, providers, regions, budgets, or side effects can invalidate supporting evidence.
+
+Revalidate at point of use. Queues, retries, streams, agents, adapters, and side-effect executors must verify that evidence remains sufficient immediately before consequential work.
+
+Do not rely on ingress checks. Evidence can age, be revoked, conflict, or become irrelevant after the request enters the system.
+
+Define evidence debt. If a constrained path operates with less evidence, track which claims were missing, why the path was allowed, its authority ceiling, and when debt must be resolved.
+
+Bound evidence debt. Limit duration, request count, data, cost, regions, providers, tools, and side effects while mandatory evidence is unresolved.
+
+Do not convert debt into permission. A missing claim should not become accepted merely because the system has operated without an incident.
+
+Handle evidence service outages. Choose explicit unknown, review, deny, or restricted behavior for each claim class. Do not use stale or empty responses accidentally.
+
+Handle stale caches. Cache the claim with issuer, version, scope, expiry, revocation generation, and dependency key. An old cached claim should narrow or block the result.
+
+Handle revocation. Withdrawn consent, identity, approval, capability, or policy authority must invalidate affected decisions according to risk and execution state.
+
+Handle offline verification. Signed evidence may be checked offline only within a bounded validity and revocation model. Offline does not mean indefinitely trusted.
+
+Handle cross-region evidence. A region must verify issuer trust, data scope, policy epoch, residency, and revocation state before accepting remote claims.
+
+Handle provider claims. Treat provider-reported safety, usage, and completion facts as evidence with a declared issuer and limitation. Do not let provider assertions override gateway policy.
+
+Handle agent-produced claims. Agent summaries, extracted facts, and planned intents are untrusted inputs until verified by an appropriate authority.
+
+Handle user-provided claims. A client may supply context, but the gateway must mark it as self-asserted and require independent verification where risk demands it.
+
+Handle derived claims. Retrieval, classification, risk, and policy outputs should identify source data, algorithm, version, timestamp, and confidence or limitations.
+
+Handle evidence deletion. Retention rules should preserve enough digest, provenance, and version information to explain the decision without keeping raw sensitive content unnecessarily.
+
+Make denial explainable. Return stable reason codes such as missing identity, stale consent, conflicting classification, unsupported destination, unknown capability, or insufficient approval without exposing protected policy details.
+
+Make review actionable. A reviewer should see the missing or conflicting claims, source lineage, requested action, risk, obligations, and exact changes that would require a new decision.
+
+Make evidence machine-readable. Avoid requiring operators to interpret prose before enforcement. Use schemas, typed fields, reason codes, and verifiable references.
+
+Test missing claims. Remove each mandatory fact independently, then remove combinations. Verify the exact defined outcome.
+
+Test stale claims. Advance expiry, revocation, policy, identity, consent, capability, classification, and billing versions before execution.
+
+Test conflicts. Return contradictory principals, tenants, purposes, destinations, regions, approvals, capabilities, and risk levels. Confirm explicit conflict handling.
+
+Test source substitution. Sign a valid claim with the wrong issuer, key purpose, tenant, audience, version, or scope.
+
+Test semantic widening. Replace exact resource, operation, tool argument, data class, provider, model, or destination with a broader equivalent and verify rejection or reauthorization.
+
+Test transformation. Normalize, translate, redact, summarize, aggregate, and interpolate data between evaluation and execution. Confirm evidence remains applicable.
+
+Test evidence replay. Reuse a valid claim for another request, purpose, tenant, region, provider, model, tool, or side effect.
+
+Test partial results. Make one mandatory source unavailable while optional sources succeed. Verify the system does not count optional evidence as a substitute.
+
+Test evaluator disagreement. Run independent evaluators with different versions, inputs, or clocks. Confirm deterministic conflict state and safe precedence.
+
+Test offline and cache behavior. Partition evidence services, serve stale cache entries, rotate keys, revoke claims, and restore connectivity.
+
+Test point-of-use races. Change consent, policy, identity, capability, destination, or approval between queue admission and execution.
+
+Test evidence debt. Allow a restricted operation, exhaust its budget, delay recovery, and verify it cannot quietly become normal authority.
+
+Test adversarial claims. Use duplicate fields, malformed timestamps, huge values, confusable Unicode, invalid encodings, future versions, and forged lineage.
+
+Monitor sufficiency. Track decisions by evidence profile, missing claims, conflicts, source, freshness, risk, restriction, review outcome, and point-of-use rejection.
+
+Track false confidence. Measure decisions supported only by weak, duplicated, stale, self-asserted, or indirect claims.
+
+Track source health. Monitor issuer failures, verification errors, schema drift, clock skew, revocation lag, cache age, parser disagreement, and evidence transformation loss.
+
+Preserve minimal provenance. Store claim digests, issuer IDs, versions, timestamps, scopes, reason codes, policy and dependency versions, and decision identity without retaining raw prompts or customer files unnecessarily.
+
+Set hard gates. High-risk allows require all mandatory evidence, trusted issuers, current versions, no unresolved conflicts, applicable scope, enforceable obligations, and point-of-use verification.
+
+Do not confuse a complete envelope with sufficient evidence. A signed list can be fully intact and still omit the fact required to authorize the action.
+
+Do not confuse a true claim with permission. Identity, ownership, balance, capability, or consent facts support policy evaluation; they do not independently grant authority.
+
+Do not confuse more evidence with better evidence. Duplicate or correlated claims can create volume without increasing confidence or authority.
+
+The practical pattern is this: define typed minimum evidence sets by action risk, bind every claim to subject, tenant, purpose, resource, operation, destination, route, region, provider, model, tool, time, and policy epoch, verify issuer scope, provenance, freshness, independence, applicability, and transformations, represent missing and conflicting facts explicitly, preserve negative evidence, compose conservatively, bound evidence debt, revalidate at point of use, invalidate stale and revoked claims, make review and denial actionable, preserve minimal provenance, test missing, stale, conflicting, forged, widened, transformed, replayed, partial, offline, cached, racing, and adversarial evidence, and monitor weak support and source health. A policy decision is well-supported only when the system can show that each conclusion has the right facts, from the right authority, for this exact action, at this exact time.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
