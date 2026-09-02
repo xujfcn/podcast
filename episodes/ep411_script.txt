@@ -1,0 +1,157 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about transactional policy decisions at the AI API gateway: how authorization, resource reservation, execution state, and external side effects stay coherent when systems crash, retry, timeout, or disagree.
+
+Policy evaluation and side effects usually happen in different systems. The evaluator may approve a request, a quota service may reserve capacity, a worker may call a provider, and the billing or audit record may be written later. Without an explicit transaction model, every boundary can create an inconsistent story.
+
+Start by defining the transaction scope. State exactly which parts are atomic, which are eventually consistent, which require compensation, and which can end in an unknown outcome.
+
+Separate authorization from commitment. An allow decision says an action is permitted. A commit says the system has accepted responsibility for a specific effect and its accounting.
+
+Give each transaction a stable identity. Bind decision ID, request digest, subject, tenant, purpose, resource, operation, policy epoch, reservation, effect identity, executor, provider operation, and idempotency key.
+
+Model explicit states. Issued, authorized, reserving, reserved, executing, submitted, committed, canceled, compensated, failed-before-effect, and outcome-unknown should not be inferred from missing rows or HTTP status.
+
+Define the transaction owner. One authority should coordinate state transitions and fencing. Other services may contribute evidence, but they must not independently commit the same effect.
+
+Use an authoritative state store. Require conditional writes, version checks, and durable transitions. A cache or replica can accelerate reads but must not decide a conflicting commit from stale data.
+
+Reserve before effect. Quota, balance, capacity, concurrency, provider slots, and one-time authority should be reserved before consequential work begins.
+
+Bind the reservation. Include exact tenant, purpose, request digest, route, provider, model, region, tool, amount, expiry, and effect identity. Changed context needs reauthorization.
+
+Use leases and fencing. A worker may hold a short execution lease, but an expired or superseded worker must be unable to commit a later result.
+
+Define commit conditions. State which acknowledgments, obligations, provider statuses, usage records, and audit facts must exist before marking the transaction committed.
+
+Do not equate submission with commit. A provider may accept a request without completing it, and a network timeout may hide whether the request was accepted.
+
+Represent unknown outcomes. If the gateway cannot prove whether an external effect happened, use outcome-unknown and route to status lookup, reconciliation, or human review.
+
+Do not retry unknown effects blindly. A retry can duplicate a charge, publication, deletion, export, message, or tool call. First query provider state or use a stable provider idempotency key.
+
+Use an effect ledger. Record intended, submitted, acknowledged, completed, failed, and unknown states by stable effect identity. The ledger should converge under duplicate messages and retries.
+
+Make external calls idempotent. Send gateway-generated operation IDs to providers and tools where supported. The key must identify the semantic action, not just the transport attempt.
+
+Handle systems without idempotency. Use a single-flight executor, durable ledger, status query, compensation, or manual review. Do not claim exactly-once behavior that the external system cannot provide.
+
+Define the commit point. Choose the moment when the gateway considers the effect accepted and irreversible. Make this point observable and durable.
+
+Define the rollback boundary. Before the commit point, cancel or release where safe. After the commit point, use compensation or reconciliation rather than pretending the effect did not occur.
+
+Do not release reservations too early. A worker crash or client disconnect does not prove that the provider stopped.
+
+Do not hold reservations forever. Expire leases and route uncertain work to reconciliation with clear ownership and retry limits.
+
+Use a transaction state machine, not a collection of booleans. Flags such as authorized, charged, completed, and canceled can produce impossible combinations unless transitions are constrained.
+
+Define legal transitions. For example, an authorized transaction can reserve, cancel, or expire, but a committed transaction cannot return to authorized merely because a callback was lost.
+
+Use monotonic versions. Every transition should reject writes from older versions and preserve a causal sequence for audit and recovery.
+
+Use compare-and-swap. Reservation, commit, cancel, compensation, and reconciliation must condition on the expected current state.
+
+Handle concurrent cancellation. Cancellation may race with provider submission or completion. Define precedence, evidence requirements, and whether the result is canceled, completed, or unknown.
+
+Handle concurrent revocation. Policy or credential revocation during execution should block future steps where possible, but it cannot erase an effect that already happened.
+
+Handle policy changes. An authorized transaction may continue only under explicitly defined semantics after a policy epoch change. High-risk work should reauthorize before commitment.
+
+Handle obligation changes. New residency, redaction, approval, retention, budget, or provider restrictions can invalidate a pending transaction.
+
+Bind policy to commit. Rechecking only at admission is insufficient when the effect occurs later. Verify current authority and obligations at the commit boundary.
+
+Handle partial preparation. If a provider request was built but not sent, it may be discarded. If it was sent but no acknowledgment arrived, it is an external ambiguity and needs reconciliation.
+
+Handle multi-resource reservations. When a request needs quota, balance, capacity, and approval, define acquisition order, timeout, release, and compensation to avoid deadlocks and leaks.
+
+Avoid distributed lock illusions. A lock in one service does not make a provider call and billing write atomic. Use an effect ledger and idempotent protocols across boundaries.
+
+Use sagas where needed. Break a workflow into durable steps with explicit forward actions and compensating actions. Record which steps completed and which remain uncertain.
+
+Make compensation honest. A refund, restore, revoke, or delete-after-export may reduce impact, but it does not prove the original effect never happened.
+
+Make compensation policy-aware. Compensation itself is an external side effect requiring authority, identity, scope, idempotency, and audit.
+
+Handle irreversible effects. For deletion, publication, external delivery, or disclosure, require stronger approval, current evidence, durable intent, and reconciliation before retry.
+
+Handle reversible effects. A reversible action still needs an effect identity and status because the reversal may fail or arrive late.
+
+Handle batch transactions. Define whether the batch commits atomically, per item, or by bounded groups. Do not report all-success when some effects are unknown.
+
+Handle fan-out. Each child provider call or tool action needs a unique child effect identity and a parent transaction relationship.
+
+Handle fan-in. Aggregation must account for duplicate, late, partial, and conflicting child results without committing the parent twice.
+
+Handle streams. Define transaction boundaries for stream start, each chunk, tool call, final output, and billing. Disconnects must not erase accepted external work.
+
+Handle agent workflows. Each consequential tool call should have its own transaction or clearly bounded child transaction. A plan approval is not a blanket commit for future actions.
+
+Handle queues. Queue admission, reservation, execution, and commit may be separated by long delays. Revalidate state and preserve the same transaction identity across redelivery.
+
+Handle retries. Retries must carry the same semantic transaction and effect identity when they represent the same action. Changed payloads or routes require a new authorization.
+
+Handle provider failover. A fallback provider cannot inherit a transaction unless policy, obligations, data residency, capability, billing, and idempotency semantics remain compatible.
+
+Handle region failover. Transfer ownership explicitly, fence the old region, and decide what happens to in-flight calls and reservations.
+
+Handle callback races. Duplicate, late, forged, and contradictory callbacks must be authenticated, deduplicated, and checked against the current transaction version.
+
+Handle missing callbacks. Absence of a callback is not failure-before-effect. Query status or remain unknown until a bounded reconciliation policy decides.
+
+Handle provider inconsistency. If usage, completion, billing, and gateway records disagree, preserve the discrepancy and reconcile by operation ID and evidence rather than overwriting one side.
+
+Handle billing. Reserve funds, submit work, settle confirmed usage, release unused holds, and reconcile ambiguous charges. Use transaction IDs and integer currency units.
+
+Handle quota. Reserve capacity before work, consume confirmed usage, and release unused reservations only with effect evidence.
+
+Handle audit. Write intent and transitions durably before high-risk execution when possible. If audit storage is unavailable, use a restricted path or stop.
+
+Handle client response timing. Returning success before commitment can cause the client to retry. Return accepted, processing, completed, failed, or unknown with stable semantics.
+
+Make client retries safe. Document and enforce idempotency behavior, status lookup, retry windows, and unknown-outcome handling.
+
+Make operators effective. Show transaction state, current owner, lease, version, reservations, effect IDs, provider status, obligations, and next reconciliation action.
+
+Preserve minimal evidence. Keep hashes, state transitions, versions, quantities, operation IDs, approvals, and acknowledgments without retaining raw prompts, secrets, or customer files unnecessarily.
+
+Test crash points. Stop workers before reservation, after reservation, before submission, after submission, after provider acceptance, before commit, and after commit but before the client response.
+
+Test timeouts. Delay policy, quota, billing, provider, callback, and audit services. Confirm explicit unknown or restricted states and bounded retries.
+
+Test duplicate delivery. Redeliver queue messages, callbacks, client requests, provider responses, and reconciliation jobs. Verify one convergent effect.
+
+Test concurrent transitions. Race commit, cancel, revoke, expire, compensate, transfer, and retry. Confirm legal state transitions and fencing.
+
+Test provider ambiguity. Return accepted-without-completion, conflicting status, lost response, delayed callback, duplicate callback, and status outage.
+
+Test reservation leaks. Crash, cancel, reject, expire, and partially complete transactions. Verify capacity, quota, and balance are not held forever or released after effect.
+
+Test compensation. Fail refunds, restores, revocations, and cleanup. Confirm the original effect remains visible and compensation is retried safely.
+
+Test policy changes. Change epoch, obligations, route, region, provider, model, purpose, tenant, and data class at every transaction phase.
+
+Test batch and fan-out. Fail individual children, duplicate child results, and lose parent aggregation. Verify accurate partial and unknown reporting.
+
+Test queue and failover. Move work across workers and regions during partition, lease expiry, revocation, and provider timeout. Confirm old owners cannot commit.
+
+Test billing and quota. Use fractional usage, rounding boundaries, duplicate settlements, negative releases, and currency or token unit mismatches.
+
+Test audit loss. Remove logs, acknowledgments, and durable evidence during high-risk work. Verify the configured restriction or stop behavior.
+
+Test recovery. Restart services with in-flight transactions, stale caches, old schema versions, and missing callbacks. Verify recovery converges without replaying effects.
+
+Monitor transaction health. Track unknown outcomes, commit latency, reservation age, compensation rate, duplicate attempts, stale-owner writes, callback gaps, provider disagreement, and reconciliation backlog.
+
+Alert on unsafe patterns. Watch for release-after-effect, commit-without-evidence, repeated unknown retries, cross-tenant effect IDs, policy-epoch mismatch, and executor version drift.
+
+Set hard gates. High-risk effects require current authorization, complete obligations, authoritative reservation, valid ownership and fencing, idempotency, durable intent, and a defined unknown-outcome path.
+
+Do not confuse authorization with commitment. Permission to act does not prove that the system reserved resources or accepted the resulting effect.
+
+Do not confuse rollback with erasure. Compensation can reduce harm while the original action remains part of history.
+
+Do not confuse eventual consistency with transactionality. A record that becomes correct later may still permit an unsafe duplicate in the meantime.
+
+The practical pattern is this: give every workflow a stable transaction and effect identity, model explicit states and legal transitions, authorize and reserve before effect, use leases, fencing, conditional writes, and idempotency, define commit and rollback boundaries, distinguish accepted, completed, failed, and unknown outcomes, use sagas and honest compensation across non-atomic systems, recheck policy at commitment, preserve obligations through queues, streams, batches, agents, adapters, providers, retries, and failover, reconcile ambiguous results, test crashes, timeouts, duplicates, races, provider disagreement, reservation leaks, compensation failure, policy changes, fan-out, audit loss, and recovery, and monitor transaction debt. A policy workflow is transactional enough when every external effect has one accountable identity, every uncertain state is explicit, and recovery converges without granting or repeating authority.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
