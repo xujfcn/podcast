@@ -1,0 +1,129 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision integrity at the AI API gateway: how to prove that the decision evaluated by the policy engine is the same decision ultimately enforced by a worker, adapter, provider, or tool executor.
+
+Authorization can fail between evaluation and execution. A proxy may drop an obligation, a worker may accept a different audience, a cache may return an older envelope, a client may replay a valid token, or an adapter may silently widen a route. Decision integrity protects the handoff itself.
+
+Start with a decision envelope contract. Define the decision identity, subject, tenant, purpose, resource, operation, request digest, policy epoch, dependency versions, effect, obligations, audience, issuer, issuance time, expiry, nonce, and evidence needed by the executor.
+
+Define the covered bytes. A signature is meaningful only when every security-relevant field is included in canonical form. Do not sign a convenient subset while leaving destination, tool arguments, data class, or obligations mutable.
+
+Use canonical serialization. Specify field names, ordering, encoding, number formats, timestamp precision, Unicode normalization, null behavior, and duplicate-field handling. Every verifier must sign and verify the same representation.
+
+Use authenticated integrity. Sign or MAC the envelope according to the trust boundary, key management model, and audience. Encryption provides confidentiality, not proof that the decision was not changed.
+
+Bind the audience. A decision for one executor, region, provider, model, tool, or service must not be accepted by another unless explicit delegation exists.
+
+Bind the issuer. Verify which policy engine, tenant authority, or delegated service issued the envelope, which key version was used, and whether that issuer remains authorized.
+
+Bind the policy epoch. An intact old decision can still be invalid after policy migration, revocation, or retirement. Integrity includes freshness and current epoch checks.
+
+Bind dependencies. Include the identity, consent, risk, capability, quota, billing, and classification versions that supported the result. A valid envelope with untrusted or mismatched facts is not sufficient.
+
+Bind the request. Include a canonical request digest or a carefully defined semantic summary. The executor must detect changed payloads, tool arguments, modality, destination, or options.
+
+Bind the subject and tenant. Prevent an envelope issued for one principal, project, workspace, or billing account from being swapped into another request.
+
+Bind the purpose. A decision for generation is not automatically permission for export, training, debugging, publication, or tool execution. Purpose must survive every hop.
+
+Bind obligations. Redaction, encryption, residency, consent, approval, budget, retention, logging, and provider restrictions are part of the decision, not optional annotations.
+
+Make obligations non-droppable. Require executors to reject envelopes that omit mandatory fields, contain an unknown obligation version, or cannot prove that all obligations survived translation.
+
+Use an explicit effect. Allow, deny, review, unknown, and allow-with-obligations should be distinct states. Do not let an absent effect default to allow.
+
+Make the envelope fail closed. Missing signature, expired timestamp, unknown key, invalid audience, mismatched digest, unsupported version, or unverifiable obligation should stop the action or route it to review.
+
+Prevent field substitution. Attackers may preserve a valid signature while swapping an unsigned tenant, destination, model, tool, or routing field. Keep security inputs inside the authenticated envelope.
+
+Prevent envelope confusion. Different message types can share fields but have different meanings. Bind message type, schema, protocol, and intended operation into the signed context.
+
+Prevent algorithm confusion. Restrict accepted algorithms and key types. Do not let a verifier downgrade from a strong signature to an unintended algorithm or treat a MAC as a public-key signature.
+
+Rotate keys safely. Include key identifiers and support overlap during rotation, but define revocation, retirement, cache invalidation, and verifier update behavior.
+
+Protect private keys. Signing authority should be isolated, scoped, audited, and unavailable to ordinary evaluators or application code. A compromised signer can produce perfectly intact but unauthorized decisions.
+
+Use key purpose separation. Separate keys for policy decisions, client authentication, artifacts, audit evidence, and provider credentials. Cross-purpose verification creates confusing trust paths.
+
+Handle delegation explicitly. A gateway may delegate a narrow decision to a worker or tool. The delegated envelope must identify the original authority, delegate, audience, scope, obligations, and expiry.
+
+Prevent authority expansion in delegation. A downstream component may enforce a narrower scope, but it must never derive broader capabilities from an envelope that did not grant them.
+
+Use nonce and replay controls. Bind one-time or idempotent actions to a nonce, request identity, sequence, or execution lease. A valid old envelope should not authorize a duplicate charge, deletion, publication, or tool call.
+
+Separate replay from audit. Historical envelopes may explain past decisions, but replay systems must mark them as evidence and prevent them from entering a live execution path.
+
+Bind side effects. Charges, provider calls, tool invocations, data exports, publications, deletions, and infrastructure changes should reference the decision identity and verify the envelope immediately before execution.
+
+Preserve integrity through queues. Serialize the full envelope or a verifiable reference with the job. Do not reconstruct authority from mutable queue metadata when the job reaches a worker.
+
+Preserve integrity through streams. Recheck message, tool, data, route, and side-effect envelopes on long-lived connections. A secure connection does not make every later message authorized.
+
+Preserve integrity through retries. A retry may reuse an envelope only when the request digest, audience, route, purpose, obligations, freshness, and side-effect identity still match.
+
+Preserve integrity through adapters. Provider and tool adapters must verify the envelope, enforce obligations, and produce a translated request whose relevant restrictions are still provable.
+
+Reject lossy translation. If a provider API cannot express residency, redaction, safety mode, budget, or destination restrictions, stop or route to a compatible executor. Do not silently discard the condition.
+
+Use proof of coverage. Record which envelope fields were consumed by each executor and which obligations were enforced. An executor that ignores a signed field still creates an integrity gap.
+
+Use versioned schemas. Additive changes, optional fields, defaults, and unknown-field handling can change meaning. Define compatibility and reject ambiguous versions.
+
+Protect against truncation. Size limits, parser differences, Unicode boundaries, duplicate headers, and partial reads can cause the signer and executor to see different content. Bound and validate the complete message.
+
+Protect against parser differentials. Use the same canonical parser where possible, or test differences in JSON, CBOR, protobuf, HTTP headers, URLs, numbers, timestamps, and Unicode.
+
+Protect against proxy mutation. Intermediate services may add, remove, reorder, compress, or normalize fields. The signed envelope should be the authoritative source, with transport metadata treated as untrusted until checked.
+
+Protect against stale caches. Cache integrity includes epoch, expiry, revocation generation, audience, context digest, obligations, and key version. A correctly signed stale envelope is still unsafe.
+
+Protect against region confusion. Bind region and execution class where data residency, capability, or risk differs. A valid decision for one location must not silently authorize another.
+
+Protect against provider confusion. Bind model, provider, safety configuration, modality, and endpoint class. A decision for one provider route may not apply to an unapproved fallback.
+
+Protect against tool confusion. Bind tool identity, version, operation, target, and arguments. Validate the final arguments after templating, interpolation, or agent planning.
+
+Use point-of-use verification. Validate signature, issuer, audience, epoch, freshness, context digest, obligations, revocation status, and side-effect identity immediately before consequential execution.
+
+Do not rely only on ingress verification. Requests can change after ingress through queues, retries, agent planning, routing, or provider translation.
+
+Test tampering. Flip every signed field, remove obligations, change effect, substitute audience, alter route, replace digest, change expiry, and reorder encoded data. Verification must fail or produce the defined constrained state.
+
+Test unsigned-field attacks. Mutate headers, tenant selectors, destinations, tool arguments, provider names, region metadata, and client-carried context that the envelope does not cover. The system should reject or reauthorize.
+
+Test replay. Reuse a valid envelope after expiry, revocation, policy migration, key rotation, nonce consumption, side-effect completion, and audience change.
+
+Test cross-context reuse. Move an envelope across principals, tenants, purposes, resources, operations, data classes, routes, regions, providers, models, tools, and queues. Every invalid reuse should be blocked.
+
+Test delegation. Give a worker or tool a narrow envelope, then attempt broader operations, different targets, longer execution, and alternate providers. The delegate must remain within scope.
+
+Test translation. Send envelopes through every protocol adapter, provider fallback, serialization format, and language implementation. Compare covered fields, obligations, and final request semantics.
+
+Test parser differences. Use duplicate fields, reordered objects, numeric extremes, invalid encodings, confusable Unicode, ambiguous URLs, long values, truncation, and alternate timestamp formats.
+
+Test key rotation. Verify old and new keys during overlap, revoked keys after retirement, unknown key behavior, cache refresh, and signer authorization changes.
+
+Test partial failures. Drop signature metadata, policy epoch, dependency versions, obligations, revocation responses, or regional acknowledgments. Missing proof must not become an allow.
+
+Test concurrency. Revoke authority while an envelope is queued, retrying, streaming, translated, or waiting for a tool. The point-of-use check must see the current state.
+
+Test resource pressure. Force oversized envelopes, parser limits, queue backlog, cache misses, verifier timeouts, key-service failures, and provider delays. Integrity enforcement must remain bounded and deterministic.
+
+Test malicious signers. Exercise compromised or misconfigured issuers, wrong tenant keys, unauthorized key IDs, and valid signatures from an issuer without current policy authority.
+
+Preserve minimal evidence. Record decision identity, signer, key version, covered digest, policy and dependency versions, verification result, mismatch code, and executor acknowledgment. Avoid storing raw prompts, secrets, provider payloads, or customer files unnecessarily.
+
+Monitor integrity failures. Track signature failures, audience mismatches, stale envelopes, obligation loss, digest mismatches, replay attempts, parser disagreements, translation drops, and point-of-use rejections.
+
+Make failures actionable. Authorized operators should know whether the problem was tampering, stale authority, wrong audience, missing obligation, unsupported schema, parser disagreement, or key trust. Callers should receive stable, non-sensitive reason codes.
+
+Set enforcement gates. No high-risk side effect should proceed unless the executor can prove envelope integrity, current authority, required bindings, freshness, and obligation coverage.
+
+Do not confuse integrity with authorization. A perfectly signed deny is not an allow, and a perfectly signed allow from an unauthorized issuer is not legitimate authority.
+
+Do not confuse integrity with confidentiality. An encrypted envelope can still be replayed, misaddressed, or signed by the wrong authority.
+
+Do not confuse integrity with correctness. The policy engine may make a wrong decision and transmit it without alteration. Pair integrity with semantic tests, invariants, and review.
+
+The practical pattern is this: define a complete decision envelope, canonicalize and authenticate every security-relevant field, bind issuer, audience, subject, tenant, purpose, resource, operation, request digest, route, region, provider, model, tool, time, policy epoch, dependencies, effect, obligations, and side-effect identity, prevent replay and delegation expansion, verify at every queue, stream, retry, adapter, fallback, and point of use, reject lossy translations, isolate signing keys, version schemas, test tampering, unsigned-field attacks, replay, cross-context reuse, delegation, translation, parser differences, rotation, partial failures, concurrency, resource pressure, and malicious issuers, preserve minimal evidence, monitor mismatches, and gate high-risk execution. A policy decision is intact only when the system can prove that the same authorized meaning survived every hop and remains valid for this exact action.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
