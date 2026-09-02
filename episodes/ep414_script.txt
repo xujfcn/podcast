@@ -1,0 +1,169 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision replay safety: how an AI API gateway reconstructs historical decisions for audit, debugging, testing, and recovery without turning old evidence into fresh authority.
+
+Decision replay is useful. It can explain an incident, compare policy versions, validate a migration, reproduce a disputed charge, or rebuild missing audit context. But a replayed allow must not become permission to execute an action again.
+
+Start by separating three operations. Reconstruction rebuilds what the system recorded. Re-evaluation runs a policy over captured inputs. Reauthorization evaluates current context for a new action. Only reauthorization can create fresh runtime authority.
+
+Give every replay an explicit purpose. Audit, debugging, regression testing, migration analysis, incident response, recovery, and customer dispute resolution have different access, retention, and output requirements.
+
+Use an isolated replay plane. Replay workers should not share production queues, provider credentials, tool credentials, billing writers, notification channels, or effect endpoints.
+
+Default replay to no side effects. Network egress, provider calls, tools, email, publication, deletion, billing, quota consumption, and customer callbacks should be disabled unless a narrowly approved simulator is used.
+
+Mark replay data at ingestion. Add replay mode, replay ID, source decision ID, source transaction ID, original generation, original policy digest, and reconstruction purpose to every envelope.
+
+Propagate the replay marker. It must survive parsing, queues, caches, adapters, evaluators, logs, traces, exports, and test reports.
+
+Make replay outputs non-authoritative by construction. Use a distinct schema, signature key, issuer, namespace, and audience so production executors reject them automatically.
+
+Do not sign replay results with production decision keys. A technically valid signature can accidentally make historical output executable.
+
+Use a replay-specific trust domain. Production services should not trust its issuer for authorization, reservations, leases, commits, or external effects.
+
+Capture exact historical inputs where lawful. Include canonical request digest, identity attributes, tenant, purpose, resource, operation, policy version, dependency versions, feature flags, region, time semantics, and evidence references.
+
+Minimize replay data. Prefer hashes, normalized attributes, redacted fixtures, and synthetic substitutes over raw prompts, secrets, credentials, files, or personal data.
+
+Preserve provenance. Every reconstructed field should identify whether it came from an authoritative record, a signed snapshot, a replica, an inferred value, an operator input, or a synthetic fixture.
+
+Do not fill gaps silently. Missing identity, consent, risk, quota, provider, or policy facts must remain unknown. A convenient default can change the historical decision.
+
+Represent uncertainty. A replay can be exact, bounded, approximate, incomplete, or impossible. Put that status in the result and explanation.
+
+Distinguish event time from replay time. Historical policy may depend on token expiry, consent state, account status, business calendar, model availability, or regional restrictions at the original instant.
+
+Use a controlled clock. Supply the original evaluation time where the engine supports it, and block uncontrolled calls to the current clock.
+
+Pin policy artifacts. Replay against a verified digest, compiler version, runtime version, schema, dependency bundle, and configuration snapshot.
+
+Verify the artifact chain. Confirm source, build, signature, publication record, and retirement status before treating an old policy as authentic.
+
+Pin external facts where possible. Risk lists, model capabilities, regional rules, account state, pricing, and consent snapshots can change independently of policy code.
+
+Do not query current dependencies during historical replay unless the mode explicitly asks for a current comparison. Mixing old policy with current facts produces a hybrid that never existed.
+
+Name comparison modes clearly. Historical replay asks what the old system should have decided then. Current re-evaluation asks what today’s policy would decide over a defined input. Counterfactual analysis changes one or more named variables.
+
+Do not label counterfactual results as historical truth. Record every changed input, dependency, policy, compiler, and time source.
+
+Canonicalize replay inputs. The same semantic request should produce a stable digest, but canonicalization must not erase distinctions that influenced the original decision.
+
+Preserve ordering. Multi-step sessions, tool plans, approvals, revocations, queue events, and policy updates need a causal timeline, not merely sorted timestamps.
+
+Handle duplicate events. Deduplicate by stable event and transaction identities while retaining evidence of duplicate delivery where it affected the original system.
+
+Handle missing events. State which transition cannot be proven. Do not invent an acceptance, revocation, consumption, commit, or cancellation.
+
+Handle conflicting records. Preserve both claims, rank their authority, and report the unresolved conflict instead of overwriting one with the other.
+
+Handle retired schemas. Use versioned parsers in a sandbox. Do not coerce old records through a current schema that changes meaning.
+
+Handle retired code safely. Historical evaluators may contain vulnerable dependencies. Run them in hardened containers with no secrets, restricted resources, and no production network.
+
+Handle nondeterminism. Randomness, unordered collections, floating-point behavior, locale, timezone, concurrency, and dependency responses can change results.
+
+Capture random seeds and deterministic settings. When exact reproduction is impossible, quantify the variation and avoid claiming bit-for-bit replay.
+
+Handle model-assisted policy. If an LLM or classifier contributed to a decision, preserve model identity, version, prompt template digest, parameters, safety settings, and relevant response evidence.
+
+Do not assume a hosted model can reproduce an old response. Provider behavior may drift even under the same model name.
+
+Use recorded model evidence where allowed. For testing, prefer a signed recorded output or a deterministic stub instead of calling a live provider and calling it historical replay.
+
+Handle secrets. Replay must never reactivate expired credentials, decrypt data without current authority, or expose original secret values to operators.
+
+Use scoped decryption approval. If protected evidence is essential, require purpose, approver, field scope, duration, audit, and automatic revocation.
+
+Handle personal data. Apply current privacy rights and retention rules even when reproducing an old decision. Historical need does not override present deletion or access restrictions.
+
+Handle tenant isolation. Replay storage, indexes, workers, exports, and logs must preserve the original tenant boundary and the operator’s current access.
+
+Handle production identifiers carefully. A replay should not write to production records under original request, transaction, or effect IDs.
+
+Namespace replay identities. Prevent collisions with live idempotency keys, reservations, leases, callbacks, caches, and billing records.
+
+Block production callbacks. A replayed provider or tool response must never reach a customer webhook, stream, agent session, or completion queue.
+
+Block production cache writes. Replay results belong in isolated caches and must not replace current decisions, routing facts, model capabilities, or policy artifacts.
+
+Block production metrics contamination. Tag replay traffic and exclude it from customer usage, latency objectives, provider success rates, fraud signals, and autoscaling decisions unless explicitly analyzed.
+
+Block production billing. Reconstructed token counts and charges are estimates or audit records, not new ledger entries.
+
+Support shadow evaluation safely. A shadow engine may evaluate live inputs, but its outputs must be non-authoritative, non-blocking, and unable to trigger side effects.
+
+Control sampling. Shadow and replay datasets should follow documented sampling rules and avoid collecting more sensitive content than necessary.
+
+Define replay authorization. Operators need permission for the purpose, tenant, date range, data classes, policy artifacts, and export destination.
+
+Use two-person approval for sensitive replay. High-risk tenants, decrypted evidence, broad date ranges, or production-like side-effect simulation deserve stronger oversight.
+
+Set replay budgets. Bound records, time range, CPU, memory, storage, model calls, concurrency, and export size.
+
+Rate-limit replay. A large forensic job must not starve production policy evaluation or dependency services.
+
+Make replay cancelable. Cancellation should stop future processing, revoke temporary data access, clean isolated resources, and preserve a minimal audit record.
+
+Expire replay artifacts. Inputs, intermediate state, decrypted material, outputs, and exports need separate retention limits and deletion evidence.
+
+Review replay exports. Reports should redact secrets, personal data, internal control details, and unrelated tenant information.
+
+Make explanations precise. Show original decision, replay result, mode, policy digest, dependency snapshot, input provenance, missing facts, changed variables, and confidence.
+
+Do not expose hidden security controls unnecessarily. Give operators enough evidence to act without publishing bypass details into broad logs or customer-facing messages.
+
+Define acceptance criteria. An exact replay requires verified inputs, policy artifact, runtime, dependencies, time semantics, ordering, and deterministic behavior.
+
+Define mismatch categories. Input mismatch, artifact mismatch, dependency mismatch, runtime mismatch, nondeterminism, missing evidence, and genuine policy defect require different remediation.
+
+Use replay for migration gates. Compare old and new policy results over a governed corpus, then review changed allows, changed denies, obligations, explanations, and unsupported cases.
+
+Do not auto-promote from replay alone. A clean corpus cannot prove coverage of every production context. Combine replay with tests, simulation, staged rollout, and runtime monitoring.
+
+Use replay for incident recovery carefully. Rebuilding lost state may restore evidence of an old decision, but it must not issue a new lease, reservation, or executable token.
+
+Require current reauthorization before resumed effects. If work must continue after recovery, bind a new decision to current identity, context, policy, obligations, and transaction state.
+
+Handle already-completed effects. Replay can reconstruct history and reconcile records, but it must not call the provider or tool again to prove completion.
+
+Handle unknown effects. Use provider status lookup, effect ledgers, receipts, and human review. Do not use replay as a retry mechanism.
+
+Test production rejection. Send replay outputs to every production executor, adapter, queue, reservation service, billing writer, provider connector, and tool broker. They must reject them.
+
+Test marker propagation. Pass replay data through every serializer, schema version, queue, cache, log, trace, export, and callback path.
+
+Test missing evidence. Remove identity, consent, policy, time, dependency, ordering, revocation, and transaction records. Confirm the replay reports uncertainty.
+
+Test mixed-time inputs. Combine historical policy with current account state or current dependencies and verify the system labels or blocks the invalid hybrid.
+
+Test old runtimes. Run retired parsers, compilers, and evaluators in isolation with malicious fixtures and resource limits.
+
+Test nondeterminism. Vary random seeds, locale, timezone, collection order, concurrency, floating-point implementation, and model output.
+
+Test data boundaries. Attempt cross-tenant joins, unauthorized decryptions, oversized exports, expired evidence access, and replay after a deletion request.
+
+Test identity collisions. Reuse live request IDs, idempotency keys, effect IDs, cache keys, leases, and transaction IDs. Confirm namespace isolation.
+
+Test side-effect escape. Attempt provider calls, tool execution, messages, publication, deletion, callbacks, billing, quota writes, and production cache updates.
+
+Test cancellation and expiry. Stop jobs during ingestion, evaluation, export, and cleanup. Confirm access and artifacts expire correctly.
+
+Test migration comparisons. Change policy, compiler, schema, dependency snapshots, and feature flags. Verify every difference is attributed.
+
+Test recovery workflows. Reconstruct committed, canceled, revoked, superseded, consumed, expired, and unknown decisions. Confirm none becomes fresh authority.
+
+Monitor replay activity. Track jobs, purpose, tenants, operators, approvals, data classes, policy versions, resource usage, exports, retention, mismatches, and rejected side-effect attempts.
+
+Alert on dangerous signals. Watch for production credentials in replay, executable signatures, live queue writes, provider traffic, billing mutations, missing replay markers, cross-tenant reads, and artifacts past expiry.
+
+Set hard gates. Replay requires explicit purpose, scoped operator authority, isolated infrastructure, non-production issuer and namespace, verified artifacts, provenance, bounded resources, retention, and proof that production executors reject replay results.
+
+Do not confuse reproducibility with truth. A replay faithfully reproduces only the inputs and environment it can prove.
+
+Do not confuse explanation with authorization. Understanding why an old allow occurred does not permit the action now.
+
+Do not confuse recovery with retry. Reconstructing uncertain history must not duplicate an external effect.
+
+The practical pattern is this: separate reconstruction, re-evaluation, and reauthorization, require an explicit replay purpose, isolate workers and data, disable effects by default, use replay-specific issuers, signatures, schemas, audiences, and namespaces, preserve provenance and uncertainty, pin verified policy artifacts, dependencies, time, ordering, and runtime, protect secrets and personal data, block production queues, callbacks, caches, metrics, billing, reservations, and tools, require current reauthorization before resumed work, test production rejection, marker propagation, missing evidence, mixed-time inputs, retired runtimes, nondeterminism, data boundaries, identity collisions, effect escape, cancellation, migration, and recovery, and monitor every job and attempted boundary violation. Decision replay is safe when it can explain the past precisely while remaining structurally incapable of authorizing the present.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
