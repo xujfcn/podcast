@@ -1,0 +1,141 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision consumption: how an AI API gateway safely spends a decision that grants limited, one-time, or finite authority.
+
+A signed decision can be valid and still be dangerous when used twice. Retries, queue redelivery, concurrent workers, regional failover, agent loops, and provider timeouts can all turn one approval into multiple charges, exports, publications, deletions, or tool calls.
+
+Start by classifying decisions. Some are reusable reads, some are time-limited sessions, some permit a fixed number of requests, and some authorize exactly one consequential action. The consumption model must be explicit.
+
+Give every consumable decision a stable identity. Include issuer, subject, tenant, purpose, resource, operation, request digest, audience, policy epoch, expiry, quantity, unit, nonce, and side-effect identity.
+
+Separate validity from availability. A decision may be authentic and unexpired but already consumed, reserved, exhausted, revoked, or held by another executor.
+
+Model a state machine. Useful states include issued, eligible, reserved, executing, completed, partially consumed, released, expired, revoked, exhausted, and conflicted. Do not infer state from missing records.
+
+Use atomic reservation. The transition from eligible to reserved must be linearizable at the authority that owns the consumption record. Two workers must not both win because they read the same old state.
+
+Define the consumption owner. Choose a durable store, shard, region, or coordinator that decides who may reserve the authority. Replicas can serve evidence, but stale replicas must not grant a second claim.
+
+Bind reservation to execution. A reservation should include executor, audience, route, region, request digest, lease, and side-effect identity. A worker must not transfer it to a different action without reauthorization.
+
+Use short execution leases. A reservation that never finishes must not lock authority forever. Leases need expiry, renewal rules, fencing tokens, and recovery behavior.
+
+Fence old owners. When a lease is renewed, retried, or taken over, issue a monotonically increasing fencing token. Downstream executors must reject work from an older token.
+
+Do not rely on clocks alone. Use server-side timestamps, monotonic sequence numbers, and bounded clock skew. Expiry and lease decisions must remain safe when wall clocks disagree.
+
+Define retry semantics. A retry of the same idempotent action may reuse a reservation; a changed request, route, provider, tool argument, or side effect requires a new decision.
+
+Use idempotency keys. Bind them to the decision and semantic action, not merely to a client-supplied string. An attacker must not reuse an idempotency key for a different tenant or operation.
+
+Store completion evidence. A completed action should record decision identity, reservation, fencing token, executor, side-effect identity, outcome, and provider or tool acknowledgment.
+
+Make completion atomic where possible. Reservation consumption and durable recording of the side effect should be coordinated. When true atomicity is impossible, use an explicit reconciliation protocol.
+
+Do not mark success on request submission alone. A provider timeout may hide whether work completed. Distinguish accepted, running, completed, failed-before-effect, and outcome-unknown.
+
+Handle outcome unknown conservatively. For a charge, deletion, export, or publication, do not blindly retry. Query status, use provider idempotency, or send the action to reconciliation.
+
+Define partial consumption. If a decision grants ten requests or one thousand tokens, record the exact amount reserved, used, released, and remaining. Avoid floating-point ambiguity in billing or quotas.
+
+Use integer units. Tokens, cents, bytes, seconds, calls, and rows should have canonical units and rounding rules. Every component must agree on what was consumed.
+
+Reserve before effect. A worker should claim capacity or authority before calling the provider or tool. Post-hoc accounting cannot reliably prevent duplicate side effects.
+
+Release safely. A released reservation must prove that no external effect occurred, or it must remain consumed until reconciliation establishes that fact.
+
+Avoid premature release. Network disconnect, worker crash, or client cancellation does not prove that the provider stopped. Use provider status, cancellation acknowledgment, or an expiry policy.
+
+Bind cancellation. A cancellation request should identify the decision, reservation, fencing token, and external operation. Cancellation must not accidentally release authority while work continues.
+
+Make side effects idempotent. Charges, emails, exports, publications, tool calls, and deletions need stable operation identities that downstream systems recognize.
+
+Use provider idempotency when available. Pass a gateway-generated operation key, never an arbitrary client key alone, and retain it long enough to cover provider retries and reconciliation.
+
+Handle providers without idempotency. Use a durable effect ledger, a single-flight executor, status queries, compensating actions, or manual review. Do not pretend exactly-once delivery exists when it does not.
+
+Protect against queue redelivery. The message may be delivered many times, but only one reservation and one side-effect identity may become effective.
+
+Protect against worker concurrency. Two threads, processes, containers, or regions must contend on the same authoritative state and fencing rules.
+
+Protect against split brain. During a partition, a region without authoritative consumption ownership may serve reads but must not spend one-time authority unless a safe quorum or preallocated lease exists.
+
+Define failover transfer. Moving work between regions requires an explicit transfer record, old-owner fencing, new-owner authorization, and a clear rule for in-flight provider calls.
+
+Do not copy authority through replication. Replicating a decision envelope does not replicate its consumed state. State transfer must include version, owner, lease, reservation, and completion evidence.
+
+Use monotonic versions. Consumption records need compare-and-swap or equivalent conditional updates. Reject writes based on older versions.
+
+Prevent replay after expiry. An expired reservation, completion token, provider callback, or queue message must not reopen a decision.
+
+Prevent replay after revocation. Revocation should invalidate eligible and reserved authority according to risk and side-effect state. Already completed effects need reconciliation, not fiction.
+
+Define revocation races. If revocation and reservation happen concurrently, define their order and required evidence. High-risk actions should require current revocation state at point of use.
+
+Bind consumption to purpose. A decision consumed for generation cannot be reused for export, training, debugging, publication, or tool execution.
+
+Bind consumption to data. If the payload, data class, destination, provider, model, or region changes, treat it as a different action unless the policy explicitly allows the transformation.
+
+Bind consumption to obligations. Redaction, retention, residency, encryption, approval, budget, and logging obligations must be enforced before marking the decision consumed.
+
+Do not consume on a rejected attempt unless policy says so. Authentication failures, invalid arguments, unsupported capability, and policy mismatches need explicit accounting semantics.
+
+Do not let failed validation burn unlimited authority. Conversely, do not allow an attacker to probe a finite grant forever without consuming or rate limiting attempts.
+
+Separate reservation quota from effect quota. A worker may reserve capacity, but only confirmed usage should count against some budgets. Define both precisely.
+
+Handle streaming consumption. Decide whether authority is consumed at stream start, per chunk, per token, or at completion. Disconnects and reconnects must follow the declared model.
+
+Handle agent plans. An approved plan is not automatically approval for every future tool call. Consume authority per action or per narrowly defined batch, with fresh checks after material changes.
+
+Handle batch jobs. Define whether one decision covers the batch, each item, or a bounded group. One failed or changed item must not silently spend authority for unrelated items.
+
+Handle fan-out. A single request may create multiple provider calls or tools. Require an explicit fan-out budget and unique child operation identities.
+
+Handle fan-in. Aggregation, retries, and fallback must not count the same underlying work twice. Reconcile provider usage with gateway usage.
+
+Handle cache hits. A cached response may avoid consuming provider capacity, but it must not bypass purpose, tenant, data, retention, or response policy checks.
+
+Handle preauthorization. Preauthorized budgets should be narrow, expiring, auditable, and bound to operation classes. Never treat a payment or quota balance as general permission.
+
+Handle billing. Reserve funds before work when required, settle confirmed usage, release unused holds, and reconcile ambiguous provider outcomes. Use transaction IDs for deduplication.
+
+Handle client cancellation. Cancellation should stop future work where possible, but it must not erase already incurred provider usage or external effects.
+
+Handle crashes. On restart, recover reservations, leases, callbacks, provider operation IDs, and completion evidence before accepting new work.
+
+Handle late callbacks. A callback for an old operation may explain an outcome, but it must not resurrect expired authority or trigger a second effect.
+
+Handle duplicate callbacks. Deduplicate by provider operation ID, gateway effect ID, and decision identity.
+
+Handle missing callbacks. Expire into outcome-unknown or reconciliation, not automatic success or unlimited retry.
+
+Use a bounded reconciliation queue. Route ambiguous operations to workers with clear ownership, retry caps, backoff, and human escalation.
+
+Make reconciliation idempotent. Re-running reconciliation must converge to one recorded outcome and must not create another external effect.
+
+Audit every transition. Record who issued, reserved, renewed, transferred, executed, released, completed, revoked, expired, or reconciled the authority.
+
+Preserve minimal evidence. Keep hashes, versions, quantities, state transitions, operation IDs, reason codes, and acknowledgments without retaining raw prompts, secrets, or customer payloads unnecessarily.
+
+Monitor consumption anomalies. Track duplicate attempts, reservation conflicts, stale-owner writes, expired leases, unknown outcomes, release-after-effect cases, cross-region transfers, and reconciliation age.
+
+Set hard gates. High-risk side effects require authoritative reservation, current policy and revocation checks, valid fencing, obligation verification, idempotency, and a durable effect record.
+
+Test concurrent claims. Launch many workers against one decision and verify exactly one reservation wins.
+
+Test retries and crashes. Kill workers before reservation, after reservation, before provider submission, after submission, and before acknowledgment. Verify safe recovery in every state.
+
+Test failover. Move work across regions during a partition, lease expiry, policy change, revocation, and provider timeout. Confirm old owners are fenced.
+
+Test outcome ambiguity. Drop provider responses, duplicate callbacks, delay status, and return conflicting statuses. Verify no unsafe duplicate effect.
+
+Test partial grants. Spend one unit from a finite budget, retry it, split it across workers, and attempt to exceed the remaining quantity.
+
+Test context changes. Change tenant, purpose, payload, destination, model, provider, region, tool arguments, obligations, and policy epoch between reservation and execution.
+
+Test cancellation and release. Cancel before submission, during execution, after provider acceptance, and after an unknown timeout. Verify release never creates a second opportunity after an external effect.
+
+Test recovery races. Revoke, expire, transfer, complete, and reconcile the same decision concurrently. Confirm the state machine has one safe outcome.
+
+The practical pattern is this: classify reusable and consumable authority, give each grant a stable identity, separate validity from availability, model explicit states, atomically reserve, issue leases and fencing tokens, bind reservations to exact context and side effects, use idempotency, reserve before effect, distinguish accepted from completed and unknown outcomes, reconcile ambiguity, fence failover, track partial quantities in integer units, preserve obligations, audit every transition, test concurrency, retries, crashes, partitions, callbacks, finite budgets, context changes, cancellation, and recovery races, and never release authority without evidence that no external effect occurred. A policy decision is safely consumed when one approved action has one accountable owner, one bounded effect identity, and one convergent final state.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
