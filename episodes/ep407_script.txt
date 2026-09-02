@@ -1,0 +1,137 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about policy decision degradation at the AI API gateway: how to define safe behavior when evaluation is incomplete, dependencies fail, the control plane is unavailable, or a decision arrives too late.
+
+This is narrower than general failure handling. The question is not merely whether the service returns an error. The question is what authority remains when the policy system cannot fully prove that an action is allowed.
+
+Start with a degradation contract. Define affected policy domains, failure signals, protected operations, allowed constrained paths, review paths, time limits, owners, evidence, and recovery conditions.
+
+Classify the failure. Distinguish evaluator timeout, dependency timeout, stale facts, missing policy artifact, invalid decision, control-plane outage, revocation uncertainty, regional disagreement, queue expiry, and provider capability uncertainty.
+
+Classify the action. A public read, confidential generation, data export, privileged tool call, charge, deletion, publication, and infrastructure change should not share one degradation rule.
+
+Define the authority ceiling. Every degraded path needs a maximum capability set, destination set, data class, budget, lifetime, and side-effect scope. Degradation may preserve or reduce authority, never silently increase it.
+
+Choose explicit states. Use allow, allow with obligations, restricted allow, review, deny, unknown, and unavailable as distinct outcomes. Do not let a missing decision become an implicit allow.
+
+Define what restricted means. It might mean public data only, read-only operations, smaller payloads, approved models, one region, no tools, no external side effects, or human approval. Make each restriction machine-enforceable.
+
+Separate fail-closed from fail-safe. Denying all work may protect confidentiality but can harm availability or safety operations. A constrained fallback can be safer if its scope, data, and duration are explicit.
+
+Define emergency paths narrowly. An emergency route should have a purpose, approved subjects, protected resources, maximum duration, stronger logging, and independent review. It must not become a broad bypass for ordinary traffic.
+
+Use policy snapshots carefully. A last-known-good policy may support a constrained path when the control plane is down, but its epoch, expiration, dependency assumptions, and permitted actions must be bounded.
+
+Never treat stale policy as current policy. A cached artifact can help explain or restrict behavior, but its age and revocation state must be checked before authorization.
+
+Define dependency classes. Identity, consent, risk, classification, provider capability, quota, billing, residency, and tool inventory do not have identical failure consequences. Missing consent or identity should usually be more restrictive than missing a non-critical metric.
+
+Define dependency criticality. For each policy branch, identify which facts are mandatory, which allow a constrained result, and which can be replaced by a conservative default.
+
+Make defaults explicit. If risk is unavailable, choose review or a lower-risk route. If classification is unavailable, treat the data as more sensitive. If provider capability is unknown, choose a verified compatible provider or stop.
+
+Do not use empty values as defaults. An empty tenant, destination, obligation list, or risk result can be misinterpreted as unrestricted. Represent missing values as explicit unknown states.
+
+Bound evaluation time. Allocate a policy evaluation budget and define what happens when it is nearly exhausted. A timeout should produce a known degraded state, not whichever branch completed first.
+
+Protect the remaining budget. Do not spend all time fetching optional facts and then skip the mandatory authorization check. Evaluate critical controls first.
+
+Define partial-result semantics. If authentication succeeded but classification failed, or policy evaluation succeeded but obligation construction failed, state exactly which actions remain eligible.
+
+Do not combine partial results casually. A successful allow from one branch cannot compensate for an unknown deny or missing obligation from another branch unless the composition rule explicitly says so.
+
+Preserve the strongest restriction. When components disagree during degradation, choose the narrower capability, shorter lifetime, smaller data flow, stronger obligation, or higher review state.
+
+Prevent fallback expansion. If the preferred evaluator fails, a fallback evaluator, region, provider, model, or tool must have equal or narrower authority and verified semantic compatibility.
+
+Verify fallback identity. Confirm policy digest, evaluator version, dependency snapshot, region, audience, and obligations before accepting a degraded result.
+
+Use a degradation budget. Limit how long a component can operate in degraded mode, how many requests can use the path, how much data can move, and how many side effects can occur.
+
+Use a risk budget. High-risk operations should consume little or none of the degraded allowance. Prefer spending degraded capacity on low-risk, reversible work.
+
+Use a data budget. Restrict fields, modality, payload size, retention, provider destinations, and regions while facts are incomplete.
+
+Use a side-effect budget. Disable tools, charges, publications, deletions, and infrastructure changes by default. If any remain available, bind them to narrow approvals and idempotency.
+
+Use a freshness budget. A degraded decision based on a snapshot should expire quickly and require renewed proof. Do not reset the timer at every proxy or retry.
+
+Handle revocation uncertainty. If the gateway cannot confirm whether identity, consent, policy, or tool access was revoked, fence consequential actions until current state is available.
+
+Handle control-plane outage. Define whether regions may use a signed snapshot, enter restricted mode, or stop. Include maximum offline duration and startup verification.
+
+Handle regional disagreement. A region that cannot prove its policy epoch or revocation state should not receive affected traffic. Route to a known compatible location or a constrained local path.
+
+Handle queue degradation. Admission under a healthy policy does not guarantee execution during an outage. Reauthorize queued jobs or constrain them before provider calls and side effects.
+
+Handle session degradation. Long-lived streams and agents must checkpoint authority. When the evaluator is unavailable, pause consequential steps rather than letting an old session continue indefinitely.
+
+Handle provider degradation. If capability, safety mode, residency, or pricing facts are unknown, route only to a verified compatible provider or return a constrained result.
+
+Handle tool degradation. Tool inventory, schema, target, or approval uncertainty should disable the tool or require fresh human approval. Do not execute from stale plans.
+
+Handle billing degradation. If quota, balance, price, or transaction state is unavailable, prevent duplicate charges and set a bounded behavior for free or pre-authorized work.
+
+Handle consent degradation. Missing or stale consent should narrow purpose, fields, destination, and retention, or require renewed consent. Consent cannot be inferred from system availability.
+
+Handle classification degradation. When data class is unknown, use the more sensitive classification and the stricter egress and provider policy.
+
+Handle identity degradation. Do not replace an unavailable identity result with an empty or anonymous principal that happens to match a broad public rule.
+
+Handle risk degradation. Use a conservative risk tier or review queue. Do not route unknown risk to the broadest model or tool set.
+
+Make recovery a state transition. Define degraded, recovering, validated, and normal states. Do not return to normal merely because a dependency responds once.
+
+Require recovery evidence. Verify policy artifacts, dependency freshness, revocation propagation, regional convergence, cache invalidation, queue handling, and executor readiness before restoring full authority.
+
+Drain degraded work. Decide whether requests admitted under restriction complete under that restriction, are reauthorized, or are canceled. Do not silently upgrade them after recovery.
+
+Invalidate degraded caches. Mark decisions, route selections, and obligation bundles created under incomplete facts so they cannot be reused as normal decisions.
+
+Reconcile audit records. Preserve the original degraded state, inputs, restrictions, approvals, and side effects. Recovery must not rewrite history.
+
+Make client behavior clear. Return stable states and retry guidance without exposing internal policy details, protected resources, or dependency secrets.
+
+Make operator behavior clear. Show which control failed, which restricted path was selected, what authority ceiling applied, how much budget remains, and what evidence is required for recovery.
+
+Test evaluator timeout. Exhaust CPU, memory, rule steps, and network time. Verify deterministic state, bounded work, and no implicit allow.
+
+Test dependency failure. Remove identity, consent, classification, risk, capability, quota, billing, residency, and tool facts independently and together. Verify each criticality rule.
+
+Test partial policy results. Make one branch allow, another unknown, and a mandatory obligation unavailable. Confirm composition preserves the required restriction.
+
+Test stale snapshots. Advance policy epochs, revoke credentials, withdraw consent, retire tools, and change provider capability while the control plane is offline.
+
+Test regional partitions. Leave one region on an old policy or revoke acknowledgment. Confirm traffic fencing and no cross-region authority expansion.
+
+Test queue and stream aging. Wait across expiration, retry jobs, reconnect streams, resume agents, and invoke tools after recovery. Verify reauthorization and no stale upgrade.
+
+Test fallback paths. Fail every preferred evaluator, provider, region, adapter, cache, and registry. Confirm fallback identity, compatibility, obligations, and narrower scope.
+
+Test emergency paths. Exercise expired approvals, repeated renewals, wrong tenants, wrong purposes, broad tool arguments, and attempted use outside the emergency scope.
+
+Test side effects. Attempt charges, exports, publications, deletions, tool calls, and infrastructure changes under every degraded state. Verify safe refusal or explicit bounded approval.
+
+Test recovery races. Restore the control plane while revocation, migration, rollback, queue execution, and cache refresh are in flight. Define precedence and prevent premature normal mode.
+
+Test repeated outages. Enter and exit degraded mode repeatedly. Ensure budgets, counters, epochs, and restrictions do not reset incorrectly or accumulate hidden authority.
+
+Test observability loss. Remove metrics, acknowledgments, audit storage, and dependency health signals. Missing evidence should preserve restriction and block recovery.
+
+Test malformed results. Return invalid signatures, missing obligations, contradictory effects, future timestamps, unknown schema versions, and mismatched policy digests.
+
+Monitor degraded operation. Track requests by degraded state, restricted path, authority ceiling, dependency failure, data class, route, tenant, side effect, duration, and recovery outcome.
+
+Track near misses. Count attempted use of stale snapshots, missing obligations, expired approvals, wrong audiences, blocked tool calls, and fallback mismatches.
+
+Set hard gates. Block normal mode when policy epoch, revocation state, dependency freshness, regional convergence, artifact integrity, or executor readiness cannot be proven.
+
+Minimize evidence. Record state, versions, digests, restrictions, reason codes, approvals, and side-effect identities without storing raw prompts, secrets, provider payloads, or customer files unnecessarily.
+
+Do not confuse availability with permission. Keeping the endpoint responsive is useful, but a response is not proof that the requested authority is safe.
+
+Do not confuse a safe fallback with a broad fallback. A fallback is safe because its authority is bounded and verified, not because it usually works.
+
+Do not confuse recovery with restoration. Recovery means the system has re-established the evidence needed for normal authority, not merely that one service returned HTTP 200.
+
+The practical pattern is this: classify failures and actions, define explicit degraded states, set authority, risk, data, side-effect, freshness, and time budgets, make missing facts unknown, preserve the strongest restriction, use signed bounded snapshots only when justified, verify fallbacks, fence revocation and regional uncertainty, reauthorize queues, streams, agents, leases, tools, and side effects, model recovery as a state machine, require evidence before normal mode, drain and invalidate degraded work, test timeouts, dependency failures, partial results, stale snapshots, partitions, fallbacks, emergencies, side effects, recovery races, repeated outages, observability loss, and malformed results, monitor debt and near misses, and preserve minimal provenance. A policy system degrades safely when incomplete evaluation reduces what it can authorize, makes the restriction visible, and never turns uncertainty into unearned authority.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
