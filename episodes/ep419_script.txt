@@ -1,0 +1,197 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about provider account routing: how an AI API gateway chooses the correct provider organization, project, subscription, region, and credential set before it chooses an endpoint or sends a request.
+
+Routing to a provider is not specific enough. One provider can expose many accounts with different contracts, quotas, retention settings, regions, model access, budgets, support tiers, and failure histories.
+
+The wrong account can still return a valid model response. That makes account-routing failures difficult to notice and potentially expensive, noncompliant, or insecure.
+
+Start with an account registry. Give every provider account a stable internal identity that does not depend on a display name, key prefix, or mutable provider label.
+
+Record the provider, contractual entity, organization, project, subscription, region, environment, owner, purpose, status, and effective dates.
+
+Record capabilities at the account level. Model access, context length, batch support, tool use, media generation, zero retention, and preview features can differ between accounts.
+
+Record commercial terms. Pricing, committed spend, credits, discounts, minimums, overage rules, tax treatment, and currency can change the correct route.
+
+Record data terms. Retention, training, support access, residency, encryption, logging, and deletion controls may be account-specific.
+
+Record risk boundaries. Production, development, evaluation, regulated workloads, customer-dedicated capacity, and internal experiments should not share accounts accidentally.
+
+Treat credentials as properties of an account, not as the account itself. Keys rotate; account identity and obligations must remain stable.
+
+Separate account selection from credential selection. First select an eligible account, then obtain a current scoped credential for that account and operation.
+
+Do not infer account identity from a secret at runtime. Resolve credentials through managed metadata and reject unknown or ambiguous bindings.
+
+Declare request requirements. Include tenant, environment, purpose, modality, model capability, region, data classification, retention, budget, latency, and required support guarantees.
+
+Apply hard eligibility before optimization. An account incompatible with residency, contract, tenant isolation, or workload purpose must never enter the candidate set.
+
+Optimize only among eligible accounts. Cost, latency, quota headroom, reliability, and committed-spend utilization are secondary to correctness.
+
+Bind the decision to the resolved account generation. A later registry edit must not silently change the identity governing an accepted request.
+
+Return an account decision receipt internally. Include request identity, account identity, registry generation, eligibility evidence, selected credential lease, and expiration.
+
+Keep provider account details private. Clients may need a route class or compliance status, but not internal organization IDs, billing accounts, or credential metadata.
+
+Use tenant allowlists. A tenant should reach only accounts approved by contract and policy, even when another account has spare capacity.
+
+Support dedicated accounts. Some customers require isolated quotas, keys, logs, invoices, or provider agreements.
+
+Support shared accounts deliberately. Shared capacity needs fair scheduling, cost attribution, abuse containment, and protection against cross-tenant metadata leaks.
+
+Never mix production and development by convenience. Test traffic can consume production quota, expose real data to weaker controls, or distort billing.
+
+Never use a personal account for service traffic. Ownership, continuity, support, auditing, and revocation become fragile.
+
+Handle account lifecycle explicitly. Candidate, active, constrained, draining, suspended, revoked, expired, and retired should be observable states.
+
+Do not route new work to a draining account. Allow accepted work to finish or transfer according to its operation contract.
+
+Suspend quickly when terms, billing, security, or provider notices require it. Propagate the change to routers, pools, queues, and retries.
+
+Fence retired accounts. Old workers and cached decisions must not continue submitting work after retirement.
+
+Track account health separately from provider health. One project can be rate-limited, misconfigured, suspended, or out of credit while other accounts remain healthy.
+
+Track health by capability. Text generation may work while image generation, batch, fine-tuning, or tool calls fail.
+
+Use account-specific circuit breakers. A failure in one account should not poison all routes to the provider, and provider-wide failure should not be mistaken for one bad key.
+
+Measure quota headroom. Provider quotas may apply by organization, project, model, region, minute, day, or billing period.
+
+Normalize quota carefully. Requests per minute, tokens per minute, concurrent jobs, storage, and media limits are not interchangeable.
+
+Reserve account capacity before dispatch. Selection based on stale headroom can overload the same account from many gateway instances.
+
+Use distributed reservations or admission controls. Keep the decision atomic enough to prevent a thundering herd toward the apparently cheapest account.
+
+Release reservations on confirmed rejection or cancellation. Retain them when provider acceptance or usage remains unknown.
+
+Reconcile provider usage to the selected account. Every charge should map to request, tenant, model, account, credential generation, and provider invoice evidence.
+
+Do not allocate cost by API key alone. Rotation, shared keys, provider aggregation, and delayed invoices can make key-based accounting wrong.
+
+Handle prepaid credits. A cheap route can become expensive when credits expire, are restricted, or belong to another tenant or project.
+
+Handle committed spend. Preferential use may be rational, but it must not override data, reliability, or customer isolation requirements.
+
+Handle currencies and taxes. Compare normalized effective cost with timestamped rates and commercial rules, not raw price strings.
+
+Handle provider account rate limits. Backoff and retry should remain tied to the affected account and quota dimension.
+
+Do not retry through another account automatically when the operation may already have been accepted. Preserve idempotency and reconcile the first account.
+
+Evaluate fallback from the beginning. A fallback account needs its own eligibility, terms, budget, capacity, and credential checks.
+
+Make cross-account fallback visible in operation evidence. Record why it happened and whether output properties or contractual conditions changed.
+
+Do not let fallback cross tenant ownership. Spare quota in another customer's dedicated account is not shared capacity.
+
+Preserve request identity across accounts. The same semantic operation needs a stable idempotency key that survives credential and route changes.
+
+Scope provider idempotency correctly. Some providers isolate idempotency keys by account or project, so gateway-level deduplication remains necessary.
+
+Handle asynchronous jobs. Poll, cancel, retrieve, and callback operations must return to the account that created the job.
+
+Store provider object ownership. Files, batches, fine-tunes, assistants, vector stores, and generated artifacts may be visible only inside one account.
+
+Do not route object follow-up by model availability alone. The destination account must own or be authorized to access the referenced object.
+
+Handle uploads. Bind file IDs and retention policies to the account that stores them, and prevent cross-account reference confusion.
+
+Handle fine-tuned models. The same friendly name may resolve to different provider object IDs and training data in different accounts.
+
+Handle caches. Cache keys and eligibility must include account-sensitive behavior when outputs, terms, tools, or data boundaries differ.
+
+Avoid exposing account-specific cached results to incompatible tenants. Sharing requires explicit equivalence across policy, model, input, and output rights.
+
+Handle upstream connection pools. Partition by provider account and credential context so authentication and billing never bleed across requests.
+
+Drain pools during credential rotation or account suspension. Existing transport must not carry new work under stale authority.
+
+Handle key rotation without changing account identity. Support overlap, generation fencing, audit evidence, and rollback within a bounded window.
+
+Use least-privilege credentials. Separate generation, file access, administration, billing, fine-tuning, and deletion permissions where providers permit it.
+
+Do not distribute master credentials to every gateway worker. Use a broker, scoped leases, managed identities, or isolated execution tiers.
+
+Protect secret metadata. Logs and metrics can use account IDs and credential generations, never raw keys or reversible fingerprints.
+
+Handle regional accounts. An account's billing region, endpoint region, processing region, and storage region may not be the same.
+
+Verify effective residency. Marketing labels and endpoint hostnames are not enough; preserve the provider product and contractual evidence.
+
+Handle legal entities. Two accounts under the same provider brand may contract with different subsidiaries and jurisdictional terms.
+
+Handle support tiers. Production routing may require an account with incident support, capacity guarantees, and escalation paths.
+
+Handle preview access. Experimental models may exist only in an account with weaker service levels or different data conditions.
+
+Require explicit purpose for preview accounts. Do not let model enthusiasm bypass production controls.
+
+Handle provider account compromise. Revoke credentials, disable selection, fence in-flight commits where possible, inspect access, and preserve evidence.
+
+Do not rotate blindly after compromise. A new key in the same account may remain exposed through the same control path.
+
+Handle billing suspension. Distinguish exhausted credit, payment failure, administrative hold, quota limit, and provider outage.
+
+Handle deleted projects. Provider object references and audit records must remain understandable even when the remote project disappears.
+
+Keep immutable account history. Do not reuse an internal account ID for a newly created provider project.
+
+Version account metadata changes. Operators need to reconstruct why an old request was eligible and which terms governed it.
+
+Use approvals for high-impact changes. Adding a production account, changing tenant eligibility, weakening retention requirements, or enabling cross-account fallback deserves review.
+
+Simulate routing changes. Measure which tenants, models, regions, budgets, and objects would move before activation.
+
+Roll out changes gradually. Compare expected and actual account selection, quota usage, cost, latency, errors, and policy denials.
+
+Provide an operator view. Show account state, ownership, eligible tenants, capabilities, terms generation, quota headroom, spend, health, pools, jobs, and recent routing changes.
+
+Avoid one giant account score. Operators need to see hard eligibility and individual optimization factors, not a mysterious rank.
+
+Monitor selection concentration. A routing bug can send nearly all traffic to one account while dashboards report provider health as normal.
+
+Monitor cross-boundary attempts. Alert when requests try to use an account outside their tenant, environment, region, purpose, or data profile.
+
+Monitor credential drift. Detect credentials mapped to the wrong project, unknown keys, stale generations, and provider permissions that exceed registry declarations.
+
+Monitor orphaned objects. Files, jobs, models, and artifacts without a known owning account become difficult to retrieve, delete, or audit.
+
+Test account eligibility. Vary tenant, environment, purpose, data class, region, modality, model, and contract profile.
+
+Test quota races. Dispatch from many gateway instances as headroom approaches zero and confirm reservations prevent overload.
+
+Test account failures. Suspend billing, revoke a key, delete a project, remove model access, reduce quota, and change provider terms.
+
+Test fallback. Make the preferred account unavailable before dispatch, after acceptance, during streaming, and while asynchronous work is running.
+
+Test object affinity. Create files, batches, fine-tunes, and artifacts in one account, then attempt follow-up operations through another.
+
+Test pool isolation. Run concurrent traffic through accounts with different credentials and verify transport reuse cannot cross the boundary.
+
+Test rotation. Introduce a new credential generation, retire the old one, restart workers, and replay stale routing decisions.
+
+Test tenant isolation. Attempt to consume another tenant's dedicated quota, credits, files, models, or provider objects.
+
+Test regional differences. Change endpoint, storage, processing, billing, and legal-entity attributes independently.
+
+Test registry outages. The gateway should use bounded, signed snapshots or fail according to policy, not invent account eligibility.
+
+Test delayed provider evidence. Usage and invoices can arrive hours later; reconciliation must still resolve the correct account and request.
+
+Set hard gates. Every provider dispatch needs an eligible account identity, current registry generation, compatible tenant and purpose, sufficient reserved capacity, valid scoped credential, account-partitioned transport, and durable operation binding.
+
+Do not confuse a working key with an approved account. Authentication success proves possession of a secret, not routing eligibility.
+
+Do not confuse provider diversity with failure independence. Multiple accounts can share the same provider infrastructure, billing organization, quota parent, or control plane.
+
+Do not confuse low price with low effective cost. Credits, commitments, retries, support, residency, and operational overhead all matter.
+
+Do not confuse account fallback with a harmless implementation detail. It can change contractual terms, object ownership, quotas, billing, and recovery behavior.
+
+The practical pattern is this: maintain a versioned provider account registry; declare tenant, purpose, region, data, capability, and commercial requirements; apply hard eligibility before optimization; select the account before the credential; reserve quota atomically; bind requests, objects, jobs, connections, usage, and retries to a stable account identity; reevaluate every fallback; isolate dedicated tenants, environments, pools, and credentials; handle lifecycle, rotation, compromise, suspension, regional and legal differences explicitly; simulate and approve high-impact changes; test quota races, account failures, object affinity, pool isolation, stale decisions, registry outages, and delayed billing; and monitor concentration, cross-boundary attempts, credential drift, and orphaned objects. A gateway routes provider accounts correctly when every request uses the account whose capacity, contract, data controls, and ownership actually match the work.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
