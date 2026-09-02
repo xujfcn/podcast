@@ -1,0 +1,191 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about output rights governance: how an AI API gateway preserves the contractual and technical evidence needed to know whether generated text, code, images, audio, video, and other artifacts can be used, modified, published, or redistributed as intended.
+
+This is not legal advice. It is an infrastructure problem that supports legal and product decisions. A gateway cannot interpret every law, but it can stop routing from erasing which terms, models, inputs, accounts, and controls governed an output.
+
+The central mistake is treating all model output as interchangeable. Two routes can return similar content while carrying different provider terms, model licenses, retention settings, regional rules, indemnity conditions, and downstream restrictions.
+
+Start with a declared use purpose. Internal analysis, customer support, source code generation, advertising, public publishing, dataset creation, model training, and resale may require different routes and evidence.
+
+Bind purpose to the request. Do not infer it only from prompt text, endpoint name, or the application that happened to send the call.
+
+Define a rights profile. Include allowed uses, prohibited uses, redistribution rules, derivative-work conditions, attribution requirements, retention controls, training settings, region, and required review.
+
+Version the profile. Terms and provider programs change. An output must remain linked to the exact profile active when it was generated.
+
+Separate provider terms from model licenses. A hosted service agreement and an open-model license are different sources of obligations.
+
+Separate model rights from input rights. Permission to use a model does not prove the caller had permission to submit source text, code, images, music, voices, likenesses, or private data.
+
+Separate output rights from factual safety. A usable license does not make content accurate, non-infringing, private, or suitable for publication.
+
+Separate rights evidence from a guarantee. Metadata can show the route and declared conditions; it cannot prove that generated content contains no protected expression or third-party material.
+
+Build a terms registry. Store provider, account type, product, model family, model version, endpoint, region, effective dates, source document, review status, and normalized obligations.
+
+Keep source documents. A normalized flag is useful for routing, but reviewers need the original terms and the section from which each rule was derived.
+
+Hash and timestamp terms snapshots. A mutable URL is not sufficient evidence of what applied months ago.
+
+Record authority. Note who approved each interpretation, when it was reviewed, and when it must be reviewed again.
+
+Treat unknown terms as unknown. Do not convert a missing registry entry into permission.
+
+Use conservative compatibility rules. A route is eligible only when its known conditions satisfy the declared purpose and tenant policy.
+
+Fail before sending sensitive inputs. Discovering after generation that the route was not approved is too late for retention, training, or regional obligations.
+
+Evaluate account-specific programs. Enterprise privacy, zero-retention, indemnity, and content-use terms may depend on the exact provider account, contract, and feature configuration.
+
+Do not assume a provider-wide promise applies to every endpoint. Consumer products, API products, previews, fine-tuning, batch jobs, and media generation can differ.
+
+Track feature-specific terms. Web search, retrieval, voice cloning, image editing, music generation, and third-party tools may introduce separate providers and rights conditions.
+
+Track model version. Aliases can move to a new model with different training data, behavior, preview status, or terms.
+
+Resolve aliases before authorization. A friendly model name is not enough evidence for a rights decision.
+
+Bind the authorization to the resolved route. If fallback selects another provider or model, evaluate its rights profile again.
+
+Never let fallback weaken the declared conditions silently. A route that is cheaper or available but incompatible with public redistribution must not replace an approved route.
+
+Expose meaningful failure. Tell the application that no eligible route satisfies the requested use profile without leaking private contract details.
+
+Support explicit alternatives. The client may choose an internal-only route, a reviewed route, a different modality, or no generation at all.
+
+Handle input provenance. Record references to source assets, ownership declarations, licenses, consent, and permitted transformations without copying unnecessary sensitive content.
+
+Use asset manifests. Each image, document, audio clip, code repository, and dataset should have an identity and declared usage basis.
+
+Propagate restrictions. If an input is internal-only, noncommercial, attribution-required, or prohibited from model training, derived output should carry the appropriate downstream controls.
+
+Do not trust caller labels blindly. High-risk uses may require verified asset provenance or human review.
+
+Handle public-domain claims carefully. Record the claim and evidence source; do not turn an unsupported declaration into certainty.
+
+Handle licensed stock assets. A license may permit publication but prohibit use in model training, templates, logos, or products for resale.
+
+Handle customer content. Tenant contracts may restrict provider selection, retention, support access, and use outside the requested service.
+
+Handle personal data. Consent and privacy rules are distinct from copyright and output ownership. Preserve both control planes.
+
+Handle likeness and voice. Consent, identity verification, revocation, disclosure, and jurisdiction may matter even when the base model permits generation.
+
+Handle trademarks and brands. A route may generate branded content, but publication still needs brand and impersonation controls.
+
+Handle code. Generated code can resemble licensed source, include incompatible snippets, or depend on packages with their own licenses.
+
+Attach code provenance evidence where available. Include model route, retrieval sources, repository context, generated files, scans, and review outcome.
+
+Do not claim source-code ownership from a model response alone. Use similarity, secret, dependency, and license scanning proportionate to the risk.
+
+Handle retrieval-augmented generation. Retrieved documents remain governed by their access and use conditions, and citations do not automatically authorize republication.
+
+Bind retrieval sources to the output record. Preserve document IDs, versions, access basis, excerpts used, and citation status within privacy limits.
+
+Handle web search. Search results can introduce third-party terms, snippets, images, and factual sources. Track the search provider and source URLs separately from the language model.
+
+Handle fine-tuned models. Record the base model, adapter or fine-tune identity, training-data approval, provider program, and deployment terms.
+
+Handle open models. Pin license texts and model-card versions, including restrictions inherited from base models, datasets, or adapters.
+
+Handle community checkpoints. A repository label is not enough. Verify origin, license chain, weights, dependencies, and allowed deployment context.
+
+Handle embeddings. Derived vectors may still represent protected, private, or contract-restricted source material.
+
+Handle synthetic datasets. Permission to generate individual outputs does not automatically permit bulk dataset creation or training another model.
+
+Handle evaluation data. Storing prompts and outputs for benchmarking may conflict with retention, confidentiality, or training restrictions.
+
+Handle images. Track reference assets, edits, identities, provider route, model version, content credentials, and publication purpose.
+
+Handle audio and music. Record voices, samples, lyrics, compositions, reference tracks, model terms, and distribution purpose.
+
+Handle video. A single output may combine images, voices, music, scripts, actors, and third-party generation services with separate conditions.
+
+Create an artifact rights manifest. Link every generated artifact to request ID, tenant, purpose, input assets, route, terms snapshot, controls, reviewers, and downstream restrictions.
+
+Keep manifests durable. A temporary response header is not enough for assets that may be published months later.
+
+Make manifests portable. When an artifact moves to storage, a content system, a repository, or a customer, preserve a stable reference to its rights evidence.
+
+Do not put secrets in portable metadata. Use opaque evidence IDs and controlled lookup rather than embedding contracts, credentials, or personal data.
+
+Sign manifests. Downstream systems should detect alteration, missing fields, or substitution of a more permissive profile.
+
+Support revocation and supersession. A later terms update may affect future generation, future publication, or both. Encode the scope rather than rewriting history.
+
+Do not retroactively invent certainty. If past terms cannot be reconstructed, mark the evidence incomplete and route the artifact for review.
+
+Distinguish generation permission from publication permission. An internal draft can be generated before brand, privacy, factual, and rights review.
+
+Distinguish publication from redistribution. Customer delivery, public posting, sublicensing, template sale, and dataset release are different actions.
+
+Use downstream enforcement. Content management, export, download, API response, and publishing systems should evaluate the artifact profile before action.
+
+Prevent metadata stripping. A conversion, resize, transcode, copy, or bundle operation should preserve the rights manifest reference.
+
+Track derivatives. Link edits, translations, summaries, crops, remixes, and code modifications to their source artifacts and new review state.
+
+Do not assume transformation removes restrictions. A summary, embedding, translation, or style transfer may still inherit obligations.
+
+Handle mixed outputs. A document can contain generated prose, retrieved quotations, customer data, stock images, and generated charts. Track components when their conditions differ.
+
+Use review thresholds. Low-risk internal drafts may pass automatically; public campaigns, commercial media, voice likeness, regulated advice, and training datasets may require specialists.
+
+Make review evidence specific. Record the artifact version, intended use, reviewed sources, decision, conditions, reviewer, and expiration.
+
+Invalidate review when relevant content changes. A new image, route, source document, voice, or publication purpose may require re-review.
+
+Preserve denial reasons privately. Operators need enough detail to correct the workflow, but end users should not receive confidential contract language.
+
+Audit route selection. Record every eligible and rejected rights profile, the selected route, fallback behavior, and final resolved model.
+
+Audit configuration changes. A one-line change to a provider account or retention flag can alter the allowed use of future outputs.
+
+Monitor registry freshness. Alert when terms snapshots expire, source URLs change, provider notices arrive, or model aliases resolve unexpectedly.
+
+Monitor unknown coverage. Track requests, models, modalities, tools, and artifacts that lack a complete rights profile.
+
+Monitor downstream violations. Detect public exports of internal-only artifacts, missing attribution, expired reviews, stripped manifests, and incompatible derivative uses.
+
+Do not log full protected inputs merely to prove provenance. Store minimal evidence, hashes, references, and access-controlled snapshots according to policy.
+
+Apply retention limits to rights evidence deliberately. Some evidence must outlive generation logs, while personal or confidential source data may need earlier deletion.
+
+Test terms changes. Modify effective dates, account programs, model aliases, regions, endpoints, and use purposes and verify route eligibility.
+
+Test fallback. Make the preferred provider unavailable and confirm the gateway does not select a route with weaker output, retention, or redistribution conditions.
+
+Test mixed assets. Combine inputs with commercial, noncommercial, attribution, internal-only, revoked, and unknown profiles.
+
+Test derivatives. Translate, crop, remix, summarize, transcode, bundle, and export artifacts while preserving lineage and restrictions.
+
+Test long-lived workflows. Generate a draft, change terms, rotate models, revise content, and publish weeks later. Verify the system evaluates both historical evidence and current action policy.
+
+Test incomplete evidence. Remove a terms snapshot, source license, consent record, or model version and confirm the system requires review instead of assuming permission.
+
+Test malicious labels. Attempt to mark customer data as public, copyrighted assets as owned, preview models as approved, and personal voices as synthetic.
+
+Test tenant isolation. One tenant's enterprise rights, contract, and approval must never authorize another tenant's request.
+
+Test regional differences. Route the same purpose through regions with different provider products, data controls, and contractual entities.
+
+Test provider chains. Include search, OCR, translation, model inference, image generation, storage, and publishing providers in one workflow.
+
+Test artifact delivery. Download through APIs, object storage, email, repositories, content platforms, and customer exports without losing evidence.
+
+Set hard gates. High-risk generation requires a declared purpose, verified tenant, resolved route, current terms profile, compatible input manifests, required consent, and downstream enforcement plan.
+
+Set hard publication gates. A public or commercial action requires the exact artifact version, compatible rights profile, complete provenance, required attribution, current review, and permitted destination.
+
+Do not confuse provider ownership language with infringement protection. Ownership allocation and third-party claims are separate questions.
+
+Do not confuse zero retention with output rights. Data handling controls and permission to use the result solve different problems.
+
+Do not confuse open weights with unrestricted use. Open availability can still carry license conditions, acceptable-use terms, or dataset obligations.
+
+Do not confuse a rights manifest with legal clearance. It organizes evidence and enforces decisions; qualified reviewers still decide ambiguous or high-risk cases.
+
+The practical pattern is this: declare use purpose, maintain versioned terms and model-license registries, resolve aliases and account-specific programs before routing, preserve input provenance and consent, propagate restrictions through generated and derivative artifacts, sign durable rights manifests, reevaluate every fallback and downstream action, distinguish generation, publication, redistribution, and training, use risk-based review, retain source evidence without over-logging private content, test terms changes, fallbacks, mixed assets, derivatives, long-lived workflows, incomplete evidence, malicious labels, tenant isolation, regions, provider chains, and exports, and monitor stale profiles and missing manifests. An AI gateway governs output rights well when every artifact carries enough trustworthy context for the next system and reviewer to know what may happen to it and why.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
