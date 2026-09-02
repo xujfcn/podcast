@@ -1,0 +1,165 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about connection draining at the AI API gateway: how to stop accepting new work during deployments, scaling events, maintenance, and failover while safely finishing, transferring, or terminating work already in progress.
+
+A process can be removed from a load balancer in milliseconds while its requests continue for minutes. AI traffic makes this gap especially important because streams, uploads, batches, agents, and tool calls have different completion and cancellation semantics.
+
+Start with an explicit drain state machine. Ready, refusing-new-work, draining, force-closing, stopped, and failed should be observable states with legal transitions.
+
+Separate routing removal from process termination. First stop new admission, then drain accepted work, then close transports, then terminate only after evidence or a deadline.
+
+Define admission precisely. A TCP connection, HTTP request, stream, WebSocket message, batch item, queued job, and tool call can each represent a different unit of new work.
+
+Do not treat an existing connection as permission for unlimited new requests. HTTP keep-alive, HTTP/2 multiplexing, WebSockets, and session protocols can carry fresh work after drain begins.
+
+Advertise drain intent at every layer. Update service discovery, load balancers, ingress proxies, connection pools, schedulers, queue consumers, and internal routers.
+
+Use a monotonic drain generation. Delayed health checks or stale control-plane updates must not return a draining instance to service accidentally.
+
+Define the no-new-work boundary. Record the instant and generation after which the instance rejects new requests, streams, tool actions, and queue leases.
+
+Return actionable rejection signals. Use protocol-appropriate status, retry guidance, idempotency semantics, and alternate routing without exposing internal topology.
+
+Preserve request identity. A client or upstream retry after drain rejection must carry the same idempotency key when it represents the same semantic action.
+
+Do not retry accepted work blindly. A lost connection during drain does not prove that provider execution or a tool side effect stopped.
+
+Track every accepted unit. Maintain authoritative counts for active requests, streams, uploads, provider calls, queue leases, tool calls, callbacks, and pending commits.
+
+Count by state, not socket. One HTTP/2 connection may contain many streams, while one request may outlive its client connection through provider work or reconciliation.
+
+Define completion per workload. A non-streaming request may finish after response delivery; a stream may finish after the terminal event; a tool action may finish only after commit or an explicit unknown outcome.
+
+Handle ordinary HTTP requests. Stop new admission, allow bounded in-flight requests to complete, add connection-close guidance where appropriate, and reject late arrivals consistently.
+
+Handle HTTP/2 and HTTP/3. Send protocol signals that prevent new streams while allowing accepted streams to finish. Track the last accepted stream identity and test client behavior.
+
+Handle WebSockets. Stop accepting new sessions, define whether existing sessions may send new work, notify clients of migration or closure, and close with a meaningful code before the hard deadline.
+
+Handle server-sent events. Continue accepted streams within budget, deliver a terminal event when possible, and provide resumable cursor semantics when supported.
+
+Handle token streaming. Preserve chunk ordering, usage accounting, moderation state, tool-call framing, and final status through completion or transfer.
+
+Do not claim a clean completion if the stream ended without a terminal record. Mark interrupted, canceled, transferred, completed, or outcome-unknown explicitly.
+
+Handle uploads. Reject new uploads after admission closes, but allow accepted uploads enough time to finish or resume from verified offsets.
+
+Handle large responses. Account for kernel buffers, proxies, slow clients, and response delivery acknowledgments rather than assuming application write means client receipt.
+
+Handle queue consumers. Stop leasing new jobs before shutdown, renew leases only for work that can finish, and release or transfer ownership with fencing.
+
+Fence old consumers. A drained worker whose lease expired must not commit after another worker has resumed the job.
+
+Handle scheduled and batch work. Stop new batch admission, track each child item, and report partial completion without rerunning completed effects.
+
+Handle agents. A conversation may continue elsewhere, but each in-flight model call and consequential tool call needs a stable identity and transfer policy.
+
+Handle tool execution. Do not terminate between an external side effect and its durable commit record without leaving an explicit reconciliation state.
+
+Handle provider requests. Cancellation support varies. If a provider cannot confirm cancellation, retain the transaction as active or unknown until reconciled.
+
+Handle callbacks. A drained instance may stop serving traffic while provider callbacks remain outstanding. Route callbacks by durable operation identity, not process affinity.
+
+Handle billing and quota. Preserve reservations until execution outcome is known, settle confirmed usage, and avoid both duplicate charging and premature release.
+
+Handle policy decisions. A drain must not extend authorization lifetimes. Revalidate stale work before transfer or continuation on another instance.
+
+Handle credentials. Revoke instance credentials only after required final commits and transfers, but do not leave broad credentials alive merely to simplify draining.
+
+Use scoped shutdown credentials where necessary. Give the instance only the authority needed to finish accepted work, publish final state, and release resources.
+
+Define a soft deadline. Before it, accepted work may finish normally while new work is refused.
+
+Define a transfer deadline. At this point, transferable work should checkpoint, release ownership, and move to a healthy executor.
+
+Define a hard deadline. After it, remaining work is canceled, fenced, or marked unknown according to workload risk. Do not leave behavior to an operating-system kill.
+
+Budget deadlines by phase. Reserve time for admission removal, execution, response delivery, state commit, lease transfer, callback routing, and final telemetry flush.
+
+Do not spend the whole grace period on model generation. A request that finishes computation at the deadline may still need delivery, accounting, and durable state.
+
+Use per-request remaining budgets. Long-running work admitted shortly before drain may need transfer or rejection rather than consuming the whole shutdown window.
+
+Define transferability. Pure computation may be restartable; stateful streams may need cursors; external effects may require ownership transfer; some work cannot move safely.
+
+Checkpoint only trustworthy state. Include request digest, progress cursor, output boundary, provider operation ID, tool state, policy generation, lease token, and accounting state.
+
+Authenticate checkpoints. A destination must verify origin, integrity, freshness, tenant, purpose, workload type, and fencing generation.
+
+Do not transfer secrets unnecessarily. Use references, scoped credentials, or rehydration under current authority rather than serializing raw credentials into checkpoints.
+
+Use destination acceptance. The source should release ownership only after the destination proves it can enforce obligations and has durably accepted the transfer.
+
+Avoid dual ownership. Use leases, fencing tokens, conditional state transitions, and idempotency to ensure source and destination cannot both commit.
+
+Handle failed transfers. Keep source ownership until acceptance, retry within budget, then cancel or mark unknown according to policy.
+
+Handle deployment waves. Drain a bounded percentage of capacity, verify tail latency and completion, then continue. Do not drain an entire failure domain simultaneously.
+
+Protect capacity. Remaining instances need headroom for rerouted new requests and transferred work. Admission control should tighten before saturation.
+
+Coordinate autoscaling. Scale-in should select instances with low non-transferable work, stop new admission, and wait for drain evidence before termination.
+
+Coordinate failover. During regional failure, waiting for perfect draining may be impossible. Fence the old region, preserve operation identities, and reconcile ambiguous effects.
+
+Coordinate maintenance. Announce deadlines to internal clients, pause scheduled work, and avoid starting long jobs near the drain window.
+
+Make readiness honest. A draining instance should fail readiness or expose a dedicated state while remaining alive for accepted work and management traffic.
+
+Keep liveness separate. A healthy draining process must not be restarted repeatedly because it intentionally stopped accepting new work.
+
+Keep management paths available. Status, cancellation, checkpoint transfer, callback reconciliation, and telemetry may need restricted access while public admission is closed.
+
+Handle process signals idempotently. Repeated termination signals should not restart the drain timer, reopen admission, or duplicate cleanup.
+
+Persist drain intent where necessary. A process restart during drain should not return to ready before the orchestrator and current generation authorize it.
+
+Control dependency shutdown order. Stop ingress before workers, workers before state stores, and state mutation before audit transport only according to a tested dependency graph.
+
+Do not close connection pools too early. Accepted requests may still need policy, provider, billing, storage, and audit calls.
+
+Do not close them too late without bounds. Idle connections and background refreshes can prevent shutdown or create fresh work.
+
+Stop background work explicitly. Disable cache refresh, health probes that mutate state, scheduled jobs, prefetch, speculative requests, and maintenance tasks as appropriate.
+
+Flush telemetry with limits. Preserve final counters and traces, but do not delay safety-critical fencing or termination indefinitely for observability.
+
+Preserve audit evidence. Record drain generation, start time, deadlines, admission closure, active counts, transfers, cancellations, unknown outcomes, and final termination reason.
+
+Make operator status useful. Show workload counts by type and age, longest remaining request, uncommitted effects, transfer failures, callback backlog, and time to hard deadline.
+
+Test new requests during drain. Exercise fresh TCP, reused keep-alive, HTTP/2 streams, WebSocket messages, queue leases, batch additions, and agent tool calls.
+
+Test slow clients. Throttle uploads and downloads, pause stream readers, drop connections, reconnect, and retry at every drain phase.
+
+Test slow providers. Delay first byte, token chunks, completion, cancellation confirmation, usage records, and callbacks beyond each deadline.
+
+Test external effects. Terminate before submission, after submission, after provider acceptance, before durable commit, and after commit but before client response.
+
+Test transfer races. Race source completion, destination acceptance, lease expiry, cancellation, revocation, and hard shutdown.
+
+Test protocol behavior. Verify HTTP/1.1 connection close, HTTP/2 stream refusal, HTTP/3 migration, WebSocket close, SSE resume, and client library retry behavior.
+
+Test orchestration failures. Delay load-balancer removal, deliver stale readiness, restart the process, repeat signals, and kill it before grace expires.
+
+Test capacity pressure. Drain instances under peak traffic, provider slowdown, regional failover, and queue backlog. Confirm admission control protects remaining capacity.
+
+Test dependency loss. Remove policy, state, billing, audit, provider, callback, and checkpoint services during drain.
+
+Test unknown outcomes. Lose the response after an external effect and confirm retries use status lookup or reconciliation rather than repeating the action.
+
+Test security changes. Revoke credentials, change policy, withdraw consent, rotate keys, and change tenant state during draining and transfer.
+
+Monitor drain quality. Track drain duration, rejected new work, active work by type, forced closures, interrupted streams, transfer success, duplicate effects, unknown outcomes, reservation age, and callback backlog.
+
+Alert on unsafe patterns. Watch for new admission after cutoff, old workers committing after fencing, repeated effects after transfer, readiness reopening, grace-period exhaustion, and credentials surviving termination.
+
+Set hard gates. An instance can terminate cleanly only when admission is closed, ownership is transferred or resolved, external effects are committed or explicitly unknown, leases are fenced, reservations are settled or retained for reconciliation, and final state is durable.
+
+Do not confuse zero connections with zero work. Provider calls, callbacks, queues, and tool effects can continue without a client socket.
+
+Do not confuse readiness removal with drain completion. It prevents some new traffic but says nothing about accepted work.
+
+Do not confuse process exit with cancellation. External work may continue after the process disappears.
+
+The practical pattern is this: model drain states explicitly, stop admission at every protocol and scheduler, preserve stable request and effect identities, track work by semantic state, define completion for streams, uploads, batches, agents, providers, tools, billing, and callbacks, use soft, transfer, and hard deadlines, checkpoint only transferable work, authenticate destination acceptance, fence old owners, protect remaining capacity, separate readiness from liveness, order dependency shutdown, preserve audit evidence, test reused connections, slow clients, providers, side effects, transfers, protocols, orchestration failures, capacity pressure, dependency loss, unknown outcomes, and security changes, and monitor forced termination and duplicate effects. A gateway drains safely when stopping an instance changes where work runs, not what the user’s accepted request means.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
