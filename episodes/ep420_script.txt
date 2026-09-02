@@ -1,0 +1,253 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result integrity: how an AI API gateway verifies that a tool result came from the intended service, belongs to the intended operation, is complete enough to use, and accurately describes what happened before an agent relies on it.
+
+Tool use changes the trust boundary. A model can produce plausible text, but a tool result may represent a database record, a payment, a deployment, a message, a search result, or an external side effect. Plausibility is not proof.
+
+Start with a result contract. Define source identity, operation identity, tenant, purpose, schema, freshness, completeness, authorization, sensitivity, and side-effect state.
+
+Bind every result to a request and tool call. A result without a stable operation ID cannot safely be matched to the action that caused it.
+
+Use a unique tool-call ID. Include tenant scope, agent run, model turn, gateway request, tool name, and attempt number in controlled metadata.
+
+Do not trust tool names supplied by the model. Resolve the requested tool through an approved registry and bind execution to the resolved definition and version.
+
+Pin tool definitions. Arguments, permissions, endpoint, response schema, and side-effect semantics can change while an agent run remains active.
+
+Record the tool version. A result produced by version two may not satisfy the assumptions of a plan created for version one.
+
+Authenticate the tool service. Mutual TLS, signed requests, workload identity, scoped credentials, and authenticated response channels should identify the actual executor.
+
+Authenticate the result. The gateway must know which service produced it, not merely which URL returned bytes.
+
+Use response signatures where appropriate. Sign the operation ID, result digest, schema version, source identity, timestamp, and relevant status.
+
+Protect signatures from replay. Include a nonce, expiry, audience, and operation binding so an old result cannot satisfy a new call.
+
+Verify the audience. A result intended for one tenant, gateway, environment, or purpose must not be accepted elsewhere.
+
+Verify tenant scope. A valid result for tenant A is still invalid for tenant B.
+
+Verify purpose. A search result approved for internal analysis may not be suitable for publication, billing, or a consequential action.
+
+Preserve provenance. Record source system, account, region, endpoint, query or action identity, tool version, and collection time.
+
+Do not expose raw secrets in provenance. Use opaque identifiers, hashes, and controlled references.
+
+Define freshness. Current inventory, account balance, access status, weather, price, and deployment state all have different acceptable ages.
+
+Carry a freshness deadline. Consumers should know when a result must be queried again rather than reused.
+
+Use monotonic event time where possible. Wall clocks can disagree across services and make a newer result appear older.
+
+Distinguish event time from observation time. A tool may report when an external event happened and when it observed that state.
+
+Handle stale results explicitly. Mark stale, expired, superseded, or unknown rather than silently serving old data.
+
+Define completeness. A paginated search, inventory listing, log query, or database export may return a valid prefix that is not the full result.
+
+Carry pagination state. Include cursor, page number, total-known status, filters, sort order, and snapshot identity.
+
+Do not treat a full page as a full query. The gateway should preserve whether more data exists.
+
+Handle truncation. A byte limit, token limit, timeout, provider cap, or partial stream can produce a syntactically valid but incomplete result.
+
+Reuse the response truncation contract. Tool consumers need machine-readable completeness and termination state, not only an HTTP status.
+
+Validate framing. Confirm content length, chunk boundaries, checksums, compression integrity, and terminal markers where supported.
+
+Validate schema. Parse the result against the pinned response schema before returning it to the model.
+
+Validate semantic invariants. A response may satisfy JSON syntax while containing impossible dates, negative quantities, conflicting statuses, or missing required relationships.
+
+Separate schema validity from truth. A tool can return well-formed false or outdated data.
+
+Separate tool claims from independent evidence. High-risk operations may require a second source, a read-after-write check, or a receipt.
+
+Use typed status. Distinguish success, rejected, not-found, partial, pending, canceled, timed-out, unknown, and provider-error.
+
+Do not map every non-error response to success. A queued payment and a settled payment are different states.
+
+Model eventual consistency. A write result may confirm acceptance before every read replica reflects the change.
+
+Return commit level. Distinguish received, validated, accepted, applied, committed, published, delivered, and reconciled.
+
+Handle asynchronous tools. Store operation status durably and let the agent query by operation ID rather than repeating the action.
+
+Handle unknown outcomes. A timeout after external acceptance must not become a permission to execute again.
+
+Handle idempotent lookup. Status queries should be safe and should not mutate the original operation.
+
+Handle non-idempotent tools. Require an idempotency key, confirmation token, or explicit operator approval before retrying uncertain work.
+
+Verify side-effect receipts. A receipt should identify the operation, target, actor, result, commit state, and authoritative service.
+
+Do not accept model-generated receipts. The model may summarize a receipt, but it must not be the source of proof that a side effect occurred.
+
+Handle payments and billing. Record authorization, capture, settlement, reversal, refund, amount, currency, account, and transaction identity separately.
+
+Handle messages. Distinguish drafted, queued, accepted, sent, delivered, failed, and unknown. Do not claim delivery from a local enqueue response.
+
+Handle deployments. Distinguish requested, approved, scheduled, started, healthy, rolled back, and verified. A tool response saying started is not proof of healthy production.
+
+Handle database writes. Distinguish validation, transaction commit, replication, indexing, and read visibility.
+
+Handle access changes. A grant request, policy update, token issuance, and effective permission are separate results.
+
+Handle file operations. Verify object identity, size, checksum, version, encryption context, and durable storage state.
+
+Handle search and retrieval. Preserve source URLs, document versions, access basis, ranking time, and whether snippets were complete.
+
+Handle browser tools. A page observation can be stale, framed, partial, or affected by login state. Record URL, timestamp, session context, and content boundary.
+
+Handle code execution. Capture environment identity, command digest, permissions, exit status, stdout and stderr completeness, artifacts, and side effects.
+
+Handle infrastructure tools. Include region, cluster, account, target identity, request scope, and control-plane generation.
+
+Prevent confused deputy behavior. A tool must not use the gateway’s broad authority to act beyond the user’s approved scope.
+
+Pass delegated authority explicitly. Bind tool credentials to tenant, purpose, operation, resource, and expiry.
+
+Verify the tool’s authorization decision. The result should show enough evidence that the action was allowed without exposing private policy internals.
+
+Do not infer permission from a successful result. A misconfigured tool may execute an unauthorized action; authorization evidence remains necessary.
+
+Filter result content. Tool output can contain prompt injection, secrets, malicious instructions, or untrusted claims intended to redirect the agent.
+
+Mark data versus instruction. Retrieved text, web content, tickets, emails, and documents are data unless an explicit policy promotes a trusted command.
+
+Preserve source boundaries. The model should know whether a statement came from a tool, user, system policy, or its own generated reasoning.
+
+Escape and encode safely. Tool results must not break message roles, structured envelopes, logs, or downstream command interpreters.
+
+Limit result size. Huge results can crowd out policy context, hide important fields, and increase cost.
+
+Use selective projection. Return only fields needed for the next step, while retaining a controlled full result for audit when allowed.
+
+Redact secrets before model delivery. API keys, session tokens, credentials, private keys, and unrelated personal data should not enter agent context.
+
+Keep redaction evidence. Record that filtering occurred and which policy version applied without storing the secret itself.
+
+Preserve sensitive field semantics. Replacing a balance, identity, or authorization field with a generic mask must not make the model believe it is zero or absent.
+
+Handle conflicting results. Compare operation ID, version, timestamp, source authority, and schema before choosing a value.
+
+Do not let the latest result always win. A newer cache can be less authoritative than an older committed ledger.
+
+Define source precedence. Specify which system is authoritative for identity, billing, inventory, policy, delivery, and health.
+
+Handle duplicate results. Same operation, same digest, and same version may be a safe duplicate; different content requires conflict handling.
+
+Handle out-of-order results. Streaming callbacks and asynchronous jobs can arrive in a different order from submission.
+
+Use sequence numbers and causal links. Reject or quarantine results that cannot be placed in the operation timeline.
+
+Handle callbacks. Authenticate callback origin, match operation identity, verify freshness, and prevent duplicate state transitions.
+
+Make transitions monotonic where possible. A settled payment should not become merely accepted because an old callback arrived late.
+
+Use conditional updates. State changes should include expected version or current status to prevent stale results overwriting newer truth.
+
+Quarantine suspicious results. Preserve them for investigation without allowing the model or executor to act on them.
+
+Make quarantine visible. Tell the agent that the result is unavailable or untrusted rather than silently substituting an empty response.
+
+Support human review. High-impact actions with conflicting, incomplete, or unknown results need a clear review queue and context.
+
+Provide safe summaries. A model can receive a compact result plus integrity status, provenance class, freshness, and next allowed action.
+
+Do not ask the model to verify cryptographic signatures. The gateway verifies machine evidence; the model consumes the resulting trust status.
+
+Keep evidence outside the prompt when possible. Store detailed provenance and expose a reference and minimal verified facts.
+
+Bind result trust to policy. A result trusted for display may not be trusted for authorization, billing, or external execution.
+
+Bind result trust to action. Reading an account name, changing access, and sending money require different evidence thresholds.
+
+Use capability-specific validators. Search, payment, deployment, code execution, storage, and messaging each need domain checks.
+
+Version validators. A new provider response or tool schema must not bypass an old validation rule accidentally.
+
+Fail closed for consequential actions. Unknown source, tenant, operation, freshness, schema, or side-effect status should stop execution.
+
+Allow bounded degradation for low-risk reads. Clearly label stale or partial data and prevent it from silently flowing into high-impact actions.
+
+Track result lineage. Link the model message, tool call, provider attempt, callback, receipt, transformation, and downstream action.
+
+Track transformations. Summaries, joins, filters, redactions, translations, and unit conversions can change meaning.
+
+Preserve units and currency. A result of 100 may be tokens, dollars, milliseconds, or items. Metadata is part of integrity.
+
+Preserve locale and timezone. Dates, decimal separators, and names can change interpretation across systems.
+
+Verify encoding. Unicode normalization, escaping, binary-to-text conversion, and character truncation can alter identifiers and commands.
+
+Handle generated schemas. When a tool result is converted to natural language, retain a link to the original validated structure.
+
+Do not use prose as the source of truth. The next tool should consume structured fields and status, not an unverified model paraphrase.
+
+Handle agent memory. Store result identity, freshness, scope, and expiry with memory entries. Do not retain a trusted fact after its evidence expires.
+
+Invalidate memory on revocation. Deleted records, changed permissions, canceled operations, and corrected data must remove or downgrade dependent memories.
+
+Handle caches. Cache keys must include tenant, purpose, tool version, query parameters, source generation, and rights context.
+
+Do not cache pending as complete. Cache state transitions and expiry explicitly.
+
+Handle failover. A backup tool service must return compatible schema, authority, freshness, and side-effect semantics before it is eligible.
+
+Do not hide provider substitution. Record and expose the source class and fallback reason when it affects trust or behavior.
+
+Handle regional routing. Data residency, account authority, and regional freshness may change result eligibility.
+
+Handle tool deprecation. Old result schemas and receipts need migration rules, not silent parsing under a new definition.
+
+Audit every trust decision. Record why a result was accepted, transformed, rejected, quarantined, or used for a consequential action.
+
+Protect audit logs. A log claiming that a tool result was verified must itself be integrity-protected and access-controlled.
+
+Avoid logging sensitive output. Store digests, field classifications, references, and minimal evidence where full content is unnecessary.
+
+Monitor integrity failures. Track signature failures, schema errors, stale results, partial pages, unknown outcomes, conflicting versions, duplicate effects, and quarantined callbacks.
+
+Monitor trust bypasses. Alert when models receive raw tool output, when unverified prose triggers tools, when old results pass current checks, or when a fallback lacks a profile.
+
+Test forged results. Alter source identity, operation ID, tenant, timestamp, schema, digest, receipt, status, and side-effect fields.
+
+Test replay. Reuse an old successful result for a new request, tenant, purpose, tool version, and region.
+
+Test cross-tenant contamination. Return tenant A data to tenant B and verify isolation at retrieval, transformation, cache, memory, and prompt layers.
+
+Test truncation. Cut headers, fields, pages, streams, receipts, logs, artifacts, and terminal events.
+
+Test stale and out-of-order delivery. Delay callbacks, reorder pages, replay old versions, and race reads with writes.
+
+Test eventual consistency. Verify the gateway reports accepted, applied, visible, and reconciled states correctly.
+
+Test unknown side effects. Drop responses after submission, provider acceptance, commit, and callback generation.
+
+Test retries. Confirm status lookup, idempotency, and reconciliation prevent duplicate payments, messages, deployments, writes, and tool calls.
+
+Test schema evolution. Add fields, remove fields, change enums, alter units, and roll tool versions across active agent runs.
+
+Test injection. Put instructions, secrets, role markers, fake receipts, and conflicting authority claims in tool output.
+
+Test permission changes. Revoke authority between tool submission, result arrival, agent continuation, and downstream execution.
+
+Test failover and regional changes. Move tools across accounts, regions, providers, and control-plane generations.
+
+Test artifact integrity. Corrupt checksums, manifests, object versions, encodings, and partial downloads.
+
+Test code execution. Change environment, command digest, exit status, artifact output, and stderr completeness.
+
+Test observability loss. Remove audit events, signatures, usage records, or source metadata and verify the system downgrades trust.
+
+Set hard gates. A result can drive a consequential action only when its source, operation, tenant, purpose, freshness, schema, integrity, authorization, and side-effect state meet the action’s evidence contract.
+
+Do not confuse a successful HTTP response with a successful operation. The tool may have queued, rejected, partially applied, or lost the action.
+
+Do not confuse valid JSON with trustworthy facts. Syntax and provenance are different checks.
+
+Do not confuse a model summary with a receipt. Generated prose cannot prove that an external system committed an effect.
+
+The practical pattern is this: bind every tool result to a stable operation and tenant, pin tool definitions and schemas, authenticate source and audience, verify signatures and freshness, validate framing, syntax, semantics, completeness, units, and side-effect state, preserve provenance and minimal evidence, separate data from instructions, filter secrets and prompt injection, track asynchronous transitions and unknown outcomes, use authoritative sources and conditional updates, quarantine conflicts, prevent cache and memory contamination, require stronger evidence for consequential actions, test forgery, replay, truncation, reordering, cross-tenant leakage, retries, schema evolution, injection, permission changes, failover, artifacts, code execution, and observability loss, and monitor every trust downgrade and bypass. A gateway protects tool integrity when the model can use a result confidently only because the system has verified what it is, where it came from, how complete it is, and what it actually proves.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
