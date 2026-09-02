@@ -1,0 +1,181 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about response truncation governance: how an AI API gateway tells the truth when a model output, stream, structured response, tool call, or agent run stops before the work is complete.
+
+Truncation is not one failure. It can mean the model reached its output limit, the context window was exhausted, a gateway budget expired, a provider cut the stream, a proxy dropped bytes, a client disconnected, or a safety or policy boundary stopped delivery.
+
+Those causes have different recovery actions. A client may safely continue one response, query another status, retry a pure request, or require human review. The gateway must not collapse them into a generic HTTP 200 with incomplete text.
+
+Start with an explicit completion contract. Define what complete means for plain text, JSON, tool calls, multimodal output, token streams, uploads, downloads, and agent workflows.
+
+Separate generation completion from delivery completion. A provider may finish generating while the gateway or client receives only part of the response.
+
+Separate delivery completion from semantic completion. The bytes may arrive, but a JSON document, code block, citation list, or tool-call argument may still be incomplete.
+
+Separate semantic completion from side-effect completion. An agent message can be truncated after it requested a tool but before the tool result or final commit.
+
+Use a machine-readable completion state. Examples include complete, length-limited, context-limited, deadline-exceeded, provider-interrupted, transport-interrupted, client-canceled, policy-stopped, and outcome-unknown.
+
+Preserve the raw provider finish signal. Normalize it for clients, but retain the original reason, provider, model, route, and protocol evidence for audit and debugging.
+
+Do not infer completeness from HTTP status. A successful transport status says that a response envelope was delivered, not that the requested semantic work finished.
+
+Make the boundary visible in every protocol. JSON responses need a finish reason; streaming responses need a terminal event; WebSockets need an application-level completion message; asynchronous jobs need durable status.
+
+Never silently append a gateway-generated sentence to truncated model output. That can change meaning and hide the actual completion state.
+
+Handle output-token limits. If the model reaches max output tokens, report length-limited even when the final text appears grammatical.
+
+Handle context limits. If the request cannot fit, reject before generation when possible. If a provider truncates input or output internally, expose the effective behavior and preserve the original request digest.
+
+Handle gateway budgets. Distinguish a model limit from a gateway deadline, tenant quota, cost budget, or operational shutdown.
+
+Handle provider limits. Providers may impose hidden caps, stop sequences, moderation cutoffs, or output policies. Record evidence rather than pretending the gateway made the decision.
+
+Handle stop sequences. A configured stop sequence can be successful completion, while an unexpected early stop is not. Keep configuration and observed boundary together.
+
+Handle stream interruption. If the terminal event is absent, mark the response as interrupted or unknown; do not manufacture a normal finish.
+
+Handle proxy truncation. Verify byte counts, checksums where available, framing, compression integrity, and terminal markers across every hop.
+
+Handle client cancellation. A canceled client may still leave provider work running. Record cancellation separately from generation completion and reconcile usage and effects.
+
+Handle slow clients. Do not let delivery buffers grow without bound. Apply backpressure and a delivery deadline, then report whether generation finished but delivery did not.
+
+Handle reconnecting streams. Resume only from a verified cursor or sequence number. Never replay arbitrary chunks and ask the client to guess where the answer ended.
+
+Give every chunk an ordering identity. Include stream ID, sequence number, response version, and integrity information where the protocol permits.
+
+Define replay safety. A client may request missing bytes, but a gateway must not rerun a tool call, publication, payment, message, or other effect merely to reconstruct a response.
+
+Handle structured output. Validate syntax and schema before declaring completion. A closing brace in a partial object is not enough if required fields, array items, or semantic constraints are missing.
+
+Expose parse status. Distinguish valid and complete, valid but incomplete, syntactically invalid, schema-invalid, and not-applicable.
+
+Handle JSON mode and grammar constraints. If a provider promises valid JSON but the transport ends early, the gateway should report an interrupted structured response, not return a misleading parse error alone.
+
+Handle tool-call arguments. Do not execute a tool from a partial argument stream unless the tool contract explicitly supports incremental input and authorization covers that behavior.
+
+Handle tool names and call IDs. A truncated tool call may contain a name but no complete arguments, or arguments without a trustworthy call boundary. Keep it pending or invalid according to policy.
+
+Handle multiple tool calls. Track each call independently. One completed call must not be duplicated because a later sibling call was truncated.
+
+Handle agent plans. A partial plan is not an approved plan. Require explicit plan and authority boundaries before executing consequential steps.
+
+Handle multimodal outputs. Images, audio, video, files, and citations need artifact-level completeness, not just a text finish reason.
+
+Verify artifact integrity. Use content length, checksums, manifest entries, frame boundaries, and durable upload status before presenting a file as complete.
+
+Handle image generation. A returned URL or object ID may point to a complete artifact, while a truncated textual explanation is merely incomplete metadata. Track them separately.
+
+Handle audio and video streams. A playable prefix is not necessarily a complete asset. Expose duration, finalization, encoding, and manifest state.
+
+Handle citations and references. If the answer stops before its source list or citation markers are complete, mark citation completeness independently.
+
+Handle code. A response that ends inside a function, string, or code block should not be labeled complete just because tokens were delivered successfully.
+
+Handle markdown. Track unclosed fences, tables, links, and lists when clients depend on renderable output, but do not confuse formatting repair with semantic completion.
+
+Handle language generation. A sentence ending at punctuation is not proof that the requested outline, translation, or list is complete.
+
+Define continuation semantics. A continuation request should identify the original response, boundary, model context policy, remaining budget, and whether repetition is allowed.
+
+Do not promise exact continuation. Sampling, provider state, hidden context, and model versions can make continuation diverge. Tell clients whether continuation is best effort or deterministic.
+
+Use continuation only when safe. For a pure explanatory answer it may be reasonable. For a structured object or tool plan, continuation must preserve schema and call identity.
+
+Prevent overlap. The next segment needs a verified cursor, token boundary, or application-level continuation marker so it does not repeat or omit content.
+
+Prevent unauthorized continuation. Recheck current policy, credentials, tenant budget, consent, and purpose before extending work.
+
+Preserve model context appropriately. A continuation may need the original prompt and generated prefix, but it should not carry secrets or stale authority unnecessarily.
+
+Use bounded continuation attempts. Repeatedly asking for more tokens can become an infinite loop and can multiply spend.
+
+Report remaining budget. Give clients enough information to decide whether continuation is possible without exposing internal provider limits or sensitive pricing logic.
+
+Calculate usage honestly. Count input, output, cached, reasoning, tool, and failed-attempt usage according to the provider evidence and billing contract.
+
+Do not charge twice for delivery retries. Re-fetching a stored response is not a second generation, but a continuation is new work and must be accounted for.
+
+Reserve budget before continuation. A client should not discover after a second request that the account cannot afford the rest of the operation.
+
+Handle partial billing. If generation ended after 300 tokens, settle those tokens even when the final answer was incomplete, unless the product contract says otherwise.
+
+Handle unknown usage. If provider usage is missing after an interrupted call, retain an unreconciled state instead of silently assuming zero.
+
+Protect quotas. A truncated response still consumes capacity and may still have triggered provider-side work.
+
+Protect caches. Cache only responses whose completion state, policy context, tenant scope, and artifact integrity satisfy cache rules.
+
+Never cache a partial response as a normal completed answer. If partial results are cacheable, label them and require an explicit consumer contract.
+
+Handle fallback. Switching providers after truncation may produce a different answer. It should be a new attempt linked to the original operation, not an invisible continuation.
+
+Preserve causality across fallback. Store why the first attempt stopped, what output was delivered, what usage was incurred, and which policy authorized the second attempt.
+
+Handle retries after transport loss. If the provider operation may have completed, query status or use idempotency before starting new generation.
+
+Handle asynchronous jobs. The job record should distinguish output-ready, output-partial, artifact-finalizing, failed, canceled, and unknown.
+
+Handle queues. A worker that truncates output must commit the outcome and cursor before releasing its lease. Another worker must not restart from the beginning without checking that state.
+
+Handle batch responses. Track completion for each item and the batch envelope separately. One truncated item must not hide successful siblings.
+
+Handle streaming usage. Final usage may arrive in a terminal event. If that event is missing, record provisional usage and reconcile later.
+
+Handle moderation stops. A policy stop is not the same as a provider length limit. Expose a safe category without revealing restricted content or enforcement internals.
+
+Handle privacy redaction. If redaction interrupts a stream, preserve a safe terminal state and do not allow a continuation to recover withheld content.
+
+Handle deadline races. If output and deadline occur together, use event ordering and provider evidence rather than wall-clock guesswork.
+
+Use monotonic sequence numbers and timestamps. Clock differences across gateway, provider, proxy, and client must not reorder completion evidence.
+
+Make terminal events durable. Do not tell a client that a response is complete before the gateway has enough evidence to reconcile usage and side effects.
+
+But do not delay delivery forever. Use a clear distinction between client-visible completion and back-office reconciliation still in progress.
+
+Make response metadata trustworthy. Include request ID, response ID, model, route, finish state, usage status, continuation eligibility, and artifact status without exposing secrets.
+
+Version the completion contract. Clients need to know whether new finish reasons are understood and how unknown reasons should be handled safely.
+
+Define a safe default for unknown reasons. Unknown must not be treated as complete, retryable, or executable without an explicit compatibility rule.
+
+Test token limits. Force output caps at every boundary and verify finish reasons, usage, continuation, cache behavior, and billing.
+
+Test context exhaustion. Vary prompt size, tools, images, retrieved documents, and provider tokenizer behavior.
+
+Test stream loss. Drop first byte, middle chunks, final chunk, terminal event, usage event, and connection after provider completion.
+
+Test slow delivery. Throttle readers, fill buffers, pause proxies, and exceed delivery deadlines.
+
+Test structured outputs. Truncate inside strings, arrays, nested objects, Unicode sequences, tool arguments, and code blocks.
+
+Test multimodal artifacts. Interrupt uploads, downloads, encoding, manifests, and finalization at every stage.
+
+Test side effects. Cut the response before and after tool submission, provider acceptance, external commit, and durable result recording.
+
+Test fallback and retry. Verify no duplicate generation or effect, and verify every new attempt is linked to the original outcome.
+
+Test policy changes. Expire credentials, revoke consent, change budgets, and alter safety rules between truncation and continuation.
+
+Test client compatibility. Use clients that ignore finish reasons, retry on any non-200, assume JSON is complete, or reconnect without cursors.
+
+Monitor truncation quality. Track finish states by model, provider, route, tenant, workload, protocol, output size, and deadline phase.
+
+Track semantic damage. Measure invalid JSON, incomplete tool calls, broken artifacts, duplicate continuations, unknown outcomes, and client retries after partial delivery.
+
+Track cost impact. Monitor tokens spent on continuations, fallback attempts, duplicate work, unreconciled usage, and partial responses stored or served.
+
+Alert on unsafe patterns. Watch for normal success with missing terminal events, executable partial tool calls, cache hits on incomplete output, repeated continuation loops, and providers whose finish signals disappear.
+
+Set hard gates. A response can be labeled complete only when generation, semantic validation, required artifacts, terminal delivery evidence, policy checks, and billing state satisfy the declared contract.
+
+Do not confuse readable with complete. Humans can often infer missing meaning, but software cannot safely assume it.
+
+Do not confuse valid syntax with complete intent. A short JSON object may parse while omitting required work.
+
+Do not confuse a terminal connection close with a successful finish. Transport closure without an application terminal marker is evidence of interruption or uncertainty.
+
+The practical pattern is this: define completion separately for generation, delivery, semantics, artifacts, tools, agents, and side effects; preserve provider finish evidence; expose machine-readable states; distinguish length, context, budget, provider, transport, client, and policy stops; verify stream framing and artifact integrity; make structured output and tool calls pass completeness gates; offer bounded, authorized continuation with stable cursors; reconcile usage and side effects without double charging or replaying work; keep incomplete responses out of normal caches; test every truncation boundary, slow path, retry, fallback, policy change, and client assumption; and monitor semantic damage, cost, and unknown outcomes. A gateway is honest when clients can tell exactly what arrived, what finished, what remains possible, and what must never be repeated.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical AI API infrastructure guidance, visit crazyrouter.com. I’ll be back with another episode soon.
