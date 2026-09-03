@@ -1,253 +1,249 @@
-Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result policy enforcement: how an AI API gateway applies output rules before a result reaches an agent, user, provider, log, cache, or external system.
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result provenance: how an AI API gateway records where every answer came from, which operation produced it, what transformations occurred, and whether the evidence is still trustworthy.
 
-A tool result is not automatically safe just because the tool call was authorized. The action may be allowed while the returned fields, attachments, links, or downstream destinations are not. Output policy is the control that turns a raw provider response into an approved result view.
+When an agent uses a tool, the final answer may pass through a provider, an adapter, a cache, a workflow, a model, and several transformation steps. Without provenance, the system can show a plausible result while losing the ability to explain its source.
 
-Start by separating execution policy from output policy. Execution policy answers whether the gateway may perform an operation. Output policy answers what may be revealed, to whom, for what purpose, through which destination, and for how long.
+Provenance is not the same as logging. Logging records events for operators. Provenance connects an answer or artifact to the action, source, evidence, policy, transformations, and destinations that produced it.
 
-Create a result policy input with tenant, principal, delegated agent, source tool, operation, target, provider account, region, purpose, sensitivity, retention, destination, requested view, and current policy generation.
+Start with a stable result identity. Every tool result should have a result ID, parent action ID, attempt IDs, tenant, actor, tool version, operation, target, provider account, region, and creation time.
 
-Do not let a model select its own output policy. The model can request a summary, status, or detail level, but the gateway must decide whether that view is allowed.
+Do not use a provider request ID as the complete identity. A provider ID may be reused across accounts, may identify only transport, or may not capture retries and downstream transformations.
 
-Normalize the raw response first. Validate schema, operation identity, target, account, status, timestamps, completeness, and provider metadata before applying output rules.
+Record the original intent. Preserve the canonical operation, normalized target, parameters, purpose, authorization decision, policy generation, and expected postcondition.
 
-Treat malformed or incomplete responses as restricted. A partial JSON object, truncated stream, or provider error may contain unexpected sensitive fields and cannot safely pass through a permissive formatter.
+Keep sensitive inputs protected. Provenance should prove what was requested without copying credentials, private payloads, or customer content into every audit record.
 
-Use field allowlists for each result view. Define the exact fields allowed in status, redacted, summary, operator, customer, workflow, and raw-response views.
+Record source authority. Identify whether a fact came from the provider response, a signed callback, a target read, a database ledger, a cache, a human review, or a model-generated inference.
 
-Do not rely on a growing denylist of secrets. Providers can add new fields, nested structures, debug information, and attachments. Unknown fields should be withheld until classified.
+Do not present model inference as tool evidence. If the model summarizes a tool result, the summary must remain linked to the underlying evidence and must state when it adds interpretation.
 
-Classify every field and artifact. Mark credentials, personal data, financial information, private content, infrastructure details, customer records, model prompts, provider metadata, and ordinary operational status.
+Separate observed facts from derived conclusions. A provider says “accepted,” the gateway derives “processing,” and a workflow concludes “not ready.” These are different claims with different evidence.
 
-Apply policy recursively. Sensitive information can appear in nested objects, arrays, error messages, filenames, headers, markdown, images, transcripts, and encoded values.
+Use typed provenance edges. Useful edges include requested, dispatched, accepted, completed, verified, transformed, summarized, redacted, cached, delivered, reconciled, and corrected.
 
-Treat attachments as results. A safe status response can still leak confidential data through a PDF, image, spreadsheet, archive, audio file, or download link.
+Make the provenance graph append-only. Add new facts and relationships rather than overwriting the history that explains how the answer changed.
 
-Do not assume metadata is harmless. Object names, URLs, IDs, timestamps, counts, regions, and error categories can reveal protected business or security information.
+Preserve time semantics. Record event time, observation time, persistence time, and delivery time where they differ. A delayed callback can be newer evidence about an older action.
 
-Separate result views from raw payloads. A customer may need “refund completed,” a workflow may need a transaction ID, and an operator may need a redacted diagnostic. None necessarily needs the full provider response.
+Use trusted sequence information. Provider event sequences, target versions, policy generations, and gateway offsets help distinguish current evidence from stale or reordered observations.
 
-Make views purpose-specific. A result approved for internal troubleshooting should not automatically be valid for customer communication, model training, analytics, or another tenant’s workflow.
+Do not trust arrival order alone. A late timeout should not erase a completion event, and a delayed stale cache read should not replace a fresher target verification.
 
-Treat model context as a disclosure destination. Sending a result to an external model provider is an egress decision, even when the model is only summarizing the response.
+Bind provenance to tenant and audience. Evidence for one customer, environment, or region must not be attached to another result merely because identifiers look similar.
 
-Treat memory, caches, logs, traces, queues, and support consoles as destinations too. Output policy must apply to every copy, not only the final user response.
+Bind provenance to provider account and route. A fallback account may return a result with the same logical operation but a different contract or state.
 
-Use destination-specific transformations. The same result may become a boolean for a workflow, a redacted summary for a user, a controlled reference for a support agent, and a withheld response for an untrusted caller.
+Record route changes. If an action moves between providers, regions, or accounts, preserve each attempt and identify which source produced which result.
 
-Do not let the model’s summary bypass restrictions. A shorter answer can still reveal the protected fact. Apply data-flow policy to semantic content, not only to recognizable strings.
+Do not merge unrelated attempts into one clean story. A retry may create a second provider operation, and provenance must make that risk visible.
 
-Use minimum necessary disclosure. Return the smallest fact that enables the next approved action.
+Use action fingerprints. Store a digest of the canonical request, target, parameters, and scope so a result can be compared with the action it claims to answer.
 
-Prefer predicates and bounded facts. “Healthy,” “eligible,” “three records matched,” and “payment authorized” can be safer than the underlying record set.
+Detect mismatches. If a provider response names a different target, operation, tenant, model, environment, or account, mark the result invalid or disputed.
 
-Control counts and aggregates. Small groups, rare combinations, repeated comparisons, and timing differences can reveal individuals or confidential operations.
+Validate provider response schemas. A result with missing identity, status, timestamp, or required fields should not be treated as fully proven.
 
-Apply query budgets and inference controls. Limit repeated access, filter changes, joins across results, and cross-session correlation.
+Treat unknown fields as restricted until understood. Schema drift can introduce new claims, hidden metadata, or sensitive values that the provenance layer does not classify.
 
-Bind results to tenant and subject. A role that can see customer data in tenant A must not receive a result from tenant B, even if the operation ID or object name looks valid.
+Record tool and adapter versions. The same logical tool can produce different semantics after a schema, normalization, or provider-translation change.
 
-Use stable result identity. Store source action, attempt, provider reference, target, tenant, and view version so a result cannot be substituted across boundaries.
+Record policy versions. A result should show which authorization, data, routing, retention, and safety rules governed its production and delivery.
 
-Bind references to audience, purpose, expiration, and policy generation. A status token must not retrieve raw content, and a reference issued for one workflow must not work in another.
+Do not silently reinterpret old evidence under a new policy. Preserve the historical decision and add a new evaluation if current policy must be applied.
 
-Use short-lived and one-time access for high-risk artifacts. A secret export, identity document, recovery file, or private report should not become a permanent URL.
+Track target versions. For updates, deployments, files, and records, provenance should show which version was observed before the action and which version was verified afterward.
 
-Recheck policy at the last responsible moment. A result may be safe at execution time but restricted later because consent, role, tenant status, purpose, route, or policy changed.
+Use compare-and-swap evidence where possible. A final value alone may not prove that this action caused the transition.
 
-Do not rely on admission-time decisions alone. Queues, long-running jobs, provider callbacks, and human review introduce time in which output policy can become stale.
+For create operations, record stable resource identity, owner, tenant, provider account, and creation context. Existence by name is weak provenance.
 
-Use policy generations and revocation versions. A newer restrictive generation must invalidate older result-view receipts and cached access decisions.
+For delete operations, distinguish requested, accepted, hidden, archived, and verified removed. “Not found” can have several meanings.
 
-Do not let delayed active events reopen access after revocation. Apply control-plane updates monotonically and require explicit new authorization for restoration.
+For payments, record authorization, capture, settlement, ledger posting, reversal, and reconciliation evidence separately.
 
-Separate observation from disclosure. The gateway may verify a sensitive postcondition internally and return only a safe status to the agent or user.
+For messages, record queue identity, provider message ID, send status, delivery events, and recipient scope. Matching content is not enough to prove delivery.
 
-Separate provider permission from recipient permission. A provider may be allowed to return full output to the gateway, but the requester may be entitled to only selected fields.
+For deployments, record release ID, environment, region, rollout stages, health checks, and rollback events. “Deployed” should identify the exact evidence level.
 
-Record provider account and region. Output rules may depend on provider retention, residency, contractual terms, and the route that processed the data.
+For asynchronous model jobs, record job ID, model route, input artifact reference, output artifact identity, verification status, and retention state.
 
-Reauthorize when output moves to another provider or region. A fallback model or backup analytics system is a new destination.
+For file operations, record object version, checksum, location, encryption context, replication status, and deletion marker.
 
-Do not let provider fallback widen disclosure. The fallback receives the same or narrower view, and only if its data contract satisfies the original policy.
+For reads, record source, consistency level, cache age, query scope, and observation time. A read result without freshness context can be misleading.
 
-Control external messaging. Email, chat, webhook, issue tracker, social post, and customer portal tools require recipient, channel, attachment, and content validation.
+Make cache provenance explicit. A cached answer should show source time, cache age, policy generation, result identity, and whether it is safe for the current purpose.
 
-An approved message body does not authorize an added attachment or provider URL. Validate every link and file independently.
+Do not let a cache become an invisible source. Clients should know when the gateway served an earlier verified result instead of performing a fresh observation.
 
-Do not put protected content in URLs, filenames, labels, metrics, or trace names. These surfaces are copied broadly and often retained outside normal data controls.
+Invalidate provenance on deletion, revocation, and policy change. A result may remain factually true but no longer be authorized for the current consumer.
 
-Use secure artifact delivery. Encrypt files, bind references to identity and purpose, expire them, revoke them when required, and record each access.
+Separate factual validity from access validity. The gateway can know that a result is correct while still refusing to disclose it to the current caller.
 
-Do not confuse masking with access control. A masked value may remain sensitive, and an unmasked value may be allowed only for one narrow audience.
+Track purpose. A result produced for billing reconciliation may not be valid evidence for customer marketing or model training.
 
-Apply structured redaction. Handle JSON, XML, CSV, text, images, audio, PDFs, archives, and binary metadata using schema- and content-aware rules.
+Preserve purpose through transformations. Summaries, translations, embeddings, OCR, classifications, exports, and redacted views must remain linked to the source and its restrictions.
 
-Redact before logs and telemetry. Once raw output enters an observability system, deleting the primary result does not remove the copy.
+Do not treat a summary as an independent source. It inherits the source’s sensitivity and may introduce model interpretation.
 
-Normalize provider errors. Errors can echo prompts, request bodies, headers, credentials, SQL fragments, customer values, and internal URLs.
+Record transformation method and version. A summary made by one model or prompt may differ materially from one made by another.
 
-Do not pass raw stack traces to models or clients. Return a safe error category, correlation ID, and permitted next step.
+Record whether a transformation is lossless, lossy, deterministic, or model-generated. Consumers need to know how much of the source can be relied on.
 
-Control streamed output chunk by chunk. Each chunk is a disclosure and must satisfy current result policy before delivery.
+Make model-generated claims traceable. If an answer contains a factual statement from a tool, link it to the result field, source timestamp, and evidence level when the interface supports citations.
 
-Use buffering for high-risk streams. Validate schema, sensitivity, completeness, destination, and current authority before releasing output.
+Do not expose private chain-of-thought. Provenance should explain source and evidence without pretending to reveal hidden model reasoning.
 
-Do not depend on final-response cleanup after an early chunk leaks data. Once delivered, content may already be copied into clients, logs, or model context.
+Use claim-level provenance for high-impact workflows. A decision about payment, eligibility, deployment, or access should identify which verified facts support it.
 
-Make policy outcomes explicit. Useful result states include delivered, redacted, summarized, referenced, withheld, pending review, expired, revoked, and policy-error.
+Separate claim support from claim truth. A source link shows where a claim came from; it does not guarantee that the source was correct or current.
 
-Do not collapse all restricted results into a generic failure. The client needs to know whether it may request a safe view, wait, authenticate, seek approval, or stop.
+Record verification status. Claims may be unverified, provider-reported, gateway-validated, target-verified, business-reconciled, disputed, or expired.
 
-Give agents a safe vocabulary. Typed fields such as `status`, `view`, `redactions`, `next_action`, `expires_at`, and `evidence_level` reduce unsafe interpretation.
+Do not collapse verification levels into one confidence score. A numerical score can hide why evidence is weak.
 
-Do not let a model claim details that the result view withheld. The response schema should make unavailable fields genuinely unavailable.
+Return safe provenance to clients. Include result identity, source type, observation time, status, finality, verification class, and correlation ID without exposing secrets or internal policy.
 
-Use view-specific schemas. A field called `details` that contains arbitrary provider JSON defeats policy review and gives consumers an unbounded disclosure surface.
+Make raw evidence access separate. A client may receive a safe status while an authorized operator can inspect the protected provider response through a controlled reference.
 
-Version result schemas and policy rules. Adding a field, changing a summary, or modifying an adapter can change confidentiality and compliance behavior.
+Use expiring evidence references. Raw payloads and artifacts should not become permanent access paths merely because a receipt links to them.
 
-Treat unknown schema versions as restricted. Require compatibility review before new provider fields become visible, logged, cached, or sent externally.
+Bind references to audience, tenant, purpose, result identity, and expiration. A reference for a support reviewer must not work for an unrelated agent.
 
-Preserve historical policy context. Store view version, policy generation, classification, route, purpose, audience, and decision time with the access record.
+Use one-time access for highly sensitive evidence. Retrieval should be audited and should not make the raw payload visible to more systems than necessary.
 
-Do not silently reinterpret historical delivery. If a field is later classified as sensitive, record the change and apply an explicit migration or revocation policy.
+Protect provenance records themselves. Metadata can reveal customer relationships, resource names, provider accounts, security incidents, or business activity.
 
-Use scope intersection in workflows. A child result view receives only the intersection of parent authority, child role, tenant policy, purpose, destination, and current result rules.
+Minimize identifiers. Use stable internal IDs and safe labels instead of raw personal data, secrets, or full provider payloads.
 
-Never use the union of all workflow permissions. One step’s broad access must not expand another step’s output.
+Do not put sensitive claims in metrics, trace names, URLs, filenames, or error text. Provenance should be useful without spreading confidential content.
 
-Propagate delegated constraints. Record who delegated access, what view was approved, to which agent, for what purpose, and until when.
+Use encryption with context binding. Tie protected evidence to tenant, result identity, purpose, region, and retention class.
 
-Revoke delegated result access when the parent authority changes. Cached views, references, and queued transformations must not survive indefinitely.
+Separate evidence storage from result delivery. The gateway may retain a minimal receipt while delivering only a redacted view or status predicate.
 
-Prevent confused deputy behavior. A broad service identity should not disclose a raw result to a caller whose logical permission allows only a summary.
+Make retention provenance-aware. Keep enough metadata to explain the result after raw payload deletion, but do not preserve unnecessary content indefinitely.
 
-Use signed or tamper-evident view receipts. Include result identity, tenant, audience, view, constraints, policy generation, expiration, and source action.
+Record deletion and redaction events. A later investigator should know that raw data was removed, which policy required it, and what evidence remains.
 
-Reject stale, altered, or misdirected receipts. A receipt for one view, tenant, provider, or policy generation must not be replayed elsewhere.
+Do not claim full provenance if upstream data has been deleted. State the evidence boundary honestly and identify which claims can no longer be independently inspected.
 
-Enforce at every boundary. The final client response, model request, queue write, cache insertion, log event, artifact download, and support view each need output-policy enforcement.
+Handle provider corrections. If a provider changes or retracts an earlier result, record the correction as a new event linked to the original observation.
 
-Use two-stage checks for sensitive disclosure. Validate the proposed view, then immediately before delivery recheck identity, revocation, purpose, target, retention, destination, and policy generation.
+Do not rewrite history to make the corrected result look original. Consumers need to know what was believed at each time.
 
-Make denial messages safe and useful. State categories such as field not permitted, purpose mismatch, destination not approved, tenant mismatch, expired reference, revoked consent, or step-up required.
+Mark contradictions as disputed. Conflicting provider status, target reads, callbacks, or human decisions should remain visible until resolved.
 
-Do not reveal hidden thresholds, unrelated identifiers, or raw sensitive values in denials.
+Define authority precedence. Signed provider events, verified ledger entries, target versions, and human review may have different authority for different tools.
 
-Offer safe alternatives. Return a status predicate, redacted view, bounded count, controlled reference, or human-review path when full output is not allowed.
+Do not choose the latest observation without a source rule. Time alone does not determine reliability.
 
-Make the safe path convenient. Developers should not need raw provider access to perform common workflows.
+Use reconciliation for uncertain effects. If the original response was lost, preserve the uncertainty, query status, verify the target, and attach the new evidence to the same action identity.
 
-Prefer narrow tools. “Get deployment health” is easier to govern than “return the entire infrastructure object,” and “send approved notification” is safer than “post arbitrary payload.”
+Do not create a new action just to obtain provenance for the old one. Status lookup and execution are separate operations.
 
-Keep raw-response modes isolated. Full output should require strong identity, narrow scope, trusted destination, short lifetime, explicit purpose, and detailed audit.
+Link compensation. Refunds, rollbacks, deletions, and repairs should point to the original action while keeping their own identity, authorization, and outcome.
 
-Use break-glass access sparingly. Require reason, authentication, object scope, duration, redaction level, and automatic expiry.
+Make parent-child provenance explicit. A workflow, batch, or multi-tool plan should show which child results support each parent outcome.
 
-Do not allow break-glass to become ordinary support. Frequent emergency access means the normal result views are too weak or the workflow is underspecified.
+Do not report a parent as fully verified when one critical child is unresolved or disputed.
 
-Separate audit evidence from payload. Record who requested which view, under what policy, to which destination, without copying the complete sensitive output.
+Use aggregate rules. Define whether a workflow is complete only when all children are verified, or whether partial completion is an acceptable explicit state.
 
-Use tamper-evident access records. Include subject, tenant, result identity, source action, view, destination, policy generation, decision, and timestamps.
+Record fan-out. If one result causes thousands of downstream tool calls, provenance should show the causal link and scope budget.
 
-Preserve denied attempts. A blocked disclosure is valuable security evidence, but the record should contain only safe metadata.
+Prevent provenance laundering. A downstream tool must not present data as its own observation merely because it received it from another tool.
 
-Connect output policy to retention. A delivered view, cached copy, memory item, derivative, and reference should expire according to sensitivity, purpose, and authorization.
+Preserve source labels across protocol translation. HTTP, RPC, queue, webhook, and model-tool formats should carry the same action and result identity.
 
-Do not extend retention automatically because a result was accessed. An extension requires explicit authority, reason, purpose, and new deadline.
+Make handoffs tamper-evident. Signed or hashed receipts can prove that a downstream executor received the intended scope and evidence reference.
 
-Connect output policy to deletion. When a result expires or consent is withdrawn, remove or restrict raw payloads, derived views, caches, queues, temporary files, and access references within the documented boundary.
+Reject stale or altered receipts. A receipt for another tool, tenant, route, policy generation, or target should not be accepted.
 
-Use tombstones and deletion generations to prevent resurrection after restore, retry, replication, or delayed events.
+Use idempotent event processing. Duplicate callbacks, retries, and restored queue messages should add no contradictory duplicate effect.
 
-Connect output policy to permission revocation. Revocation should prevent future disclosure, invalidate issued references, stop queued transformations, and handle already-delivered copies according to policy.
+Handle out-of-order evidence. Persist each fact, then derive the current state using version and authority rules.
 
-Do not claim deletion while an active link or cache can still retrieve the result.
+Use leases for provenance workers. Multiple workers may process the same event, but state materialization must be concurrency-safe.
 
-Track lineage without exposing content. Operators should be able to see source action, transformations, destinations, policy decisions, and deletion status through identifiers and classifications.
+Do not let a failed provenance write hide a successful external effect. Use transactional outboxes and durable event storage so evidence capture can resume after a crash.
 
-Use hashes and fingerprints for investigation. Prove that two views derive from the same result without repeatedly opening the raw payload.
+Record the gap when evidence capture is delayed. Operational uncertainty is itself part of the provenance story.
 
-Control analytics and training flows. Tool results should not enter generalized datasets merely because they passed through a model workflow.
+Connect provenance to billing. Usage, charge, provider account, model, token count, and customer action should be traceable to one logical operation and its retries.
 
-Require explicit purpose and data contract for secondary use. Minimize, filter, and retain only the approved derivative.
+Do not charge or credit based on an unlinked provider record without marking it for reconciliation.
 
-Do not let debugging silently become training. Development copies need their own authorization, environment, retention, and deletion policy.
+Connect provenance to data access. Show who received which result view, when, for what purpose, and under which policy.
 
-Control browser and terminal surfaces. Screenshots, copied text, downloads, rendered previews, and shell output are disclosure paths.
+Connect provenance to revocation. If authority was withdrawn before delivery, record whether the result was withheld, redacted, or already exposed.
 
-Classify multimodal derivatives. OCR, alt text, thumbnails, transcripts, embeddings, and metadata can expose the protected source.
+Connect provenance to retention. Show when the source, derivatives, references, caches, and provider artifacts expire or are deleted.
 
-Do not assume a thumbnail or excerpt is safe. A small representation may reveal a face, document number, secret, or confidential chart.
+Make operator investigation safe. Provide lineage queries by action ID, result ID, tenant, provider reference, or correlation ID without defaulting to full payload access.
 
-Use content-aware detection, but do not rely on pattern matching alone. Sensitive facts may be encoded, paraphrased, visual, or inferable from combinations.
+Use role-specific views. Support, security, billing, and engineering teams need different provenance detail.
 
-Control query and response size. Large results increase exposure and make review, redaction, retention, and deletion harder.
+Require break-glass for raw evidence. Record reason, scope, duration, reviewer, and every access.
 
-Use pagination, field selection, maximum counts, and bounded summaries at the provider boundary.
+Do not use raw provider inspection as ordinary debugging. Frequent break-glass access signals missing safe provenance views.
 
-Do not authorize an unbounded read and hope output policy fixes it later. Minimize at ingress as well as at delivery.
+Test provider mismatch. Return a result for another operation, account, tenant, environment, or model and verify rejection or dispute.
 
-Make result policy observable. Operators should know why a field was removed, which policy applied, which destination was denied, and when the decision expires.
+Test retries and failover. Lose responses, create duplicate provider operations, change routes, and confirm that the provenance graph exposes every attempt.
 
-Do not expose internal policy thresholds to ordinary callers. Use safe reason categories and support correlation IDs.
+Test schema drift. Add fields, change identifiers, alter status semantics, and verify that unknown claims are restricted until reviewed.
 
-Test field and artifact redaction. Put sensitive data in nested fields, arrays, errors, headers, filenames, markdown, images, OCR, audio, archives, and encoded content.
+Test transformation lineage. Summarize, translate, redact, embed, OCR, export, and cache a result. Verify source links, policy labels, retention, and destination records.
 
-Test destination changes. Deliver the same result to an agent, user, model provider, log, cache, email, webhook, support console, and memory store. Each boundary should produce the correct view.
+Test claim support. Give the model stale, partial, conflicting, and unverified evidence. It should not present stronger claims than the provenance permits.
 
-Test purpose changes. Retrieve data for support, then attempt marketing, analytics, training, or another customer workflow. The gateway should require a separate policy decision.
+Test deletion and retention. Delete raw payloads, expire references, restore backups, and verify that tombstones and minimal receipts prevent resurrection.
 
-Test tenant and role changes. Reuse result IDs, references, cache keys, and sessions across tenants and roles. Every mismatch should be denied.
+Test revocation. Withdraw consent or access after execution but before delivery, during streaming, and after a reference was issued.
 
-Test policy updates and revocation. Change classification, withdraw consent, revoke the parent permission, expire a lease, and verify that old view receipts and caches no longer disclose data.
+Test cross-tenant isolation. Reuse result IDs, operation IDs, cache keys, references, and provider IDs across tenants and verify every mismatch is blocked.
 
-Test schema drift. Add provider fields, nested objects, attachments, and new response types. Unknown content should be restricted by default.
+Test concurrency and recovery. Crash workers during event persistence, state materialization, redaction, delivery, and cleanup. Provenance must remain coherent.
 
-Test streaming and partial responses. Leak a value in an early chunk, interrupt delivery, change policy mid-stream, and verify safe stop and accurate receipt state.
+Test contradictions. Make provider status, target state, callback, and human review disagree. Confirm documented authority rules and disputed states.
 
-Test retries and crashes. Fail after provider response and before normalization, redaction, audit, delivery, or cleanup. Recovery must not bypass output policy.
+Test workflow aggregation. Resolve some children, leave one unknown, and verify the parent does not become falsely final.
 
-Test fallback providers and regions. Verify data contracts, residency, retention, purpose, and view restrictions before egress.
+Measure provenance completeness. Track actions with stable identities, source authority, policy versions, target versions, route accounts, timestamps, and verification class.
 
-Test break-glass. Require reason, bounded access, redaction, audit, and automatic expiry.
+Measure unlinked results. Every provider response, callback, cache hit, and client delivery should map to a logical action or be flagged for investigation.
 
-Test deletion and restore. Expire a result, restore a backup containing it, replay a queue message, and verify tombstones and policy generations prevent unauthorized resurrection.
+Track claim support coverage. Measure how many high-impact client statements can be traced to verified evidence.
 
-Test inference. Issue repeated count, filter, comparison, timing, and cross-session queries. Verify budgets and rate limits limit reconstruction.
+Track false certainty. Count claims later contradicted by stronger evidence, stale reads, provider corrections, or target verification.
 
-Test unknown consumers and policy outages. Remove identity or policy context and verify the risk-specific safe response rather than an undocumented allow.
+Track provenance gaps. Measure missing timestamps, unknown schema fields, unverified targets, absent provider account, lost callbacks, and delayed evidence writes.
 
-Measure minimal disclosure. Compare raw provider fields with model-visible, client-visible, operator-visible, stored, logged, and externally transmitted fields.
+Track transformation depth. Deep chains increase risk that source, purpose, or sensitivity labels are lost.
 
-Track policy denials by category. Group field, purpose, destination, tenant, role, expiry, revocation, schema, provider, and route conflicts.
+Track raw evidence access. Monitor break-glass events, full-payload views, provider response downloads, and support investigations.
 
-Track raw-output exposure. Every complete provider response delivered to an ordinary agent, client, log, or external provider should be explainable and rare.
+Track cross-tenant and cross-route rejection. These are important signals even when caused by malformed requests.
 
-Track redaction volume and unknown-field blocks. These metrics reveal schema drift, provider coupling, and missing result views.
+Track deletion boundary. Report raw payload, derivative, cache, queue, provider artifact, and reference status separately.
 
-Track result-view usage. See which views are used, which fields trigger step-up access, and where developers repeatedly request raw output.
+Track billing reconciliation. Measure provider usage and customer charges that lack an action or result link.
 
-Track destination egress by data class. Record provider, region, recipient, purpose, view, contract, and policy generation.
+Track cache provenance. Monitor stale results, missing source times, expired policy generations, and cache entries served after revocation.
 
-Track cache, memory, and reference survivors. Report protected results accessible after expiry, consent withdrawal, tenant suspension, or role change.
+Keep provenance schemas versioned. Historical result graphs must remain understandable as tools, providers, policies, and evidence classes evolve.
 
-Track inference signals. Repeated low-information queries, small-group aggregates, timing probes, and cross-session joins should be visible.
+Do not silently change the meaning of verification labels. Introduce explicit versions and compatibility rules.
 
-Track break-glass usage and retention extensions. Frequent exceptions indicate missing product paths or overly restrictive default views.
+Make SDKs provenance-aware. Typed results should expose source type, result identity, observation time, verification level, finality, and safe correlation IDs.
 
-Track schema and policy drift. Report adapters using old rules, unknown fields, stale receipts, and enforcement boundaries that have not acknowledged a new generation.
+Provide citations where useful. A client should be able to explain which tool result supports an answer without receiving the entire protected payload.
 
-Keep result policy versioned. Historical access records must explain what was visible, to whom, for what purpose, through which destination, under which rule.
+Prefer narrow tools and structured outputs. Provenance is easier to preserve when operations and result fields are explicit.
 
-Do not silently weaken output rules for compatibility. Introduce explicit schema versions, migrations, reauthorization, and review.
+Keep arbitrary raw-response tools restricted. Generic providers and free-form outputs create large, difficult-to-govern provenance surfaces.
 
-Make SDKs output-policy aware. Typed views, safe summaries, expiring references, explicit download methods, and clear denial categories reduce unsafe client behavior.
+The central design principle is simple: every important answer should carry enough evidence to show where it came from, what happened between source and delivery, and how much confidence the consumer is entitled to have.
 
-Provide a documented raw mode only for controlled operators and debugging environments. It should be disabled for ordinary agent execution and protected by short-lived, audited access.
+An AI API gateway should therefore maintain stable action and result identities, preserve source and transformation lineage, distinguish facts from inference, bind evidence to tenant and purpose, expose verification levels honestly, and keep provenance auditable without copying sensitive payloads everywhere.
 
-The central design principle is simple: every tool result must pass an explicit output policy before it crosses a boundary.
-
-An AI API gateway should therefore validate and classify provider output, construct purpose-specific views, minimize and redact fields, control transformations and destinations, recheck policy at delivery, preserve lineage, and make every disclosure explainable.
-
-That is how tool execution can remain useful without allowing raw provider responses to become uncontrolled agent context or data exports. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
+That is how agents can be helpful without turning plausible answers into untraceable claims. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.

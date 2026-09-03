@@ -6,9 +6,9 @@ import xml.etree.ElementTree as ET
 
 root = Path('/root/.openclaw/workspace/podcast')
 ep = 431
-title = 'EP431: AI API Gateway Tool Result Policy Enforcement - Apply Output Rules Before Delivery'
-description = 'Apply explicit output policy to AI tool results before delivery across agents, users, providers, caches, logs, memory, and external systems.'
-pub_date = 'Thu, 03 Sep 2026 12:45:00 +0000'
+title = 'EP431: AI API Gateway Tool Result Provenance - Trace Where Every Answer Came From'
+description = 'Trace AI tool answers to stable actions, sources, evidence, transformations, policies, providers, and destinations without spreading sensitive payloads.'
+pub_date = 'Thu, 03 Sep 2026 13:15:00 +0000'
 parts = (root / f'episodes/ep{ep:03d}_script.txt').read_text().split('\n\n')
 (root / 'audio').mkdir(exist_ok=True)
 for i, part in enumerate(parts, 1):
