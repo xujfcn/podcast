@@ -1,0 +1,263 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract testing: how an AI API gateway proves that clients receive exactly the guarantees they requested, and cannot quietly assume more than the result supports.
+
+A consumer contract is only useful if runtime behavior matches it. Documentation can say that a result is provisional, stale after ten minutes, provider-reported rather than target-verified, and unsafe for retries. A client can still ignore every qualifier unless the system tests and enforces those boundaries.
+
+Contract testing turns assumptions into executable evidence.
+
+Start with a contract matrix. For every consumer and operation, list required evidence, freshness, finality, authorization, retention, retry behavior, cancellation, delivery state, correction behavior, and side-effect permissions.
+
+Do not test only the happy path. A contract is most valuable when providers time out, streams terminate, policies change, results age, and external systems disagree.
+
+Define the consumer role. Display clients, model context builders, workflow engines, billing services, support tools, audit pipelines, and external integrations should not share one undifferentiated contract.
+
+Each role should have explicit permitted assumptions and prohibited promotions.
+
+A dashboard may display provider-reported processing status. A workflow may require target verification before moving forward. A billing service may require reconciled usage. A model may use a result as context but not as permission to execute a side effect.
+
+Test that these distinctions survive serialization, SDK mapping, caching, retries, and fallback routes.
+
+Use machine-readable contract fields. Include result state, evidence class, source time, observed time, freshness deadline, finality, contract version, authorization scope, retention deadline, and retry guidance.
+
+Do not make tests parse human prose to decide whether a result is safe.
+
+Test state transitions. Begin with requested, accepted, processing, completed-reported, completed-verified, delivered, expired, disputed, failed, and unknown.
+
+For each transition, verify the allowed consumers and forbidden actions.
+
+A completed-reported result should not pass a helper named require_verified. An expired result should not pass a helper named usable_for_action.
+
+Do not map every provider status to a generic success enum merely to simplify client code.
+
+Test evidence upgrades. If a provider response is later checked against the target, verify that the evidence class changes and that the new observation remains bound to the same operation, resource, tenant, and version.
+
+Do not upgrade evidence because a model expressed higher confidence.
+
+Test evidence downgrades and withdrawal. If verification becomes invalid, the contract should expose the downgrade, correction, or withdrawal to every dependent consumer.
+
+A result once marked verified must not remain permanently trusted after its source is corrected or revoked.
+
+Test freshness with controlled clocks. Create a result, delay it in a queue, cache it, pass it through model generation, and deliver it after the allowed window.
+
+Verify that the client sees age and deadline and that high-impact actions are rejected or forced to revalidate.
+
+Do not use only wall-clock sleep in tests. Use deterministic time control so boundary conditions are repeatable.
+
+Test exact boundaries: one second before expiry, at expiry, one second after expiry, and after clock skew.
+
+Define clock assumptions. Record timestamp source, precision, allowed skew, and behavior when a timestamp is missing or inconsistent.
+
+Unknown age should result in restriction, review, or conservative expiry—not silent indefinite reuse.
+
+Test finality. Simulate providers that report completion before the target is updated, targets that update asynchronously, and resources that temporarily disappear.
+
+Verify that consumers receive the correct intermediate state rather than a false final result.
+
+Test deletion. A not-found response from one endpoint should not satisfy a contract requiring absence across replicas, indexes, caches, and provider artifacts.
+
+Test create operations too. A provider may return an ID before the resource is readable, replicated, or usable. The contract must distinguish accepted identity from usable resource.
+
+Test retry semantics. Inject timeouts after the provider accepted a side effect, before the gateway received a response, and after the client disconnected.
+
+Verify that the client receives unknown outcome and reconciliation instructions instead of a blind retry recommendation.
+
+For idempotent operations, test repeated requests against the same operation key. For non-idempotent operations, verify that the contract prevents automatic replay.
+
+Do not declare retry safety merely because the HTTP method is POST or PUT.
+
+Test duplicate provider attempts. Make the adapter retry internally and confirm that the gateway preserves logical operation identity and reports attempt history safely.
+
+Consumers need to distinguish one operation with several attempts from several independent operations.
+
+Test cancellation. Cancel while work is queued, while the provider is processing, during verification, during streaming, and before delivery.
+
+Verify what cancellation actually means in each phase.
+
+A client disconnect may stop waiting without stopping provider work. The contract should not promise more than the gateway can enforce.
+
+Test late results. Deliver a result after the client deadline, after authorization revocation, or after retention expiry.
+
+Verify that late data cannot trigger a new side effect under stale context.
+
+Test delivery states. Simulate accepted, queued, sent, provider-acknowledged, delivered, and consumed states for notifications.
+
+A message accepted by the gateway should not satisfy a contract requiring human consumption.
+
+Test partial and streaming results. Cut a stream after metadata, after provisional content, after a schema fragment, and just before final markers.
+
+Verify that clients cannot treat incomplete output as final structured data.
+
+Test resume and replay semantics separately. If the stream can resume, verify cursor binding, duplicate suppression, expiration, and authorization. If it cannot, return a clear reconciliation state.
+
+Test structured outputs. Generate syntactically valid JSON with missing, contradictory, stale, or unsupported fields.
+
+Verify that schema validity is not confused with business validity or evidence support.
+
+A field can have the right type and still be unverified.
+
+Test field-level provenance where needed. Change one source field and verify that dependent claims, summaries, and decisions identify the affected portion.
+
+Do not invalidate an entire result unnecessarily when safe field-level correction is supported, but do not preserve a parent claim whose required field is now uncertain.
+
+Test error taxonomy. Inject invalid request, unauthorized, policy denied, provider rejected, rate limited, unavailable, timeout, unknown outcome, stale evidence, disputed evidence, and partial completion.
+
+Verify each error maps to the correct client action.
+
+A policy denial should not be retried as a provider outage. An unknown outcome should not be retried as a definitive failure.
+
+Test authorization scope. Use the same underlying fact with different tenants, subjects, resources, purposes, and audiences.
+
+Verify that result views, references, caches, and actions stay bound to their approved scope.
+
+Try changing the tenant, provider account, region, or subject between read and action. The gateway should reject the mismatch.
+
+Do not test only a valid token. Test confused-deputy paths and stale authorization.
+
+Test retention. Let a result expire in raw storage, cache, queue, log, memory, export, index, and provider artifact flows.
+
+Verify that each consumer receives the required purge, quarantine, redaction, or revalidation behavior.
+
+A client contract is incomplete if it passes a result after its approved purpose ends.
+
+Test correction and revocation. Deliver a result, derive a summary, cache it, place it in agent memory, and then correct or withdraw the source.
+
+Verify that dependent consumers receive an update or are prevented from using the stale derivative.
+
+Do not rely on one webhook. Test missed notifications, duplicate notifications, reordering, and consumer recovery from a durable current-state lookup.
+
+Test dependency boundaries. Remove an edge from the lineage graph, alter a source version, or make a dependency unavailable.
+
+Verify that the gateway marks affected results unknown or restricted rather than assuming independence.
+
+A missing lineage edge is a governance failure, not evidence that no dependency exists.
+
+Test transformations. Summarize, translate, redact, classify, embed, and serialize a result.
+
+Verify that source identity, contract version, purpose, retention, audience, and limitations survive each transformation.
+
+A transformed result must not gain stronger guarantees than its source.
+
+Test side-effect promotion. Present a display-only result to a workflow that attempts payment, deletion, deployment, access change, or external messaging.
+
+Verify that explicit evidence, freshness, authorization, idempotency, and approval checks are required before promotion.
+
+Do not let a convenient SDK method convert observation into action implicitly.
+
+Test capability negotiation. Ask for target verification, citations, structured output, streaming, residency, freshness, or delivery receipts while making the provider unable to supply one requirement.
+
+Verify that the gateway either selects a route that satisfies the capability or returns an explicit downgrade that the client must accept.
+
+Silent downgrade is a contract failure.
+
+Test fallback. Switch provider account, region, adapter, model version, or contract version during an operation.
+
+Verify that the result exposes the changed source and guarantees.
+
+Two providers with the same model alias may differ in retention, residency, tool support, verification, rate limits, or finality.
+
+Do not let fallback preserve the appearance of equivalent semantics when the guarantees changed.
+
+Test version evolution. Add a new result state, qualifier, field, or error type.
+
+Older clients should preserve unknown fields and fail safely on unknown high-impact states. New clients should understand the new meaning without breaking old valid states.
+
+Do not map new states into old success values merely to keep tests green.
+
+Test deprecated behavior. Send old status names, removed fields, and legacy retry instructions.
+
+Verify warning, rejection, or compatibility behavior according to the version policy.
+
+Contract tests should catch accidental semantic changes in adapters and serializers.
+
+Test aggregation. Create a parent result from multiple child operations where one child is failed, stale, partial, disputed, or unknown.
+
+Verify that the aggregate exposes completeness, membership, snapshot time, and treatment of unresolved children.
+
+“All succeeded” is unsafe unless the set and evidence are defined.
+
+Test concurrency. Read a result while another worker corrects, revokes, expires, or deletes it.
+
+Verify atomic version checks and safe conflict handling.
+
+A consumer must not read version one and act after version two invalidated its authority.
+
+Test race conditions in cache refresh, queue retry, provider callback, correction event, and deletion job.
+
+The safe result should win regardless of event ordering.
+
+Test crash recovery. Stop workers during contract evaluation, result delivery, correction publication, quarantine, purge, and reconciliation.
+
+After restart, verify that obligations and client-visible state are reconstructed from durable records.
+
+A crash must not turn an unknown outcome into an invented failure or success.
+
+Test observability. Inspect logs, traces, metrics, dead-letter queues, error payloads, URLs, and support screens.
+
+Verify that contract metadata is present and raw sensitive tool results are absent.
+
+Safe IDs should support investigation without forcing operators to copy private content.
+
+Test auditability. For each protected action, reconstruct the contract version, evidence class, freshness, authorization, result version, consumer identity, and decision.
+
+The gateway should be able to explain what the client was entitled to assume when it acted.
+
+Do not record hidden model reasoning. Record the observable evidence and policy decisions needed to verify the contract.
+
+Use consumer-driven contract tests. Clients publish the guarantees they require; the gateway and adapters run those expectations against real and synthetic responses.
+
+Keep provider contract tests too. Providers may change fields, timestamps, status values, retry behavior, and delivery semantics without changing the model name.
+
+Contract tests should run in CI, staging, canary, and production shadow traffic where safe.
+
+Do not rely only on tests against mocks. Mocks often preserve the ideal semantics the real provider violates.
+
+Use recorded fixtures carefully. Remove customer data, credentials, private prompts, and unnecessary payloads.
+
+Synthetic fixtures should cover adversarial combinations, not just representative success.
+
+Use mutation testing. Remove freshness checks, alter evidence labels, drop tenant binding, change a final state to reported, or suppress correction events.
+
+Verify that tests fail when a safety guarantee is weakened.
+
+A test suite that remains green after deleting enforcement is not testing the contract.
+
+Use fault injection. Delay providers, drop callbacks, duplicate events, corrupt metadata, reorder messages, expire credentials, and make verification targets unavailable.
+
+Observe whether clients receive honest limitations and safe next actions.
+
+Do not measure only availability. Measure semantic correctness under failure.
+
+Track contract violations. Count stale reads, weak-result promotions, unauthorized views, duplicate side effects, unhandled unknown outcomes, ignored qualifiers, and actions after revocation.
+
+Track violations by consumer, operation, provider, version, and consequence.
+
+Track downgrade acceptance. A client that accepts a lower evidence class should make that choice explicit and auditable.
+
+Track contract test coverage by state, transition, failure mode, consumer role, and storage layer.
+
+High code coverage does not imply semantic contract coverage.
+
+Track escaped defects: production cases where a result meant less than the client assumed.
+
+Use incident reviews to add a fixture, a state transition, a contract rule, and a regression test.
+
+Track deprecated contract usage and unknown-state handling.
+
+Clients that silently discard qualifiers are a risk even when the gateway returns correct data.
+
+Provide SDK guardrails. Expose requireFresh, requireVerified, reconcileUnknown, ensureSameScope, and safeToExecute helpers that enforce contract semantics.
+
+Make unsafe conversions explicit and difficult.
+
+Do not provide a generic cast from ToolResult to ExecutionInput.
+
+Document the difference between display, context, control, and execution inputs.
+
+Use type systems where possible. Represent provisional, verified, expired, disputed, and unknown states as distinct types or capabilities.
+
+Runtime checks remain necessary because provider behavior and time can change after compilation.
+
+The central principle is simple: a consumer contract is not proven by publishing it; it is proven when adversarial tests demonstrate that every client is blocked from assuming more than the evidence, freshness, authorization, and finality support.
+
+An AI API gateway should test state transitions, evidence upgrades and withdrawals, freshness boundaries, retry and cancellation behavior, corrections, revocations, retention, transformations, fallbacks, version changes, concurrency, recovery, and side-effect promotion.
+
+That is how contracts become runtime guarantees instead of polite documentation. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
