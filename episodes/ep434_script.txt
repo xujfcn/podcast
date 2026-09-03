@@ -1,0 +1,295 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result dependency tracking: how an AI API gateway knows which answers, decisions, caches, memories, and side effects depend on a tool result, and what must change when that result changes.
+
+Modern agents rarely use a tool result only once. A result may be summarized into an answer, stored in memory, copied into a cache, used in a policy decision, included in a report, or used to trigger another action.
+
+If the original result is corrected, revoked, deleted, or found to be stale, every dependent artifact may need to be reevaluated. Without dependency tracking, old evidence keeps producing new claims.
+
+Dependency tracking is the discipline of recording which outputs rely on which inputs, under what transformation, policy, purpose, and time boundary.
+
+Start with stable artifact identities. Give every tool result, field, claim, answer, cache entry, memory record, decision, workflow step, export, and side effect its own immutable identity.
+
+Do not use a filename, URL, model response ID, or mutable database key as the complete identity. Those values can be reused or redirected.
+
+Record dependency edges explicitly. Useful edge types include derived-from, summarized-from, filtered-from, authorized-by, cached-from, copied-to, triggered-by, verified-against, contradicted-by, superseded-by, and invalidated-by.
+
+A generic “related to” link is too weak. The edge should say what relationship exists and what happens when the source changes.
+
+Record dependency strength. Some artifacts are fully derived from one source; others use a source as one input among many; some merely reference a source for context.
+
+Distinguish hard dependencies from soft dependencies. A hard dependency means the artifact is invalid without the source. A soft dependency means it may remain useful but requires review.
+
+Record the exact source portion. A claim may depend on one JSON field, one database version, one page range, one image region, or one event—not the entire payload.
+
+Use immutable versions. Bind artifacts to object versions, record revisions, provider event IDs, content digests, policy generations, and model or adapter versions.
+
+Do not bind a derivative only to the current state of a mutable resource. The current state may no longer explain what the agent saw.
+
+Record the transformation. A normalized field, summary, translation, extraction, classification, embedding, redaction, and recommendation should identify its method and version.
+
+Record whether the transformation is lossless, lossy, deterministic, rule-based, or model-generated.
+
+A model-generated summary may depend on both the source result and the prompt assembly or model route that produced it.
+
+Track multi-input dependencies. An answer comparing two providers depends on both source results, their timestamps, the comparison rule, and the selected scope.
+
+Do not assume one source can explain an output that was computed from several sources.
+
+Track negative dependencies too. A decision may depend on the absence of a matching record, a denied permission, an unavailable provider, or a timeout window.
+
+Absence can change when indexing, authorization, replication, or query scope changes.
+
+Bind dependencies to tenant and purpose. An artifact derived for one customer or purpose must not silently become evidence for another.
+
+Bind dependencies to environment, region, provider account, and route. The same resource name can refer to different states in different contexts.
+
+Record time semantics. Capture source event time, observation time, derivation time, delivery time, and expiration time where they matter.
+
+A dependency can be factually valid but unusable after its freshness window closes.
+
+Do not treat time-to-live as the same thing as invalidation. Expiration is scheduled; invalidation can happen immediately because of correction, revocation, deletion, or policy change.
+
+Define invalidation causes. Useful causes include source correction, source deletion, consent withdrawal, authorization revocation, schema change, policy change, route change, evidence contradiction, freshness expiry, and security incident.
+
+Each cause may require a different response. A corrected price may trigger recomputation; revoked access may require withholding; deleted content may require purge.
+
+Define invalidation states. An artifact can be valid, stale, suspect, disputed, blocked, expired, superseded, withdrawn, purged, or unknown.
+
+Do not collapse all changes into a boolean valid flag. Operators need to know why an artifact can no longer be trusted.
+
+Use monotonic safety rules. If a source becomes less trustworthy, dependent claims should not silently become more authoritative.
+
+A source correction must not increase the confidence of a dependent answer merely because a new model summarized it.
+
+Propagate restrictions as well as facts. Sensitivity, audience, retention, purpose, residency, and deletion obligations should flow from source to dependent artifacts.
+
+A redacted view may reduce content exposure but does not automatically remove the source’s retention or audience constraints.
+
+Track policy dependencies. An output may depend on the authorization, routing, safety, retention, or disclosure policy in effect when it was created.
+
+When policy changes, decide whether to invalidate old artifacts, block future use, or require reevaluation before delivery.
+
+Do not reinterpret historical decisions under current policy without recording a new evaluation.
+
+Track model and prompt dependencies. A generated answer may depend on model version, system instructions, tool schema, retrieval configuration, and prompt assembly.
+
+If the model or prompt changes, determine whether the answer must be recomputed or merely labeled with its original generation context.
+
+Track adapter dependencies. Provider translation, normalization, fallback mapping, and schema conversion can change the meaning of a result.
+
+A provider update may require reviewing all downstream artifacts derived through the affected adapter version.
+
+Track cache dependencies. A cache entry depends on source identity, source version, policy generation, freshness budget, request scope, and cache key semantics.
+
+When any of those inputs changes, the cache entry may need revalidation or removal.
+
+Do not invalidate only by URL or model name. A cache key that omits tenant, purpose, parameters, or policy can create cross-context contamination.
+
+Track memory dependencies. Agent memory should identify what result or claim it came from, when it was created, how long it remains valid, and what events invalidate it.
+
+Stale memory must not support a fresh high-impact action without rechecking its source.
+
+Track decision dependencies. An authorization, routing, billing, fraud, safety, or workflow decision should list the claims and policy inputs that supported it.
+
+When one critical input changes, the decision should become stale or require reevaluation.
+
+Do not let a decision remain final merely because its input record still exists. Its meaning may have changed.
+
+Track side-effect dependencies. An email, refund, deployment, deletion, message, or access change may have been triggered by a claim or decision.
+
+If that claim is later corrected, the gateway should know whether compensation, notification, rollback, or human review is needed.
+
+Dependency tracking does not mean pretending an external effect never happened. Preserve the original action and attach correction or compensation actions to it.
+
+Track workflow dependencies. A parent workflow depends on child results, completion predicates, aggregation rules, and timeout or cancellation semantics.
+
+If one child becomes disputed, the parent may need to become partial, blocked, or disputed.
+
+Do not report a workflow as fully complete when a critical child dependency is unresolved.
+
+Define aggregation semantics. “All succeeded,” “at least one succeeded,” “majority healthy,” and “within budget” each have different dependency behavior.
+
+Record which children were included in the aggregate and the snapshot used.
+
+Track fan-out. One tool result may trigger many downstream operations. Record the causal edge, scope, count, and execution policy.
+
+A broad fan-out increases the cost and risk of invalidation, so the gateway should know its blast radius before allowing it.
+
+Use bounded propagation. Do not recursively invalidate unlimited historical artifacts in a single synchronous request.
+
+Mark affected artifacts, enqueue recomputation or purge work, and expose progress and remaining risk.
+
+Do not hide partial propagation. Consumers need to know whether some derivatives are still usable while others are pending review.
+
+Use dependency snapshots for safe decisions. A decision can record the source versions and policy generations it evaluated, making later reconstruction possible.
+
+Do not read dependencies from a moving target while evaluating. Concurrent changes can produce a decision that never corresponded to one coherent input set.
+
+Use compare-and-swap or snapshot isolation where available. If a source changes during evaluation, retry or mark the decision uncertain.
+
+Make propagation idempotent. Duplicate invalidation events, retries, and recovered workers should not create contradictory states or repeated external effects.
+
+Store invalidation events durably. A crash between detecting a source change and updating dependents must not lose the obligation to propagate it.
+
+Use transactional outboxes when source updates and invalidation publication must stay consistent.
+
+Record propagation lag. The time between source change and dependent quarantine is part of the safety posture.
+
+High-impact artifacts should have tighter propagation budgets than low-risk analytics views.
+
+Prioritize by consequence. A revoked secret exposure, unsafe access decision, or incorrect payment claim should outrank a stale dashboard summary.
+
+Use dependency classes. Security, privacy, billing, operational, customer-facing, and analytical dependencies can have different response targets.
+
+Do not let a low-priority queue delay a high-impact quarantine.
+
+Separate quarantine from recomputation. First stop unsafe reuse, then rebuild the artifact when trustworthy inputs are available.
+
+A dependent answer can be blocked immediately even if recomputation will take time.
+
+Return explicit uncertainty to clients. Use states such as source changed, verification required, recomputation pending, access withdrawn, evidence unavailable, or compensation required.
+
+Do not fill a dependency gap with a plausible model answer.
+
+Keep source correction visible. If a provider changes a result, append the correction, identify affected claims, and record which consumers received the earlier version.
+
+Do not rewrite every historical answer to match the latest source. Historical delivery must remain auditable.
+
+For customer-facing corrections, distinguish correction time from original answer time.
+
+Track delivery dependencies. Record which claim version was delivered, to whom, through which channel, and whether the recipient acknowledged or acted on it.
+
+A correction may need to reach the same audience, but not necessarily through the same channel.
+
+Do not assume that updating a database automatically updates an email, report, cache, memory entry, or downstream agent.
+
+Track export dependencies. CSV files, reports, webhooks, and external system records may outlive the source result.
+
+If an export must be deleted or corrected, record destination, artifact identity, delivery status, and any required recall or replacement operation.
+
+Track provider-side derivatives. A provider may retain prompts, files, jobs, embeddings, or results. Gateway dependency tracking should record known external artifact references and deletion obligations.
+
+Do not claim complete purge when only gateway-local copies were removed.
+
+Track billing dependencies. A charge may depend on provider usage, token accounting, route, pricing version, discounts, and customer action.
+
+If usage is corrected, identify affected invoices, balances, reports, and credits.
+
+Do not recalculate silently. Preserve the original amount, correction reason, and resulting adjustment.
+
+Track authorization dependencies. A delivered result may depend on a user role, consent record, tenant membership, purpose, and policy version.
+
+If access is revoked, dependent references and cached views should be blocked even if the underlying fact remains true.
+
+Track retention dependencies. A derivative can inherit a deletion deadline from its source or have a stricter business deadline of its own.
+
+The retention graph should distinguish source deletion, derivative deletion, cache expiry, reference expiry, and provider cleanup.
+
+Do not keep a derivative forever merely because the source was deleted.
+
+Track schema dependencies. A change in a tool response field, status enum, identifier format, or provider contract can affect every downstream transformation.
+
+Unknown schema changes should place affected artifacts into a restricted state until reviewed.
+
+Do not assume backward compatibility from a successful HTTP response.
+
+Track capability dependencies. A result may depend on a provider supporting a modality, tool call, region, context size, or structured output contract.
+
+If capability support changes, routing and downstream decisions may need reevaluation.
+
+Track route dependencies. A result produced by one provider account or region may not be equivalent to a result from another.
+
+Fallback should preserve the route identity and contract so dependent claims do not lose semantic context.
+
+Track evidence strength. A claim derived from target verification may remain usable after a provider correction for a narrow purpose; a provider-reported claim may not.
+
+Dependency propagation should consider evidence class, not only graph connectivity.
+
+Do not invalidate more than necessary, but do not preserve an artifact whose supporting evidence is no longer adequate.
+
+Use field-level impact analysis. A provider correction to a display label may not affect a billing amount, while a correction to account identity may affect every dependent artifact.
+
+Define impact rules for each tool and result schema.
+
+Do not use string matching to estimate impact in high-consequence systems.
+
+Use semantic dependency labels. A claim can depend on identity, amount, status, authorization, location, timestamp, or content separately.
+
+This allows precise recomputation and safer quarantine.
+
+Record dependency completeness. Measure how many important outputs have known source paths, transformation versions, policy inputs, and invalidation rules.
+
+Untracked dependencies are hidden blast radius.
+
+Measure orphaned artifacts. An orphan is a cache, memory, report, decision, or side effect whose source cannot be resolved.
+
+Orphans should be quarantined or assigned an explicit degraded status.
+
+Measure propagation lag and backlog. Track detection time, quarantine time, recomputation time, purge time, and final verification time.
+
+Measure stale-use incidents. Count claims or actions that consumed an artifact after its source had changed or its policy had been revoked.
+
+Measure correction reach. Confirm that every affected audience and destination received an authorized correction or was blocked.
+
+Measure blast radius. For each source type, estimate the number and consequence of dependent artifacts.
+
+Large blast radius suggests shorter freshness windows, stronger verification, narrower fan-out, or better isolation.
+
+Measure recomputation success. Failed rebuilds should remain visibly unresolved rather than reverting to old artifacts silently.
+
+Measure deletion completeness. Track source, derivatives, caches, memory, exports, provider artifacts, and references separately.
+
+Measure compensation status. If a corrected claim caused an external effect, track notification, rollback, refund, repair, or human review to completion.
+
+Test source correction. Change one result field and verify that only semantically dependent claims are invalidated or recomputed.
+
+Test multi-source updates. Change one input to a comparison and verify the aggregate becomes stale until rebuilt.
+
+Test policy revocation. Withdraw access after generation but before delivery, during caching, and after a reference was issued.
+
+Test schema drift. Alter identifiers and status values, then verify affected transformations are restricted.
+
+Test model and prompt changes. Re-run a derivation with a new model or prompt version and confirm old and new answers remain distinguishable.
+
+Test cache and memory invalidation. Change the source and ensure no stale cache or memory entry supports a new high-impact answer.
+
+Test fan-out. Trigger many downstream operations, then introduce a source correction. Verify bounded, prioritized propagation and visible backlog.
+
+Test crash recovery. Stop workers during event persistence, quarantine, recomputation, purge, and delivery. The dependency graph must recover without losing obligations.
+
+Test out-of-order events. Deliver correction, deletion, and verification events in different orders and confirm deterministic final state.
+
+Test cross-tenant isolation. Reuse source IDs, digests, cache keys, and artifact references across tenants and ensure propagation stays scoped.
+
+Test external effects. Cause an email, payment, deployment, or access change from a claim, then correct the source. Verify compensation tracking without erasing history.
+
+Test partial aggregation. Leave one child unresolved and verify the parent cannot claim full completion.
+
+Test retention. Delete raw evidence and confirm dependent artifacts are purged, downgraded, or explicitly marked as lacking inspectable support.
+
+Test dispute. Make two sources conflict and verify dependent claims become disputed rather than choosing a convenient source.
+
+Test stale snapshots. Change a dependency during evaluation and verify retry, rejection, or explicit uncertainty.
+
+Use append-only provenance for the graph, but materialize current status for fast decisions. The materialized view must be rebuildable from durable events.
+
+Version graph schemas and edge semantics. Historical dependency records must remain interpretable as tools and policies evolve.
+
+Do not silently change what “derived,” “verified,” or “invalidated” means.
+
+Protect dependency metadata. The graph can reveal business relationships, security events, customer activity, and operational structure.
+
+Use role-specific views and minimize raw payload access.
+
+Bind graph queries to tenant, purpose, audience, and authorization. A support operator may inspect lineage without seeing all source content.
+
+Use expiring evidence references and audit raw-source access.
+
+Make SDKs dependency-aware. Typed results should expose source identity, version, freshness, verification level, invalidation state, and safe dependency references.
+
+Make it easy for application developers to react to source changes instead of silently holding stale objects.
+
+The central principle is simple: every derived answer creates a dependency, and every dependency creates a responsibility when its source changes.
+
+An AI API gateway should record precise dependency edges, preserve versions and transformation history, propagate restrictions and invalidations, quarantine unsafe derivatives quickly, recompute with coherent snapshots, and track external effects that were triggered by now-changed evidence.
+
+That is how an agent system can adapt when reality changes instead of continuing to repeat yesterday’s proof. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
