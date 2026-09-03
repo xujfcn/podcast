@@ -1,0 +1,291 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result consumer contracts: how an AI API gateway defines what each client may assume about a tool result, and prevents a status response from becoming a promise it never made.
+
+The same tool result can be consumed by a model, an application, a workflow engine, a human operator, a billing service, or another tool. Each consumer may need different guarantees.
+
+One client may only need a displayable status. Another may use the result to authorize a payment, delete a resource, deploy code, or send a customer message. If the gateway does not define the contract, consumers invent semantics from convenient words such as success, complete, delivered, or verified.
+
+A consumer contract states what a result means, what it does not mean, which evidence supports it, how long it can be reused, and what the consumer must do before taking the next action.
+
+Start with typed result states. Distinguish requested, dispatched, accepted, processing, completed-reported, completed-verified, delivered, consumed, expired, disputed, failed, and unknown.
+
+Do not return one boolean called success. Transport success, provider acceptance, business completion, target verification, and client delivery are separate facts.
+
+Define assumptions explicitly. A result may guarantee that the gateway accepted a request, but not that the provider completed it or that the target reflects the intended state.
+
+Put non-guarantees in the contract. Consumers need to know whether retries can duplicate effects, whether the result is cached, whether freshness is bounded, and whether downstream reconciliation is required.
+
+Do not expect developers to infer non-guarantees from documentation examples.
+
+Bind every result to an operation identity, tenant, resource, provider account, region, route, policy generation, and source version where relevant.
+
+A result contract without scope is unsafe. The same resource name or provider ID can mean different things in different accounts or environments.
+
+Define evidence classes. Provider-reported, gateway-validated, target-verified, ledger-reconciled, human-reviewed, and model-inferred results should not be interchangeable.
+
+A consumer contract should state which evidence class is sufficient for each permitted use.
+
+A dashboard may accept provider-reported status. A refund, access change, deletion, or deployment may require target verification or human approval.
+
+Do not let a weak result silently authorize a stronger action.
+
+Define freshness semantics. Include source time, observation time, age, allowed-until time, and revalidation requirements.
+
+A result that was valid at creation may be stale when a model reads it, when a workflow executes, or when a human approves it.
+
+Make point-of-use checks part of the contract. Consumers must recheck freshness before high-impact operations.
+
+Do not treat a model rewrite as a refresh. Rephrasing stale evidence does not make it current.
+
+Define finality semantics. A completed-reported result may mean the provider says work finished; completed-verified means the target was checked; reconciled means the relevant records agree.
+
+Consumers should not infer finality from an HTTP 200, a non-empty response, or a provider status string.
+
+Use explicit postconditions. For a create operation, the postcondition may be a resource with a stable ID. For a deployment, it may be a healthy release in a specified environment. For deletion, it may require absence across defined replicas and indexes.
+
+A result contract should say how the postcondition is verified and what remains outside its scope.
+
+Do not call a resource deleted when only one search endpoint returned not found.
+
+Define retry semantics. State whether the operation is idempotent, whether a retry creates a new attempt, and how the consumer can reconcile an uncertain effect.
+
+A timeout is not proof of failure. The contract should direct the consumer to query status or inspect the target before retrying a side effect.
+
+Do not encourage blind retries for payments, messages, deployments, access changes, or deletions.
+
+Return stable action and attempt identities. Consumers need to distinguish one logical operation from multiple provider attempts.
+
+Do not merge failed and successful attempts into one vague event.
+
+Define delivery semantics. Generated, queued, sent, delivered, and consumed are distinct states for messages and notifications.
+
+A messaging API accepting a request does not prove that a human saw it.
+
+A gateway should expose the highest verified state and identify the next observable transition.
+
+Define streaming semantics. State whether a result is provisional, partial, superseded, final, or withdrawn.
+
+Consumers must not act on a partial stream as if it were a final structured result.
+
+If a connection ends mid-stream, the contract should say whether the client may resume, retry, or must reconcile.
+
+Define structured output semantics. A valid JSON document does not guarantee that every field is semantically verified.
+
+Separate schema validity, field presence, business validity, and evidence support.
+
+Do not let a model-generated field appear equivalent to a target-verified field merely because both fit the same schema.
+
+Annotate fields with source and verification where high-impact workflows require it.
+
+Define error semantics. Distinguish invalid request, unauthorized, policy blocked, provider rejected, provider unavailable, timeout, unknown outcome, stale evidence, disputed evidence, and partial completion.
+
+Generic errors force consumers to guess whether retrying is safe.
+
+An unknown outcome should usually trigger reconciliation, not immediate repetition.
+
+Define cancellation semantics. State whether cancellation stops queued work, interrupts provider execution, prevents delivery, or merely stops the client waiting.
+
+A client disconnect is not automatically a provider cancellation.
+
+Consumers need to know what work may continue after cancellation and which result states can still arrive.
+
+Define deadline semantics. A client timeout, gateway deadline, provider timeout, and external operation deadline are different boundaries.
+
+A result arriving after the consumer’s deadline may still be valid evidence but not usable for the original action.
+
+Do not let late results trigger a new side effect without a fresh context check.
+
+Define authorization assumptions. A result may be safe for one audience and forbidden for another, even when the factual content is unchanged.
+
+Bind result views to tenant, subject, resource, action, purpose, policy version, and expiration.
+
+A consumer contract should state whether it may share, cache, store, summarize, export, or use the result to trigger another tool.
+
+Do not assume permission to read implies permission to redistribute or retain.
+
+Define purpose and retention. A client may use a result for the approved workflow but not store it indefinitely or reuse it for analytics, training, or marketing.
+
+Consumers need explicit deletion, revocation, and correction behavior.
+
+A result contract is incomplete if it says how to read data but not when to stop keeping it.
+
+Define correction behavior. State whether a result can be amended, withdrawn, or superseded and how consumers receive updates.
+
+Historical delivery must remain auditable, but current reuse must follow the corrected state.
+
+Do not silently replace an old value in a database without preserving the original result and correction relationship.
+
+Define dependency behavior. A result may be derived from other tool results, records, policies, caches, or model transformations.
+
+Consumers should know whether a source correction invalidates this result and where to subscribe for change notifications.
+
+A cached answer should identify source version, age, policy generation, and revalidation rules.
+
+Do not present a cache hit as a fresh target observation.
+
+Define consumer roles. Application display, model context, workflow control, audit, billing, support, security, and external integration may receive different fields and guarantees.
+
+Use audience-specific contracts instead of one response that tries to satisfy every use.
+
+A customer-facing client may receive safe status and a correlation ID. An operator may receive protected evidence through an audited reference. A billing service may receive reconciled usage and pricing metadata.
+
+Do not expose raw provider payloads merely because one internal consumer needs them.
+
+Define transformation semantics. If a result is summarized, translated, redacted, classified, embedded, or copied into memory, record the transformation version and inherited restrictions.
+
+A summary is not a direct quote. A redacted view is not complete evidence. An embedding is not automatically safe to retain.
+
+Consumers should be able to tell what was observed and what was derived.
+
+Define claim semantics. If a result supports a statement, identify which fields or evidence spans support it, what qualifiers apply, and what remains unknown.
+
+Do not let a model convert “provider accepted” into “the customer received the item.”
+
+High-impact claims need claim-level citations or safe evidence references.
+
+Do not expose private chain-of-thought. Evidence lineage is enough to explain a claim without revealing hidden reasoning.
+
+Define aggregation semantics. If a workflow returns “all jobs succeeded,” specify the set of jobs, snapshot time, inclusion rules, and treatment of unknown or partial children.
+
+A consumer must not infer completeness from a convenient aggregate label.
+
+For counts and totals, define filters, scope, consistency, source revision, units, currency, and rounding.
+
+Do not make a number reusable when its query definition is missing.
+
+Define side-effect contracts. If a result may trigger another tool, state the required evidence level, freshness, authorization, idempotency, and approval.
+
+A display result should not automatically be accepted as an execution input.
+
+Require explicit promotion from observation to action.
+
+Use capability negotiation. Consumers should declare whether they need streaming, structured output, target verification, citations, residency, freshness, or delivery receipts.
+
+The gateway can then reject a result that lacks the requested guarantee instead of silently returning a weaker one.
+
+Do not make every client parse a long description to discover whether the result is usable.
+
+Represent guarantees and limitations as machine-readable fields.
+
+Use contract versioning. Providers, tools, policies, adapters, and result states evolve.
+
+A client must know which version defines the meaning of each field and status.
+
+Do not silently change “complete,” “delivered,” “verified,” or “deleted.” Add a new version and compatibility rule.
+
+Support graceful evolution. Add fields safely, preserve unknown-field handling, and define how older clients behave when a new state appears.
+
+Unknown states should fail safely for high-impact actions.
+
+Do not map a new provider status into an old success value merely to preserve compatibility.
+
+Define downgrade behavior. If the gateway cannot provide target verification, it may return provider-reported status with an explicit limitation, or it may block the requested operation.
+
+Consumers should choose whether a weaker result is acceptable for their purpose.
+
+Do not downgrade silently under load or provider failure.
+
+Define degraded-mode rules. State what remains available when the control plane, provider, policy service, or verification target is unavailable.
+
+Security and authorization checks should fail closed when required evidence is missing.
+
+Low-risk displays may show last verified state with age and warning.
+
+Define observability fields. Include action ID, result ID, correlation ID, source type, verification level, freshness, finality, and contract version.
+
+Avoid placing sensitive payloads in logs, metrics, URLs, filenames, or trace names.
+
+Consumers need safe IDs to investigate without copying private content.
+
+Define audit semantics. Record which contract was applied, which consumer received the result, what version was delivered, and whether a downstream action followed.
+
+A gateway should be able to answer what the client was entitled to assume at the moment it acted.
+
+Protect audit metadata because it can reveal customer activity, provider routes, security events, and business relationships.
+
+Define retention and deletion in the contract. Result payloads, references, caches, logs, memory entries, and exports may have different deadlines.
+
+When a source is deleted or access is revoked, consumers need a precise response: purge, quarantine, redact, revalidate, or preserve minimal audit evidence.
+
+Do not assume a client deleted data merely because a notification was sent.
+
+Define correction and revocation channels. Polling, webhooks, event streams, and scheduled reconciliation each provide different timeliness and reliability.
+
+Consumers should know how to detect missed events and rebuild current state.
+
+Do not rely on one transient notification for a high-impact correction.
+
+Provide status lookup and lineage lookup. A consumer should be able to inspect the current state without replaying the original side effect.
+
+A reconciliation query is not permission to execute the original operation again.
+
+Define cross-provider semantics. A fallback provider may support a different model, region, contract, capability, pricing rule, or finality guarantee.
+
+The result must expose provider account, route, adapter, and contract identity.
+
+Do not make two provider responses appear equivalent merely because they share a model alias.
+
+Define cross-region behavior. Replication delay, data residency, local policy, and source version can affect what a consumer may assume.
+
+Bind results to region and consistency mode when they affect meaning.
+
+Do not call a regional observation global truth without an aggregation contract.
+
+Test contract mismatch. Return a valid response that lacks required verification and confirm the consumer blocks the protected action.
+
+Test status ambiguity. Provide accepted, processing, completed, and delivered states and verify each has distinct client behavior.
+
+Test unknown outcomes. Lose provider responses and ensure clients reconcile instead of duplicating side effects.
+
+Test freshness. Delay a result in queues and model generation; verify point-of-use checks reject it after its purpose-specific boundary.
+
+Test corrections and revocation. Change or withdraw the source after delivery and verify dependent consumers receive the required state.
+
+Test streaming interruption. Cut a stream after provisional content and verify clients cannot treat it as final.
+
+Test structured output drift. Add fields and statuses; ensure older clients fail safely and newer clients preserve semantics.
+
+Test authorization scope. Deliver the same fact to different audiences and verify views, references, and retention obligations remain distinct.
+
+Test transformation lineage. Summarize, translate, redact, embed, and store a result in memory; verify source and policy metadata survive.
+
+Test side-effect promotion. Attempt to use a display-only result to trigger a payment, deletion, deployment, message, or access change.
+
+Test cancellation and deadlines. Disconnect clients and cross deadlines; verify the contract describes continuing work and late results accurately.
+
+Test aggregation. Leave one critical child unknown and ensure the parent result is partial or unresolved rather than fully successful.
+
+Test fallback. Change provider account, region, and contract and verify consumers see the changed guarantees.
+
+Test recovery. Crash workers during result delivery, correction publication, and contract evaluation; rebuild current state from durable events.
+
+Test cross-tenant isolation. Reuse result IDs, correlation IDs, cache keys, and evidence references and verify contracts remain tenant-bound.
+
+Measure unsupported assumptions. Count actions taken by consumers without the evidence, freshness, authorization, or finality required by their contract.
+
+Measure contract violations by client, operation, provider, and consequence.
+
+Measure unknown-outcome retries and duplicate side effects. These reveal unclear or ignored retry semantics.
+
+Measure stale-use incidents, weak-result promotions, and actions triggered by provider-reported evidence where verification was required.
+
+Measure correction reach, revocation latency, missed events, and unresolved downstream copies.
+
+Measure contract downgrade frequency. Frequent downgrades may indicate provider instability or unrealistic client requirements.
+
+Measure clients using deprecated statuses, ignoring qualifiers, or dropping source and freshness metadata.
+
+Measure unversioned responses and unknown-field failures.
+
+Measure audit completeness: consumer identity, contract version, result version, delivery state, and downstream action link.
+
+Keep contracts close to SDK types, schemas, tests, and documentation. A contract that exists only in prose will drift.
+
+Generate client helpers for safe state checks, freshness validation, reconciliation, correction handling, and side-effect promotion.
+
+Make the safe path the easy path.
+
+The central principle is simple: a result means only what its contract guarantees, and every consumer must know the boundary between observation, verification, delivery, and action.
+
+An AI API gateway should expose typed states, evidence classes, freshness and finality, retry and cancellation semantics, authorization and retention limits, correction behavior, contract versions, and machine-readable guarantees.
+
+That is how different clients can share one gateway without turning a modest tool result into an accidental promise. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
