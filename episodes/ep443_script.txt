@@ -1,0 +1,341 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract retirement governance: how an AI API gateway retires old guarantees without leaving unsafe clients, cached results, queued work, or side-effect paths behind.
+
+A contract is not retired when a new version is published. It is retired when the old meaning can no longer be selected, produced, consumed, replayed, or used to authorize an action.
+
+Without deliberate retirement, legacy paths remain hidden in SDKs, workers, exports, dashboards, fallback routes, and recovery procedures. The system appears modern while old assumptions continue to execute.
+
+Start with an authority statement. Name the contract being retired, its versions, affected operations, owner, reason, replacement, retirement date, and risk assessment.
+
+Do not retire a contract merely because traffic has fallen. Low traffic is not proof that no delayed job, backup, support tool, or emergency procedure still depends on it.
+
+Inventory every surface. Find producers, consumers, adapters, providers, schemas, SDKs, caches, queues, dead-letter stores, logs, traces, memory, exports, indexes, webhooks, model prompts, workflow definitions, dashboards, runbooks, tests, fixtures, and audit readers.
+
+A contract can survive in a script nobody remembers, a cron job, a serialized workflow, or a disaster-recovery image.
+
+Do not search only source repositories. Inspect runtime configuration, stored messages, feature flags, client versions, and operational tooling.
+
+Identify the semantic boundary. Record the states, evidence classes, freshness, finality, retry behavior, cancellation, delivery, correction, revocation, retention, authorization, residency, and side-effect permissions that the old contract defined.
+
+Retirement must remove old meaning, not only old field names.
+
+Define the replacement contract and the semantic delta. State what improves, what becomes stricter, which states are new, and which old assumptions are no longer valid.
+
+Do not describe a breaking semantic change as a harmless deprecation.
+
+Publish a migration guide with concrete mappings, rejected mappings, client actions, deadlines, and examples of unsafe legacy behavior.
+
+A client needs to know not only how to upgrade, but what it must stop assuming.
+
+Set a retirement timeline. Use announcement, inventory, migration, warning, restricted mode, hard rejection, and final cleanup phases.
+
+The timeline should vary by operation risk. A display-only client may receive a longer migration window than a client that triggers deletion, payment, deployment, access changes, or external messaging.
+
+Do not give irreversible workflows unlimited compatibility time.
+
+Tag every request and result with contract version. Include the version in responses, events, cache entries, queued work, audit records, and side-effect receipts.
+
+Without explicit version identity, retirement cannot distinguish old work from new work.
+
+Do not infer version from date, route name, SDK release, or provider model alias.
+
+Measure usage by client, tenant, operation, provider, region, and environment. Track reads, writes, negotiations, transformations, replays, retries, side effects, and administrative access.
+
+A client that never calls the public endpoint may still consume old events or cached results.
+
+Do not count only successful API requests.
+
+Classify consumers by capability. Identify which clients understand expiration, unknown outcomes, evidence classes, correction, revocation, retention, and new finality semantics.
+
+A client that can parse a new schema may still be unable to act safely on it.
+
+Do not certify readiness from SDK installation alone.
+
+Use capability negotiation during migration. Clients should declare supported versions and required guarantees before execution.
+
+The gateway should select the replacement contract or reject the request explicitly.
+
+Do not silently serve the old contract when the client omits its supported versions.
+
+Create a narrow compatibility layer when it is safe. Preserve identity, scope, evidence, freshness, retention, and action restrictions during translation.
+
+A compatibility representation may expose fewer guarantees, but it must not manufacture stronger ones.
+
+Do not map unknown, expired, disputed, or withdrawn states into legacy success.
+
+Use stricter semantics during disagreement. If old and new contracts differ about evidence, freshness, finality, authorization, or retry safety, choose the more restrictive outcome.
+
+Temporary loss of availability is safer than temporary expansion of authority.
+
+Do not resolve incompatibility by selecting whichever version permits the action.
+
+Migrate producers first when possible. New producers should publish the replacement contract while preserving enough metadata for safe legacy translation.
+
+If the old representation loses distinctions that the new contract requires, mark the result limited or unknown.
+
+Do not fabricate new verification fields from old ambiguous status values.
+
+Migrate consumers with contract tests. Verify state handling, unknown states, freshness checks, correction, revocation, retention, retry, cancellation, and side-effect gates.
+
+A client is ready when it handles the behavior under failure, not when its build succeeds.
+
+Do not rely on a single happy-path integration test.
+
+Migrate event streams carefully. Publish versioned events with logical operation ID, result ID, source version, sequence, and contract version.
+
+Dual publishing must not create two operations or two side effects.
+
+Consumers should deduplicate by logical identity and sequence, not by payload equality alone.
+
+Do not let a legacy consumer process both old and new events independently.
+
+Migrate queues and retries. Attach contract version, expiration, operation identity, and retry policy to every queued item.
+
+When a worker claims old work after retirement begins, it must either translate safely, reroute to a compatible executor, or stop before execution.
+
+Do not process old queued side effects under a new contract label without revalidation.
+
+Handle dead-letter queues. Unsupported old messages must become visible remediation items with protected metadata and an expiration policy.
+
+Do not retry an unsupported message forever or discard it without preserving its operational identity.
+
+Migrate caches. Old cached results may omit new evidence, freshness, scope, or retention metadata.
+
+Invalidate, revalidate, or mark them legacy and display-only according to risk.
+
+A cache hit must not bypass contract negotiation or newly required point-of-use checks.
+
+Do not let an old cache serve stale authority after the old contract is retired.
+
+Migrate memory and summaries. Agent memory, prompt templates, summaries, embeddings, and retrieval indexes can preserve old assumptions or old evidence.
+
+Attach source version, contract version, purpose, audience, expiration, and invalidation relationship.
+
+Do not let a summary created under a retired contract authorize a current action.
+
+Migrate exports and integrations. CSV files, reports, webhooks, partner APIs, support downloads, and automation scripts may use old statuses and meanings.
+
+Identify recipients, delivery state, retention, correction, and deletion capability.
+
+Do not call an export migrated just because the database schema changed.
+
+Migrate provider adapters. Remove old normalization rules, status mappings, retry behavior, and fallback routes only after checking active and delayed traffic.
+
+An adapter can preserve an old contract even when the public endpoint no longer advertises it.
+
+Do not leave a legacy adapter reachable through emergency routing without an explicit retirement exception.
+
+Migrate model aliases and route configuration. A friendly alias should no longer resolve to a retired contract or an incompatible adapter.
+
+Record resolved provider, account, region, model, adapter, policy, and contract version.
+
+Do not allow an old alias to become an undocumented backdoor.
+
+Migrate authorization and policy. New contracts may require stronger evidence, narrower audiences, shorter retention, or stricter side-effect gates.
+
+Verify every old path against current policy before allowing translation.
+
+Retirement is a security change, not only an API change.
+
+Do not let compatibility bypass a newly tightened policy.
+
+Migrate audit and compliance readers. Historical records must remain interpretable after the old contract is no longer active.
+
+Preserve original contract version, evidence class, policy generation, and what the consumer was entitled to assume at the time.
+
+Do not rewrite history into the replacement vocabulary and erase the old semantics.
+
+Migrate dashboards and runbooks. Replace labels such as complete, delivered, verified, and deleted only when their new meanings are explicit.
+
+Operational screens can reintroduce retired assumptions even after the API blocks them.
+
+Do not declare retirement complete while support instructions still tell operators to retry unknown outcomes blindly.
+
+Migrate tests and fixtures. Mark old fixtures as historical, compatibility-only, or retired. Add tests proving that old states cannot reach current side-effect paths.
+
+Remove obsolete assumptions from examples, generated clients, and documentation.
+
+Do not delete fixtures before proving that no active test or recovery procedure depends on them.
+
+Define read and write behavior for retired versions. Reads may be allowed for historical audit, restricted support, or migration, while new writes and side effects are rejected.
+
+Make those distinctions explicit.
+
+Do not use one global “version retired” flag when audit reads and execution writes have different safety requirements.
+
+Return clear rejection errors. State that the contract is retired, identify the replacement, provide migration guidance, and avoid exposing sensitive internal policy details.
+
+A generic invalid request error creates repeated support work and encourages unsafe retries.
+
+Do not make a retired version look temporarily unavailable if retrying cannot help.
+
+Bind retirement to time and policy generation. A request negotiated before retirement may wait in a queue until after the cutoff.
+
+Recheck the contract immediately before execution.
+
+Do not allow an old negotiation receipt to survive forever.
+
+Handle in-flight work. Decide whether existing operations finish under the old contract, are translated, are paused, or are cancelled.
+
+The decision should depend on evidence, risk, and whether a side effect has already occurred.
+
+Do not change the meaning of an in-flight result without preserving its original version and operation identity.
+
+Handle uncertain outcomes. If the provider accepted work before the contract cutoff but the gateway did not receive the result, reconcile under the old operation identity before retrying or migrating.
+
+Retirement must not turn uncertainty into duplicate execution.
+
+Do not replay an old non-idempotent operation just because its contract is no longer served.
+
+Handle late callbacks. Providers may send old-format events after the public contract is retired.
+
+Accept them only through a version-aware, scope-checked path that preserves evidence and prevents unauthorized action.
+
+Do not drop late callbacks without recording their operation and reconciliation state.
+
+Handle corrections and revocations. Historical results under the old contract may later be corrected, disputed, withdrawn, or deleted.
+
+The retired contract must still have a safe mechanism to propagate those changes to current consumers.
+
+Do not treat retirement as permission to ignore old result corrections.
+
+Handle retention and deletion. Old payloads, translations, events, caches, logs, indexes, embeddings, backups, and provider artifacts remain subject to their approved lifecycle.
+
+A retired contract can still be a live data-governance obligation.
+
+Do not retain old data indefinitely merely because the code that created it is gone.
+
+Handle backups and disaster recovery. A restored snapshot may contain retired contract data, workers, schemas, and routes.
+
+After restoration, quarantine old work, reapply retirement policy, and prevent old messages from reaching current side effects.
+
+Do not assume disaster recovery restores only data and not old behavior.
+
+Handle rollback. If the new contract is rolled back, decide whether the old contract can safely return, whether stored state remains compatible, and which side-effect gates apply.
+
+A retirement may be irreversible even when a binary rollback is technically possible.
+
+Do not restore an old route without rechecking authorization, retention, provider capability, and unresolved operations.
+
+Use explicit retirement exceptions. An exception should identify scope, owner, reason, allowed operations, evidence requirements, expiration, and review.
+
+Keep exceptions narrow and observable.
+
+Do not create a permanent “legacy” flag with broad access.
+
+Use quarantine for unknown legacy traffic. Preserve safe metadata, block side effects, and route the item to migration or review.
+
+Quarantine is better than silently converting an unrecognized old message into a current result.
+
+Do not send quarantined payloads to unrestricted support channels.
+
+Prove reachability is gone. Search code, configuration, routes, queues, scheduled jobs, feature flags, aliases, adapters, workers, and recovery images.
+
+Then test that a request using the retired version cannot reach an executor.
+
+A deleted file is not proof that no path remains.
+
+Test direct requests. Send old version headers, content types, event schemas, SDK identifiers, and legacy status values.
+
+Verify clear rejection or safe historical-read behavior.
+
+Test indirect requests through aliases, fallback routes, batch jobs, webhooks, and internal services.
+
+Retirement must cover paths that do not expose version selection publicly.
+
+Test delayed queues. Place old work in a queue, cross the retirement deadline, then let a worker claim it.
+
+Verify revalidation, quarantine, safe translation, or rejection before any side effect.
+
+Test retries after cutoff. Lose provider responses, let deduplication windows expire, and attempt recovery.
+
+Ensure the system reconciles rather than blindly replaying old work.
+
+Test cache races. Populate an old cache, retire the contract, tighten policy, and read through a new client.
+
+Verify the cache cannot supply retired authority or hide missing qualifiers.
+
+Test event dual-publishing. Deliver old and new events in different orders, duplicate them, and drop one representation.
+
+Verify logical deduplication and safe convergence.
+
+Test provider callbacks. Send late, reordered, duplicated, malformed, and old-format callbacks from the provider.
+
+Verify identity, scope, evidence, and action gates remain intact.
+
+Test contract negotiation. Offer only the retired version, offer a retired and current version, request unsupported guarantees, and omit version information.
+
+Verify deterministic selection and safe rejection.
+
+Test client capability mismatch. Use clients that ignore unknown states, expiration, corrections, revocation, or evidence qualifiers.
+
+Retired or unsafe operations should be blocked for those clients.
+
+Test side-effect paths. Attempt payment, deletion, deployment, access changes, messages, and external tool calls through every old and new route.
+
+No retired contract should authorize a protected action after the cutoff.
+
+Test historical reads. Allow approved audit or support access to old records while preventing reuse, export, or promotion to current execution.
+
+A historical record is evidence about the past, not current authority.
+
+Test corrections and deletion. Correct, withdraw, or delete a result created under the old contract and verify current consumers receive the required state.
+
+Test backups and restore. Restore a snapshot containing old workers and queued operations; verify quarantine and retirement enforcement run before processing.
+
+Test rollback. Roll back binaries, change feature flags, and restore route configuration in a controlled environment.
+
+Verify that retirement rules, data versions, and unresolved work remain safe.
+
+Test exception expiry. Create a narrow retirement exception, let it expire, and confirm the old path is blocked again.
+
+Test cross-tenant isolation. Reuse old IDs, cache keys, aliases, and event sequences across tenants and regions.
+
+A migration path must not turn identity ambiguity into cross-tenant access.
+
+Test observability. Inspect logs, metrics, traces, dashboards, support views, and rejection errors for contract version, retirement state, and safe correlation IDs.
+
+Verify that raw sensitive payloads do not leak during migration diagnosis.
+
+Test audit reconstruction. For each action near the cutoff, recover the contract version, retirement state, policy generation, route, evidence, freshness, consumer, and execution outcome.
+
+The system should explain why the action was permitted or blocked.
+
+Measure retirement adoption. Track current-version usage, old-version reads, old-version writes, legacy events, translation traffic, exceptions, and rejected requests.
+
+Break down results by client, tenant, operation, provider, region, and environment.
+
+Measure blocked side effects attempted through retired paths. These are important leading indicators of unsafe client behavior.
+
+Measure unresolved legacy work, queue age, dead-letter age, cache age, and old artifacts in backups and indexes.
+
+Measure correction, revocation, deletion, and retention obligations for retired results.
+
+Measure time to detect and remove each legacy route.
+
+Measure exceptions by owner, scope, reason, and expiration. Any exception that keeps being renewed needs architectural attention.
+
+Measure historical-read volume separately from execution volume.
+
+A large historical-read population may be legitimate, while any retired-version execution is a serious defect.
+
+Measure false rejection and migration friction. Clients that are blocked because the replacement is unclear will create pressure for unsafe exceptions.
+
+Improve documentation and tooling instead of weakening retirement.
+
+Define final retirement proof. Confirm no active producers, no active consumers, no supported negotiation path, no unexpired executable cache, no queued side effects, no unresolved operation requiring the old semantics, no live fallback route, no recovery dependency, and no unreviewed exception remain.
+
+Also confirm that historical audit and deletion obligations have an owner.
+
+Do not mark the contract retired until every condition has evidence.
+
+After retirement, keep a minimal tombstone. It should identify the retired version, replacement, date, and safe diagnostic without preserving unnecessary sensitive payloads.
+
+A tombstone prevents old replicas or clients from interpreting the version as merely missing.
+
+Do not leave an ambiguous 404 where a clear retirement response is safer.
+
+The central principle is simple: old guarantees are not retired when a replacement exists; they are retired when no uncontrolled path can still produce, consume, replay, or act on them.
+
+An AI API gateway should inventory dependencies, version semantics, migrate clients and stored work, negotiate capabilities, enforce stricter behavior during disagreement, quarantine legacy traffic, protect historical evidence, test delayed and indirect paths, manage exceptions, and prove retirement before removing the last guard.
+
+That is how contract evolution can finish cleanly, without leaving yesterday’s assumptions in tomorrow’s execution path. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
