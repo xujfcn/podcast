@@ -1,0 +1,253 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result policy enforcement: how an AI API gateway applies output rules before a result reaches an agent, user, provider, log, cache, or external system.
+
+A tool result is not automatically safe just because the tool call was authorized. The action may be allowed while the returned fields, attachments, links, or downstream destinations are not. Output policy is the control that turns a raw provider response into an approved result view.
+
+Start by separating execution policy from output policy. Execution policy answers whether the gateway may perform an operation. Output policy answers what may be revealed, to whom, for what purpose, through which destination, and for how long.
+
+Create a result policy input with tenant, principal, delegated agent, source tool, operation, target, provider account, region, purpose, sensitivity, retention, destination, requested view, and current policy generation.
+
+Do not let a model select its own output policy. The model can request a summary, status, or detail level, but the gateway must decide whether that view is allowed.
+
+Normalize the raw response first. Validate schema, operation identity, target, account, status, timestamps, completeness, and provider metadata before applying output rules.
+
+Treat malformed or incomplete responses as restricted. A partial JSON object, truncated stream, or provider error may contain unexpected sensitive fields and cannot safely pass through a permissive formatter.
+
+Use field allowlists for each result view. Define the exact fields allowed in status, redacted, summary, operator, customer, workflow, and raw-response views.
+
+Do not rely on a growing denylist of secrets. Providers can add new fields, nested structures, debug information, and attachments. Unknown fields should be withheld until classified.
+
+Classify every field and artifact. Mark credentials, personal data, financial information, private content, infrastructure details, customer records, model prompts, provider metadata, and ordinary operational status.
+
+Apply policy recursively. Sensitive information can appear in nested objects, arrays, error messages, filenames, headers, markdown, images, transcripts, and encoded values.
+
+Treat attachments as results. A safe status response can still leak confidential data through a PDF, image, spreadsheet, archive, audio file, or download link.
+
+Do not assume metadata is harmless. Object names, URLs, IDs, timestamps, counts, regions, and error categories can reveal protected business or security information.
+
+Separate result views from raw payloads. A customer may need “refund completed,” a workflow may need a transaction ID, and an operator may need a redacted diagnostic. None necessarily needs the full provider response.
+
+Make views purpose-specific. A result approved for internal troubleshooting should not automatically be valid for customer communication, model training, analytics, or another tenant’s workflow.
+
+Treat model context as a disclosure destination. Sending a result to an external model provider is an egress decision, even when the model is only summarizing the response.
+
+Treat memory, caches, logs, traces, queues, and support consoles as destinations too. Output policy must apply to every copy, not only the final user response.
+
+Use destination-specific transformations. The same result may become a boolean for a workflow, a redacted summary for a user, a controlled reference for a support agent, and a withheld response for an untrusted caller.
+
+Do not let the model’s summary bypass restrictions. A shorter answer can still reveal the protected fact. Apply data-flow policy to semantic content, not only to recognizable strings.
+
+Use minimum necessary disclosure. Return the smallest fact that enables the next approved action.
+
+Prefer predicates and bounded facts. “Healthy,” “eligible,” “three records matched,” and “payment authorized” can be safer than the underlying record set.
+
+Control counts and aggregates. Small groups, rare combinations, repeated comparisons, and timing differences can reveal individuals or confidential operations.
+
+Apply query budgets and inference controls. Limit repeated access, filter changes, joins across results, and cross-session correlation.
+
+Bind results to tenant and subject. A role that can see customer data in tenant A must not receive a result from tenant B, even if the operation ID or object name looks valid.
+
+Use stable result identity. Store source action, attempt, provider reference, target, tenant, and view version so a result cannot be substituted across boundaries.
+
+Bind references to audience, purpose, expiration, and policy generation. A status token must not retrieve raw content, and a reference issued for one workflow must not work in another.
+
+Use short-lived and one-time access for high-risk artifacts. A secret export, identity document, recovery file, or private report should not become a permanent URL.
+
+Recheck policy at the last responsible moment. A result may be safe at execution time but restricted later because consent, role, tenant status, purpose, route, or policy changed.
+
+Do not rely on admission-time decisions alone. Queues, long-running jobs, provider callbacks, and human review introduce time in which output policy can become stale.
+
+Use policy generations and revocation versions. A newer restrictive generation must invalidate older result-view receipts and cached access decisions.
+
+Do not let delayed active events reopen access after revocation. Apply control-plane updates monotonically and require explicit new authorization for restoration.
+
+Separate observation from disclosure. The gateway may verify a sensitive postcondition internally and return only a safe status to the agent or user.
+
+Separate provider permission from recipient permission. A provider may be allowed to return full output to the gateway, but the requester may be entitled to only selected fields.
+
+Record provider account and region. Output rules may depend on provider retention, residency, contractual terms, and the route that processed the data.
+
+Reauthorize when output moves to another provider or region. A fallback model or backup analytics system is a new destination.
+
+Do not let provider fallback widen disclosure. The fallback receives the same or narrower view, and only if its data contract satisfies the original policy.
+
+Control external messaging. Email, chat, webhook, issue tracker, social post, and customer portal tools require recipient, channel, attachment, and content validation.
+
+An approved message body does not authorize an added attachment or provider URL. Validate every link and file independently.
+
+Do not put protected content in URLs, filenames, labels, metrics, or trace names. These surfaces are copied broadly and often retained outside normal data controls.
+
+Use secure artifact delivery. Encrypt files, bind references to identity and purpose, expire them, revoke them when required, and record each access.
+
+Do not confuse masking with access control. A masked value may remain sensitive, and an unmasked value may be allowed only for one narrow audience.
+
+Apply structured redaction. Handle JSON, XML, CSV, text, images, audio, PDFs, archives, and binary metadata using schema- and content-aware rules.
+
+Redact before logs and telemetry. Once raw output enters an observability system, deleting the primary result does not remove the copy.
+
+Normalize provider errors. Errors can echo prompts, request bodies, headers, credentials, SQL fragments, customer values, and internal URLs.
+
+Do not pass raw stack traces to models or clients. Return a safe error category, correlation ID, and permitted next step.
+
+Control streamed output chunk by chunk. Each chunk is a disclosure and must satisfy current result policy before delivery.
+
+Use buffering for high-risk streams. Validate schema, sensitivity, completeness, destination, and current authority before releasing output.
+
+Do not depend on final-response cleanup after an early chunk leaks data. Once delivered, content may already be copied into clients, logs, or model context.
+
+Make policy outcomes explicit. Useful result states include delivered, redacted, summarized, referenced, withheld, pending review, expired, revoked, and policy-error.
+
+Do not collapse all restricted results into a generic failure. The client needs to know whether it may request a safe view, wait, authenticate, seek approval, or stop.
+
+Give agents a safe vocabulary. Typed fields such as `status`, `view`, `redactions`, `next_action`, `expires_at`, and `evidence_level` reduce unsafe interpretation.
+
+Do not let a model claim details that the result view withheld. The response schema should make unavailable fields genuinely unavailable.
+
+Use view-specific schemas. A field called `details` that contains arbitrary provider JSON defeats policy review and gives consumers an unbounded disclosure surface.
+
+Version result schemas and policy rules. Adding a field, changing a summary, or modifying an adapter can change confidentiality and compliance behavior.
+
+Treat unknown schema versions as restricted. Require compatibility review before new provider fields become visible, logged, cached, or sent externally.
+
+Preserve historical policy context. Store view version, policy generation, classification, route, purpose, audience, and decision time with the access record.
+
+Do not silently reinterpret historical delivery. If a field is later classified as sensitive, record the change and apply an explicit migration or revocation policy.
+
+Use scope intersection in workflows. A child result view receives only the intersection of parent authority, child role, tenant policy, purpose, destination, and current result rules.
+
+Never use the union of all workflow permissions. One step’s broad access must not expand another step’s output.
+
+Propagate delegated constraints. Record who delegated access, what view was approved, to which agent, for what purpose, and until when.
+
+Revoke delegated result access when the parent authority changes. Cached views, references, and queued transformations must not survive indefinitely.
+
+Prevent confused deputy behavior. A broad service identity should not disclose a raw result to a caller whose logical permission allows only a summary.
+
+Use signed or tamper-evident view receipts. Include result identity, tenant, audience, view, constraints, policy generation, expiration, and source action.
+
+Reject stale, altered, or misdirected receipts. A receipt for one view, tenant, provider, or policy generation must not be replayed elsewhere.
+
+Enforce at every boundary. The final client response, model request, queue write, cache insertion, log event, artifact download, and support view each need output-policy enforcement.
+
+Use two-stage checks for sensitive disclosure. Validate the proposed view, then immediately before delivery recheck identity, revocation, purpose, target, retention, destination, and policy generation.
+
+Make denial messages safe and useful. State categories such as field not permitted, purpose mismatch, destination not approved, tenant mismatch, expired reference, revoked consent, or step-up required.
+
+Do not reveal hidden thresholds, unrelated identifiers, or raw sensitive values in denials.
+
+Offer safe alternatives. Return a status predicate, redacted view, bounded count, controlled reference, or human-review path when full output is not allowed.
+
+Make the safe path convenient. Developers should not need raw provider access to perform common workflows.
+
+Prefer narrow tools. “Get deployment health” is easier to govern than “return the entire infrastructure object,” and “send approved notification” is safer than “post arbitrary payload.”
+
+Keep raw-response modes isolated. Full output should require strong identity, narrow scope, trusted destination, short lifetime, explicit purpose, and detailed audit.
+
+Use break-glass access sparingly. Require reason, authentication, object scope, duration, redaction level, and automatic expiry.
+
+Do not allow break-glass to become ordinary support. Frequent emergency access means the normal result views are too weak or the workflow is underspecified.
+
+Separate audit evidence from payload. Record who requested which view, under what policy, to which destination, without copying the complete sensitive output.
+
+Use tamper-evident access records. Include subject, tenant, result identity, source action, view, destination, policy generation, decision, and timestamps.
+
+Preserve denied attempts. A blocked disclosure is valuable security evidence, but the record should contain only safe metadata.
+
+Connect output policy to retention. A delivered view, cached copy, memory item, derivative, and reference should expire according to sensitivity, purpose, and authorization.
+
+Do not extend retention automatically because a result was accessed. An extension requires explicit authority, reason, purpose, and new deadline.
+
+Connect output policy to deletion. When a result expires or consent is withdrawn, remove or restrict raw payloads, derived views, caches, queues, temporary files, and access references within the documented boundary.
+
+Use tombstones and deletion generations to prevent resurrection after restore, retry, replication, or delayed events.
+
+Connect output policy to permission revocation. Revocation should prevent future disclosure, invalidate issued references, stop queued transformations, and handle already-delivered copies according to policy.
+
+Do not claim deletion while an active link or cache can still retrieve the result.
+
+Track lineage without exposing content. Operators should be able to see source action, transformations, destinations, policy decisions, and deletion status through identifiers and classifications.
+
+Use hashes and fingerprints for investigation. Prove that two views derive from the same result without repeatedly opening the raw payload.
+
+Control analytics and training flows. Tool results should not enter generalized datasets merely because they passed through a model workflow.
+
+Require explicit purpose and data contract for secondary use. Minimize, filter, and retain only the approved derivative.
+
+Do not let debugging silently become training. Development copies need their own authorization, environment, retention, and deletion policy.
+
+Control browser and terminal surfaces. Screenshots, copied text, downloads, rendered previews, and shell output are disclosure paths.
+
+Classify multimodal derivatives. OCR, alt text, thumbnails, transcripts, embeddings, and metadata can expose the protected source.
+
+Do not assume a thumbnail or excerpt is safe. A small representation may reveal a face, document number, secret, or confidential chart.
+
+Use content-aware detection, but do not rely on pattern matching alone. Sensitive facts may be encoded, paraphrased, visual, or inferable from combinations.
+
+Control query and response size. Large results increase exposure and make review, redaction, retention, and deletion harder.
+
+Use pagination, field selection, maximum counts, and bounded summaries at the provider boundary.
+
+Do not authorize an unbounded read and hope output policy fixes it later. Minimize at ingress as well as at delivery.
+
+Make result policy observable. Operators should know why a field was removed, which policy applied, which destination was denied, and when the decision expires.
+
+Do not expose internal policy thresholds to ordinary callers. Use safe reason categories and support correlation IDs.
+
+Test field and artifact redaction. Put sensitive data in nested fields, arrays, errors, headers, filenames, markdown, images, OCR, audio, archives, and encoded content.
+
+Test destination changes. Deliver the same result to an agent, user, model provider, log, cache, email, webhook, support console, and memory store. Each boundary should produce the correct view.
+
+Test purpose changes. Retrieve data for support, then attempt marketing, analytics, training, or another customer workflow. The gateway should require a separate policy decision.
+
+Test tenant and role changes. Reuse result IDs, references, cache keys, and sessions across tenants and roles. Every mismatch should be denied.
+
+Test policy updates and revocation. Change classification, withdraw consent, revoke the parent permission, expire a lease, and verify that old view receipts and caches no longer disclose data.
+
+Test schema drift. Add provider fields, nested objects, attachments, and new response types. Unknown content should be restricted by default.
+
+Test streaming and partial responses. Leak a value in an early chunk, interrupt delivery, change policy mid-stream, and verify safe stop and accurate receipt state.
+
+Test retries and crashes. Fail after provider response and before normalization, redaction, audit, delivery, or cleanup. Recovery must not bypass output policy.
+
+Test fallback providers and regions. Verify data contracts, residency, retention, purpose, and view restrictions before egress.
+
+Test break-glass. Require reason, bounded access, redaction, audit, and automatic expiry.
+
+Test deletion and restore. Expire a result, restore a backup containing it, replay a queue message, and verify tombstones and policy generations prevent unauthorized resurrection.
+
+Test inference. Issue repeated count, filter, comparison, timing, and cross-session queries. Verify budgets and rate limits limit reconstruction.
+
+Test unknown consumers and policy outages. Remove identity or policy context and verify the risk-specific safe response rather than an undocumented allow.
+
+Measure minimal disclosure. Compare raw provider fields with model-visible, client-visible, operator-visible, stored, logged, and externally transmitted fields.
+
+Track policy denials by category. Group field, purpose, destination, tenant, role, expiry, revocation, schema, provider, and route conflicts.
+
+Track raw-output exposure. Every complete provider response delivered to an ordinary agent, client, log, or external provider should be explainable and rare.
+
+Track redaction volume and unknown-field blocks. These metrics reveal schema drift, provider coupling, and missing result views.
+
+Track result-view usage. See which views are used, which fields trigger step-up access, and where developers repeatedly request raw output.
+
+Track destination egress by data class. Record provider, region, recipient, purpose, view, contract, and policy generation.
+
+Track cache, memory, and reference survivors. Report protected results accessible after expiry, consent withdrawal, tenant suspension, or role change.
+
+Track inference signals. Repeated low-information queries, small-group aggregates, timing probes, and cross-session joins should be visible.
+
+Track break-glass usage and retention extensions. Frequent exceptions indicate missing product paths or overly restrictive default views.
+
+Track schema and policy drift. Report adapters using old rules, unknown fields, stale receipts, and enforcement boundaries that have not acknowledged a new generation.
+
+Keep result policy versioned. Historical access records must explain what was visible, to whom, for what purpose, through which destination, under which rule.
+
+Do not silently weaken output rules for compatibility. Introduce explicit schema versions, migrations, reauthorization, and review.
+
+Make SDKs output-policy aware. Typed views, safe summaries, expiring references, explicit download methods, and clear denial categories reduce unsafe client behavior.
+
+Provide a documented raw mode only for controlled operators and debugging environments. It should be disabled for ordinary agent execution and protected by short-lived, audited access.
+
+The central design principle is simple: every tool result must pass an explicit output policy before it crosses a boundary.
+
+An AI API gateway should therefore validate and classify provider output, construct purpose-specific views, minimize and redact fields, control transformations and destinations, recheck policy at delivery, preserve lineage, and make every disclosure explainable.
+
+That is how tool execution can remain useful without allowing raw provider responses to become uncontrolled agent context or data exports. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
