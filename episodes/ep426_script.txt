@@ -1,0 +1,241 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool scope governance: how an AI API gateway prevents one narrow permission from silently becoming access to many tools, targets, tenants, or side effects.
+
+An agent may be authorized to read one document, update one ticket, send one approved message, or call one specific provider operation. The danger begins when that authority is represented too broadly. A general service token, a wildcard target, an ambiguous tool name, or a reusable approval can turn a precise decision into a much larger capability.
+
+Scope governance is the discipline of defining exactly what a tool authorization covers, carrying that scope through every boundary, and rejecting any request that attempts to expand it without a new decision.
+
+Start with a structured action scope. Include the tenant, actor, delegated principal, tool, operation, target, target version, parameters, environment, region, provider account, data class, purpose, rate limit, maximum quantity, and validity window.
+
+Do not authorize “access to the CRM” when the actual requirement is “read the contact record for this customer.” Broad nouns are convenient for humans but difficult to enforce safely.
+
+Separate tool identity from provider identity. An agent may call a logical tool named `update_ticket`, which is translated into different provider APIs. The authorization must bind to the logical operation and preserve constraints through translation.
+
+Use stable internal tool identities. Display names, aliases, and model-facing descriptions can change. Scope decisions should reference identifiers and versions that remain unambiguous during the decision lifetime.
+
+Make operation scope explicit. Read, list, search, create, update, append, delete, send, transfer, deploy, and execute are different authority classes even when they use the same underlying API.
+
+Do not let a read permission imply a write permission. Do not let a list permission imply access to every returned record. Do not let a ticket update permission imply the ability to change billing, ownership, or security fields.
+
+Define field-level scope for mutable resources. An agent might be allowed to update a status and note, but not the assignee, customer email, payment amount, or access policy.
+
+Bind authority to allowed values and limits. A permission to send a message may cover one recipient, one channel, one content identity, and one time window. A permission to issue a refund must include the maximum amount and currency.
+
+Never trust model-generated parameters to stay within scope. Validate every parameter at the gateway and again at the execution adapter after normalization.
+
+Canonicalize parameters before comparison. Normalize identifiers, URLs, paths, encodings, quantities, currencies, and optional defaults so equivalent requests compare consistently.
+
+Do not canonicalize away meaningful changes. A different recipient, tenant, environment, amount, target, or destructive flag is a scope change even if the JSON shape looks similar.
+
+Use request fingerprints. Store a digest of the authorized canonical action and reject reuse when the final action differs. A valid authorization identity must not become a container for new parameters.
+
+Scope targets by stable identity. Names, slugs, email addresses, and paths may be mutable or ambiguous. Resolve them to a tenant-bound resource identity before authorization.
+
+Bind mutable targets to versions or revisions. If the target changed after approval, require a new decision or an explicit conditional update contract.
+
+Use compare-and-swap semantics for updates. Execute only if the target is still the version or state that the policy evaluated.
+
+Treat wildcard scope as a special risk. Wildcards may be acceptable for low-risk reads under a tightly bounded tenant, but they should not silently cover destructive actions, external recipients, or cross-region data.
+
+If wildcard scope is necessary, constrain it with a maximum count, query filter, field set, region, purpose, and expiration. Make every expansion observable.
+
+Do not let a search result expand authority. Finding ten records does not authorize updating ten records. Each resulting target must remain within the original scope, or each action must be evaluated separately.
+
+Separate discovery from execution. An agent may discover candidate resources without being authorized to modify them. Discovery output is data, not permission.
+
+Do not let returned metadata become executable instructions without validation. Tool results can contain URLs, identifiers, commands, or suggested next actions that attempt to redirect the agent outside its scope.
+
+Treat tool output as untrusted input. Validate target identity, tenant, operation, and parameters before using a result to construct a follow-up action.
+
+Constrain chained tools. If tool A is authorized to read a record and tool B is authorized to send a message, the combination may still be unsafe if the data from A is not approved for transmission through B.
+
+Carry purpose and data classification through the chain. A value read for internal troubleshooting may not be permitted in an external email or a provider prompt.
+
+Use information-flow controls. Mark data returned by a tool with tenant, sensitivity, purpose, retention, and allowed destinations. A downstream tool must enforce those labels before sending or storing the data.
+
+Do not assume that a trusted tool makes its output safe for every destination. Scope applies to data movement as well as direct side effects.
+
+Bind delegated authority. If an agent acts on behalf of a user, record the original principal, delegating actor, agent identity, tool, operation, and constraints. Delegation must not increase the principal’s authority.
+
+Prevent confused deputy behavior. A tool should not use its broad service credential to perform an action merely because a caller has a narrow logical permission.
+
+Use capability-specific credentials or leases. The credential presented to the provider should be scoped to the approved account, operation, audience, target class, and expiration whenever the provider supports it.
+
+Separate credential scope from policy scope. A broad credential is not permission to use it broadly, and a narrow policy decision must not be widened because the credential happens to allow more.
+
+Do not infer authorization from key prefixes, service names, network location, or internal trust. Resolve current policy and scope at the enforcement boundary.
+
+Bind route and account to scope. A fallback provider account may have different data terms, model access, quotas, residency, or contractual obligations. The original scope may not cover the fallback.
+
+Reauthorize when route changes. A provider switch is a context change, not just a transport optimization.
+
+Bind region and environment. A staging permission must not work in production, and a regional data permission must not silently cross a residency boundary.
+
+Make scopes time-bound. Short validity windows reduce the risk of old approvals surviving changes in user role, target state, tenant status, or business context.
+
+Freshness is not enough by itself. A recent permission with a wildcard target is still too broad. Scope precision and decision freshness are separate requirements.
+
+Use one-time authority for irreversible effects. A permission to send one message or delete one object should be consumed once and recorded as used.
+
+Do not let retries create scope expansion. A retry may preserve the same action scope, but it must not alter the target, amount, recipient, or operation without reauthorization.
+
+Use idempotency with scope checks. Reusing an action identity is safe only when the canonical request and scope match the original decision.
+
+Treat compensation as a new scope decision. A rollback, refund, delete, or repair may be justified by the original action, but it is still a new external effect with its own constraints.
+
+Separate approval scope from workflow scope. A human may approve one step, while the workflow contains ten future steps. Do not treat approval of the first step as approval of the entire plan.
+
+Make human approval displays precise. Show normalized target, parameters, recipient, data scope, environment, expected effects, provider account, and expiration. Avoid approving vague summaries generated by the model.
+
+If the action changes after approval, highlight the changed fields and require a new decision when the change crosses the risk boundary.
+
+Do not use “same intent” as an excuse to skip scope comparison. Semantic similarity is not a security proof.
+
+Define scope inheritance for workflows. A child action may inherit only the intersection of parent authority, child policy, tenant boundary, and tool-specific limits. It must never inherit the union.
+
+This intersection rule is crucial. If a parent workflow allows customer support but a child tool allows broad database writes, the resulting action should remain limited to the narrower support scope.
+
+Make scope reduction monotonic. Context changes can narrow authority, but no downstream component should broaden it without a fresh authorization decision.
+
+Reject unknown scope fields. If a new parameter affects target, quantity, destination, data handling, or side effects and the policy engine does not understand it, fail safely or require review.
+
+Version tool schemas. Scope validation depends on parameter semantics. A new tool version may introduce a field that changes risk and must not be treated as compatible automatically.
+
+Declare side effects in tool metadata. A tool should say whether it reads, writes, sends, deletes, transfers, executes code, changes permissions, or triggers asynchronous work.
+
+Do not hide side effects behind harmless names. A tool called `sync_profile` may send data externally, create records, or overwrite fields. The gateway needs a truthful effect declaration.
+
+Use effect classes in policy. Read-only observation, reversible mutation, external communication, financial action, credential change, deployment, and destruction deserve different scope and freshness requirements.
+
+Limit batch operations. A scope for one record must not cover a batch endpoint merely because the endpoint accepts the same field names. Batch size, target set, partial failure, and retry semantics must be evaluated.
+
+For batches, create child scopes or receipts. Each child action should identify its target and outcome. A parent approval should not conceal an accidental expansion from one record to ten thousand.
+
+Use target-set proofs for bulk operations. The gateway should record how the set was selected, the filter used, the count, the snapshot time, and the maximum allowed size.
+
+Do not authorize an unbounded query followed by an unbounded mutation. Query scope and mutation scope must be independently constrained.
+
+Control pagination. An agent should not gain access to every page merely because the first page was authorized. Enforce page limits, cumulative counts, and time windows.
+
+Control recursion and fan-out. A tool result that causes the agent to call another tool for every returned item can multiply scope and side effects. Set explicit fan-out budgets and require separate authorization for high-impact children.
+
+Control loops. Repeated tool calls may gradually cross a boundary even when each individual call looks harmless. Track cumulative effects by action, workflow, tenant, target set, and time window.
+
+Use budgets for money, data volume, recipients, records, compute, and execution time. A scope without a cumulative budget may be technically narrow per call but broad in aggregate.
+
+Make budgets non-transferable unless policy explicitly allows it. One tool should not hand unused authority to another tool or another tenant.
+
+Record budget consumption atomically. Concurrent workers must not both believe that the remaining allowance is available.
+
+Stop when the budget is exhausted. Do not silently create a new scope or reset the counter because a worker restarted or a region changed.
+
+Preserve scope through protocol translation. If the provider API represents one logical operation as multiple requests, every child request must carry the parent constraints and remain within the approved target and parameter set.
+
+Do not allow adapters to add defaults that expand scope. An omitted recipient, region, or account should resolve to a policy-approved value or cause rejection.
+
+Validate URLs and destinations. A permission to call one host must not permit redirects, alternate schemes, userinfo fields, internal IPs, or arbitrary subdomains unless explicitly scoped.
+
+Validate file paths. Normalize traversal, symlinks, archive entries, case sensitivity, and mount boundaries. A path permission should map to a stable resource boundary rather than a string prefix.
+
+Validate SQL-like filters and expressions. Parameterized operations, allowed columns, bounded predicates, and query complexity limits prevent a narrow logical scope from becoming arbitrary database access.
+
+Validate shell or code execution tools with especially strong boundaries. Prefer structured operations and isolated sandboxes. A command permission should identify executable, arguments, working directory, environment, resources, and network policy.
+
+Treat model-generated code as data until it passes a separate execution policy. A general “run code” capability is rarely an acceptable scope for an agent.
+
+Control external recipients. Email, chat, webhook, and social tools should scope recipient, channel, message identity, attachments, and send count. A permission to notify one customer must not authorize a broadcast.
+
+Control attachments and data exports. The body may be approved while an added file silently expands data scope. Validate every attachment, destination, retention rule, and classification.
+
+Control tool-generated URLs. A notification tool should not follow links or upload data to a URL returned by another tool unless the destination is approved.
+
+Control secrets. A tool authorized to read configuration metadata should not be able to retrieve credentials, and a tool authorized to use a secret should not be able to reveal it to the model or an external destination.
+
+Use secret references rather than secret values in scope records. The execution boundary can resolve a current lease without putting credentials into prompts, logs, or receipts.
+
+Prevent scope laundering through summaries. A model may summarize sensitive data into a less obvious form. Data policy should apply to the source and permitted destination, not only to recognizable strings.
+
+Track provenance. Every sensitive value used by a tool should point to its source, purpose, transformations, and approved destinations.
+
+Make authorization decisions explainable without exposing controls. Return safe categories such as target outside scope, field not permitted, budget exceeded, environment mismatch, or reauthorization required.
+
+Do not reveal hidden policy thresholds, account identities, or credential details when a concise denial is sufficient.
+
+Use deny-by-default for unknown tools and operations. A model-facing tool catalog should contain only approved capabilities, but the executor must still verify identity because catalogs and prompts can become stale.
+
+Remove retired tools from every layer. A tool that disappears from the catalog but remains executable is a scope governance failure.
+
+Track reachability. Identify policies and scopes that are defined but never enforced, tools that bypass the gateway, and adapters that accept operations without a current decision.
+
+Enforce scope at the last responsible moment. Upstream checks improve user experience, but the adapter or provider boundary must perform the final validation against current context.
+
+Use a two-stage check for high-impact actions. First validate the proposed scope. Immediately before execution, validate the final canonical action, current target, authorization freshness, revocation state, budget, and route.
+
+Make every enforcement handoff verifiable. Pass a signed or tamper-evident scope receipt containing action identity, constraints, policy generation, target, expiration, and audience.
+
+Reject scope receipts intended for another tool, account, environment, or target. Authority is not portable merely because the operation names look similar.
+
+Prevent replay across tenants and regions. Bind scope to audience, tenant, environment, provider account, and nonce where one-time use is required.
+
+Use append-only evidence. Record the requested scope, approved scope, reductions, final scope, execution attempts, rejected expansions, and consumption state.
+
+Do not overwrite an approved scope when a request is narrowed or denied. Preserve the decision history so operators can see what the system prevented.
+
+Make current scope observable. Operators should be able to answer what this agent may do now, why it may do it, how much authority remains, and when it expires.
+
+Do not expose a broad internal capability map to the model. Give the agent only the tools and operations it needs for the current task, while keeping final enforcement independent.
+
+Test scope escalation. Replace one target with another tenant’s target, add a field, increase an amount, change the environment, follow a redirect, add a recipient, or switch provider accounts.
+
+Test chained expansion. Let a read result feed a write, a query produce a batch, a webhook provide a new URL, or a tool output contain a command. Verify that every transition rechecks scope.
+
+Test concurrency. Run multiple workers against one budget, one target, and one one-time lease. Confirm that no race creates an extra effect or consumes more authority than allowed.
+
+Test retries and failover. Lose the response after provider acceptance, retry in another region, change policy while the action is pending, and verify that scope is preserved or narrowed safely.
+
+Test schema evolution. Add a new parameter, change an alias, introduce a batch mode, or alter default behavior. Unknown risk should produce rejection or review.
+
+Test data-flow restrictions. Read sensitive data with an internal tool and attempt to send it through email, webhook, model provider, or file export. The destination policy must be enforced.
+
+Test path and URL boundaries. Use traversal, encoding changes, redirects, alternate hosts, IPv6 forms, symlinks, and case variants. String-prefix checks are not sufficient.
+
+Test workflow inheritance. Give a parent narrow authority and a child broad capability. Verify that the child receives only the intersection and cannot widen the parent decision.
+
+Test human approval changes. Modify recipient, amount, target, attachment, or environment after approval and verify the correct step-up behavior.
+
+Test retired and unknown tools. Attempt to invoke a removed tool, an alias with an old identity, and an operation not present in the current schema.
+
+Measure scope violations prevented. Track out-of-scope targets, field violations, budget conflicts, environment mismatches, route changes, stale decisions, and rejected schema versions.
+
+Measure authority utilization. A large gap between granted scope and consumed scope may indicate overbroad approvals, while repeated near-limit events may indicate a workflow that needs a better task boundary.
+
+Track cumulative fan-out and data volume. Per-call metrics can hide an agent that performs thousands of individually valid operations.
+
+Track scope reduction. Record when downstream policy narrows authority and when the model requests an expansion. These are useful signals for improving tool design.
+
+Track bypasses. Every execution that lacks a current scope receipt, uses a broad service credential, or skips the final adapter check should be visible and actionable.
+
+Track unknown fields and policy fallbacks. A system that frequently falls back on default behavior may be silently accepting scope it cannot fully understand.
+
+Track cross-tenant and cross-environment rejection. These events are important security signals even when the request was generated accidentally.
+
+Track data-flow denials. A blocked attempt to move sensitive output to an unapproved destination can reveal tool combinations that need safer product design.
+
+Keep the scope model versioned. Tool semantics, provider contracts, data classifications, and policy rules evolve. Historical receipts must show which scope schema and policy generation were active.
+
+Do not silently reinterpret old approvals under a new tool schema. Require migration, reauthorization, or an explicit compatibility proof.
+
+Make scope contracts available to SDKs. Developers should know which parameters define identity, which fields are mutable, how retries work, what budgets apply, and when a new decision is required.
+
+Provide safe client errors. A scope conflict should tell the caller what category of change occurred and what next action is allowed, without exposing sensitive policy internals.
+
+Make the common narrow action easy. If developers must request a broad capability to complete a simple task, they will eventually create unsafe workarounds. Offer precise, composable tools with clear boundaries.
+
+Prefer domain-specific operations over generic powerful primitives. “Set ticket priority” is easier to scope than “execute arbitrary database update,” and “send approved notification” is safer than “call arbitrary webhook.”
+
+Keep powerful primitives isolated. If generic code execution or arbitrary network access is unavoidable, require stronger authentication, shorter leases, dedicated environments, human review, and detailed receipts.
+
+The central design principle is simple: authority should shrink as it moves toward execution, never expand by accident.
+
+An AI API gateway should therefore define scope as a complete action contract, bind it to tenant and target, constrain data flow and fan-out, preserve it through retries and translation, and verify it again at the side-effect boundary.
+
+That is how one approval remains one approval, instead of becoming a license for an agent to do everything that happens to be technically possible. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
