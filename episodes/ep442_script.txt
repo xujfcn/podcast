@@ -1,0 +1,431 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract version negotiation: how an AI API gateway selects compatible guarantees before execution, instead of discovering after a side effect that the client and provider meant different things.
+
+Version negotiation is not only about choosing a JSON schema. It decides which result states exist, what completed means, how freshness is measured, which evidence is required, whether retries are safe, and what a client may do next.
+
+If negotiation happens too late, the request may already have created a resource, sent a message, charged a payment, or changed access under an incompatible contract.
+
+The first principle is simple: select semantics before execution.
+
+A client should declare the contract versions it supports and the guarantees it requires. The gateway should resolve those requirements against its adapters, policies, provider routes, regions, and operation capabilities.
+
+Do not select a version only because both sides can parse the same fields.
+
+Wire compatibility is not semantic compatibility.
+
+Define a contract identifier. It should name the contract family, major version, minor version where relevant, operation type, and capability profile.
+
+Keep the identifier independent from the provider model name and SDK version.
+
+A model alias can stay stable while its route, adapter, evidence, or retry behavior changes.
+
+Define required capabilities separately from preferred capabilities.
+
+Required capabilities might include target verification, bounded freshness, idempotent retry, correction events, deletion confirmation, regional processing, structured output, or delivery receipts.
+
+Preferred capabilities might include richer provenance, lower latency, streaming, or a longer reconciliation window.
+
+If a required capability cannot be satisfied, reject before execution.
+
+Do not silently downgrade a required guarantee to improve availability.
+
+Represent negotiation as a machine-readable offer and selection.
+
+The client offer can include supported contract versions, required evidence class, maximum result age, accepted finality states, residency, retention, retry policy, cancellation behavior, and permitted downgrade rules.
+
+The gateway selection should return the chosen contract version, effective guarantees, limitations, provider route class, and expiration of the negotiation decision.
+
+Do not hide the selected contract in documentation or logs only.
+
+Bind the selection to the request and operation identity.
+
+A negotiation result should not be reusable for another tenant, resource, provider account, region, action, or purpose unless the contract explicitly permits it.
+
+Use a stable negotiation ID or signed contract receipt.
+
+The receipt can include request shape digest, capability set, policy generation, route generation, contract version, issue time, and expiration.
+
+Do not include secrets or sensitive payloads in the receipt.
+
+Check the receipt immediately before execution.
+
+The selected route, provider account, policy, authorization, and capabilities may change while a request waits in a queue.
+
+If relevant context changed, renegotiate or reject.
+
+Do not treat negotiation as permanent authorization.
+
+Separate contract compatibility from authorization.
+
+A provider may support the required semantics while the caller lacks permission to perform the action.
+
+The gateway must satisfy both checks independently.
+
+Do not let a successful version negotiation imply access approval.
+
+Separate capability availability from current readiness.
+
+A route may theoretically support target verification but have an unavailable verification target. It may support correction events but have a delayed event channel.
+
+Negotiate against current executable capability when the operation requires it.
+
+Do not promise a guarantee based only on static provider documentation.
+
+Define major and minor compatibility rules.
+
+A major version can change status meaning, evidence requirements, retry behavior, or security boundaries. A minor version can add optional fields or capabilities without weakening existing guarantees.
+
+Do not label a semantic breaking change as minor merely because the schema remains readable.
+
+Clients should declare ranges carefully.
+
+Supporting version two does not necessarily mean accepting every future version two behavior unless the compatibility rules are explicit.
+
+Unknown high-impact states and capabilities should fail safely.
+
+Do not make wildcard version acceptance the default for side-effecting workflows.
+
+Use operation-specific negotiation.
+
+A read-only search, a payment, a deployment, a deletion, and an external notification need different evidence, finality, retry, and cancellation contracts.
+
+Do not negotiate one global contract for every tool call in a session.
+
+The same client may accept provider-reported results for display and require target-verified results for execution.
+
+Use purpose-specific profiles.
+
+A profile can name a reviewed set of guarantees such as display-safe, workflow-safe, financial-reconciled, deletion-verified, or human-review-required.
+
+Profiles simplify client configuration, but their expanded semantics must remain visible and versioned.
+
+Do not turn profile names into vague marketing labels.
+
+Define evidence negotiation.
+
+A client may require provider-reported, gateway-validated, target-verified, ledger-reconciled, or human-reviewed evidence.
+
+The selected contract should identify both the required evidence and the evidence expected at each state transition.
+
+A request can be accepted under a contract that promises eventual target verification, but the initial result must not pretend that verification already happened.
+
+Do not confuse a future guarantee with a current state.
+
+Define freshness negotiation.
+
+The client should state the maximum acceptable age at point of use, not merely at response creation.
+
+The gateway should disclose source timestamp, observation timestamp, expected processing delay, and revalidation method.
+
+If the result may become stale before a queued action executes, require revalidation at the action boundary.
+
+Do not renew freshness by translating, caching, or summarizing a result.
+
+Define finality negotiation.
+
+Some clients can act on provider-reported completion. Others require target verification or reconciliation.
+
+The selected contract should list which states are terminal for that consumer and which remain provisional.
+
+Do not let a generic completed status satisfy every finality requirement.
+
+Define retry negotiation.
+
+State whether the operation is idempotent, which key defines one logical operation, how long deduplication remains effective, and how unknown outcomes are reconciled.
+
+If the provider cannot honor safe retry behavior, the gateway should select a non-retry contract or reject clients that require automatic retry.
+
+Do not promise retry safety based only on HTTP method names.
+
+Define cancellation negotiation.
+
+State whether cancellation can stop queued work, provider execution, verification, delivery, or only client waiting.
+
+Clients that require hard cancellation should not be routed to a provider that offers only best-effort cancellation.
+
+Do not translate “cancel request accepted” into “operation stopped.”
+
+Define correction and revocation negotiation.
+
+A client may require notifications when results are amended, disputed, withdrawn, or deleted.
+
+The gateway should select a durable notification or polling mechanism with recovery semantics.
+
+Do not promise correction propagation through a transient webhook with no replay or state lookup.
+
+Define retention negotiation.
+
+The caller’s purpose, the provider’s retention policy, gateway storage, caches, logs, and downstream consumers must fit the approved lifecycle.
+
+If a provider retains artifacts longer than the client or tenant permits, that route is incompatible.
+
+Do not select a route first and discover its retention terms after data leaves the gateway.
+
+Define residency negotiation.
+
+Include processing region, storage region, provider account, fallback boundaries, and transfer restrictions.
+
+A fallback route is compatible only if it preserves the required residency and data-handling contract.
+
+Do not hide cross-region fallback behind a stable model alias.
+
+Define modality and artifact negotiation.
+
+Text, images, audio, video, files, embeddings, and tool artifacts can have different retention, size, delivery, and deletion guarantees.
+
+The selected contract should cover every input and output modality involved.
+
+Do not negotiate a text contract and then attach an unmanaged file artifact.
+
+Define streaming negotiation.
+
+State whether output is provisional, resumable, replayable, ordered, deduplicated, and finalized with an explicit marker.
+
+A client that requires atomic structured output should not receive a stream whose partial content can be mistaken for final data.
+
+Do not enable streaming merely because both endpoints support it technically.
+
+Define structured output negotiation.
+
+Agree on schema version, required fields, semantic validation, unknown-field behavior, and evidence annotations.
+
+A client may require strict schema validity but also field-level provenance or verification.
+
+Do not treat syntactic JSON compatibility as business compatibility.
+
+Define error negotiation.
+
+The client should understand invalid request, unauthorized, policy denied, provider rejected, unavailable, timeout, unknown outcome, stale evidence, disputed evidence, and partial completion.
+
+If an old client cannot represent unknown outcome safely, block it from non-idempotent operations.
+
+Do not map an unknown effect to failure just because the legacy enum lacks a value.
+
+Define downgrade rules explicitly.
+
+A client may allow lower evidence for a display-only response but forbid it for execution. It may allow a newer minor version but not a different major version.
+
+The gateway should return the exact downgrade and require explicit acceptance when it changes a material guarantee.
+
+Do not interpret silence as consent to weaker semantics.
+
+Use server-driven selection carefully.
+
+The gateway can choose the best compatible contract from the client offer, but it must not invent capabilities or expand the client’s accepted range.
+
+Use deterministic selection rules so the same context produces the same contract.
+
+Do not let provider cost alone select a weaker contract.
+
+Use client-driven selection when the client understands the tradeoff and can choose among safe offers.
+
+Present concise machine-readable alternatives rather than raw provider-specific details.
+
+Do not force application developers to reverse-engineer dozens of provider contracts.
+
+Use policy constraints as a hard filter.
+
+Tenant policy, data classification, action risk, region, purpose, and legal requirements can remove otherwise compatible versions.
+
+The selected contract must include the policy generation used for the decision.
+
+Do not allow a cached negotiation from an older policy generation to bypass new restrictions.
+
+Use route capability attestations.
+
+Adapters and providers should declare supported contract features, but the gateway should verify important capabilities through tests and runtime observations.
+
+An attestation without recent evidence is not enough for high-impact routing.
+
+Do not keep advertising a capability after drift detection shows it is unreliable.
+
+Define negotiation freshness.
+
+A capability decision can expire because provider behavior, route health, policy, credentials, or account configuration changes.
+
+Set an expiration appropriate to the operation risk and volatility.
+
+Recheck immediately before irreversible effects.
+
+Do not cache a negotiation indefinitely for convenience.
+
+Handle queues and delayed execution.
+
+Carry the negotiation receipt with the queued work, but validate it when a worker claims the job.
+
+If the route no longer supports the contract, reroute only if another route preserves every required guarantee.
+
+Otherwise pause or fail before execution.
+
+Do not silently reroute to a semantically weaker provider.
+
+Handle multi-step workflows.
+
+Each step may have a different contract, but downstream assumptions must be compatible with upstream results.
+
+Record which result version and contract authorized each next step.
+
+Do not let a workflow negotiate a strong contract at the beginning and use weaker intermediate results later.
+
+Use contract composition rules.
+
+The workflow’s effective guarantee cannot be stronger than its weakest required dependency unless independent verification upgrades it.
+
+If one tool result is provider-reported and another is target-verified, the combined claim must describe the difference.
+
+Do not average evidence levels into a vague confidence score.
+
+Handle fan-out and aggregation.
+
+Every child route should satisfy the child requirement, and the aggregate contract should define completeness, membership, snapshot time, and unresolved children.
+
+Do not return “all completed” when one child used an incompatible or unknown contract.
+
+Handle fallback and failover.
+
+Precompute compatible fallback sets for critical operations where possible.
+
+A fallback must satisfy contract, policy, residency, retention, authorization, and capability requirements—not only model availability.
+
+Do not renegotiate downward automatically during an outage.
+
+Handle provider account routing.
+
+Different accounts at the same provider can have different data terms, regions, quotas, tool support, and retention.
+
+Bind the selected account to the contract receipt.
+
+Do not switch accounts after negotiation without re-evaluating compatibility.
+
+Handle model aliases.
+
+Resolve the alias to a route and contract before execution, and record the resolved provider, model, version, and capabilities.
+
+If alias resolution changes while work is queued, recheck the contract.
+
+Do not let a friendly name conceal semantic changes.
+
+Handle legacy clients.
+
+Publish a narrow compatibility contract that clearly states missing guarantees, supported operations, and retirement date.
+
+Prevent legacy clients from performing operations they cannot represent safely.
+
+Do not preserve full authority for a client that cannot understand expiry, revocation, unknown outcomes, or evidence levels.
+
+Handle new clients with old producers.
+
+If the producer cannot supply the required fields or semantics, the gateway may add independent verification, choose another route, or reject.
+
+Do not fabricate metadata to satisfy a new schema.
+
+Unknown evidence should remain unknown.
+
+Make negotiation observable.
+
+Record client offer, selected contract, rejected alternatives, policy constraints, route capabilities, expiration, and final execution route using safe identifiers.
+
+Protect this metadata because it can reveal customer requirements, provider relationships, and security posture.
+
+Do not log sensitive payloads merely to explain negotiation.
+
+Return actionable rejection details.
+
+State which required capability could not be satisfied and whether a safe alternative exists.
+
+Avoid exposing private provider configuration or internal policy logic.
+
+Do not return a generic unavailable error when the real issue is semantic incompatibility.
+
+Test exact version matches, ranges, preferred versions, unsupported majors, unknown minors, and malformed offers.
+
+Verify deterministic selection and safe rejection.
+
+Test required versus preferred capabilities.
+
+Remove a preferred capability and confirm negotiation succeeds with an explicit limitation. Remove a required capability and confirm execution does not begin.
+
+Test silent downgrade attempts.
+
+Make an adapter claim a weaker evidence class under the same version and verify drift detection invalidates the route capability.
+
+Test policy changes between negotiation and execution.
+
+Tighten residency, retention, authorization, or evidence requirements while work waits in a queue. The worker must re-evaluate and block incompatible execution.
+
+Test provider changes between negotiation and execution.
+
+Switch account, region, adapter, model version, or capability state and verify the receipt cannot be reused blindly.
+
+Test unknown outcomes and retries.
+
+Lose the response after provider acceptance and confirm that the negotiated reconciliation behavior survives SDK, queue, and worker boundaries.
+
+Test fallback.
+
+Make the primary route unavailable and verify that only a contract-equivalent fallback can execute.
+
+Test cancellation semantics.
+
+Select contracts with hard cancellation, best-effort cancellation, and wait-only cancellation. Confirm client behavior matches each one.
+
+Test corrections and revocations.
+
+Withdraw a result after delivery and verify that clients which required correction support receive or discover the update.
+
+Test retention and deletion.
+
+Select routes with different artifact lifecycles and confirm incompatible provider retention is rejected before data transfer.
+
+Test streaming interruption and structured output completion.
+
+Verify that a client requiring atomic final output cannot accidentally consume a partial stream.
+
+Test legacy clients with new states.
+
+Inject unknown, disputed, expired, and withdrawn states. High-impact actions must fail safely.
+
+Test negotiation replay.
+
+Reuse a receipt across tenants, resources, regions, purposes, provider accounts, and expired time windows. Every mismatch should be rejected.
+
+Test concurrency.
+
+Change route capabilities and policy while many workers attempt to execute under the same negotiation generation.
+
+Ensure the safety decision is consistent and version-bound.
+
+Test crash recovery.
+
+Stop the gateway after negotiation, during persistence, before provider dispatch, and after provider acceptance. Recover without losing the selected contract or inventing a new one.
+
+Test audit reconstruction.
+
+For every protected action, recover the client offer, selected guarantees, route, policy generation, evidence requirements, and execution result.
+
+Measure negotiation failures by capability, provider, route, client, operation, and policy.
+
+A high failure rate may indicate unrealistic requirements, provider regression, or missing compatible routes.
+
+Measure explicit downgrades and client acceptance.
+
+Track whether downgraded results remain display-only or later reach side-effect paths.
+
+Measure executions without a valid negotiation receipt.
+
+For high-impact operations, that number should be zero.
+
+Measure stale negotiation use, route changes after selection, fallback incompatibility, and policy-generation mismatches.
+
+Measure legacy contract usage and retirement progress.
+
+Track clients that request broad wildcard versions or omit required capabilities.
+
+Measure semantic incidents prevented before dispatch.
+
+This is one of the clearest values of negotiation: an incompatible request should fail before it creates an external effect.
+
+The central principle is simple: clients, gateways, and providers must agree on result meaning before work begins, and that agreement must remain bound to the exact operation and context.
+
+An AI API gateway should negotiate contract versions, required capabilities, evidence, freshness, finality, retry, cancellation, correction, retention, residency, and downgrade behavior before dispatch. It should bind the selection to policy and route generations, revalidate before execution, and reject unsafe fallbacks.
+
+That is how multi-provider AI systems choose compatible guarantees before they create consequences. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
