@@ -1,0 +1,175 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result reconciliation: how an AI API gateway resolves uncertainty when an external action may have happened, but the original request did not produce a trustworthy final response.
+
+This is the failure window every tool gateway must take seriously. The provider may accept a request, the network may fail, the worker may restart, and the client may receive a timeout. At that point, the system cannot honestly say success or failure without more evidence.
+
+Reconciliation is the process of turning that uncertainty into a verified outcome, a bounded unresolved state, or a controlled human review. It is not the same as retrying. A retry attempts to cause an effect again. Reconciliation first asks what already happened.
+
+Start with a durable action identity. Every consequential tool call needs an identity that survives transport retries, worker crashes, regional failover, and delayed provider callbacks. Without it, reconciliation becomes guesswork.
+
+Store the canonical action, tenant, actor, tool, operation, target, parameters, environment, authorization decision, idempotency key, and every transport attempt. Keep sensitive payloads protected, but retain enough evidence to compare later responses with the original intent.
+
+Record the uncertainty boundary precisely. Was the connection lost before dispatch, after request bytes left the gateway, after provider acknowledgment, or after a completion response? Different boundaries support different recovery actions.
+
+Do not call every timeout an uncertain side effect. A timeout before dispatch may be a clean failure. A timeout after provider acceptance is a reconciliation case. The gateway must know which stage it reached.
+
+Use provider-native status lookup whenever available. Query by the provider operation ID, idempotency key, client reference, or another stable correlation value. Never create a new operation merely to discover whether the old one completed.
+
+If the provider has no status API, look for an observable postcondition. Read the target state, search for the created resource, inspect the transaction ledger, verify the message event, or query the deployment system. The postcondition must be specific enough to distinguish this action from an earlier or unrelated one.
+
+Do not infer completion from a generic resource existence check. A resource with the same name may have existed before the action, may belong to another tenant, or may have been created by a different workflow.
+
+Bind reconciliation to tenant and target identity. A provider search that returns a matching object is not sufficient unless account, region, owner, version, timestamp, and action metadata also align.
+
+Use fingerprints for matching. Compare the intended operation, target, parameters, amount, recipient, model, environment, and creation window with the provider’s observed record. A partial match should remain unresolved rather than being promoted to success.
+
+Define evidence levels. Provider acceptance proves that the provider received the request. Provider completion proves the provider says it finished. Target-state verification proves an observable postcondition. Business reconciliation proves the result satisfies the customer’s intended outcome.
+
+Do not collapse these levels into one boolean. A tool result can be accepted but not completed, completed but not yet visible, or visible but inconsistent with the requested action.
+
+Create an explicit state machine. Useful states include unknown, checking, accepted, completed, failed-before-effect, partially-completed, disputed, expired, and manually-resolved. Every transition should have an evidence source and timestamp.
+
+Keep unknown as a first-class state. It is safer to tell the client that the result is unresolved than to invent a failure that encourages a duplicate action or a success that hides missing work.
+
+Return structured guidance to the client or agent. Tell it whether to wait, poll, ask the user, retry with the same action identity, submit a compensating action, or stop. A generic error often causes an unsafe new request.
+
+Do not let the model decide whether an uncertain action should be repeated. The model can explain the user’s intent, but the gateway must enforce the reconciliation contract.
+
+Recheck authorization before reconciliation. Reading the status of an existing action may be allowed even when starting a new side effect is no longer allowed. Keep those permissions separate.
+
+Recheck authorization before any new provider attempt. An old approval does not authorize a new retry after the user, tenant, target, policy, or route has changed.
+
+Preserve the original idempotency identity. If reconciliation shows that no effect occurred and a retry is allowed, reuse the same action identity or a provider-supported continuation identity. Do not silently create a second business action.
+
+If the provider confirms completion, return the recorded result and mark the action resolved. If the provider confirms failure before effect, a retry may be possible under current policy. If the provider cannot answer, keep the action unresolved and follow the risk-specific escalation policy.
+
+Use bounded reconciliation attempts. Polling forever can consume capacity and hide an operational failure. Define a maximum duration, backoff, attempt count, and escalation path for every action class.
+
+Use different budgets by risk. A read-only lookup may tolerate a short best-effort window. A payment, deletion, deployment, or credential change may require longer reconciliation and human review before any retry.
+
+Avoid tight polling loops. Use exponential backoff, provider retry guidance, event subscriptions, and queue-based wakeups. Reconciliation should reduce load, not turn an outage into a polling storm.
+
+Prefer callbacks when they are reliable. Validate webhook signatures, event identity, provider account, target, operation, sequence, and timestamp before accepting a callback as evidence.
+
+Do not trust a webhook merely because it names the same operation ID. Verify that the event came from the expected provider account and that its payload matches the original action.
+
+Make webhook consumers idempotent. Providers can deliver the same event several times, out of order, or after a status poll already resolved the action. Deduplicate events and apply only valid monotonic transitions.
+
+Handle out-of-order evidence. A completion callback may arrive before the original request timeout is persisted. The evidence log should accept both facts and derive the current state without deleting history.
+
+Use source authority rules for contradictions. A signed provider completion event may outrank a stale polling response, while a verified target read may outrank a generic provider status. Document these rules instead of choosing whichever result arrived last.
+
+Mark contradictions as disputed. If the provider says completed but the target remains unchanged, preserve both observations and route the action to a reconciliation policy. Do not quietly rewrite one fact into the other.
+
+Use compare-and-swap for target verification. If the action was authorized against version 12, verify the expected transition from version 12 to the intended result. A matching final value without the expected causal transition may be insufficient.
+
+Record provider account and route during reconciliation. A fallback account may not be able to see the original operation, and a different region may expose stale state. Lack of visibility is not proof of absence.
+
+Do not treat “not found” as failed without considering propagation delay, account mismatch, region mismatch, retention, and provider indexing behavior.
+
+Use negative evidence carefully. A provider query that returns no match is meaningful only within a documented consistency and search scope. State the limits of the observation.
+
+For create operations, reconcile by stable client reference or provider metadata. Searching only by display name can find the wrong object or miss a duplicate with a generated name.
+
+For update operations, read the target version and audit history where available. A final state that matches the requested value may have been produced by another actor.
+
+For delete operations, distinguish deleted, deletion requested, hidden, archived, and not found. “Not found” may indicate success, a permission boundary, or a provider outage.
+
+For financial actions, reconcile through the provider ledger or transaction record. A client timeout does not justify a second charge. If a charge is uncertain, the safe next step is status lookup, not blind retry.
+
+For messages, reconcile through message IDs, provider delivery events, or a send ledger. Identical content is not enough to determine whether the original message was delivered.
+
+For deployments, reconcile through release IDs, environment state, rollout status, and health checks. A provider accepting a deployment request does not prove that production now runs the requested version.
+
+For asynchronous model jobs, reconcile through the job ID and output artifact identity. A missing response may mean the job is still running, completed with an unavailable artifact, or failed after partial work.
+
+For file operations, verify object version, checksum, location, encryption context, and deletion marker. A listing from one region may not represent the final state everywhere.
+
+Make partial completion explicit. A batch may create seven resources and fail on the eighth. The parent action should link to child outcomes and describe which effects happened.
+
+Never retry an entire batch when only one child is unresolved unless the provider contract proves the operation is batch-idempotent. Reconcile and retry at the smallest safe action boundary.
+
+Use compensation for already-completed effects. A refund, rollback, delete, or repair is a new action with its own authorization, idempotency key, receipt, and outcome. It is not a correction to history.
+
+Do not call compensation automatically when the original state is merely unknown. First establish what happened, or use an explicitly approved compensating workflow that tolerates either outcome.
+
+Link every reconciliation, retry, cancellation, and compensation to the original action. This causal graph is essential for support, billing, audits, and incident response.
+
+Keep an append-only evidence log. Record request, dispatch, provider response, callback, poll, target read, manual review, and state transition as separate events. Materialize the current status from those facts.
+
+Make state transitions monotonic where possible. A late timeout should not move completed back to failed. A new contradictory observation should create a disputed or corrected state with provenance.
+
+Preserve what was known at each time. Later evidence can resolve uncertainty, but it must not erase the fact that the gateway was uncertain when the client first received the timeout.
+
+Protect reconciliation from replay. An old provider event or captured status response must not resolve a new action. Bind evidence to operation identity, provider account, target, audience, and time.
+
+Protect against cross-tenant lookup. Status APIs and reconciliation workers must enforce tenant scope even when a provider uses globally unique operation IDs.
+
+Avoid leaking sensitive details in status responses. Return safe state, next action, timestamps, and support correlation IDs. Keep credentials, raw payloads, internal policy rules, and unrelated tenant data private.
+
+Make receipt-backed responses stable. Once an action is resolved, a later status query should return the same business outcome, even if transport metadata or provider trace IDs differ.
+
+Do not issue a second customer charge for a reconciliation query. Reading and proving an existing effect must be separate from executing a new effect.
+
+Connect reconciliation to billing. Link provider usage and customer charges to the original action identity, not to every retry attempt. If the provider completed one operation after a timeout, record one business effect.
+
+Handle provider billing ambiguity explicitly. If provider usage cannot be tied to an action, mark the record for financial reconciliation rather than silently charging or discarding it.
+
+Use an outbox for reconciliation work. When an uncertain state is committed, persist the intent to check status or verify the postcondition in the same durable transaction. A worker can resume after a crash without losing the case.
+
+Use leases for reconciliation ownership. Multiple workers may observe the same case, but only one should perform a state transition at a time. Lease recovery must still check the latest evidence before acting.
+
+Do not allow a stuck lease to block resolution forever. Expire ownership safely, then let another worker reconcile from the durable evidence log.
+
+Make control-plane outages safe. If policy or revocation state is unavailable, status observation may continue within approved boundaries, but new side effects should follow the action’s risk-specific fail-safe rule.
+
+Track revocation and policy generations during reconciliation. A status lookup can remain valid while a retry or compensation requires a new policy decision.
+
+Use route-aware reconciliation. If the original provider account is unavailable, try a documented status path for that account before considering a fallback. Do not assume another account can see or safely repeat the action.
+
+Define finality for each tool. Some actions are final at provider acceptance. Others require settlement, target-state verification, downstream confirmation, or a human decision. The receipt should show whether the outcome is provisional or final.
+
+Expose finality to clients. “Accepted” should not be rendered as “completed.” “Pending reconciliation” should not be rendered as “failed.” Clear states reduce duplicate user actions.
+
+Give the agent a safe vocabulary. Tool results should distinguish completed, accepted, pending, unknown, disputed, and failed-before-effect, with an allowed next step for each.
+
+Do not ask users to repeat an action when the gateway can safely resume it. Preserve intent and action identity, show the current state, and request confirmation only if the retry would create a materially new risk.
+
+Do not hide a required decision behind automation. For destructive or financial actions with unresolved external state, route to human review when the evidence budget expires.
+
+Make human review actionable. Show the original intent, attempts, provider references, observed evidence, conflicting facts, authorization age, and recommended options without exposing secrets.
+
+Record the reviewer’s decision as a new evidence event. Include scope, time, authority, and any constraints. Do not overwrite the uncertain history.
+
+Test the full uncertainty matrix. Disconnect before dispatch, after dispatch, after acceptance, after completion, before receipt persistence, during failover, and while callbacks are delayed.
+
+Test duplicate and reordered evidence. Deliver the same webhook repeatedly, poll before and after the callback, and restart the worker between state transitions. The final receipt should remain coherent.
+
+Test ambiguous matches. Create a similar object from another workflow, change the target version, move the resource to another region, and remove provider search metadata. The reconciler should refuse weak matches.
+
+Test authorization changes. Revoke the actor after the first attempt, change tenant status, rotate credentials, and update policy. Existing observation and new side effects must be handled differently.
+
+Test partial batches and compensation. Resolve some children, leave one unknown, and verify that retry and compensation operate only within approved boundaries.
+
+Test regional and account failover. Make the original account temporarily invisible, then restore it. The reconciler should not create a duplicate through the fallback path merely because the original lookup failed.
+
+Test retention and deletion. Ensure the system can reconcile within its operational window, while sensitive payloads are removed according to retention policy and safe evidence remains auditable.
+
+Measure time to resolution. Track unknown actions by age, reconciliation success, disputed outcomes, manual-review rate, and the time between provider completion and gateway confirmation.
+
+Measure unsafe retries prevented. A good reconciler is valuable because it stops duplicate or unauthorized effects, not merely because it eventually returns a green status.
+
+Track evidence quality by provider and tool. Providers with stable operation IDs, status APIs, signed events, and target reads should produce stronger resolution rates than providers with no observable contract.
+
+Track false certainty. Count cases where the system reported success or failure and later evidence contradicted it. This metric should drive better state semantics.
+
+Track client behavior after uncertainty. If users frequently create new action IDs after timeouts, improve the SDK, status endpoint, and tool response contract instead of blaming the client.
+
+Keep the reconciliation protocol versioned. Provider adapters evolve, evidence standards strengthen, and state meanings must remain understandable for old actions.
+
+Never silently change the meaning of historical outcomes. Preserve schema version, adapter version, policy generation, route account, and evidence source.
+
+The central design principle is simple: when an external effect is uncertain, observe first, reconcile second, retry only when the evidence and current authorization make it safe.
+
+An AI API gateway should therefore treat reconciliation as a first-class lifecycle, not as an error-handling afterthought. Keep stable action identity, preserve uncertainty, gather strong evidence, distinguish observation from execution, and make every resolution explainable.
+
+That is how an agent can recover from a lost response without turning ambiguity into duplicate work. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
