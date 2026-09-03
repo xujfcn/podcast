@@ -1,0 +1,309 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract migration safety: how an AI API gateway changes result semantics without creating a protection gap for clients, providers, or downstream actions.
+
+A contract migration is more than adding a field. It can change what completed means, how freshness is calculated, which evidence is required, how retries work, or whether a result may trigger a side effect.
+
+If producers and consumers upgrade at different times, the system can briefly operate with incompatible assumptions. That brief window is where stale reads, duplicate effects, unauthorized access, and false completion claims appear.
+
+Migration safety starts with an inventory. Identify every producer, adapter, provider route, schema, SDK, cache, queue, log, memory store, export, workflow, dashboard, and side-effect executor that consumes the result.
+
+Do not migrate only the API endpoint. A result contract lives across every place where its state is interpreted.
+
+Write the semantic delta explicitly. State which fields, statuses, evidence levels, timestamps, guarantees, limitations, and actions are changing.
+
+A schema diff shows structure. A semantic diff shows what clients may now assume.
+
+Do not describe a changed status as a harmless rename when its finality or retry meaning changed.
+
+Version the contract. Include contract version in responses, events, cached objects, audit records, and action receipts.
+
+Do not infer contract version from deployment time, SDK version, or provider model name.
+
+Define compatibility in both directions. Say whether a new producer can serve an old consumer, whether an old producer can serve a new consumer, and what information is lost in translation.
+
+If a new verified state is mapped into an old completed state, document that the old client receives weaker semantics.
+
+Do not silently map a stronger or weaker result into the same generic success value.
+
+Use capability negotiation. Clients should declare whether they understand verified evidence, unknown outcomes, expiration, correction events, partial results, and new retry semantics.
+
+The gateway can select a compatible representation or reject the request explicitly.
+
+Do not make every client guess whether it can safely consume a new state.
+
+Use additive changes where possible. Add qualifiers, evidence classes, source timestamps, expiration, and contract version before removing old fields.
+
+But additive does not mean safe automatically. A new field can be ignored by a legacy client while the old field continues to imply a stronger guarantee.
+
+During migration, preserve old behavior only when it remains safe. If the old meaning is unsafe, fail closed or provide an explicit legacy limitation.
+
+Do not preserve an unsafe contract merely because one client has not upgraded.
+
+Use dual publishing for events when needed. Emit old and new representations with the same logical operation ID, result version, and source identity.
+
+Consumers must not process both as two independent operations.
+
+Use deduplication keys that bind logical result, contract version, and event sequence.
+
+Do not let dual delivery create duplicate payments, messages, deployments, or deletions.
+
+Use dual reading carefully. A client may read the new representation while retaining a fallback to the old one, but the fallback must not silently restore weaker guarantees.
+
+If the new evidence is unavailable, return unknown or require revalidation rather than pretending the old status is equivalent.
+
+Do not use fallback code that converts every parse failure into success.
+
+Separate wire compatibility from semantic compatibility. A response may deserialize correctly while changing what the value means.
+
+Test both layers independently.
+
+A client that can parse a status is not necessarily authorized to act on it.
+
+Migrate state machines explicitly. List old states, new states, allowed transitions, terminal states, reversals, expiration, correction, and revocation.
+
+For every old-to-new mapping, identify lost distinctions and affected actions.
+
+Do not collapse unknown, failed, cancelled, expired, and disputed into one terminal error.
+
+Migrate evidence semantics. If the new contract distinguishes provider-reported from target-verified, ensure adapters preserve the distinction and clients enforce it.
+
+Historical records should retain the evidence class that was actually available at the time.
+
+Do not rewrite old provider-reported results as verified just because the new schema has a verified field.
+
+Migrate freshness semantics. Define timestamp source, precision, clock skew, expiration, revalidation, and behavior at the boundary.
+
+Old clients may have assumed that result creation time was observation time. The new contract must not silently inherit that mistake.
+
+During transition, annotate legacy timestamps and restrict high-impact actions until freshness is proven.
+
+Do not allow a migration to turn missing age into unlimited reuse.
+
+Migrate retry semantics. State whether operation identity, attempt identity, idempotency keys, and unknown outcomes are preserved.
+
+A client upgrade should not cause one logical operation to be retried under a new key.
+
+Bind retry behavior to the operation contract, not merely to the SDK method name.
+
+Test timeouts at every migration boundary: provider acceptance, adapter response, gateway persistence, event publication, client receipt, and side-effect execution.
+
+Migrate cancellation semantics. Define what stops in each phase and how late results are represented.
+
+An old client may believe cancellation ends provider work while the new route only stops delivery.
+
+Expose the difference before switching traffic.
+
+Do not promise cancellation based only on a request being accepted by an adapter.
+
+Migrate delivery semantics. Distinguish queued, sent, acknowledged, delivered, and consumed.
+
+If the old contract called an acknowledgement delivery, provide an explicit compatibility warning or block clients that require actual consumption.
+
+Do not preserve misleading labels to avoid a UI change.
+
+Migrate retention and deletion. New result derivatives, event streams, caches, and audit receipts may have different lifecycles.
+
+Ensure old and new representations inherit purpose, audience, tenant, retention, and deletion obligations.
+
+When the source is deleted, both contract versions must be purged, quarantined, or reduced to approved audit evidence.
+
+Do not leave the legacy representation behind because the new store was cleaned up.
+
+Migrate correction and revocation. Define how a correction reaches clients that understand only the old contract.
+
+If an old client cannot process withdrawal or supersession, prevent it from taking high-impact actions on affected results.
+
+Do not silently keep stale client-side state alive after the source was corrected.
+
+Migrate lineage. Preserve operation ID, result ID, source version, provider artifact, attempt, transformation, policy generation, and contract version.
+
+A client should be able to reconcile old and new representations without guessing whether they describe the same operation.
+
+Do not generate a new identity merely because the wire format changed.
+
+Migrate authorization scope. Verify that tenant, subject, resource, audience, purpose, region, and policy generation remain bound in both versions.
+
+A compatibility adapter must not broaden access while translating fields.
+
+Do not treat a legacy client as permission to return more data than its original contract allowed.
+
+Migrate side-effect gates. List every action that each contract version may trigger and the evidence required.
+
+During migration, require the stricter gate when the two versions disagree.
+
+This is the safe direction: weaker compatibility may reduce availability, but it must not increase authority.
+
+Do not let a legacy convenience path bypass new verification or freshness checks.
+
+Use monotonic safety rules. A migration may add restrictions or preserve equal protection, but no intermediate step should make riskier input more authoritative.
+
+If the new contract cannot be evaluated, the result should become restricted or unknown—not more trusted.
+
+Do not optimize migration success by weakening the guard at the boundary.
+
+Use shadow translation. Run old and new normalizers against sanitized fixtures and compare state, evidence, freshness, finality, scope, and permitted actions.
+
+A translation is compatible only when its semantic result is acceptable for the consumer’s purpose.
+
+Do not judge compatibility by identical JSON output.
+
+Use canary consumers and producers. Upgrade a small, low-risk set of clients before broad rollout.
+
+Choose canaries by operation, tenant, region, risk, and side-effect capability.
+
+Read-only displays are safer canaries than payment or deletion workflows.
+
+Do not canary irreversible actions without containment and reconciliation.
+
+Use dual-run verification. For a period, evaluate old and new contract logic independently and compare decisions without executing the action twice.
+
+Record disagreements with inputs, versions, evidence, and policy context.
+
+Do not let the first evaluator to return decide the action when the migration is under comparison.
+
+Define disagreement behavior. If old and new contracts disagree about finality, freshness, authorization, or retry safety, pause or require revalidation.
+
+Do not resolve semantic disagreement by selecting whichever result is more permissive.
+
+Use migration barriers. Before a client can consume a new contract, verify SDK support, state handling, correction handling, expiry handling, and side-effect gates.
+
+A feature flag should not be the only proof that a client is ready.
+
+Record readiness evidence by client and operation.
+
+Do not enable a new result state globally because one test client passed.
+
+Migrate caches and queues. Old cached objects may be missing new qualifiers; queued events may use old schemas; retries may cross the cutover.
+
+Attach contract version and expiration to every cache entry and queued message.
+
+Invalidate or revalidate objects that cannot satisfy the new contract.
+
+Do not let an old cache serve a result under a new contract label.
+
+Use version-aware workers. Workers should accept known versions, reject unsupported versions safely, and preserve operation identity across translation.
+
+Dead-letter unsupported messages with protected metadata and an explicit remediation path.
+
+Do not drop messages silently or retry them forever.
+
+Migrate provider adapters separately from client contracts. A provider change may require a new adapter while the public contract remains stable, or may require a public semantic version change.
+
+Test whether the adapter preserves evidence, finality, timestamps, errors, cancellation, and retention.
+
+Do not hide provider semantic drift inside a compatibility wrapper.
+
+Migrate schemas with strict unknown-state handling. New enum values, nulls, omitted fields, and nested objects should be tested against old clients.
+
+Unknown high-impact states should block action.
+
+Do not default an unknown state to completed or retryable failure without an approved rule.
+
+Migrate documentation and examples. Update status diagrams, SDK samples, error handling, retry guidance, and operational runbooks together.
+
+An old example can recreate a protection gap even after the code is correct.
+
+Do not mark a migration complete while the support dashboard still displays misleading labels.
+
+Migrate observability. Add contract version, source version, evidence class, freshness, finality, consumer, and action links to safe logs and metrics.
+
+Compare incidents and behavior by version.
+
+Do not mix old and new metrics so thoroughly that migration regressions disappear in one aggregate.
+
+Migrate audit records. Preserve which contract governed each decision and what the consumer was entitled to assume.
+
+Historical audit data should remain interpretable after old schemas are retired.
+
+Do not rewrite history into the new vocabulary without preserving the original semantics.
+
+Define rollback before rollout. Decide whether rollback means restoring the old producer, old consumer, old adapter, old schema, or all of them.
+
+Handle in-flight operations, queued messages, caches, callbacks, corrections, and side effects under rollback rules.
+
+A binary rollback may not restore the previous contract if data has already crossed the boundary.
+
+Do not roll back code while leaving incompatible persisted state active.
+
+Use forward-compatible recovery. If rollback is unsafe, keep the new reader, pause new writes, and drain or translate old state safely.
+
+Recovery should preserve evidence and operation identity.
+
+Do not choose a fast rollback that loses whether an external effect occurred.
+
+Test partial rollout. Upgrade producers in one region, consumers in another, or adapters for one provider account only.
+
+Verify cross-region and cross-account results remain explicit about their contract and guarantees.
+
+Do not assume a globally consistent deployment in a distributed gateway.
+
+Test concurrent migrations. Change provider, policy, schema, and SDK versions at the same time.
+
+Verify that version negotiation selects the safest supported combination.
+
+Do not let a compatible-looking pair hide a three-way incompatibility.
+
+Test expiration during migration. Let a result cross its deadline while being translated, cached, queued, or delivered.
+
+Verify that the stricter freshness rule applies and that translation does not renew the result.
+
+A format conversion is not a new observation.
+
+Test correction during migration. Correct or withdraw the source while old and new clients hold different representations.
+
+Verify that both views converge safely and that neither can trigger a stale side effect.
+
+Test authorization changes during migration. Revoke access between old-client read, translation, and action.
+
+Point-of-use authorization must stop the action regardless of contract version.
+
+Test unknown outcomes and retries. Lose provider responses at each boundary and confirm operation identity and reconciliation remain stable.
+
+Do not let a contract upgrade turn uncertainty into duplicate work.
+
+Test unsupported states. Inject new enum values, missing verification metadata, unknown error classes, and malformed qualifiers.
+
+Verify safe rejection, clear diagnostics, and no accidental success mapping.
+
+Test cache and queue races. Expire, correct, revoke, and delete a result while old and new workers process it.
+
+The final state must be deterministic and safe under event reordering.
+
+Test crash recovery at cutover. Stop workers during dual publishing, translation, persistence, correction, and audit recording.
+
+Restart and verify that no event is duplicated, lost, or assigned to the wrong contract version.
+
+Test side-effect gates. Attempt protected actions through every legacy and new client path.
+
+Verify that the strongest required checks remain in force during rollout and rollback.
+
+Test tenant isolation. Reuse IDs and cache keys across contract versions and confirm translations cannot cross tenant, subject, purpose, or region boundaries.
+
+Test retention. Delete a source and verify old payloads, new payloads, event copies, indexes, embeddings, exports, and audit derivatives follow their approved lifecycle.
+
+Measure migration safety. Track contract-version adoption, unsupported messages, translation failures, state disagreements, stale reads, duplicate effects, unauthorized views, correction reach, and expiry violations.
+
+Track differences between old and new decisions, not just errors.
+
+Measure how many actions were blocked by the stricter contract and whether any were later proven safe.
+
+A temporary increase in blocked actions may be evidence that the migration is protecting clients correctly.
+
+Track unknown and downgraded results by consumer and operation.
+
+Frequent downgrades may indicate that the new contract is not usable by important clients or that the provider cannot supply the required guarantees.
+
+Measure time to migrate, time to detect incompatibility, time to rollback or forward-recover, and time to retire the old contract.
+
+Do not retire the old version merely because traffic is low. Verify stored data, delayed queues, backups, support tools, and recovery procedures.
+
+Define retirement proof. Confirm no active clients, no unexpired cached objects, no queued messages, no unresolved operations, no required audit readers, and no rollback dependency remain.
+
+When retirement completes, reject old versions explicitly and preserve a safe diagnostic.
+
+Do not silently reinterpret retired results.
+
+The central principle is simple: a contract migration is safe only when every producer, consumer, stored artifact, and side-effect gate agrees on what the result means—or fails safely when it does not.
+
+An AI API gateway should version semantics, inventory dependencies, negotiate capabilities, preserve identities, test translations, enforce the stricter rule during disagreement, migrate caches and queues, protect corrections and retention, rehearse rollback, and prove retirement.
+
+That is how result contracts can evolve without creating a protection gap between old assumptions and new guarantees. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
