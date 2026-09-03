@@ -1,0 +1,191 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool execution receipts: how an AI API gateway can prove what happened when an agent crossed the boundary from proposing an action to causing an external effect.
+
+An agent can say that it sent a message, updated a record, created a ticket, or deployed a service. But a model statement is not evidence. A successful HTTP response is not always evidence either. The provider may accept a request without completing it, return a partial result, or report success for a different object than the gateway intended.
+
+A tool execution receipt is a durable, bounded record of what the gateway authorized, what it attempted, what the provider acknowledged, what controls ran, and what the system can honestly claim now.
+
+Start with the action identity. Every consequential tool invocation should have a stable identity that survives retries, failover, reconciliation, and support investigation. The receipt must point to that identity rather than to only one transport request.
+
+Keep attempt identity separate. An action may have several network attempts, but the receipt should make clear whether those attempts produced one effect, no effect, or an unresolved outcome.
+
+Record the canonical action representation. Include the tool, operation, tenant, actor, delegated principal, target, parameters, environment, purpose, and expected side effects. Store a hash or safe reference when the full payload contains sensitive data.
+
+The receipt must prove what was authorized, not merely what was requested. Include the authorization decision identity, policy generation, validity window, constraints, and the final freshness check performed before execution.
+
+Do not treat an old conversation approval as the receipt. Conversation history explains intent; the receipt records enforcement evidence.
+
+Record the credential lease or execution capability used at the boundary. Do not expose the secret itself. Record the credential identity, scope, audience, issuing authority, and expiration needed to prove that the right credential class was used.
+
+Record the route identity. A provider name is not enough when one provider has multiple organizations, projects, accounts, regions, or contracts. The receipt should identify the approved account and route generation without leaking internal secrets to the client.
+
+Record data-handling obligations. If the action required a specific region, retention setting, encryption context, or tenant boundary, the receipt should show that the route satisfied those obligations.
+
+Record the enforcement checks. Useful evidence includes parameter validation, target validation, policy evaluation, authorization freshness, idempotency validation, rate-limit admission, data-loss checks, and output validation.
+
+Do not claim that a check passed merely because the request reached an adapter. Capture the check result at the point where it was actually enforced.
+
+Record the provider request reference. If the provider returns an operation ID, transaction ID, message ID, deployment ID, or task ID, preserve it in the receipt. This is the bridge between gateway evidence and external reconciliation.
+
+If no provider reference exists, say so. A receipt that hides the lack of an external correlation ID creates false confidence.
+
+Record timestamps with clear semantics. Distinguish action creation, authorization, final admission, request dispatch, provider acceptance, provider completion, response receipt, reconciliation, and receipt issuance.
+
+Do not use one timestamp called “completed” for every stage. Time semantics matter when an incident asks whether permission was valid at dispatch, whether the provider accepted the action before a timeout, or whether a response arrived after expiration.
+
+Record the outcome state explicitly. Useful states include rejected, not started, dispatched, accepted, completed, partially completed, failed, canceled before dispatch, cancellation requested, unknown, and compensated.
+
+Unknown is a valid and important outcome. If the gateway lost the connection after dispatch, it may not know whether the provider completed the action. The receipt should preserve that uncertainty until reconciliation resolves it.
+
+Do not convert an unknown outcome into failed merely because the client saw a timeout. The client-visible transport result and the external side-effect result are different facts.
+
+Record what the gateway can prove about the effect. A provider acknowledgment may prove acceptance but not completion. A status lookup may prove completion. A downstream callback may prove a later state transition. Label each evidence level precisely.
+
+Use evidence categories. For example, client request received, policy allowed, provider accepted, provider completed, target state observed, and business reconciliation confirmed are progressively stronger claims.
+
+Avoid ambiguous language such as “success” when the evidence only proves that an HTTP request was accepted. A receipt should tell the truth at the strongest level available, not at the level that sounds most convenient.
+
+Bind the receipt to the target identity. Include a stable resource identifier, tenant, provider account, and version or revision when the target is mutable.
+
+Use target-version evidence for updates. If the gateway was authorized to update version 12 and the provider confirms version 13, the receipt should explain whether version 13 was the intended result or whether another process changed the object.
+
+Record the normalized parameters that reached the provider, or a tamper-evident digest of them. The action the gateway authorized and the action the adapter sent must be demonstrably equivalent.
+
+Do not rely on the original client JSON alone. Adapters may add defaults, translate fields, change units, expand aliases, or select a different provider operation. The receipt should capture the canonical form after translation.
+
+Record important transformations. If a model alias resolved to a concrete model, if a currency was normalized, if a region was selected, or if a batch was split into sub-actions, the receipt should preserve those decisions.
+
+When one logical action becomes multiple provider operations, use a receipt tree. The parent receipt describes the business action, and child receipts describe each bounded external operation and its outcome.
+
+Do not flatten a multi-step workflow into one vague success flag. One step may complete while another fails, and compensation may create additional actions with their own receipts.
+
+Record idempotency evidence. Include the action key or safe digest, the original request fingerprint, duplicate detection result, lease owner, and whether the provider reused the original operation.
+
+A receipt must help prove that a retry did not create a duplicate effect. It should connect every attempt to the same action identity and show the reconciliation path when the first response was uncertain.
+
+Record cancellation evidence separately. A request to cancel an action is not proof that the external effect was canceled. Capture whether cancellation happened before dispatch, was accepted by the provider, completed, or arrived too late.
+
+Record compensation separately from the original action. A refund, rollback, delete, or repair is a new operation. Link it causally to the original receipt, but never rewrite the original outcome as if it never happened.
+
+Record human approvals when they are part of the control path. Include approver identity, authentication strength, approval time, exact action scope, and expiration. Do not store more personal data than the audit purpose requires.
+
+Bind approvals to the canonical action. If the target, amount, recipient, environment, or data scope changes, the receipt should show that the original approval no longer covered the final action.
+
+Make receipts tamper-evident. Use append-only storage, signed fields, chained hashes, trusted timestamps, or another mechanism appropriate to the threat model. The goal is to detect unauthorized alteration, not to create decorative cryptography.
+
+Protect receipt integrity across services. A gateway may authorize the action, an adapter may execute it, and a reconciliation worker may finalize it. Each handoff should add evidence without allowing a later service to rewrite an earlier fact.
+
+Use monotonic state transitions. A receipt should not move from completed back to failed because a late timeout arrived. If new information changes the interpretation, append a correction or reconciliation event with its own timestamp and authority.
+
+Do not erase uncertainty retroactively. A receipt can become resolved, but the historical record should preserve that the gateway was uncertain at the earlier time.
+
+Separate fact from interpretation. “Provider returned operation ID 73” is a fact. “The customer’s request completed successfully” may be an interpretation that requires target-state or business-level evidence.
+
+Record the evidence source for every important claim. Identify whether it came from the client, policy engine, credential service, adapter, provider response, webhook, polling result, database observation, or human review.
+
+Do not treat provider claims as infallible. A provider response can be malformed, stale, truncated, or associated with the wrong request. Validate the response schema, operation identity, target, account, and status before promoting it into receipt evidence.
+
+Verify response integrity where possible. Use signatures, checksums, TLS identity, provider request IDs, and expected account bindings to reduce the chance that a response is accepted from the wrong source.
+
+Record response completeness. If a streamed tool result ended early, if a response was truncated, or if a required field was missing, the receipt should say that the output was incomplete rather than marking the action fully observed.
+
+For read operations, a receipt can record what was observed without claiming that the underlying data is globally current. Include read time, source, consistency level, and freshness indicators when they matter.
+
+For write operations, record the observed postcondition. The strongest receipt for an update says not only that the provider accepted the write, but also what target state was later observed.
+
+Do not force immediate postcondition reads when they create unacceptable cost or risk. Define evidence levels by action class and document what “complete” means for each tool.
+
+Make the receipt client-safe by default. Clients often need action status, provider operation status, timestamps, and a support correlation ID. They usually do not need internal policy names, account IDs, credential metadata, or raw sensitive parameters.
+
+Create a private receipt and a redacted receipt. Internal operators need enough detail to investigate, while end users need a useful explanation without receiving secrets or internal topology.
+
+Use stable correlation IDs in support workflows. A customer should be able to provide one receipt ID and have support reconstruct the action, attempts, route, provider reference, and final outcome.
+
+Do not make the receipt ID an authorization bypass. Status lookup must still authenticate the caller, enforce tenant scope, and check whether the caller may see the action details.
+
+Protect receipts as sensitive records. They may reveal customer targets, operation timing, provider relationships, data classifications, and business activity. Apply retention, access control, encryption, and redaction policies.
+
+Use purpose limitation for receipt data. Keep evidence needed for execution, billing, support, audit, and compliance, but do not retain full payloads forever just because storage is cheap.
+
+Separate operational retention from legal retention. The period needed to reconcile a provider action may differ from the period needed to satisfy an audit obligation. Make deletion and archival policies explicit.
+
+Support verifiable deletion where required. If payload details are deleted while an audit digest remains, the receipt should document what was removed and how the remaining evidence can still be verified.
+
+Use receipts for billing reconciliation. Link provider usage, gateway cost, customer charge, action identity, and route account. A retry should not become a second charge merely because it created a second transport attempt.
+
+Record pricing context when it affects the charge. Model version, provider account, region, currency, discount, committed-spend rule, and pricing generation may all be necessary to explain a bill later.
+
+Do not put billing logic into a vague success flag. A completed business action, a provider-billed request, and a customer-billable unit can be related without being identical.
+
+Use receipts for incident response. During an outage, operators need to know which actions were authorized, which were dispatched, which providers accepted them, which results are unknown, and which compensations are still pending.
+
+Make incident queries efficient. Index action ID, tenant, provider reference, route, time, outcome, and policy generation. A receipt that cannot be found during an incident is not useful evidence.
+
+Record the gateway version and adapter version. An outcome may depend on the code and configuration that performed translation and enforcement. Keep version information without exposing internal build secrets.
+
+Record configuration and policy generations. This lets operators reconstruct why an action was allowed and which route rules were active at the time.
+
+Do not depend on mutable labels. Store stable version IDs or digests so that a later rename does not change the meaning of a historical receipt.
+
+Use clock synchronization and trusted time sources. Freshness, expiration, ordering, and incident reconstruction become unreliable when services disagree about time.
+
+When exact time cannot be guaranteed, record uncertainty bounds. A receipt should not imply millisecond precision that the system cannot support.
+
+Make receipt issuance resilient. If the provider completes an action but the receipt writer is temporarily unavailable, use a durable outbox or event log so that the evidence can be reconstructed without issuing a duplicate action.
+
+Do not make receipt persistence a reason to repeat the external operation. The action outcome and the evidence about it are separate recovery problems.
+
+Use an append-only evidence log plus a materialized current view. The log preserves history, while the current view makes status queries fast. Rebuild the view from evidence rather than treating it as the only source of truth.
+
+Design for out-of-order events. A webhook can arrive before a client timeout is recorded, or a reconciliation result can arrive after a manual review. Sequence by event identity and logical version, not only by arrival time.
+
+Deduplicate evidence events. Provider webhooks, polling results, and queue deliveries can repeat. Use event IDs and source-specific fingerprints so duplicate evidence does not create duplicate state transitions.
+
+Make evidence provenance explicit when sources disagree. If the provider says completed but a target read says unchanged, retain both claims, mark the receipt disputed, and route the conflict to the appropriate reconciliation policy.
+
+Do not choose the answer that merely arrived last. Resolve contradictions using source authority, target observation, operation identity, and business rules.
+
+Define receipt finality. Some actions become final at provider acceptance. Others require settlement, asynchronous processing, downstream confirmation, or a business-level postcondition. The receipt should indicate whether the current state is provisional or final.
+
+Use finality boundaries in client behavior. A client may safely display “accepted” without displaying “completed,” or may wait for “settled” before unlocking a downstream workflow.
+
+Make tool schemas expose evidence states. An agent should receive structured results such as accepted, completed, pending, unknown, or disputed, with a safe next step such as poll, wait, ask the user, or stop.
+
+Do not let the model infer completion from a missing error. Tool adapters should return explicit evidence, and the gateway should reject ambiguous output formats for consequential actions.
+
+Use receipts to constrain follow-up actions. A compensation or retry should reference the prior receipt and verify its current state before proceeding.
+
+Do not allow an agent to claim completion based solely on its own generated summary. The gateway can provide a receipt-backed status message that the agent may pass to the user.
+
+Test receipt correctness under failures. Disconnect after provider acceptance, reorder callbacks, corrupt a provider response, restart the worker, lose the receipt database connection, and fail over to another region.
+
+Test partial completion. Split a batch, complete only some children, and verify that the parent receipt reports partial state with links to every child outcome.
+
+Test duplicate attempts. Replay the same action, reuse a key with changed parameters, and deliver the same webhook several times. The receipt must remain coherent and the external effect must not multiply.
+
+Test unauthorized observation. Attempt to read another tenant’s receipt, guess a receipt ID, or use a valid support identifier without the necessary role. Evidence must not become a data-leak channel.
+
+Test tampering and repair. Modify a historical field, delete an evidence event, reorder events, or inject a fake provider result. Integrity checks should detect the violation, and recovery should preserve what was actually known.
+
+Test retention and deletion. Remove sensitive payload data while preserving safe digests, then verify that operators can still answer the required audit questions without recovering deleted content.
+
+Measure evidence quality. Track receipts missing provider references, receipts that remain unknown too long, state transitions rejected as invalid, contradictory evidence, postcondition verification rate, and time from effect to durable receipt.
+
+Track the gap between provider completion and gateway confirmation. A large gap may create user confusion, duplicate retries, or billing disputes even when the provider is healthy.
+
+Track unsupported claims. Count cases where a client or model says “completed” while the receipt says accepted, pending, unknown, or disputed. These are communication failures worth fixing.
+
+Track reconciliation outcomes by tool and provider. Some adapters may consistently return strong evidence, while others may leave a large fraction of actions uncertain.
+
+Do not optimize receipt systems only for happy-path latency. A fast receipt that cannot explain the failure window is less valuable than a durable, precise record that resolves ambiguity safely.
+
+Keep the receipt contract stable. Clients, support tools, billing systems, and auditors may depend on field meanings. Evolve with explicit versions and compatibility rules.
+
+Version the receipt schema separately from the action schema. A tool operation can evolve while evidence semantics remain stable, or evidence requirements can become stronger without changing the tool API.
+
+Never silently reinterpret old receipts under new rules. Preserve the schema version, policy generation, and adapter version needed to understand historical evidence.
+
+The central design principle is simple: every consequential tool action should leave behind evidence that distinguishes intent, authorization, attempt, provider acknowledgment, observed effect, and remaining uncertainty.
+
+An AI API gateway should therefore issue execution receipts as part of the action lifecycle, not as an afterthought. Bind them to stable identities, preserve provenance, record honest outcome states, protect their integrity, and make them useful for clients, operators, billing, and recovery.
+
+That is how an agent can say what happened without relying on a guess. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
