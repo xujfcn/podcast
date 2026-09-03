@@ -1,0 +1,195 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool action idempotency: how an AI API gateway can retry uncertain work without accidentally creating the same external side effect twice.
+
+An agent may call a payment service, create a ticket, send a message, update a record, provision a resource, or trigger a deployment. In each case, the gateway can lose the connection at the worst possible moment: after the provider accepts the request, but before the gateway receives a response.
+
+That creates an ambiguity gap. The gateway does not know whether the action failed, succeeded, or is still being processed. A naive retry may repair the outage, or it may charge a customer twice, send duplicate messages, create duplicate infrastructure, or apply the same change repeatedly.
+
+Idempotency is the contract that makes this uncertainty manageable. It means that repeating the same logical operation produces one intended effect, not one new effect per network attempt.
+
+Start by separating attempts from actions. An attempt is one transport delivery. An action is the business operation the user intended. Five HTTP requests may represent one action, and one request may accidentally contain multiple actions if the boundary is poorly defined.
+
+Give every consequential action a stable action identity before the first provider call. Generate it from the canonical intent or accept a client-supplied idempotency key after validating its scope and format.
+
+Do not generate a new action identity on every retry. A retry with a new key tells the provider that this is a different operation, even when the user intended the same one.
+
+Scope the key correctly. An idempotency key should be bound to the tenant, actor, tool, operation, target, and relevant parameters. The same text key used by two tenants must not collide, and the same key must not authorize a different operation.
+
+Canonicalize the request before deriving or validating the identity. Normalize identifier formats, URL encodings, currencies, quantities, timestamps, ordering, and optional defaults. Two representations of the same intent should not create two unrelated action identities.
+
+At the same time, canonicalization must not erase meaningful differences. A change in recipient, amount, target record, environment, or destructive flag must create a different action or cause the old key to be rejected.
+
+Store a request fingerprint beside the action identity. On reuse, compare the new canonical request with the original fingerprint. If the key is reused for different parameters, reject it as an idempotency conflict rather than silently accepting the new meaning.
+
+Define the action boundary with business owners. “Send an email” may be one action per recipient, one action for a campaign, or one action for a batch. The correct boundary determines what a retry is allowed to repeat.
+
+For financial operations, the amount, currency, funding source, recipient, and settlement purpose belong inside the boundary. For infrastructure, the environment, resource name, desired state, and deployment version matter. For a message, recipient, content identity, channel, and send purpose may matter.
+
+Do not use a transport request ID as the business action ID. A request ID is useful for tracing one attempt, but retries and failover requests need to point back to the same logical action.
+
+Keep both identities. Trace the action ID across the workflow, and assign a distinct attempt ID to every delivery. This lets operators see one business operation with several transport attempts.
+
+Use an idempotency record with explicit states. Useful states include received, authorized, in progress, provider accepted, completed, failed, uncertain, expired, and conflict. Avoid treating every non-200 response as a simple failure.
+
+The uncertain state is essential. If the connection breaks after submission and before confirmation, the gateway should preserve that uncertainty instead of allowing an immediate blind retry.
+
+When an action is uncertain, prefer reconciliation over repetition. Ask the provider whether the action identity or provider reference already exists. If the provider supports idempotency keys, use the same key for the reconciliation request.
+
+If the provider does not support idempotency, build a safe adapter. Persist the action identity, use provider-side lookup where possible, and require a deterministic reconciliation strategy before allowing retries of high-impact operations.
+
+Do not claim that an action failed merely because the client timed out. A client-visible timeout describes delivery of the response, not necessarily execution of the side effect.
+
+Return a structured outcome such as completed, rejected, pending reconciliation, or unknown. This is more honest and more useful than returning a generic server error that encourages the client to create a new action.
+
+Make client guidance part of the contract. Tell clients whether they may retry, whether they must reuse the same idempotency key, how long the key remains valid, and how to query the action status.
+
+A retryable timeout should preserve the action identity. A user pressing the button again after an unknown result should either resume the existing action or receive a clear conflict, not create a second operation by default.
+
+Treat duplicate submission as a normal condition, not an exceptional attack. Mobile clients reconnect, browser tabs repeat requests, job queues redeliver messages, and users click twice. The system should handle these paths deliberately.
+
+Use a durable store for idempotency records. An in-memory cache cannot protect against process restarts, regional failover, or a retry that lands on another worker.
+
+Choose retention based on the risk and replay window. Keep records long enough to cover client retries, queue redelivery, provider settlement delays, support investigations, and reconciliation. Retention that is too short turns a safe retry into a new action.
+
+Do not delete the idempotency record immediately after success. A completed record is what lets a later duplicate receive the original outcome instead of creating a second effect.
+
+Store a safe result summary. Include the action state, provider operation identifier, completion timestamp, and client-visible result needed for a duplicate response. Avoid storing secrets or unnecessary payload data.
+
+For large results, store a durable reference and an integrity marker rather than copying the entire provider response into the idempotency record.
+
+Make duplicate responses stable. If the original action completed, a repeated request should return the same logical result or a clearly equivalent representation. Do not make clients guess whether two different response IDs represent one effect.
+
+The response itself may have changed even when the action has not. A provider may return a new trace identifier on reconciliation. Keep transport metadata separate from the stable business result.
+
+Use atomic claim semantics when multiple workers receive the same action. Only one worker should own the transition from received to in progress, while other workers wait, reconcile, or return the current state.
+
+Do not use a simple check-then-insert sequence without a uniqueness constraint. Two workers can both observe that a key is absent and both start the external operation.
+
+Enforce uniqueness on the correctly scoped action identity. Include tenant and action class in the uniqueness boundary, and validate the request fingerprint when the same key appears again.
+
+Use leases for in-progress work. A worker that crashes must not leave the action permanently locked, but lease expiry must not automatically authorize a second side effect. Recovery should reconcile before taking ownership again.
+
+Separate ownership recovery from action replay. A new worker may take over the record, but it should not assume that the provider never received the old attempt.
+
+Record the last provider interaction and the uncertainty reason. This helps recovery choose between status lookup, safe retry, human review, and terminal failure.
+
+Use provider operation IDs whenever available. A provider reference can support status lookup, cancellation, reconciliation, and support escalation even when the gateway’s transport request failed.
+
+If the provider returns no operation ID, create one in the adapter and preserve it through all retries. Where the provider allows metadata, send the gateway action identity as a trace or reference field.
+
+Do not place secret-bearing idempotency keys in URLs or logs. Treat keys as sensitive enough to protect against unintended correlation, even when they are not authentication credentials.
+
+Bind idempotency to authorization. A valid old key must not allow an action after the original authorization expired or was revoked. Reuse of an action identity does not bypass a fresh permission check.
+
+At the same time, do not reauthorize a completed action as if it were a new side effect when returning a duplicate result. The gateway should distinguish reading the recorded result from executing the operation again.
+
+For an uncertain action, recheck authorization before reconciliation and before any new provider attempt. The user may have lost permission while the original request was unresolved.
+
+Bind the action to its target version when the target is mutable. If an update was authorized against version 12 and the object is now version 14, a retry may no longer be safe even though the action key is the same.
+
+Use compare-and-swap or provider-native conditional updates. A retry should apply only to the state for which the action was authorized, unless a new decision explicitly permits the changed state.
+
+Do not confuse idempotency with commutativity. An operation can be safe to repeat, or two operations can be safe in either order, but these are different properties. Adding ten dollars twice is not equivalent to setting a balance to ten dollars.
+
+Classify operations by effect semantics. A set operation may be naturally idempotent. An increment, append, send, charge, delete, or trigger operation usually needs an explicit action identity and deduplication contract.
+
+For non-idempotent providers, translate the operation into a state target when possible. Instead of “create a resource,” request “ensure resource X has desired state Y,” then reconcile the observed state before creating anything.
+
+Use idempotent upserts carefully. An upsert keyed only by a mutable display name can update the wrong object after a rename or tenant collision. Bind the key to a stable resource identity and tenant.
+
+For messages, decide whether duplicate suppression is required. Transactional receipts, password reset messages, and financial alerts usually need strong deduplication. Marketing broadcasts may use a campaign and recipient identity with a different policy.
+
+Do not deduplicate by content alone. Two identical messages may be intentionally sent twice, and two different messages may represent a retry of the same logical notification. Use the event or action identity defined by the business contract.
+
+For webhooks and callbacks, make consumers idempotent too. A gateway can deliver one provider event more than once, and a client can retry its acknowledgment. Event IDs, sequence numbers, and durable consumption records prevent duplicate downstream effects.
+
+Use an inbox pattern for incoming events. Record the provider event identity before applying the business transition, then mark it processed after the transition commits.
+
+Use an outbox pattern for outgoing effects. Commit the business state and the intent to publish in one transaction, then deliver from the outbox using the same action identity.
+
+An outbox does not magically make a provider operation idempotent. It makes the intent durable. The adapter still needs to reconcile uncertain delivery and preserve the external action identity.
+
+Treat queue redelivery as expected. A worker acknowledgment should happen only after the action state and any required provider outcome are durably recorded. If the worker crashes before acknowledgment, the next worker must see the same action identity.
+
+Do not acknowledge too early merely to improve throughput. Early acknowledgment turns a crash into a lost action, while late acknowledgment without idempotency turns a crash into a duplicate action.
+
+Measure the right signals. Track duplicate requests, idempotency conflicts, uncertain outcomes, reconciliation success, provider duplicate rejection, lease recovery, stale-key reuse, and time to final resolution.
+
+A high duplicate count is not automatically a failure. It may show that clients are retrying correctly. A low duplicate count can hide missing instrumentation or a client that silently creates new keys on every retry.
+
+Track the percentage of retries that preserve the original action identity. This is one of the clearest indicators that the contract is actually working.
+
+Track unresolved uncertainty by age. An action that remains unknown for seconds is different from one that remains unknown for days. Define escalation thresholds by risk class.
+
+Make the action status endpoint safe and useful. It should accept the scoped action identity, enforce tenant access, return the current state, and expose the next permitted client action.
+
+Do not let status lookup reveal another tenant’s operation merely because the caller guessed a key. Scope, authenticate, authorize, and rate-limit status queries.
+
+Make conflict errors actionable. If a key is reused with different parameters, return a dedicated conflict category and identify which safe field changed when policy allows it.
+
+Do not echo sensitive original parameters in a conflict response. A conflict can be useful without disclosing the stored payload to an unauthorized caller.
+
+Use expiration carefully. Once an idempotency record expires, a reused key may become a new action. That is acceptable only if the expiration contract is explicit and the risk of late replay is controlled.
+
+For high-impact operations, prefer permanent or long-lived tombstones for completed keys. A late retry must not create a new charge or deletion simply because the original record was garbage-collected.
+
+Protect storage from unbounded key creation. Authenticate callers, cap request sizes, enforce quotas, expire safe pending records, and monitor for key-flooding attacks without deleting records needed for correctness.
+
+Test the exact failure window. Disconnect after sending request bytes, after provider acceptance, after provider response, before database commit, after database commit, and during failover. Each point should produce a defined state and recovery path.
+
+Test concurrent duplicates. Send the same action from ten workers at once and verify that only one external side effect occurs, all callers receive a coherent state, and no lock remains stuck after a crash.
+
+Test parameter conflicts. Reuse one key with a different amount, target, tenant, environment, or operation. The gateway should reject the conflict before any provider call.
+
+Test delayed provider responses. Return a success after the client timeout, then retry. The retry must reconcile with the original action rather than submit a second operation.
+
+Test provider partial failures. Simulate a provider accepting the operation but failing to persist its response, or returning a timeout after committing the side effect. The adapter must use provider references or a documented safe fallback.
+
+Test regional failover. Start an action in one region, lose that region, and retry in another. The second region must see the durable action record and the same policy, authorization, and target constraints.
+
+Test key replay across environments. An action key from staging must not work against production, even if a client accidentally sends it to the wrong endpoint.
+
+Test authorization changes. Revoke the actor after the first attempt but before reconciliation. The system should be able to inspect the existing action without granting permission for a new side effect.
+
+Test expiration races. Begin a retry before the key expires, delay execution beyond the deadline, and verify that the gateway follows the documented rule instead of silently extending authority.
+
+Test cancellation. Cancellation of an uncertain action must distinguish “stop future attempts” from “reverse an already completed effect.” Do not report cancellation as success unless the external contract proves it.
+
+Compensation is not deduplication. A duplicate charge may be refunded, but that is a second financial action with its own authorization, idempotency key, audit trail, and failure modes.
+
+Make compensation explicit. If recovery requires reversing or repairing an external effect, create a new bounded action linked to the original action, rather than pretending the original never happened.
+
+Preserve causal links. A retry, reconciliation, cancellation, compensation, and manual review should all point back to the original action identity and provider operation.
+
+Keep audit records honest. Record what the gateway knew at each point, what it attempted, what the provider confirmed, and what remains uncertain. Do not rewrite an unknown result into a clean failure after the fact.
+
+Do not expose internal uncertainty to the model as a vague error. Return a structured tool result that tells the agent whether it may poll, wait, ask the user, or stop. This prevents the model from inventing a new action because it misunderstands a timeout.
+
+Use tool schemas that include action identity and retry behavior. The model should know when a tool call is resumable, when a key must be reused, and when user confirmation is required again.
+
+The gateway, not the model, must enforce the contract. Prompt instructions about “do not double charge” are helpful context, but they are not a substitute for durable uniqueness, provider reconciliation, and atomic state transitions.
+
+The same principle applies to internal services. Trusting an internal network or a service account does not make duplicate effects safe. Every boundary that can repeat work needs an idempotency strategy.
+
+Keep the idempotency implementation close to the side-effect boundary. A wrapper far upstream may lose important provider references, target versions, or adapter semantics before the real operation is attempted.
+
+Make adapters declare their guarantees. For each tool, document whether it supports provider idempotency, status lookup, conditional execution, cancellation, compensation, or only best-effort deduplication.
+
+Route high-risk actions only through adapters with strong guarantees. If a provider cannot prove whether a charge or deletion happened, the gateway should require human review or a safer workflow instead of pretending retries are harmless.
+
+Use stronger safeguards when the provider contract is weak. Shorter windows, explicit confirmation, manual reconciliation, provider-side search, and action limits can reduce the blast radius, but they cannot create certainty that the provider does not expose.
+
+Idempotency also improves observability. One action identity gives operations teams a stable unit for tracing, billing, support, incident response, and reconciliation across many transport attempts.
+
+Use the action identity in usage records and billing metadata. A customer should not be charged twice merely because the gateway had two network attempts, and support should be able to explain how many attempts belonged to one logical operation.
+
+Reconcile usage as well as effects. If a provider reports a completed request but the gateway lacks a client response, link the provider usage to the existing action rather than recording a second billable operation.
+
+Be precise about what “exactly once” means. Across an unreliable network, exactly-once execution is usually not a transport property. It is a business outcome created through durable identity, deduplication, reconciliation, and provider cooperation.
+
+At minimum, aim for exactly-once business effect or an explicit unknown state. “At-least-once delivery plus silent duplicate risk” is not an acceptable contract for consequential tools.
+
+The central design principle is simple: a retry must preserve the identity and meaning of the original action, and the gateway must prove whether that action already took effect before attempting anything new.
+
+An AI API gateway should therefore treat idempotency as part of authorization and execution, not as an optional HTTP header. Canonicalize the action, bind it to tenant and target, persist its state, reconcile uncertainty, consume authority safely, and make every retry explainable.
+
+That is how an agent can recover from a lost response without turning uncertainty into duplicate side effects. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
