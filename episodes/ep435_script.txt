@@ -1,0 +1,241 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result correction propagation: how an AI API gateway repairs downstream answers, decisions, caches, memories, reports, and side effects when evidence changes after delivery.
+
+In a reliable agent system, a tool result is not the end of the story. It may become a customer-facing answer, a policy decision, a billing record, a memory entry, a cached response, or the trigger for an external action.
+
+Sometimes the original result is corrected. A provider sends a late update. A target read contradicts the first response. A billing record is amended. A deletion is found to be incomplete. A security review discovers that the result should never have been disclosed.
+
+Correction propagation is the controlled process of finding what depended on the changed evidence, determining what is affected, stopping unsafe reuse, and repairing authorized downstream artifacts without rewriting history.
+
+Start with an immutable correction identity. Give every correction its own ID, link it to the original result, identify the source authority, record the reason, event time, observation time, policy generation, and affected scope.
+
+Do not edit the original result in place. Historical records must show what the system knew, what it delivered, and when the correction arrived.
+
+Classify the correction. It may change a value, status, identity, scope, authorization, sensitivity, freshness, retention requirement, or evidence strength.
+
+Different correction classes have different propagation rules. A display-label change may affect one summary; an identity correction may affect every dependent claim and side effect.
+
+Record the exact affected field or evidence span. Avoid invalidating an entire dataset when only one semantic property changed.
+
+Use dependency edges to find downstream artifacts. Link results to claims, answers, decisions, caches, memory, exports, reports, notifications, and side effects.
+
+A generic relationship is not enough. Each edge should describe whether the downstream artifact must be withdrawn, downgraded, recomputed, corrected, or merely annotated.
+
+Determine impact before repair. Ask which claims use the changed field, which decisions rely on those claims, which audiences received them, and which actions were triggered.
+
+Do not propagate blindly by string matching or URL search. High-impact correction requires semantic dependency metadata.
+
+Use field-level impact rules. Identity, amount, authorization, status, location, time, and content can have different blast radii.
+
+For multi-source answers, identify whether the changed input was decisive, supporting, or incidental.
+
+Do not invalidate a comparison merely because one non-material label changed, but do not preserve it if the changed value changes the conclusion.
+
+Separate containment from repair. First prevent continued use of unsafe evidence; then recompute or correct downstream artifacts.
+
+Containment can include cache blocking, memory quarantine, decision expiration, reference revocation, delivery suppression, and provider-route isolation.
+
+Do not wait for a perfect replacement answer before blocking a dangerous old one.
+
+Use explicit correction states. Useful states include detected, assessed, quarantined, repair-pending, corrected, notified, compensated, verified, disputed, and closed.
+
+Never represent a correction as complete merely because a new answer was generated. Delivery, access revocation, purge, and external compensation may still be pending.
+
+Preserve uncertainty. If the correction is itself disputed, downgrade dependent artifacts rather than replacing one unverified claim with another.
+
+Define authority precedence. A provider correction, target verification, ledger amendment, signed callback, and human review may have different authority for different operations.
+
+Do not choose the newest event automatically. A late event can describe an old state, while a stronger source can be older but more authoritative.
+
+Use versions and digests. Bind the correction to the exact source version and compare it with the version used by each dependent artifact.
+
+A mutable URL or current record is not enough to prove what the original answer relied on.
+
+Track time separately. Record when the external event occurred, when the gateway observed it, when it assessed impact, when it quarantined dependents, and when repair completed.
+
+Propagation lag is a safety metric. The longer an unsafe claim remains reusable, the larger the risk.
+
+Set stricter deadlines for security, privacy, payment, deletion, and access corrections than for low-risk analytics summaries.
+
+Prioritize by consequence. A withdrawn access decision or exposed secret should outrank a stale dashboard label.
+
+Use purpose and audience. The same correction may require a customer notification, an internal audit note, a billing adjustment, and no action for an unrelated audience.
+
+Do not send correction details to recipients who were not authorized to receive the original evidence or its explanation.
+
+Bind repair to policy. Recompute under the policy appropriate to the current consumer, not blindly under the policy that produced the old answer.
+
+But preserve the historical policy decision. A new evaluation is not a retroactive rewrite.
+
+Separate factual correction from disclosure correction. The fact may remain true while the original audience was not permitted to see it.
+
+In that case, revoke references, purge unauthorized derivatives, notify affected parties according to incident policy, and record what was exposed.
+
+Track retention consequences. A correction may change the deletion deadline for raw evidence, caches, memory, exports, provider artifacts, or references.
+
+Do not let a corrected result remain in an old cache because the cache key still appears valid.
+
+Invalidate caches by source version, policy generation, purpose, tenant, and semantic field impact.
+
+For memory, mark entries stale or withdrawn, stop retrieval, and create replacement memory only after verification.
+
+Memory repair should preserve the source and correction relationship so future agents know why the entry changed.
+
+For decisions, identify whether the correction affects authorization, routing, billing, safety, fraud, or workflow completion.
+
+A corrected input may require reevaluation, rollback, human review, or no action depending on the decision contract.
+
+Do not automatically replay every old decision. Replaying a policy decision can create new side effects under a changed context.
+
+For customer answers, distinguish correction, clarification, retraction, and replacement.
+
+A correction should identify the original statement without repeating sensitive content unnecessarily.
+
+Use safe correction templates. State what changed, which conclusion is affected, the effective time, what action the recipient should take, and where to obtain authorized detail.
+
+Do not overclaim certainty in a correction. If the new evidence is incomplete, say that the previous claim is no longer reliable and what remains unresolved.
+
+For streaming answers, correction may arrive after some chunks were delivered. Record the exact delivered boundary and send a withdrawal or update if the protocol supports it.
+
+Do not pretend that undelivered generated text was seen by the client.
+
+For exports, reports, webhooks, and messages, record destination, artifact version, delivery state, and whether replacement or recall is possible.
+
+Updating the source database does not update a downloaded CSV, an email, a webhook consumer, or another agent’s memory.
+
+For external side effects, attach the correction to the original action and determine compensation separately.
+
+A wrong payment may need a refund or ledger adjustment. A wrong deployment may need rollback. A wrong access grant may need revocation. A wrong message may require notification.
+
+Do not erase the original effect. Preserve what happened and track the compensating action.
+
+Use idempotency for repair actions. A correction worker may retry, restart, or run concurrently.
+
+Correction propagation must not create duplicate refunds, repeated notifications, conflicting rollbacks, or repeated deletions.
+
+Use stable repair IDs and compare-and-swap checks. Verify the target state before applying compensation.
+
+Do not roll back a resource that has legitimately changed again since the original action.
+
+Use fresh verification before compensation. The correction may describe an earlier state, while the current target may already be safe.
+
+For asynchronous jobs, distinguish result correction from job cancellation. A corrected output may require replacing an artifact, not rerunning the entire job.
+
+For billing, preserve the original charge, corrected usage, pricing version, currency, adjustment, and customer balance effect.
+
+Do not silently overwrite an invoice or balance. Customers and operators need an explainable reconciliation trail.
+
+For deletion, distinguish “the deletion claim was wrong” from “the deletion completed later.” Record request, provider status, target observation, tombstone, and final verification.
+
+Do not claim permanent deletion based only on a missing search result.
+
+For authorization, record when access was granted, what evidence supported it, when the correction arrived, when access was revoked, and whether any result was delivered during the gap.
+
+Revocation is both a current control and a historical exposure question.
+
+For provider corrections, preserve provider account, region, route, adapter version, and contract. A fallback provider may require a different repair path.
+
+Do not merge provider accounts into one anonymous source during correction.
+
+For schema changes, determine whether old outputs can still be interpreted. If not, quarantine the affected derivations until a compatibility rule is reviewed.
+
+Do not assume a successful HTTP response means the old semantic interpretation remains valid.
+
+For model-generated summaries, identify the source fields, prompt assembly, model route, transformation version, and safety checks.
+
+A corrected source may require regenerating the summary, but the new model output must remain distinguishable from the original.
+
+Do not allow a model to “smooth over” a contradiction without exposing the evidence change to the responsible workflow.
+
+Use claim-level correction. If only one sentence in an answer is affected, mark that claim withdrawn or corrected while preserving unaffected claims when their evidence remains valid.
+
+Do not retract an entire answer by default if precise impact analysis can safely preserve unrelated facts.
+
+But prefer broad quarantine when dependency completeness is uncertain and the consequences are high.
+
+Unknown dependency is itself a risk signal. An artifact whose source path cannot be resolved should not be treated as fully repairable.
+
+Use a safe default for incomplete lineage: restrict reuse, mark uncertain, and route for review.
+
+Track correction fan-out. One changed result can affect thousands of downstream artifacts, so propagation must be bounded, prioritized, and observable.
+
+Use queues for repair work and expose backlog, age, priority, and failure reason.
+
+Do not perform unlimited recursive repair in one synchronous request.
+
+Separate detection from materialization. Persist the correction first, then derive impacted artifacts from the durable graph.
+
+The materialized current state must be rebuildable after a crash or corrupted index.
+
+Use transactional outboxes so a source correction and its invalidation event cannot diverge.
+
+Record evidence gaps. If the correction is known but a dependent delivery record is missing, preserve the gap and investigate rather than assuming no exposure.
+
+Do not infer “not delivered” from the absence of a log when logging itself may have failed.
+
+Make corrections tamper-evident. Use signed provider events, hashes, append-only records, or controlled audit trails when the domain requires it.
+
+Protect correction metadata. It can reveal incidents, customer relationships, payment disputes, access changes, or provider failures.
+
+Use role-specific views and minimize raw payload access.
+
+Break-glass access to original evidence should require reason, scope, duration, and audit.
+
+Use expiring, audience-bound references for corrections and protected source records.
+
+Measure correction completeness. Track how many affected claims, decisions, caches, memories, exports, and side effects have a known disposition.
+
+Measure stale reuse after detection. This is one of the most important safety indicators.
+
+Measure time to quarantine, time to repair, time to notify, time to purge, and time to verify compensation.
+
+Measure orphaned dependents and unknown blast radius. They indicate missing lineage or incomplete dependency registration.
+
+Measure correction reach by audience and destination. Every consumer that received the original claim should have an explicit correction state.
+
+Measure compensation completion. A repaired answer is not enough when an external effect already occurred.
+
+Measure false closure. Count corrections marked complete while notification, purge, revocation, or reconciliation remained unfinished.
+
+Measure contradiction duration. A correction that remains disputed needs an explicit owner and escalation path.
+
+Test value correction. Change an amount or status and verify only affected claims are invalidated or repaired.
+
+Test identity correction. Change tenant, account, resource, or provider identity and verify broad containment across all dependent artifacts.
+
+Test disclosure correction. Mark a previously delivered result unauthorized and verify reference revocation, derivative quarantine, and incident tracking.
+
+Test stale cache and memory. Correct the source and ensure old values cannot support new high-impact decisions.
+
+Test streaming correction. Change evidence after partial delivery and verify the client receives a safe withdrawal or correction state.
+
+Test external compensation. Trigger a message, refund, deployment, deletion, or access change, then correct the evidence and verify idempotent compensation logic.
+
+Test out-of-order corrections. Deliver updates in different orders and verify deterministic state using version and authority rules.
+
+Test duplicate events and worker crashes. Recovery must not lose correction obligations or duplicate repairs.
+
+Test incomplete lineage. Remove one dependency edge and confirm the affected artifact is restricted rather than silently preserved.
+
+Test multi-source impact. Correct one of several inputs and verify aggregation semantics determine whether the conclusion remains valid.
+
+Test policy change during repair. Ensure the new artifact is evaluated under current policy while historical context remains intact.
+
+Test cross-tenant isolation. Reuse correction IDs, source IDs, hashes, cache keys, and references and verify propagation remains scoped.
+
+Test deletion and retention. Confirm corrected raw evidence, derivatives, caches, exports, and provider artifacts follow the required lifecycle.
+
+Keep correction workflows explicit and resumable. Operators should see what changed, what was affected, what was blocked, what was repaired, and what remains uncertain.
+
+Version correction schemas and impact rules. Historical corrections must remain interpretable even as tools and policies evolve.
+
+Do not silently change the meaning of corrected, withdrawn, verified, or compensated.
+
+Make SDKs correction-aware. Typed results should expose source version, correction state, freshness, evidence class, safe references, and whether reuse is allowed.
+
+Make it easy for application developers to stop stale use and handle replacement or uncertainty correctly.
+
+The central principle is simple: when evidence changes, trust must change everywhere that depended on it, but history must remain honest about what was previously believed and delivered.
+
+An AI API gateway should preserve immutable corrections, map semantic impact through dependency edges, quarantine unsafe derivatives, repair claims under current policy, track notifications and compensation, and expose uncertainty until every required consequence is verified.
+
+That is how agent systems recover when reality changes instead of quietly carrying yesterday’s mistake into tomorrow’s decisions. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
