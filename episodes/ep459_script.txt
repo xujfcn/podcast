@@ -1,0 +1,389 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract evidence chain recovery: how an AI API gateway restores trustworthy operation after a broken link, without inventing authority, completion, or certainty.
+
+Containment stops a damaged chain from spreading. Recovery answers the harder question: what can safely become trusted again, and what must remain unknown?
+
+After a provider outage, adapter defect, revoked key, stale replica, corrupted cache, missing callback, or policy interruption, systems are often tempted to restart, replay, and mark everything healthy. That is dangerous. A recovered process is not a recovered chain. A durable record is not proof that an external effect happened. A successful retry is not proof that the original attempt did not happen.
+
+Recovery must rebuild evidence, preserve uncertainty, and restore authority only where the chain can prove its guarantees.
+
+Start with recovery states. Use states such as contained, unknown, awaiting-source, awaiting-reconciliation, revalidated, restored-with-limitations, safe-to-resume, superseded, revoked, and permanently-unresolved.
+
+Each state should define permitted reads, transformations, decisions, and actions.
+
+Do not reduce every interrupted workflow to pending or failed.
+
+Preserve the original chain. Keep source identity, link identities, input and output versions, actors, timestamps, contracts, policy generations, route and account information, scopes, purposes, attempts, and observed failures.
+
+Recovery should extend history, not rewrite it.
+
+Do not replace an unknown event with the result of a later retry.
+
+Define the recovery boundary. Identify the exact provider, account, route, region, adapter, schema, policy, key, queue, target, tenant, resource, operation, and time range affected.
+
+Recovery should be scoped to the failure domain and dependency graph.
+
+Do not restore global trust because one endpoint is responding again.
+
+Build a recovery inventory. Find source results, transformations, caches, replicas, summaries, memories, exports, approvals, queued actions, dispatch attempts, receipts, and postcondition observations that depend on the damaged link.
+
+Every dependent artifact needs a recovery disposition.
+
+Do not assume that only in-flight requests are affected.
+
+Classify dispositions. An artifact may be revalidated, refreshed, corrected, withdrawn, deleted, quarantined, superseded, restored with limitations, or left unknown.
+
+The disposition should depend on evidence and intended use.
+
+Do not restore a derivative merely because its source object still exists.
+
+Preserve unknown. If the gateway cannot prove whether a transition happened, record unknown rather than choosing success or failure.
+
+Unknown is a valid operational state with explicit restrictions.
+
+Do not turn missing callbacks, incomplete logs, or ambiguous provider responses into a definitive result.
+
+Separate execution recovery from evidence recovery. A worker can restart while source authority, policy, contract, freshness, and postcondition proof remain unresolved.
+
+These layers should recover independently.
+
+Do not mark the evidence chain healthy when only the worker process recovered.
+
+Re-establish source authority. Confirm the provider, account, route, model, capability, and contract currently in use, then determine whether they can reproduce or verify the original source claim.
+
+A healthy replacement source is not automatically an authentic continuation of the old source.
+
+Do not use a fallback provider’s response as if it were the original provider’s observation.
+
+Reconcile source state. Fetch current source status, event history, version, timestamps, identifiers, and limitations. Compare those observations with the gateway’s stored record.
+
+Reconciliation should expose contradictions rather than hide them.
+
+Do not overwrite the original source record with the newest convenient answer.
+
+Bind recovery observations. Every new observation should identify the original result, source, operation, attempt, target, and purpose it addresses.
+
+Recovery evidence must be attached to the question it answers.
+
+Do not accept a generic provider status page as proof for a specific customer action.
+
+Define observation quality. Record whether an observation is direct, provider-reported, inferred, reconstructed, sampled, delayed, or model-derived.
+
+Recovery should not upgrade the evidence class without proof.
+
+Do not let a model summary of an incident become a direct postcondition observation.
+
+Revalidate integrity. Verify stored bytes, signatures, hashes, serialization, content relationships, and link records where possible.
+
+Integrity recovery must cover the chain metadata, not only the final payload.
+
+Do not declare recovery complete because the final JSON parses.
+
+Revalidate lineage. Confirm every transformation, copy, cache write, replication event, queue transition, approval, dispatch, and postcondition link.
+
+Missing lineage should restrict dependent uses.
+
+Do not infer a missing link from timestamps that merely appear sequential.
+
+Revalidate scope. Check tenant, subject, resource, account, operation, region, audience, and purpose at each recovered link.
+
+Recovery is unsafe if a valid result is restored into the wrong context.
+
+Do not reuse a result for another tenant or operation because the payload shape is identical.
+
+Revalidate policy. Confirm consent, data classification, residency, access, retention, purpose, and authorization under the current policy generation.
+
+Old policy decisions may not survive a context change or revocation.
+
+Do not restore previously allowed use when the policy has since become more restrictive.
+
+Revalidate contract. Check source, gateway, adapter, consumer, and executor contract versions, required fields, obligations, unsupported values, and semantic compatibility.
+
+A recovery path needs the contract that the consumer will actually enforce.
+
+Do not replay an old envelope into a new consumer without compatibility proof.
+
+Revalidate freshness. Preserve original source time, observation time, processing time, approval time, dispatch time, and expiration.
+
+Recovery work adds time; it does not reset the age of the original evidence.
+
+Do not make stale evidence appear fresh by copying it into a new row.
+
+Revalidate finality. Distinguish accepted, reported, processing, completed, target-confirmed, reconciled, disputed, corrected, revoked, and unknown states.
+
+Recovery may improve a state only when a new observation proves the transition.
+
+Do not promote provider acceptance directly to target completion.
+
+Recover caches carefully. Invalidate entries whose source, policy, contract, route, scope, or freshness cannot be revalidated. Rebuild only from admitted evidence.
+
+A cache rebuild is a trust operation, not merely a performance operation.
+
+Do not repopulate caches from quarantined or unclassified data.
+
+Recover memory carefully. Mark memories derived from damaged chains as provisional or quarantined, then revalidate their claims and permitted uses.
+
+Long-lived agent context must not preserve temporary uncertainty as fact.
+
+Do not silently edit memory text without retaining the source and correction history.
+
+Recover replicas carefully. Compare origin, version, sequence, lag, conflict state, policy generation, and revocation status across regions.
+
+Choose an authoritative state only under explicit rules.
+
+Do not select the newest-arriving replica as truth by default.
+
+Recover queues carefully. Preserve message identity, attempt identity, expiration, action identity, contract, policy generation, and idempotency key.
+
+A replay should be distinguishable from the original delivery.
+
+Do not create a new action identity merely to make an unresolved attempt executable again.
+
+Reconcile external effects before retry. Determine whether the target accepted, completed, partially applied, rejected, or never observed the operation.
+
+When state is unknown, use target-specific reconciliation or safe compensation rather than blind duplication.
+
+Do not retry a charge, deletion, permission change, or message send with a fresh idempotency key while the first attempt is unresolved.
+
+Recover approvals. Bind any reused approval to the exact result version, evidence snapshot, scope, purpose, action, contract, policy, and expiration.
+
+A recovery event may invalidate a previous approval.
+
+Do not carry an approval across a material source, policy, target, or contract change.
+
+Recover dispatch. Before execution, independently check authority, chain continuity, exact target, freshness, idempotency, and postcondition strategy.
+
+The executor should require recovery evidence, not just a “recovered” flag.
+
+Do not allow upstream optimism to bypass the last safety boundary.
+
+Recover postconditions. Obtain direct or contractually sufficient observations of the target state, bind them to the action and attempt, and record limitations.
+
+No postcondition proof means no definitive effect claim.
+
+Do not infer external completion from a worker exit code or network acknowledgment.
+
+Define supersession. When a safe replacement result is obtained, link it to the original result and explain which claims it supersedes, which it does not, and why.
+
+Supersession should preserve history and prevent accidental mixing.
+
+Do not delete the old result just because a newer result is available.
+
+Define correction. If recovery shows that a prior claim was wrong or incomplete, propagate correction to caches, memory, analytics, billing, exports, approvals, queues, decisions, and user-visible records.
+
+Correction is part of recovery, not a separate cleanup task.
+
+Do not repair the source while leaving downstream decisions active.
+
+Define revocation. If a key, consent, policy, approval, source, or contract was invalidated, restrict every dependent artifact that relied on it.
+
+Restoration cannot resurrect withdrawn authority.
+
+Do not treat reprocessing as a way to bypass revocation.
+
+Define deletion. Remove invalid or expired content according to retention and privacy policy while retaining minimal lifecycle proof.
+
+Recovery records should not become permanent copies of sensitive payloads.
+
+Do not preserve secrets, credentials, or full prompts merely because an incident occurred.
+
+Define recovery checkpoints. Record source verified, lineage verified, policy verified, contract verified, freshness verified, target reconciled, consumers updated, and release approved.
+
+A checkpoint should correspond to a real proof obligation.
+
+Do not use one final checkbox for a chain with many unresolved links.
+
+Define release gates. Restore low-risk diagnostics first, then bounded reads, then transformations, then decisions, then external execution.
+
+Each expansion of use requires the evidence profile for that purpose.
+
+Do not release execution because display data has been restored.
+
+Define release authority. Require the appropriate owner, evidence, policy, contract, scope, and approval for high-impact recovery.
+
+Emergency restoration should be narrow, time-bound, and auditable.
+
+Do not let the operator who restarts the service silently restore customer-facing authority.
+
+Define restored-with-limitations. Some chains may safely support display or internal investigation while remaining blocked for billing, export, approval, or execution.
+
+Limitations must travel with the artifact.
+
+Do not return a normal-looking result that hides recovery restrictions.
+
+Define safe-to-resume. A chain is safe to resume only when required links are present, current, compatible, authorized, within scope, and sufficient for the intended purpose.
+
+Safe resumption is purpose-specific.
+
+Do not declare a route globally recovered when one high-impact contract remains unverified.
+
+Define permanently unresolved. If source evidence, target state, lineage, or authorization cannot be recovered within its validity window, close the chain as unknown or rejected and follow correction or compensation policy.
+
+An unresolved chain is better than an invented conclusion.
+
+Do not keep retrying forever to avoid recording uncertainty.
+
+Define replay semantics. Replays should retain original logical identity, create explicit attempt identity, preserve source time, and re-run admission, policy, contract, and idempotency checks.
+
+Recovery must not make history appear as new authority.
+
+Do not replay from a mutable queue snapshot with no version or lineage.
+
+Define recovery ordering. Restore control-plane policy and verification first, then source access, then storage and lineage, then safe reads, then derived artifacts, then decision and execution paths.
+
+The order should restore controls before consequences.
+
+Do not re-enable external actions before revocation and policy enforcement are known to work.
+
+Define dependency ordering. Revalidate parents before children: source before transformation, transformation before cache, cache before memory, evidence before approval, approval before dispatch, and dispatch before postcondition claim.
+
+Downstream recovery cannot compensate for an unverified parent.
+
+Do not release a summary while its source remains quarantined.
+
+Define recovery isolation. Run reprocessing in a bounded environment with separate credentials, queues, caches, and outputs until validation succeeds.
+
+Recovery should not contaminate the trusted path while it is still testing assumptions.
+
+Do not replay suspect work directly into production queues.
+
+Define dry runs. For high-impact operations, reconstruct intended requests and compare target, scope, policy, contract, cost, and effect without dispatching.
+
+Dry runs can expose semantic drift before side effects occur.
+
+Do not treat a successful dry run as evidence that the external effect happened.
+
+Define reconciliation windows. Specify how long the gateway searches for delayed callbacks, provider events, ledger updates, target observations, and replica convergence before closing as unknown.
+
+A bounded wait is safer than indefinite ambiguity.
+
+Do not choose a recovery timeout that is shorter than the target system’s documented evidence window.
+
+Define compensation. When an external effect may have occurred and cannot be reversed, record the effect, uncertainty, owner, target, and available compensating action.
+
+Compensation must not pretend the original effect never happened.
+
+Do not issue a duplicate “cleanup” operation without understanding the first effect.
+
+Define customer communication. Explain affected operations, current state, restrictions, corrections, and next safe action without exposing private provider or incident details.
+
+Clear semantics reduce unsafe retries and support burden.
+
+Do not tell users that an action failed when the target state is actually unknown.
+
+Define audit reconstruction. An auditor should be able to see what failed, what was contained, what evidence was recovered, what remained unknown, who approved release, and which policy and contract governed each step.
+
+Recovery should be explainable without relying on undocumented operator memory.
+
+Do not overwrite the incident timeline during remediation.
+
+Define privacy-preserving evidence. Use identifiers, hashes, classifications, reason codes, and controlled references instead of copying full payloads into recovery logs.
+
+Recovery proof should respect minimization and purpose limitation.
+
+Do not turn forensic detail into unrestricted access to customer content.
+
+Measure time to containment and recovery. Track detection, propagation stop, dependency discovery, source reconciliation, chain revalidation, safe partial availability, and full release.
+
+Fast recovery matters, but premature release is a safety failure.
+
+Do not optimize recovery time by skipping the proof that justifies restoration.
+
+Measure unknown duration. Track how long results, actions, approvals, and target states remain unresolved and whether owners and next steps exist.
+
+Unknown states need active management.
+
+Do not hide unresolved effects inside a generic retry queue.
+
+Measure recovery completeness. Count affected artifacts found, revalidated, corrected, withdrawn, deleted, restored with limitations, released, and left unknown.
+
+The total should reconcile with the original blast radius.
+
+Do not claim closure when dependency discovery is incomplete.
+
+Measure false recovery. Track artifacts released and later re-quarantined, corrected, revoked, disputed, or found to have unsupported guarantees.
+
+False recovery is more dangerous than visible downtime.
+
+Do not improve recovery metrics by closing uncertain cases early.
+
+Measure duplicate prevention. Track retries blocked, idempotency conflicts detected, duplicate dispatches prevented, and unresolved external effects reconciled.
+
+These measures show whether recovery preserved side-effect safety.
+
+Do not count every retry as progress.
+
+Measure policy and contract drift. Track recovery cases where current policy, provider capability, schema, adapter, or consumer contract differs from the original chain.
+
+Drift should trigger explicit reauthorization or incompatibility handling.
+
+Do not replay historical work under a materially different contract without review.
+
+Measure correction propagation. Count dependent caches, memories, exports, approvals, decisions, and actions updated after recovery changes a claim.
+
+Correction coverage is a direct trust metric.
+
+Do not update only the canonical source record.
+
+Measure release by purpose. Report recovered display, analytics, billing, memory, approval, export, and execution paths separately.
+
+A single uptime number hides the real safety boundary.
+
+Do not call all uses restored because read-only traffic works.
+
+Create recovery assurance reports. Include failure domain, affected scope, chain inventory, original states, new observations, revalidation evidence, unresolved links, release gates, limitations, approvals, tests, and remaining unknowns.
+
+The report should state what recovery proves and what it does not prove.
+
+Do not write “fully recovered” without listing the proof obligations satisfied.
+
+Test source recovery. Return delayed, contradictory, partial, or changed provider observations and verify the original claim remains distinct from the recovery observation.
+
+Do not test only a clean successful restart.
+
+Test lineage recovery. Remove transformation, replication, queue, approval, or postcondition links and verify downstream uses remain restricted.
+
+Do not infer continuity from matching payloads.
+
+Test replay recovery. Crash before and after admission, dispatch, acknowledgment, and reconciliation, then replay with the same logical identity and a new attempt identity.
+
+Verify no duplicate authority or side effect is created.
+
+Do not test only idempotent read operations.
+
+Test policy and contract changes. Change purpose, scope, policy generation, schema, provider capability, or executor contract while recovering an old workflow.
+
+Verify reauthorization or incompatibility handling occurs.
+
+Do not let historical permission survive a current policy change automatically.
+
+Test cache, memory, and export recovery. Restore a source after dependent derivatives were created and verify correction, restriction, and release behavior.
+
+Do not repair only the source.
+
+Test target uncertainty. Lose callbacks, create delayed confirmations, return conflicting target observations, and attempt retry and compensation.
+
+Verify the gateway preserves unknown and protects idempotency.
+
+Do not force a final status merely to close the incident.
+
+Test staged release. Restore diagnostics, reads, transformations, decisions, and execution one stage at a time.
+
+Verify every stage has its own evidence gate.
+
+Do not let a global feature flag release all stages together.
+
+Test key and revocation recovery. Revoke a signing key, credential, approval, or consent after artifacts were issued, then attempt to restore them.
+
+Verify withdrawn authority does not return through replay.
+
+Do not treat cryptographic verification as sufficient after trust-root compromise.
+
+Test privacy. Inspect recovery logs, quarantined storage, dead letters, traces, reports, support views, and exports for raw prompts, credentials, tool payloads, and private provider details.
+
+Recovery must remain a controlled data boundary.
+
+Do not expand incident access beyond the purpose required to restore safe operation.
+
+The central principle is simple: recovery is not restart, replay, or optimism. An AI API gateway must preserve the original chain, distinguish new observations from old claims, keep unknown states explicit, revalidate source, lineage, policy, contract, freshness, and target effects, and restore authority in stages.
+
+Trust returns only when the evidence returns. When the gateway can prove what happened, what changed, what remains uncertain, and which uses are safe, recovery becomes controlled restoration rather than the invention of a reassuring story. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
