@@ -1,0 +1,435 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract evidence chain of custody: how an AI API gateway keeps trust intact from the moment a result is produced to the moment a client or executor relies on it.
+
+Portability asks whether evidence can cross systems without losing meaning. Freshness asks whether it is still timely. Chain of custody asks a different question: can we account for every meaningful handoff, transformation, decision, and use without pretending that an unchanged-looking value remained untouched?
+
+This matters because tool results move through adapters, queues, caches, verifiers, model transformations, regional replicas, human review, and side-effect executors. At each step, ownership and context can change. A result can be copied, redacted, summarized, reclassified, corrected, or combined with other evidence.
+
+If those transitions are not recorded and bound, the final consumer may be unable to tell what it received, who handled it, which guarantees survived, and whether the result is still safe to use.
+
+Start with a custody identity. Give every result a stable identity, source identity, operation identity, and version. Keep these identities through serialization, retries, transformations, replication, and delivery.
+
+A custody record should answer which artifact was handled, not merely which request happened.
+
+Do not use a request ID as the only identity for every derivative.
+
+Record the origin. Capture the producing provider, account, model or tool version, adapter, region, source system, operation, and time of production.
+
+Origin metadata establishes where the evidence came from, but it does not prove that the origin was correct.
+
+Do not infer trustworthy origin from a familiar provider name.
+
+Record the initial contract. Bind the result to the contract version, capability declaration, evidence class, finality state, policy generation, purpose, audience, scope, retention, and allowed uses that applied when it was created.
+
+These fields describe the original assumptions and limitations.
+
+Do not let a downstream service reconstruct the original contract from memory.
+
+Record custody events. Useful events include created, received, validated, verified, stored, replicated, transformed, redacted, summarized, corrected, approved, queued, delivered, consumed, revoked, expired, quarantined, and deleted.
+
+Each event should identify the actor or service, time, input version, output version, action, reason, policy, and result.
+
+Do not create one generic “processed” event for every transition.
+
+Separate custody from authority. A service may handle an artifact without gaining permission to use it for every purpose. Storage, verification, transformation, delivery, and execution are distinct privileges.
+
+A custody trail proves handling; current authorization still decides whether the next use is allowed.
+
+Do not treat possession of a chain record as permission to read the underlying result.
+
+Bind each handoff to an actor. The actor may be a provider, gateway component, worker, verifier, human reviewer, client, or external recipient. Use stable service or principal identities and record the relevant role.
+
+For automated actors, include the deployment, version, region, and execution identity where needed to investigate behavior.
+
+Do not record only a team name when a specific worker or deployment matters.
+
+Record the purpose of each handoff. A result may be moved for verification, display, reconciliation, support, billing, export, memory, or execution.
+
+The purpose controls which fields may be exposed and which transformations are acceptable.
+
+Do not let a custody event for diagnosis justify a later training or marketing use.
+
+Record the audience. State whether the next recipient is an internal service, tenant, operator, model, customer, partner, or executor.
+
+An artifact can be valid for one audience and prohibited for another.
+
+Do not assume that internal recipients share one unrestricted audience.
+
+Record scope at every transition. Bind tenant, subject, resource, operation, provider account, region, and data class to the custody event.
+
+A handoff should fail if the scope changes without reauthorization.
+
+Do not rely on a queue name or database partition as the only tenant boundary.
+
+Record integrity. Use signatures, hashes, authenticated transport, content-addressed identifiers, or equivalent mechanisms to prove that the payload and relevant envelope were not altered unexpectedly.
+
+Integrity evidence should cover the fields that control authority, not only the visible value.
+
+Do not sign the result body while leaving expiration, audience, or contract version outside the integrity boundary.
+
+Record semantic transformations. A transformation may parse, normalize, redact, translate, summarize, classify, embed, merge, split, compress, encrypt, or reformat a result.
+
+For every transformation, identify the input version, output version, transformation code or model, parameters relevant to meaning, and guarantees preserved or reduced.
+
+Do not call a value unchanged when its evidence, scope, or uncertainty was altered.
+
+Record evidence changes. State whether evidence was preserved, independently strengthened, weakened, invalidated, or made unknown.
+
+A summary may preserve content while weakening provenance or completeness.
+
+Do not let a transformed artifact inherit the strongest evidence label automatically.
+
+Record lineage. Link each derivative to the source results and transformations that produced it. For merged results, record all inputs and the rule used to combine them.
+
+Lineage makes correction, revocation, deletion, and dispute propagation possible.
+
+Do not record only the last source when several tools contributed to a conclusion.
+
+Record source versions. When a provider result or target observation changes, dependent artifacts must be identifiable.
+
+Use monotonic versions, sequence numbers, and stable correction links.
+
+Do not treat a database update timestamp as enough to find every derivative.
+
+Record time semantics. Distinguish event time, observation time, verification time, handoff time, transformation time, approval time, delivery time, and consumption time.
+
+These times answer different questions about custody and freshness.
+
+Do not reset source time whenever an artifact changes hands.
+
+Record clock authority and skew where timing affects safety. A custody event that claims an artifact was fresh should identify how freshness was established.
+
+If clocks disagree, record uncertainty and apply the stricter rule.
+
+Do not make a custody timeline look precise when its time source is unreliable.
+
+Record validation results. At ingress, document syntax validation, schema validation, signature verification, identity binding, scope checks, contract compatibility, timestamp checks, and policy checks.
+
+The record should show what was checked, not merely that validation succeeded.
+
+Do not use a single valid=true field to hide which checks were skipped.
+
+Record verification claims precisely. State what was verified, against which source, at what time, under which method, and with what limitations.
+
+Verifying that a provider accepted a request is not the same as verifying the target state.
+
+Do not label an entire result verified when only one field or transition was checked.
+
+Record uncertainty. Unknown provider outcome, missing metadata, unavailable verifier, conflicting evidence, partial stream, delayed callback, and incomplete lineage should be explicit custody states.
+
+Uncertainty must survive every handoff.
+
+Do not convert unknown into failure or success merely to fit an older schema.
+
+Record finality transitions. A result may move from provisional to reported, verified, reconciled, delivered, consumed, disputed, corrected, revoked, or expired.
+
+Each transition should name the evidence or event that justified it.
+
+Do not treat transport completion as business finality.
+
+Record authorization decisions. Capture decision identity, policy generation, purpose, scope, result version, contract, obligations, expiration, and decision outcome.
+
+A later consumer can then verify whether the authorization still binds to the artifact it is using.
+
+Do not store an approval without the context that made it safe.
+
+Record obligations. If a decision requires redaction, reconciliation, human review, shorter retention, region restriction, single-use execution, or postcondition verification, attach those obligations to the custody path.
+
+A handoff is incomplete until required obligations are satisfied or explicitly carried forward.
+
+Do not mark an artifact ready because the primary decision was allowed while obligations remain unfinished.
+
+Record policy changes. When policy generation changes, identify which custody paths need reauthorization, restriction, or quarantine.
+
+Old custody evidence does not automatically imply current permission.
+
+Do not let a historical allow decision survive a new revocation rule without review.
+
+Record contract changes. A result can cross from one contract version to another through negotiation, migration, adaptation, or retirement.
+
+Document the compatibility decision and the guarantees that were preserved, weakened, or rejected.
+
+Do not silently relabel a legacy artifact as current contract evidence.
+
+Record provider changes. Fallback, account switching, adapter updates, region changes, and model upgrades can affect evidence, retention, callback, cancellation, and verification semantics.
+
+The custody chain should show the exact provider context at each stage.
+
+Do not attribute a fallback result to the original provider.
+
+Record cache and queue custody. A cache write, cache hit, queue publish, queue claim, retry, dead-letter move, and replay are separate custody events.
+
+Include expiration, purpose, contract version, and revalidation requirements.
+
+Do not treat a cache hit as a fresh source observation or queue persistence as permission persistence.
+
+Record storage copies. Identify primary storage, replica, backup, index, embedding store, log, trace, and export copies where they are within the gateway’s custody boundary.
+
+Each copy needs its own retention, deletion, correction, and access behavior.
+
+Do not assume the primary record’s lifecycle automatically controls every derivative.
+
+Record encryption and key context. State which key, region, purpose, algorithm, and key version protect the artifact, and how revocation or rotation affects use.
+
+Encryption protects confidentiality but does not prove freshness, integrity, or authorization.
+
+Do not treat decryption capability as permission to use the result.
+
+Record redaction. Identify what was removed, why, by which component, and whether the remaining artifact is complete enough for its intended purpose.
+
+A redacted output may be safer but semantically weaker.
+
+Do not let redaction create a false claim of full observation.
+
+Record summarization and translation. Identify the source version, transformation model or code, language or format mapping, uncertainty, and evidence class of the output.
+
+Security-relevant states must remain distinct across languages and representations.
+
+Do not map disputed, unknown, expired, and revoked into one friendly status.
+
+Record model-mediated transformations. If an AI model extracts, classifies, summarizes, embeds, or reasons over a tool result, record that it was model-derived and preserve the underlying source references.
+
+A model output may support a decision without becoming independent verification.
+
+Do not erase provider identity when a model restates a result.
+
+Record human review. Include reviewer role, approval scope, result version, evidence shown, decision time, expiration, and whether the reviewer approved display, export, or execution.
+
+Human review should be bound to the exact artifact and action.
+
+Do not allow a general approval comment to authorize a changed result.
+
+Record external delivery. For webhooks, partner APIs, email, downloads, and customer interfaces, record recipient category, view version, delivery state, expiration, correction obligations, and acknowledgement where available.
+
+The gateway’s custody may end at a boundary, but its record should state what was actually delivered.
+
+Do not claim recipient deletion or consumption without evidence from the recipient.
+
+Record execution handoff. Before a side effect, create an action receipt binding result version, contract, evidence, freshness, scope, authorization, idempotency, purpose, and expiration.
+
+The executor should verify the receipt and append the execution outcome to the chain.
+
+Do not let a result jump directly from observation to side effect without a visible promotion event.
+
+Record execution outcome carefully. Distinguish dispatched, accepted, completed-reported, target-verified, reconciled, failed, canceled, disputed, and unknown.
+
+An external timeout may leave the effect unknown.
+
+Do not write completed merely because the provider returned HTTP success.
+
+Record idempotency and reconciliation. Link retries to the same logical operation and preserve the evidence that determined whether replay was safe.
+
+A chain of custody should reveal duplicate attempts and why they were or were not allowed.
+
+Do not create a new operation identity for every transport retry.
+
+Record cancellation. State which actor requested cancellation, which stages stopped, which provider actions continued, and how late results were handled.
+
+Cancellation can end client waiting without ending external work.
+
+Do not delete the custody trail to make a canceled workflow look clean.
+
+Record correction and dispute. When evidence changes or parties disagree, append the correction, dispute, source version, affected derivatives, restrictions, and resolution.
+
+Do not overwrite history and lose the ability to explain what earlier consumers saw.
+
+Record revocation and expiration. Mark when authority or evidence became unusable, how the state propagated, and which pending artifacts were blocked or quarantined.
+
+A result may remain in restricted audit storage after ordinary use ends.
+
+Do not physically delete the only evidence needed to prove that revocation was enforced.
+
+Record deletion. Distinguish deletion requested, local copy deleted, replica deleted, provider deletion requested, downstream notified, downstream acknowledged, and deletion verified.
+
+This prevents an incomplete cleanup from being reported as total erasure.
+
+Do not claim a complete deletion event when only one storage layer was checked.
+
+Minimize custody data. Record enough to prove handling and decisions without copying raw prompts, tool payloads, secrets, private provider configuration, or full responses into every event.
+
+Use hashes, classifications, stable references, and protected drill-down records where appropriate.
+
+Do not create a sensitive shadow database in the name of auditability.
+
+Protect custody records. Apply access control, purpose limitation, retention, encryption, tamper evidence, and separation of duties to the chain itself.
+
+A custody record can reveal customer activity, provider relationships, security controls, and operational patterns.
+
+Do not make the audit trail readable by every service that handles the result.
+
+Make records append-only where feasible. Corrections should append new facts and link to prior events rather than silently rewriting history.
+
+If redaction or deletion is required, preserve a safe proof of the action without retaining prohibited content.
+
+Do not confuse immutable audit identity with indefinite raw-data retention.
+
+Use trusted event ingestion. Verify actor identity, event signature, source, sequence, timestamp, and schema before accepting custody events.
+
+Reject events that cannot be bound to a known artifact or actor.
+
+Do not accept an event because it has a plausible JSON shape.
+
+Detect missing events. Compare expected custody transitions with observed ones: no validation before storage, no authorization before execution, no correction propagation, no revocation at the executor, or no deletion evidence for a copy.
+
+An unexplained gap should restrict high-impact use until resolved.
+
+Do not treat silent paths as safe paths.
+
+Detect duplicate and conflicting events. A result should not be both verified and unverified at the same sequence, or both revoked and newly authorized without an explicit supersession rule.
+
+Use deterministic conflict resolution and preserve the disagreement for review.
+
+Do not choose the most permissive event when records conflict.
+
+Detect impossible sequences. A result should not be consumed before delivery, corrected after permanent deletion without a source reference, or executed after its authority was revoked.
+
+Impossible sequences are valuable signals of bugs, clock errors, replay, or forged events.
+
+Do not hide sequence anomalies by sorting events only by arrival time.
+
+Preserve causal links. Every event should identify its predecessor, input versions, triggering policy or source event, and resulting artifact.
+
+Causality is more useful than a flat list of timestamps.
+
+Do not assume chronological order proves why a decision happened.
+
+Use sequence numbers and source versions for distributed paths. Regions and workers may receive events out of order, so semantic ordering must not depend on network arrival.
+
+A late success must not restore authority after a newer revocation.
+
+Do not let replication order become policy order.
+
+Carry chain context across regions. Replicas need origin region, current region, replication sequence, policy generation, contract, expiration, and revocation state.
+
+On disagreement, restrict or independently verify high-impact use.
+
+Do not let the fastest replica become the authority by default.
+
+Carry chain context across providers. A fallback route should append a provider transition and re-evaluate guarantees.
+
+The result should show where it was produced and which guarantees the fallback could prove.
+
+Do not preserve the original custody claim when the provider changes.
+
+Carry chain context across client boundaries. Clients should receive safe identifiers, evidence class, freshness, contract, restrictions, and delivery state appropriate to their audience.
+
+They should not receive unrestricted internal custody details.
+
+Do not expose internal service names, secrets, or sensitive routing data through the client envelope.
+
+Define chain-of-custody contracts for consumers. Document what each consumer validates, records, transforms, stores, exports, and does when the chain is incomplete or contradictory.
+
+Consumer obligations are part of portable trust.
+
+Do not assume a consumer will preserve fields it does not know are required.
+
+Define chain-of-custody contracts for providers. Require operation identity, callback identity, event time, sequence, signature, account, region, and evidence limitations where available.
+
+Provider facts should enter the chain without being overstated by the gateway.
+
+Do not manufacture missing provider evidence.
+
+Define chain-of-custody contracts for executors. Require a valid action receipt, current policy check, scope match, freshness, idempotency, and an appended outcome.
+
+The final executor must make the chain operational, not merely historical.
+
+Do not allow execution to succeed without a custody event that can be reconciled later.
+
+Test creation and ingress. Send valid, malformed, unsigned, stale, cross-scope, incomplete, and contradictory envelopes.
+
+Verify that accepted artifacts have origin, contract, time, evidence, scope, and custody identity.
+
+Do not test only well-formed provider responses.
+
+Test transformations. Redact, summarize, translate, classify, embed, merge, split, compress, encrypt, and decrypt results.
+
+Verify lineage, evidence changes, purpose, audience, restrictions, and source versions are preserved.
+
+Do not count output similarity as proof of custody preservation.
+
+Test queues and caches. Retry, duplicate, delay, dead-letter, replay, and restore artifacts across versions and policy changes.
+
+Verify each transition is recorded and point-of-use checks still apply.
+
+Do not let an internal replay tool bypass custody validation.
+
+Test correction and revocation. Change or withdraw the source after derivatives, approvals, references, and queued actions exist.
+
+Verify dependent artifacts are identified and blocked, corrected, or revalidated.
+
+Do not assume one notification reaches every derivative.
+
+Test expiration and clock skew. Delay events, alter clock sources, introduce regional lag, and attempt execution near and after deadlines.
+
+The chain should show honest time uncertainty and enforce the stricter result.
+
+Do not create a fresh-looking event to revive stale authority.
+
+Test provider failure. Lose callbacks, change provider accounts, return unknown outcomes, and make verification unavailable.
+
+Verify the chain records uncertainty and blocks blind replay.
+
+Do not write failure merely because the response disappeared.
+
+Test human approval. Change result version, resource, policy, evidence, and scope after approval, then attempt use.
+
+The approval should be rejected when it no longer binds.
+
+Do not let an old approval float free of its artifact.
+
+Test side effects. Attempt actions with missing receipt, altered receipt, expired evidence, revoked authority, weak evidence, mismatched tenant, and duplicate operation identity.
+
+Executors should reject each unsafe path and append the reason safely.
+
+Do not rely on upstream tests to prove executor enforcement.
+
+Test multi-region and recovery. Delay replication, crash during event writing, restore old queues, and replay historical events.
+
+Verify deterministic safe state, no invented authority, and no duplicate side effect.
+
+Do not let restart reset chain state or deadlines.
+
+Test deletion and privacy. Inspect custody records, logs, traces, exports, dead letters, dashboards, and support tools for prohibited raw content.
+
+Verify retention and deletion behavior for both artifacts and chain metadata.
+
+Do not keep sensitive payloads in audit records by accident.
+
+Measure chain completeness. Track artifacts without origin, validation, authorization, transformation lineage, expiration, correction link, revocation state, delivery evidence, or execution outcome.
+
+Missing links should be visible by purpose and risk.
+
+Do not summarize completeness as one unqualified percentage.
+
+Measure handoff integrity. Track signature failures, scope mismatches, actor mismatches, version mismatches, missing predecessor links, conflicting sequences, and impossible transitions.
+
+These are early signals of broken trust.
+
+Measure time from source correction or revocation to restriction at every custody stage. Include caches, queues, replicas, memory, exports, and executors.
+
+A control-plane update is not complete until risky use is blocked.
+
+Do not measure only event delivery latency.
+
+Measure transformation loss. Track artifacts whose evidence class, freshness, lineage, audience, purpose, or retention weakened during processing.
+
+A transformation that silently removes a restriction is a contract failure.
+
+Do not let successful serialization hide semantic loss.
+
+Measure unknown and disputed states, quarantine, replay attempts, duplicate operations prevented, and executions rejected by custody checks.
+
+These signals show whether the chain influences behavior.
+
+Do not treat every quarantine event as a nuisance to be reduced automatically.
+
+Create chain-of-custody assurance reports by contract and operation class. Show origin coverage, event completeness, actor authenticity, transformation lineage, policy binding, executor verification, open gaps, exceptions, and last proof time.
+
+Assurance must expire after relevant provider, schema, route, policy, or storage changes.
+
+Do not certify a chain once and assume it remains intact forever.
+
+The central principle is simple: trust is not preserved by moving a value; it is preserved by proving every meaningful handoff and keeping every limitation attached.
+
+An AI API gateway should give tool results stable identities, authenticated origins, explicit evidence and uncertainty, purpose-bound scope, complete lineage, recorded transformations, current policy binding, revocation and correction paths, and independently verified execution handoffs.
+
+That is how a result can remain explainable and trustworthy from source to use, even when it crosses many systems. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
