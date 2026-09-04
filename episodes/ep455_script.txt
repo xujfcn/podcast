@@ -1,0 +1,463 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract evidence dispute resolution: how an AI API gateway handles conflicting evidence without guessing, silently choosing a convenient answer, or turning disagreement into unsafe authority.
+
+A tool result dispute appears when two valid-looking sources disagree. A provider says a job completed while the target still reports pending. One region shows a permission while another has already revoked it. A cache contains an older balance. A callback says accepted while a ledger shows no settlement. A human review note contradicts an automated classification.
+
+The hard part is not detecting that the values differ. The hard part is deciding what each source proves, whether the conflict matters for this purpose, and what the system may safely do next.
+
+Start by preserving both claims. Record source identity, operation, resource, tenant, region, provider account, observation time, source version, evidence class, contract, policy, and transformation lineage.
+
+Never overwrite one disputed value with another merely because it arrived later.
+
+Do not resolve a conflict by mutating history.
+
+Define the proposition. Two sources may disagree about different things: provider acceptance, target completion, billing settlement, permission state, or current availability.
+
+A conflict exists only after the gateway compares claims with compatible meaning and scope.
+
+Do not compare a provider report with a target observation as if they were identical propositions.
+
+Normalize carefully. Map provider-specific statuses, timestamps, identifiers, error types, and evidence classes into a common semantic model while retaining the original values.
+
+Normalization should expose uncertainty and semantic loss.
+
+Do not collapse accepted, processing, completed, and target-confirmed into one success state.
+
+Bind every claim to identity. Compare the same logical operation, resource, account, tenant, contract, and time window.
+
+A result from another retry, region, or resource is not a contradiction until identity is proven.
+
+Do not create a dispute from mismatched operations.
+
+Define conflict classes. Useful classes include stale-versus-fresh, provider-versus-target, replica divergence, duplicate identity, schema interpretation, clock disagreement, authorization disagreement, billing mismatch, callback mismatch, and human-versus-automated review.
+
+Different classes need different resolution procedures.
+
+Do not send every conflict to the same generic retry path.
+
+Define materiality. Some conflicts affect presentation only. Others affect billing, access, deletion, privacy, safety, or an external side effect.
+
+The response should be restricted according to consequence.
+
+Do not block a harmless informational view while allowing a disputed payment or permission to execute.
+
+Define source authority by claim. A provider may be authoritative about what it accepted. A target system may be authoritative about current target state. A ledger may be authoritative about settled charges.
+
+Authority is scoped, not global.
+
+Do not select one source as universally authoritative.
+
+Define freshness. A fresh target observation may supersede an old cache for current state, while an older signed audit record remains authoritative for historical evidence.
+
+Freshness must be evaluated relative to the proposition and purpose.
+
+Do not let “latest received” replace semantic freshness.
+
+Define temporal ordering. Carry event time, observation time, receipt time, verification time, and sequence where available.
+
+Message arrival order is not necessarily business-event order.
+
+Do not resolve conflicts by network timing alone.
+
+Define source version and revision. A correction, supersession, revocation, or replacement should link to the earlier claim.
+
+This allows the gateway to distinguish legitimate correction from unexplained contradiction.
+
+Do not delete the older claim when a newer correction arrives.
+
+Define policy and contract context. Two values can be valid under different policies, audiences, or contract versions.
+
+A regional privacy policy may intentionally expose less state than an internal service.
+
+Do not call policy-limited visibility a data contradiction without checking scope.
+
+Define evidence strength. Reported, authenticated, signed, independently observed, reconciled, human-approved, and target-verified claims should remain distinct.
+
+A stronger evidence class may restrict or supersede a weaker claim only when identity and time are compatible.
+
+Do not resolve a conflict by counting signatures.
+
+Define independence. Multiple services may repeat one upstream answer. A cache, adapter, and dashboard are not independent sources if they share the same original response.
+
+Record the dependency graph.
+
+Do not treat copies as corroboration.
+
+Define confidence limits. If the gateway cannot determine which claim is true, state unknown or disputed rather than assigning an unsupported winner.
+
+Uncertainty is safer than fabricated certainty.
+
+Do not convert disagreement into a probability score that silently permits side effects.
+
+Define precedence rules before incidents. Examples may include target-confirmed state over provider acceptance for target completion, current authorization over cached permission, reconciled ledger over estimated usage, and explicit revocation over old approval.
+
+Rules should be claim-specific and explainable.
+
+Do not let each service invent precedence during an outage.
+
+Define when precedence is insufficient. A newer report may still be unverified, a target may be temporarily unavailable, or the sources may belong to different failure domains.
+
+The result can remain disputed even after applying a default ordering.
+
+Do not force a winner when the winning source cannot support the required purpose.
+
+Define safe actions for disputes. Options include display with warning, narrow scope, refresh, reconcile, human review, quarantine, deny, cancel, or wait.
+
+Map each conflict class and consequence to an explicit action.
+
+Do not return a disputed result with an ordinary success status.
+
+Define consumer contracts. A display client may show both states and their times. A billing service may require reconciliation. An executor may require one current target-confirmed state.
+
+Consumers must know what disputed evidence they may use.
+
+Do not expose the same unrestricted dispute object to every consumer.
+
+Preserve original values. Store source statuses, identifiers, timestamps, signatures, hashes, error details, and response references without exposing unnecessary sensitive content.
+
+Derived resolution should link back to the original claims.
+
+Do not make the resolution impossible to audit by storing only the final summary.
+
+Protect integrity. A conflict record must itself be tamper-evident and bound to the claims, scope, policy, contract, and resolution decision.
+
+Changing one side of a dispute must invalidate the resolution.
+
+Do not sign a conclusion while leaving its inputs mutable and unbound.
+
+Track collection gaps. One source may be unavailable, delayed, unauthorized, truncated, or missing a page.
+
+A seeming conflict may actually be incomplete evidence.
+
+Do not compare a complete record with an unknown record as if unknown meant opposite.
+
+Distinguish contradiction from absence. “The target says pending” contradicts “the target says completed.” “The target could not be reached” is uncertainty, not the opposite state.
+
+Use precise state semantics.
+
+Do not map unavailable to false.
+
+Distinguish correction from conflict. A source may explicitly supersede an older result with a reason and revision identity.
+
+A correction can resolve the old claim while preserving its historical existence.
+
+Do not label every replacement an unexplained dispute.
+
+Distinguish duplicate from contradiction. Two messages with the same logical identity and content may be retries. Two messages with the same identity and different content require investigation.
+
+Use canonical identity and content hashes.
+
+Do not create two operations merely because the transport retried.
+
+Distinguish forked history. If two valid revisions descend from one source without a clear ordering, preserve both branches until reconciliation.
+
+Do not choose one branch based on storage order.
+
+Handle provider disagreement. Compare model, account, route, region, request identity, capability, and response time before deciding whether providers answered the same question.
+
+Different providers may legitimately have different views or guarantees.
+
+Do not claim consensus merely because two providers returned similar text.
+
+Handle account disagreement. A provider account may have separate billing, quotas, permissions, data, or regional state.
+
+Bind evidence to account identity.
+
+Do not merge account-local states into one global provider state.
+
+Handle region disagreement. Record origin, replication sequence, lag, local policy, and conflict status.
+
+For high-impact use, require convergence or explicitly restrict the result to one region.
+
+Do not let a healthy replica erase a known divergent region.
+
+Handle cache disagreement. Compare cache source version, expiration, invalidation status, policy generation, and audience.
+
+A stale cache may be useful for history and unsafe for current authorization.
+
+Do not treat cache age alone as proof of invalidity without claim context.
+
+Handle callback disagreement. Validate provider account, operation, sequence, event time, signature, and expected transition.
+
+A callback can be authentic and still describe a prior attempt or a different resource.
+
+Do not accept a correctly signed callback as the final state automatically.
+
+Handle ledger disagreement. Compare usage identity, units, price version, aggregation period, corrections, refunds, and settlement state.
+
+An estimate, charge, credit, and settled invoice are different claims.
+
+Do not resolve billing disputes by selecting the larger or newer amount.
+
+Handle permission disagreement. Bind subject, resource, role, policy generation, decision time, revocation, and cache state.
+
+A prior allow may be valid historically and invalid for a new action.
+
+Do not reuse stale permission evidence because it was once signed.
+
+Handle deletion disagreement. Compare request acceptance, deletion execution, local absence, replica state, cache state, backup lifecycle, provider confirmation, and retention policy.
+
+State exactly which layer is confirmed.
+
+Do not call deletion complete when one protected copy remains unknown.
+
+Handle safety disagreement. Compare classifier version, source content, policy, confidence limits, review state, and action consequence.
+
+A preliminary classification may support quarantine while a permanent deletion decision requires review.
+
+Do not turn model disagreement into automatic destructive action.
+
+Handle human disagreement. Bind each review to artifact identity, evidence snapshot, purpose, scope, policy, and expiration.
+
+Different reviewers may be evaluating different versions or purposes.
+
+Do not treat a general comment as a current approval.
+
+Handle tool result disagreement. Preserve tool identity, parameters, source, response, execution state, and transformation lineage.
+
+An agent-generated summary must not hide disagreement between tools.
+
+Do not let the final language model answer choose a source without a declared rule.
+
+Handle model interpretation disagreement. Separate extracted facts, estimates, classifications, recommendations, and unsupported inferences.
+
+Two model summaries may disagree while the underlying source remains unchanged.
+
+Do not resolve source disputes by selecting the more confident prose.
+
+Handle asynchronous work. Provider acceptance, queue state, worker state, target state, and receipt state can diverge temporarily.
+
+Represent the workflow as a state graph rather than one status field.
+
+Do not overwrite pending with completed because one stage finished.
+
+Handle external side effects. Before retry or compensation, determine whether the effect is confirmed, possibly completed, rejected, or unknown.
+
+An unresolved dispute should usually block duplicate execution.
+
+Do not retry an unknown payment, message, deletion, or provisioning action blindly.
+
+Handle idempotency. Bind conflict resolution to logical operation identity and idempotency key.
+
+A second attempt should not create a new authority path while the first remains unresolved.
+
+Do not use a new idempotency key to avoid an old dispute.
+
+Handle reconciliation. Define how sources are compared, which identifiers join them, what tolerance applies, how late data is handled, and when the result is final.
+
+Reconciliation should produce explainable matches and unmatched cases.
+
+Do not report reconciliation success without coverage and unresolved counts.
+
+Handle human escalation. Provide the requested claim, source views, times, scope, evidence classes, known gaps, policy, contract, and proposed safe options.
+
+The reviewer should decide within a bounded purpose, not interpret raw system history from scratch.
+
+Do not hide the reason for escalation behind “manual review required.”
+
+Handle exceptions. A temporary decision to use one side of a dispute needs owner, scope, purpose, expiration, compensating control, and prohibited actions.
+
+Exceptions must be narrower than normal trust.
+
+Do not let an emergency override become permanent precedence.
+
+Handle resolution decisions. Record resolver identity, rule, evidence snapshot, confidence limits, decision state, allowed uses, expiration, and follow-up obligation.
+
+A resolution is an artifact with its own lifecycle.
+
+Do not store only “resolved=true.”
+
+Handle resolution expiry. New evidence, policy changes, provider changes, key rotation, correction, revocation, or elapsed time can reopen a dispute.
+
+Revalidation triggers should be explicit.
+
+Do not treat a resolved conflict as permanently settled.
+
+Handle correction propagation. When one input changes, find derived summaries, caches, approvals, memory, exports, billing records, and queued actions.
+
+A dispute resolution is incomplete if dependent uses retain the old winner.
+
+Do not update the conflict record without notifying consumers.
+
+Handle revocation propagation. If the evidence used to resolve a dispute is revoked or compromised, stop uses that depend on it and require fresh proof.
+
+Revocation can invalidate a previously accepted decision.
+
+Do not preserve authority because the old resolution was once valid.
+
+Handle deletion and retention. Preserve enough metadata to explain why a conflict existed and how it was resolved while minimizing sensitive source content.
+
+Dispute records need access and retention controls.
+
+Do not turn conflict resolution into a permanent copy of every tool payload.
+
+Handle privacy. Source details, provider account information, customer data, prompts, and tool parameters may be sensitive.
+
+Expose only safe reason categories and authorized evidence views.
+
+Do not disclose one tenant’s conflicting data while explaining another tenant’s result.
+
+Handle delivery. If a dispute is discovered after a result was sent, notify or restrict downstream consumers according to impact.
+
+Delivery acknowledgement does not prove consumers stopped using the disputed result.
+
+Do not assume a correction message reached every derivative.
+
+Handle streams. A conflict may appear between early and final chunks, provider metadata and content, or partial and complete observations.
+
+Use stream identity, sequence, finality, and correction links.
+
+Do not let a late chunk silently rewrite an already executed decision.
+
+Handle multi-region control planes. Resolution policy and precedence rules must converge safely, with generation, activation, and rollback identities.
+
+Different regions should not resolve the same dispute under incompatible rules without detection.
+
+Do not let control-plane lag create two authoritative winners.
+
+Handle configuration drift. Compare resolver versions, source mappings, thresholds, policy generations, and key sets across services and regions.
+
+Dispute results should identify the rule set that produced them.
+
+Do not assume identical code means identical active policy.
+
+Handle recovery. Crash during collection, comparison, resolution, notification, revalidation, or execution.
+
+After recovery, preserve unresolved state and avoid duplicate side effects.
+
+Do not infer that a missing resolution record means the dispute was safely closed.
+
+Use explicit dispute states: detected, collecting, classified, awaiting-source, awaiting-reconciliation, review-required, resolved-with-limitations, resolved, reopened, expired, revoked, and unknown.
+
+Each state should define permitted consumers and next steps.
+
+Do not collapse disputed and resolved-with-limitations into ordinary success.
+
+Use reason codes such as stale-source, scope-mismatch, target-provider-gap, replica-divergence, duplicate-identity, callback-out-of-order, ledger-unreconciled, policy-version-mismatch, and unknown-postcondition.
+
+Precise categories make operations actionable.
+
+Do not return a generic conflict error that encourages unsafe retries.
+
+Measure disputes. Track rate, class, source, provider, region, route, contract, consumer purpose, time to resolution, reopened rate, and downstream impact.
+
+High-impact disputes deserve separate visibility.
+
+Do not average payment, access, and display disputes into one number.
+
+Measure false resolutions. Track decisions later corrected, reopened, revoked, or found to have selected the wrong source.
+
+This identifies weak precedence rules and poor evidence mapping.
+
+Do not treat every resolution as a success merely because the queue closed.
+
+Measure unresolved duration. Track how long high-impact work remains blocked or unknown.
+
+A safe pause that lasts forever is also an operational failure.
+
+Do not improve resolution time by silently accepting weaker evidence.
+
+Measure duplicate effects prevented. Count retries, action receipts, payments, messages, deletions, and provisioning operations safely stopped during uncertainty.
+
+These controls protect users even when evidence systems are imperfect.
+
+Do not count blocked duplicates as failed productivity.
+
+Measure correction propagation. Track dependent artifacts discovered, revalidated, restricted, corrected, deleted, and left unknown.
+
+Missing dependency links are a major dispute risk.
+
+Do not report a source correction complete while downstream winners remain active.
+
+Measure precedence drift. Detect when provider, adapter, policy, or contract changes alter which source wins.
+
+Review high-impact rule changes before rollout.
+
+Do not let an SDK update change conflict semantics accidentally.
+
+Measure independence quality. Track how often supposed independent evidence shares an upstream source, cache, model, or account.
+
+A high corroboration count with low independence is misleading.
+
+Do not use source count as a substitute for evidence quality.
+
+Create dispute assurance reports. Show claim types, conflict classes, source authority, precedence rules, freshness, independence, resolution states, permitted uses, exceptions, tests, and open gaps.
+
+Assurance should expire after relevant provider, schema, policy, or workflow changes.
+
+Do not certify dispute resolution without showing how uncertainty is handled.
+
+Test valid contradictions. Provide two authentic, correctly scoped, incompatible results.
+
+Verify explicit dispute state, safe consumer behavior, and no silent overwrite.
+
+Do not test only malformed signatures.
+
+Test stale and fresh evidence. Return an old target state, a current provider report, and a policy change.
+
+Verify precedence is claim-specific and purpose-specific.
+
+Do not resolve every conflict by arrival time.
+
+Test scope mismatches. Use valid evidence from another tenant, resource, account, region, operation, and contract.
+
+Verify it is rejected as substitution rather than treated as contradiction.
+
+Do not compare identity before checking semantic binding.
+
+Test incomplete sources. Remove pages, callbacks, partitions, and verification steps.
+
+Verify unknown remains unknown and is not converted into an opposing claim.
+
+Do not manufacture conflict from missing data.
+
+Test duplicate and forked messages. Replay identical messages and send different content under the same logical identity.
+
+Verify retries are idempotent and conflicting revisions are quarantined.
+
+Do not create a new operation for every delivery attempt.
+
+Test provider and region disagreement. Delay replication, change accounts, reorder callbacks, and return different capability states.
+
+Verify origin, sequence, lag, and contract are preserved.
+
+Do not let a local replica claim global truth.
+
+Test billing and permissions. Provide estimated versus settled usage and cached versus revoked authorization.
+
+Verify high-impact consumers require reconciliation or current reauthorization.
+
+Do not let display evidence authorize an action.
+
+Test external effects. Lose callbacks, return provider acceptance, and retry with and without the original idempotency key.
+
+Verify unknown postconditions block unsafe duplicate execution.
+
+Do not solve uncertainty by generating a new idempotency key.
+
+Test human review. Approve one evidence snapshot, then substitute a corrected or different result.
+
+Verify approval remains bound to its original artifact.
+
+Do not let a review note float free of its evidence.
+
+Test correction and revocation. Change or withdraw one input after resolution, caching, export, memory, and queueing.
+
+Verify the winner is reevaluated and dependent uses are restricted.
+
+Do not update only the canonical conflict record.
+
+Test policy drift and recovery. Change resolver policy across regions and crash during resolution or notification.
+
+Verify no two incompatible decisions become authoritative and no side effect is duplicated.
+
+Do not treat durable workflow state as proof of safe resolution.
+
+Test privacy. Inspect logs, alerts, reports, support views, and dead letters for raw prompts, credentials, tool payloads, and unnecessary provider details.
+
+Explain disputes without creating a sensitive data lake.
+
+Do not expose evidence merely because it is useful for debugging.
+
+The central principle is simple: conflicting evidence is not an invitation to guess. An AI API gateway should preserve the original claims, compare their meaning and scope, classify the conflict, apply explicit precedence only where justified, keep uncertainty visible, and restrict high-impact use until proof is sufficient.
+
+A trustworthy resolution explains what each source proves, why one result may be used for one purpose but not another, what remains unknown, and what must happen next. That is how a gateway turns disagreement into controlled workflow instead of accidental authority. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
