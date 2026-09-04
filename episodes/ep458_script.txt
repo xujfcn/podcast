@@ -1,0 +1,407 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical. Today we’re talking about tool result contract evidence chain failure containment: how an AI API gateway isolates broken trust before it spreads through caches, queues, decisions, and external actions.
+
+A chain does not become dangerous only when every link fails. One broken link can be enough. A provider response may lose its source identity. An adapter may remove a restriction. A regional replica may become stale. A callback may be replayed. A verifier may stop checking a policy generation. If downstream systems continue treating the chain as trusted, one local defect becomes distributed authority.
+
+Failure containment is the discipline of limiting what a damaged chain can influence while preserving enough context to investigate, repair, and safely resume.
+
+Start with failure domains. Separate provider, account, region, network, adapter, schema, policy, key, storage, queue, model, human review, executor, and target-system failures.
+
+Containment should follow the affected domain instead of freezing or trusting everything.
+
+Do not let one provider outage invalidate unrelated sources, and do not let a local adapter defect poison every route.
+
+Define the protected boundary. Identify which result identities, tenants, resources, operations, contracts, audiences, purposes, regions, and action classes depend on the failed link.
+
+Containment is only safe when the blast radius is known.
+
+Do not quarantine an entire customer population because one operation is affected, and do not release one affected tenant because the overall service is healthy.
+
+Track dependency lineage. Map source results to transformations, caches, summaries, memories, exports, approvals, queue messages, decisions, and action receipts.
+
+A broken link must identify its dependent artifacts.
+
+Do not assume downstream copies are harmless because their bytes were unchanged.
+
+Define failure states. Use states such as degraded, unverified, quarantined, stale, revoked, disputed, incompatible, blocked, awaiting-repair, restored-pending-validation, and safe-to-resume.
+
+A failure state should define what each consumer may do.
+
+Do not represent every chain defect as a generic unavailable error.
+
+Separate detection from containment. Detection identifies a suspected problem. Containment stops unsafe propagation, blocks promotion, restricts use, or isolates the affected partition.
+
+The system should record both events and their times.
+
+Do not claim safety merely because an alert was emitted.
+
+Contain before investigation completes. High-impact actions should stop or move to an explicitly limited path while the root cause is unknown.
+
+Safe containment buys time without converting uncertainty into authority.
+
+Do not wait for perfect diagnosis before blocking a suspicious side effect.
+
+Define fail-closed and fail-limited behavior. A payment, deletion, permission change, or external message may require denial. A progress display may show an uncertainty warning. Analytics may use a bounded partial view.
+
+Choose behavior by consequence and purpose.
+
+Do not apply full service denial to every low-risk read, and do not allow execution merely because display remains available.
+
+Preserve source facts. Quarantine should retain source identity, result version, failure class, timestamps, signatures or hashes, scope, policy, contract, and lineage references without spreading raw content.
+
+Investigators need evidence, but trusted consumers should not receive the quarantined artifact as normal input.
+
+Do not delete the only copy needed to diagnose the defect, and do not leave it in an ordinary trusted cache.
+
+Separate quarantined storage from trusted storage. Apply access control, retention, encryption, and explicit release rules to quarantined evidence.
+
+A quarantine boundary should prevent accidental consumption.
+
+Do not rely on a naming convention such as “suspect” while ordinary workers can still read the object.
+
+Bind quarantine to identity. Record result ID, source ID, link ID, tenant, resource, operation, contract, policy generation, failure event, owner, expiration, and allowed investigative purpose.
+
+A quarantine decision must not float free of the artifact it restricts.
+
+Do not quarantine by filename, cache key, or broad provider label alone.
+
+Define quarantine scope. Limit by result version, source, route, account, region, adapter, schema, policy, tenant, operation, or time interval as justified by evidence.
+
+The scope should be as narrow as safe and as broad as required.
+
+Do not use the narrowest possible scope when shared code clearly affects every route, and do not use global scope without a blast-radius argument.
+
+Define propagation stops. Block writes to trusted caches, memory, exports, analytics, approvals, queues, and action receipts when their input chain is quarantined or unknown.
+
+A consumer should not create new trusted derivatives from suspect evidence.
+
+Do not quarantine the source while allowing a model summary to continue circulating as trusted fact.
+
+Define read restrictions. Existing derivatives may need display-only status, revalidation, withdrawal, correction, deletion, or access denial.
+
+The correct response depends on whether they can influence a decision or side effect.
+
+Do not assume already-created artifacts are safe because they were created before detection.
+
+Define action restrictions. Block execution, retries, compensations, approvals, exports, permission changes, billing finalization, memory promotion, and other high-impact uses that depend on the affected chain.
+
+Low-risk diagnostics may continue with explicit limitations.
+
+Do not let a queued action escape because admission occurred before the failure was discovered.
+
+Define queue containment. Pause affected queues, mark messages suspect, prevent leasing, require revalidation, and preserve idempotency identities.
+
+Messages should not disappear simply because they were blocked.
+
+Do not drop quarantined work and then lose whether an external effect may already have happened.
+
+Define cache containment. Invalidate or quarantine entries based on source version, policy generation, route, scope, and failure window.
+
+A cache with an unaffected source should remain usable when independence is proven.
+
+Do not flush every cache blindly if it creates an avoidable outage, and do not keep entries whose dependency is uncertain.
+
+Define memory containment. Mark memories derived from suspect evidence as provisional, stale, or quarantined; stop them from influencing new decisions until revalidated.
+
+Durability must not turn a temporary defect into long-lived authority.
+
+Do not delete every memory automatically when targeted invalidation is possible, and do not leave suspect facts active because they are convenient.
+
+Define export containment. Stop new exports, mark delivered artifacts for review, and notify authorized recipients when a material correction or withdrawal is required.
+
+An exported result can continue influencing decisions outside the gateway.
+
+Do not assume internal correction is enough after data crossed an external boundary.
+
+Define approval containment. Suspend approvals and action receipts that depend on quarantined results. Recheck result identity, evidence, policy, scope, and freshness before reuse.
+
+An approval should not bypass containment.
+
+Do not let a human approval become an escape hatch from a broken evidence chain.
+
+Define region containment. Isolate a divergent region, route new work to an unaffected region when its guarantees are proven, and preserve origin, sequence, lag, and conflict state.
+
+Failover should not erase the fact that one region is unknown.
+
+Do not claim global safety merely because one region remains healthy.
+
+Define provider containment. Disable a provider, account, model, route, adapter, or capability only as broadly as the evidence requires.
+
+Fallback results need fresh admission and chain validation.
+
+Do not copy the failed provider’s guarantees to a fallback route.
+
+Define key containment. If a signing key, credential, or verifier is compromised, revoke affected authority, identify artifacts signed under the key, and apply purpose-specific revalidation.
+
+Cryptographic validity does not survive a compromised trust root automatically.
+
+Do not keep using old signatures merely because reprocessing is inconvenient.
+
+Define policy containment. If policy evaluation, consent, residency, retention, or purpose controls are uncertain, stop the uses they govern and preserve the policy generation involved.
+
+An unavailable policy decision should not become implicit allow.
+
+Do not let one control-plane outage turn into unrestricted data movement.
+
+Define schema containment. If an adapter or schema change alters field meaning, block promotion from the affected version and preserve the source representation.
+
+Compatibility must be proven before resuming.
+
+Do not treat parse success as semantic compatibility.
+
+Define model containment. If a model or prompt assembly step produces unreliable extraction, classification, summaries, or tool parameters, restrict derived outputs and retain source links.
+
+Model interpretation should not silently strengthen source evidence.
+
+Do not quarantine only the final prose while allowing generated tool parameters to execute.
+
+Define human review containment. If reviewer identity, artifact version, role, or approval context is uncertain, suspend dependent actions and request a new bounded review.
+
+Review is part of the chain and can fail too.
+
+Do not assume manual handling is automatically trustworthy.
+
+Define target containment. If the external target cannot confirm state or has returned conflicting evidence, prevent blind retries and duplicate effects.
+
+Unknown postconditions require explicit recovery workflow.
+
+Do not use a new idempotency key to escape an unresolved external-effect uncertainty.
+
+Define partial availability. Keep unaffected claims and operations available only when their chain dependencies are independent and verified.
+
+Partial service is safe only when the boundary is explicit.
+
+Do not advertise normal service while silently degrading the proof level of high-impact operations.
+
+Define user-visible semantics. Tell consumers whether a result is unavailable, provisional, stale, disputed, quarantined, or awaiting revalidation, along with safe next steps.
+
+Good semantics prevent users and agents from treating containment as an ordinary transient error.
+
+Do not return a blank response that encourages repeated unsafe retries.
+
+Define remediation actions. Options include refresh source, rerun verification, switch route, reconcile, restore policy, rotate keys, repair lineage, reprocess transformation, review manually, or close as unknown.
+
+The action should match the failure class.
+
+Do not rerun the entire workflow when only one derived cache needs invalidation.
+
+Define release rules. An artifact leaves quarantine only after the failed link is repaired or independently replaced, the chain is revalidated, affected consumers are known, and permitted uses are restored explicitly.
+
+Release should create a new decision and version.
+
+Do not flip a quarantine boolean back to false without recording what changed.
+
+Define release authority. Require the right owner, evidence, policy, contract, scope, and approval for high-impact restoration.
+
+The person who detected a problem should not automatically be the only person allowed to release it.
+
+Do not make release a manual database edit with no audit trail.
+
+Define staged recovery. Restore diagnostics first, then limited reads, then low-risk transformations, then decisions, and finally external execution after proof is sufficient.
+
+Recovery should expand authority gradually.
+
+Do not restore all consumers at once because the source endpoint is responding again.
+
+Define recovery validation. Test identity, integrity, source authority, freshness, completeness, admissibility, chain links, policy, contract, and executor behavior before release.
+
+A repaired link can still be incompatible with old derivatives.
+
+Do not consider a service healthy merely because its process restarted.
+
+Define replay safety. Reprocess quarantined inputs with original logical identities, attempt identities, versions, and idempotency keys.
+
+Replay should not create duplicate effects or overwrite historical uncertainty.
+
+Do not replay suspect work as new work without resolving its prior state.
+
+Define correction propagation. Find summaries, caches, memories, exports, approvals, billing records, queues, decisions, and receipts that depend on the broken link.
+
+Containment is incomplete if downstream copies remain active.
+
+Do not repair the source while leaving an old approval executable.
+
+Define revocation propagation. Withdraw or restrict authority derived from compromised keys, invalid policy, stale evidence, revoked consent, or corrected source results.
+
+Track blocked and unresolved consumers.
+
+Do not treat a revocation event as effective until protected paths enforce it.
+
+Define deletion under containment. Remove quarantined or invalid data according to retention policy while preserving minimal proof of the incident, affected scope, and lifecycle action.
+
+Deletion should not erase the fact that an unsafe artifact existed.
+
+Do not retain raw sensitive content forever as an incident convenience.
+
+Define privacy boundaries. Quarantine often attracts debugging access, but prompts, tool payloads, customer data, credentials, and private provider details remain protected.
+
+Use hashes, identifiers, classifications, reason codes, and controlled drill-down.
+
+Do not create a second data lake under the name of failure analysis.
+
+Define evidence minimization. Keep enough metadata to prove containment, release, correction, and revocation without copying every payload into every log.
+
+Incident evidence should be purpose-limited.
+
+Do not log secrets or full provider configurations to explain a chain break.
+
+Define observability. Track detection time, containment time, blast radius, affected purposes, blocked actions, quarantined artifacts, unresolved dependencies, recovery stage, and release evidence.
+
+Metrics should show whether unsafe propagation stopped.
+
+Do not report only alert counts.
+
+Define auditability. Record who detected, who classified, what rule applied, which artifacts were affected, what consumers were notified, what was released, and under which policy and contract.
+
+An incident should be reconstructable without relying on memory.
+
+Do not overwrite the original failure classification when the diagnosis changes.
+
+Define exception governance. Emergency use of contained evidence requires owner, reason, scope, purpose, expiration, compensating control, and explicit prohibition on higher-impact actions.
+
+Exceptions should be rarer than normal operation and easier to review.
+
+Do not let urgency silently override containment.
+
+Define dependency uncertainty. If the gateway cannot determine whether a derivative depends on a failed link, treat that dependency as suspect for high-impact uses until proven independent.
+
+Unknown lineage is not safe independence.
+
+Do not allow untraceable copies to remain trusted merely because their origin cannot be established.
+
+Define chain health. A healthy chain means required links are present, validated, current, compatible, authorized, and within permitted scope for the intended purpose.
+
+Health is purpose-specific and can change without payload mutation.
+
+Do not expose one global green status for all uses.
+
+Define service-level objectives for containment. Measure time to stop unsafe propagation, time to identify affected artifacts, time to restrict downstream consumers, time to establish safe partial availability, and time to verified release.
+
+Containment quality is about both speed and precision.
+
+Do not optimize recovery time by releasing before proof is restored.
+
+Measure blast radius. Count affected tenants, resources, operations, regions, providers, contracts, purposes, decisions, and actions.
+
+A small technical defect with broad authority impact deserves priority.
+
+Do not measure only the number of failed requests.
+
+Measure quarantine precision. Track unaffected work incorrectly blocked and affected work incorrectly left trusted.
+
+Both over-containment and under-containment have costs.
+
+Do not celebrate a perfect outage if it protected everything by stopping everything.
+
+Measure propagation prevented. Track cached writes blocked, memories withheld, exports paused, approvals suspended, duplicate effects prevented, and stale actions stopped.
+
+These are direct indicators that containment worked.
+
+Do not count blocked safety actions as simple productivity loss.
+
+Measure release quality. Track artifacts released, later corrected, reopened, revoked, or found to have unresolved dependencies.
+
+A fast release with repeated reopening indicates weak recovery validation.
+
+Do not equate release completion with restored trust.
+
+Measure unknown duration. Track how long high-impact work remains quarantined or uncertain and whether remediation paths progress.
+
+A safe pause that never resolves is an operational defect requiring ownership.
+
+Do not hide permanent unknown states under “degraded.”
+
+Measure correction coverage. Count dependent artifacts found, restricted, revalidated, corrected, deleted, and left unknown after a failure.
+
+Missing dependency links are a containment gap.
+
+Do not claim incident closure while downstream copies remain active.
+
+Measure exception use. Track owners, age, purpose, scope, compensating controls, expiration, and outcome.
+
+Repeated emergency use signals a missing normal path or unrealistic availability promise.
+
+Do not normalize exceptions to improve uptime statistics.
+
+Create chain containment reports. Show failure domain, affected scope, dependency graph, states, propagation stops, blocked uses, user semantics, recovery stage, release evidence, exceptions, tests, and open unknowns.
+
+Reports should distinguish detected, contained, remediated, revalidated, and released.
+
+Do not mark an incident resolved when only detection stopped.
+
+Test provider failures. Return malformed, incomplete, stale, contradictory, or mis-scoped provider results and verify only affected chains are contained.
+
+Do not test only connection refusal.
+
+Test adapter and schema failures. Drop restrictions, change enum meaning, alter timestamps, and remove source identity.
+
+Verify trusted promotion stops and the original representation remains available for repair.
+
+Do not treat parseable output as safe output.
+
+Test cache and queue propagation. Admit an artifact, discover a broken link, then exercise cache hits, queue leasing, retries, worker execution, and receipts.
+
+Verify no dependent action escapes containment.
+
+Do not test only newly arriving requests.
+
+Test region and provider fallback. Isolate one region or account and verify independent paths remain available without copying old guarantees.
+
+Do not claim safe failover without proving independence.
+
+Test key and policy compromise. Revoke a key or make policy generation unavailable after artifacts were issued.
+
+Verify affected authority is restricted across caches, queues, approvals, and executors.
+
+Do not preserve authority merely because signatures still verify.
+
+Test model and transformation failures. Produce an unsafe summary, classification, extraction, or tool parameter while retaining valid source data.
+
+Verify derived outputs are contained without losing source truth.
+
+Do not let a model-produced derivative become the only visible record.
+
+Test human approval failure. Substitute result version, scope, purpose, or policy after review.
+
+Verify the approval and downstream action are suspended.
+
+Do not use manual approval to bypass artifact binding.
+
+Test target uncertainty. Dispatch work, lose callbacks, create conflicting observations, and attempt retry or compensation.
+
+Verify unknown postconditions remain contained and idempotency is preserved.
+
+Do not create duplicate effects to make the state look complete.
+
+Test correction and revocation. Change source evidence after caching, memory, export, approval, and queueing.
+
+Verify all dependent uses are identified and restricted.
+
+Do not update only the canonical record.
+
+Test staged recovery. Restore the source, then attempt limited read, transformation, decision, and execution in sequence.
+
+Verify each stage requires its own validation evidence.
+
+Do not release high-impact consumers simply because low-risk reads work.
+
+Test replay and crash recovery. Stop the system during quarantine, notification, revalidation, release, dispatch, and reconciliation.
+
+Verify no artifact escapes or side effect duplicates after restart.
+
+Do not infer safe state from process recovery.
+
+Test blast-radius boundaries. Fail one route, one account, one tenant, one region, one schema version, and one policy generation.
+
+Verify containment is neither too narrow nor unnecessarily global.
+
+Do not use only all-system outage tests.
+
+Test privacy. Inspect quarantine storage, incident logs, support views, dead letters, traces, exports, and reports for raw prompts, credentials, tool payloads, and private provider details.
+
+Failure handling must remain a controlled data boundary.
+
+Do not turn debugging access into unrestricted content access.
+
+The central principle is simple: a broken evidence link should not decide the blast radius by itself. An AI API gateway must identify dependencies, stop propagation, restrict high-impact uses, preserve uncertainty, keep unaffected paths available when independence is proven, and restore authority only through staged revalidation.
+
+Containment turns a local trust failure into a bounded operational event. It protects users while the system repairs the chain, explains what was affected, and resumes only the guarantees it can actually prove. Thanks for listening to the Crazyrouter Podcast. For more practical AI infrastructure guidance, visit crazyrouter.com, and join the Crazyrouter community on Telegram. I’ll be back with another episode soon.
