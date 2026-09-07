@@ -6,9 +6,9 @@ import xml.etree.ElementTree as ET
 
 root = Path('/root/.openclaw/workspace/podcast')
 ep = 499
-title = 'EP499: Policy Replay Difference Analysis - Explain Why Decisions Change'
-description = 'Explain historical-versus-current policy differences with dependency graphs, causal categories, obligation comparison, typed uncertainty, and effect-free analysis.'
-pub_date = 'Mon, 07 Sep 2026 12:45:00 +0000'
+title = 'EP499: Policy Replay Completeness - Know What Is Missing Before Trusting the Past'
+description = 'Make historical policy replay honest with purpose-specific dependency closure, integrity checks, cache and timing evidence, transformation manifests, and explicit uncertainty.'
+pub_date = 'Mon, 07 Sep 2026 13:15:00 +0000'
 parts = (root / f'episodes/ep{ep:03d}_script.txt').read_text().split('\n\n')
 (root / 'audio').mkdir(exist_ok=True)
 for i, part in enumerate(parts, 1):
