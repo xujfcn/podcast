@@ -1,0 +1,29 @@
+from pathlib import Path
+import json, subprocess, time
+import xml.etree.ElementTree as ET
+root=Path('/root/.openclaw/workspace/podcast'); ep=541
+title='EP541: Remediation Assurance Under Change - Prove Controls Survive Releases'
+description='How AI API gateway teams can preserve remediation guarantees through releases, new routes, providers, regions, dependencies, feature flags, failover, and changing evidence paths.'
+pub_date='Mon, 14 Sep 2026 11:20:00 +0000'
+parts=[p for p in (root/f'episodes/ep{ep:03d}_script.txt').read_text().split('\n\n') if not p.startswith('METADATA_')]
+(root/'audio').mkdir(exist_ok=True)
+for i,part in enumerate(parts,1):
+ out=root/f'episodes/ep{ep:03d}_chunk{i}.mp3'; cmd=['edge-tts','--voice','en-US-GuyNeural','--text',part,'--write-media',str(out)]
+ for attempt in range(1,6):
+  try: subprocess.run(cmd,check=True); break
+  except subprocess.CalledProcessError:
+   if attempt==5: raise
+   time.sleep(attempt*5)
+concat=root/f'episodes/ep{ep:03d}_concat.txt'; concat.write_text(''.join(f"file 'ep{ep:03d}_chunk{i}.mp3'\n" for i in range(1,len(parts)+1)))
+audio=root/f'audio/ep{ep:03d}.mp3'; subprocess.run(['ffmpeg','-y','-f','concat','-safe','0','-i',str(concat),'-c:a','libmp3lame','-q:a','4',str(audio)],check=True)
+seconds=float(json.loads(subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','json',str(audio)],capture_output=True,text=True,check=True).stdout)['format']['duration']); duration=f'{int(seconds//60)}:{int(seconds%60):02d}'
+tree=ET.parse(root/'feed.xml'); channel=tree.getroot().find('channel')
+for old in list(channel.findall('item')):
+ if (old.findtext('title') or '').startswith(f'EP{ep:03d}:'): channel.remove(old)
+item=ET.Element('item')
+for tag,val in [('title',title),('description',description),('pubDate',pub_date)]: ET.SubElement(item,tag).text=val
+enc=ET.SubElement(item,'enclosure'); enc.attrib.update(url=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3',length=str(audio.stat().st_size),type='audio/mpeg')
+ET.SubElement(item,'guid').text=f'https://xujfcn.github.io/podcast/audio/ep{ep:03d}.mp3'; ns='http://www.itunes.com/dtds/podcast-1.0.dtd'
+for tag,val in [('duration',duration),('episode',str(ep)),('episodeType','full'),('explicit','false')]: ET.SubElement(item,f'{{{ns}}}{tag}').text=val
+ET.SubElement(item,'link').text=f'https://crazyrouter.com?utm_source=rss&utm_medium=podcast&utm_campaign=ep{ep}'; channel.insert(0,item); tree.write(root/'feed.xml',encoding='utf-8',xml_declaration=True)
+print(f'DONE {audio} {audio.stat().st_size} bytes {duration} {len(parts)} chunks')
