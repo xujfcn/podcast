@@ -1,0 +1,31 @@
+An expired exception may be verified across the gateway and still leave one dangerous question unanswered: what happens when the system must recover after expiry?
+
+This episode is about assurance exception expiry recovery: how AI API gateway teams can restore normal controls after temporary authority ends without accidentally reviving stale permission.
+
+Start by separating recovery from renewal. Recovery means returning to the approved baseline after exceptional behavior ends. Renewal is a new authority decision. A recovery process must never interpret an old exception as permission to keep operating while the team prepares a renewal.
+
+Define the baseline before the exception begins. Record the policy version, route, provider account, credential scope, data boundary, tool permissions, rate limits, and observability obligations that should apply after expiry. Without a known baseline, operators cannot prove that recovery restored the intended state.
+
+Use an explicit recovery state. The system may be recovering, recovered, or blocked because a dependency is unhealthy. Do not represent all three conditions as normal. New work should follow the safe state until recovery evidence is complete.
+
+Make rollback selective. An exception may have changed several controls, but some changes may have been superseded by an independent release. Restore each affected control against its current owner and version instead of blindly replaying an old snapshot over newer legitimate configuration.
+
+Protect against stale workers. A worker that was offline during expiry may reconnect with an old policy snapshot. On reconnect, require it to fetch and acknowledge the current baseline before accepting new work. A successful network connection is not proof of current authority.
+
+Reconcile queues and retries. Work admitted under the exception may be waiting in a queue or scheduled for retry. Decide whether each item may finish under its original lease, must be canceled, or must be reauthorized under the baseline. Never let a retry silently extend an expired privilege.
+
+Check provider-side state. If the exception involved a provider account, model capability, credential, or external tool, gateway recovery must verify that the provider adapter no longer uses the exceptional path. External state should be treated as a dependency to reconcile, not assumed to have followed the gateway.
+
+Verify negative space. Recovery testing should show not only that normal traffic works, but that the old exceptional request is denied, narrowed, or routed differently. A green health check that exercises only ordinary traffic can miss a still-open bypass.
+
+Keep recovery evidence durable. Record the expiry event, baseline version, affected components, acknowledgements, rejected stale requests, and any residual risk. Link the evidence to the original exception without overwriting its history.
+
+Handle partial recovery honestly. If one region has recovered and another has not, expose the split state and contain the unrecovered scope. Do not announce global recovery based on the first successful region.
+
+Make recovery idempotent. Repeating the recovery operation should not create duplicate credentials, duplicate policy revisions, or conflicting acknowledgements. Idempotency matters when operators retry after a timeout or when the control plane loses a response.
+
+For a practical exercise, choose one expired exception and compare the current state with its recorded baseline. Test a normal request, an old exceptional request, an offline worker reconnect, and a queued retry. If any path can restore or reuse old authority without a fresh decision, recovery is incomplete.
+
+Reliable assurance ends temporary authority with a controlled return to normal, not with a hopeful status update. Define the baseline, reconcile every consumer, contain partial recovery, and require fresh authorization for anything exceptional. Then expiry closes the risk instead of merely moving it into the next incident.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, recover to a known-safe baseline and never confuse restoration with renewal.
