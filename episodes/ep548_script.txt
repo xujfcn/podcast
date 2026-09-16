@@ -1,0 +1,33 @@
+An assurance exception is not truly controlled just because it has an expiration date. The expiration must cause the system to do something predictable when the date arrives, when evidence is missing, or when a renewal is delayed.
+
+This episode is about assurance exception expiry enforcement: how AI API gateway teams can make temporary authority end safely instead of becoming a permanent configuration accident.
+
+Start with a precise definition of the expiry boundary. An exception should name its effective start time, its end time, the clock that governs it, and the behavior that applies at both boundaries. A vague instruction to review an exception next week is not an enforceable expiry rule.
+
+Make expiry part of authorization evaluation. The gateway should check whether the decision is active before accepting exceptional work, not depend on a separate cleanup job to eventually remove a permissive setting. A missed scheduler run must not silently extend authority.
+
+Define the safe state in advance. When an exception expires, the route may be disabled, narrowed to a lower-risk tenant class, moved to a verified fallback provider, or require a fresh approval. The correct outcome depends on the service, but it must be explicit and testable.
+
+Treat renewal as a new decision, not a checkbox. A renewal should revalidate the scope, evidence, compensating controls, owner, and current system context. Reusing the old expiry date with a new timestamp creates the appearance of review without proving that the underlying conditions still hold.
+
+Separate a planned renewal from an active one. A ticket assigned to an approver does not extend runtime authority. Until a valid successor decision is published and propagated, the prior decision should expire according to its original terms.
+
+Make time trustworthy across the control plane. Workers, policy evaluators, caches, and schedulers need compatible clocks and a clear treatment of clock skew. If an evaluator cannot reliably determine whether a decision is active, it should take the safer action and record the uncertainty.
+
+Do not let caches outlive authority. A cached authorization result or route selection must never remain usable longer than the exception that justified it. Bound cache lifetimes by the decision expiry, and invalidate them when a renewal changes scope or obligations.
+
+Attach expiry to the decision identifier. Audit records should show which decision authorized a request and whether it was active at that exact time. This allows an investigator to distinguish a valid request made shortly before expiry from one accepted after the authority ended.
+
+Monitor the approach to expiry. Alert owners early enough to gather evidence and make a decision, but do not confuse an alert with enforcement. Teams need both a human workflow for review and a deterministic machine action when review does not finish.
+
+Test the boundary with real requests. In a controlled environment, issue work immediately before expiry, immediately after expiry, and during a renewal transition. Verify that each region and adapter applies the same outcome, and verify that stale cache entries cannot bypass the new state.
+
+Handle dependencies explicitly. A temporary exception may depend on a provider contract, a credential, a regional approval, or a compensating control. If any dependency expires or becomes unhealthy first, the exception should be reevaluated or contained before its nominal end time.
+
+Keep historical records immutable. The expired decision should remain available for audit, but it must no longer be eligible for live authorization. Preservation of evidence is different from continued authority.
+
+For a practical exercise, select one active exception and trace its expiry through the system. Find the policy record, cache lifetime, evaluator check, alert, fallback behavior, and audit event. If any component relies on a person remembering to make a manual change, the exception is not yet safely bounded.
+
+Reliable gateways treat time as an enforcement input. Give every exception a precise end, force renewal to earn new authority, and make the system fail toward a defined safer state. Then temporary access remains temporary even when people, queues, and schedules are imperfect.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, make every temporary decision end exactly when the evidence says it should.
