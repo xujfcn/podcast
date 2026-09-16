@@ -1,0 +1,31 @@
+An expired exception can be enforced correctly and still leave operators unsure whether the system actually changed. The next challenge is proving that the expiry propagated everywhere the decision mattered.
+
+This episode is about assurance exception expiry verification: how AI API gateway teams can prove that temporary authority ended across evaluators, caches, workers, regions, and provider adapters.
+
+Start with the difference between publication and enforcement. A control plane may report that an exception expired, while a worker still holds an old policy snapshot or a route cache still permits the request. The expiry event is only complete when every enforcement point has acknowledged the new state.
+
+Give the expiry a durable event identity. Record the decision identifier, expiry version, effective time, reason, and expected safe state. Every consumer should acknowledge that exact event rather than merely reporting that it refreshed at some point.
+
+Check convergence by scope. A global success signal is too weak when the exception covered several regions, tenant classes, models, credentials, or tools. Verify each affected scope independently and make missing acknowledgements visible.
+
+Test both sides of the boundary. Send controlled requests that should be denied after expiry and requests that should remain allowed because they were outside the exception scope. This catches both stale permission and over-broad containment.
+
+Inspect caches and in-flight work. A request accepted before expiry may finish under its original lease, but new work must not inherit that authority. Verify cache invalidation, queue admission, retries, and replay behavior separately.
+
+Treat provider adapters as enforcement points. A gateway may deny a new request while an adapter retries an older operation using stale metadata. Expiry verification must cover retry budgets, asynchronous jobs, webhooks, and provider-side continuations.
+
+Make uncertainty fail safely. If a region cannot confirm the expiry or a worker has an unknown policy version, route new exceptional work to the safer state and raise an operational finding. Silence is not convergence.
+
+Keep evidence queryable. Store acknowledgements, test results, policy versions, and observed request outcomes under the expiry event identity. An operator should be able to answer when the last stale consumer stopped accepting the old authority.
+
+Measure convergence time. The interval between the intended expiry and the last enforcement point becoming safe is a real control metric. Set a target, alert on violations, and use the result to improve propagation rather than hiding the delay.
+
+Exercise failure modes deliberately. Pause a worker, partition a region, delay a cache invalidation, and interrupt a provider adapter. Then expire the exception and verify that recovery does not restore the old decision or lose the expiry event.
+
+Preserve the distinction between expiration and deletion. The historical record should remain available for audit even after live authorization rejects it. Removing evidence makes it harder to prove that the control worked.
+
+For a practical exercise, choose one expired exception and build a verification report with its event identity, affected scopes, consumer acknowledgements, cache state, boundary tests, and convergence time. If the report cannot show the final safe state, the expiry is only an intention.
+
+Reliable assurance does not stop when temporary authority ends. Prove that every consumer received the expiry, every boundary behaves correctly, and every stale path is contained. Then the system can demonstrate not only that an exception was supposed to end, but that it actually ended.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, verify every control where it executes, not only where it is published.
