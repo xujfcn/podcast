@@ -1,0 +1,27 @@
+When an exception expires, the most dangerous work may already be waiting in a queue. This episode is about queued work after exception expiry: how AI API gateways can decide what may finish, what must stop, and what needs fresh authorization.
+
+Begin by binding every queued item to an execution lease. The lease should identify the subject, tenant, purpose, route, provider, parameters, policy version, and expiry. A queue timestamp alone cannot prove that the original authority is still valid.
+
+Separate admission from execution. Work accepted while an exception was active may not be safe to execute later. Before a worker starts it, recheck the lease, the current baseline, revocation state, target identity, and any conditions attached to the exception.
+
+Define explicit dispositions. An item may complete under an unexpired lease, be canceled because authority ended, be reauthorized under the baseline, or enter review because its effect is uncertain. Avoid a generic retry state that silently preserves old permission.
+
+Treat retries as new decisions. A failed provider call does not extend the authority that allowed the first attempt. Every retry should carry the original operation identity while obtaining a fresh decision about whether another attempt is permitted.
+
+Fence stale workers. Workers should reject queue items whose policy epoch or exception generation is no longer current. This prevents an offline process from reconnecting and draining old work with a snapshot that the control plane has already retired.
+
+Make cancellation observable. When work is canceled, record whether the provider saw it, whether a side effect may have happened, and what compensation or reconciliation is required. A queue deletion is not proof that external work stopped.
+
+Reconcile unknown outcomes. If a timeout happened after a provider accepted a request, do not simply retry under the baseline. First determine whether the external effect exists, then choose a safe compensation or continuation path with explicit authority.
+
+Protect tenant boundaries. A bulk queue operation must not broaden or mix authority across tenants. Evaluate each item with its own identity, purpose, data classification, and destination. Batch mechanics must not become a policy shortcut.
+
+Keep deadlines aligned. The queue lease, provider timeout, credential lease, and business deadline should be compatible. If any one expires first, the system must define whether to stop, reconcile, or request fresh approval.
+
+Test the queue at the boundary. Add items before expiry, exactly at expiry, after expiry, and during partial recovery. Disconnect a worker, change the baseline, then reconnect it. The expected result should be deterministic and visible in the audit record.
+
+For a practical exercise, select a real queue and classify its pending items by lease, exception generation, provider state, and effect uncertainty. Drain only items with complete evidence. Reauthorize the rest or quarantine them with a clear owner and deadline.
+
+Temporary authority should not survive merely because work was serialized. A reliable gateway binds queued work to a lease, fences stale consumers, treats retries as decisions, and records uncertain external effects. Expiry then closes authority without losing operational truth.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, never let a queue turn yesterday's exception into tomorrow's permission.

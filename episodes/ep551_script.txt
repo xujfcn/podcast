@@ -1,0 +1,29 @@
+An expired exception is only safe when the gateway can prove that every affected path has returned to normal. This episode is about assurance exception recovery evidence: how to demonstrate that recovery happened, rather than merely reporting that an operator clicked restore.
+
+Start with the original exception record. Capture its scope, policy version, affected routes, provider accounts, credentials, tools, tenants, regions, and expiration time. Recovery evidence must point back to that record so reviewers can tell exactly what was supposed to end.
+
+Separate intent from observation. A recovery request proves what an operator wanted to happen. It does not prove that workers, caches, queues, adapters, and providers actually changed. Record both the requested transition and independent observations of the resulting state.
+
+Use a baseline manifest. The manifest should describe the normal policy, route, credential scope, data boundary, rate limits, and audit obligations. Compare the recovered system with this manifest field by field instead of relying on a single health check.
+
+Make evidence time-bounded. A successful check at one moment does not prove that a stale worker will remain corrected after reconnect or that a retry will not recreate the old path. Include observation times, freshness limits, and the events that could invalidate each check.
+
+Test the negative case. Submit a request that was allowed only by the expired exception. The evidence should show that it is denied, narrowed, or routed through the baseline. Ordinary traffic succeeding is not proof that the exception is gone.
+
+Check every consumer. Inspect active workers, queue messages, scheduled retries, response caches, policy snapshots, provider adapters, and regional replicas. A control is not recovered while one consumer can still execute the exceptional behavior.
+
+Record acknowledgements from enforcement points. Each worker or adapter should identify the baseline version it loaded and the time it became effective. A network connection or process restart is not an acknowledgement of policy convergence.
+
+Reconcile external state. If the exception changed provider credentials, model access, tools, or account routing, collect provider-side confirmation or a bounded local proof that the exceptional credential can no longer be used. Do not assume gateway state and provider state changed atomically.
+
+Preserve partial results. If one region is recovered and another is blocked, record the split explicitly. The evidence should identify the unrecovered scope and the controls that contain it. Never turn partial recovery into a global success signal.
+
+Make the evidence tamper-evident and durable. Store the baseline reference, state observations, rejected test requests, acknowledgements, external receipts, and residual risks with immutable identifiers. Do not overwrite the original exception history with a final status.
+
+Define completion criteria before recovery starts. A useful criterion may require every enforcement point to acknowledge the baseline, every old request to fail safely, all exception leases to be expired, and all provider paths to be reconciled. Completion should be a decision over evidence, not a human impression.
+
+For a practical exercise, choose one recently expired exception. Build its manifest, query each state store, reconnect an offline worker, replay a denied request, inspect a queued retry, and compare provider credentials. If any result depends on an unverified assumption, the recovery record should remain incomplete.
+
+Reliable recovery leaves a trail that another engineer can inspect without trusting the original operator. Link evidence to the exception, compare against a known baseline, test the old path, expose partial state, and keep residual risk visible. That is how expiry becomes a demonstrable control instead of a hopeful timestamp.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, prove that temporary authority ended everywhere it mattered.

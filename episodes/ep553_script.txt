@@ -1,0 +1,27 @@
+Recovery can look complete in one region while another still accepts exceptional work. This episode is about regional convergence after exception expiry: how AI API gateways can prove that all enforcement locations agree on the safe baseline.
+
+Start by defining the convergence target. Record the exact baseline version, policy hash, credential generation, route set, provider capability set, and exception generation that every region must enforce. “Latest configuration” is too vague for a recovery proof.
+
+Give each region a state, not just a timestamp. A region may be recovering, converged, blocked, isolated, or unknown. These states should control admission and routing so traffic cannot silently enter a location whose enforcement state is untrusted.
+
+Use versioned acknowledgements. Each worker, adapter, cache, and queue consumer should report the baseline it has loaded and the dependencies it verified. A region is not converged because its control plane says a rollout finished.
+
+Fence old generations. Include an exception generation or recovery epoch in authorization envelopes. Enforcers must reject older generations even if the signature remains valid. This prevents delayed messages from reviving a retired exception.
+
+Route around uncertainty carefully. If a region is blocked, send work only to a region that can prove the required capability and policy state. If no safe region exists, fail closed or queue work with a lease rather than treating uncertainty as availability.
+
+Compare semantics, not only bytes. Two policy files can differ in formatting while behaving identically, or match byte-for-byte while dependent credentials and provider accounts differ. Convergence checks must include effective behavior and dependency state.
+
+Check caches and long-lived connections. Regional recovery often updates control-plane records first while connection pools, authorization caches, streams, and workers retain old context. Add explicit invalidation and point-of-use checks for each long-lived path.
+
+Make repair idempotent. Reapplying the baseline should not create duplicate credentials, conflicting policy revisions, or different decisions. A retry after a regional timeout must converge on the same state and produce a traceable acknowledgement.
+
+Expose split-brain evidence. Record which regions agree, which do not, the traffic each received, and the controls that limited exposure. Do not compress a regional disagreement into a single green dashboard indicator.
+
+Test failover during recovery. Move traffic away from a recovering region, restore it only after independent checks, and verify that in-flight requests and queued retries carry the correct generation. Failover is part of the recovery proof, not a separate optimistic step.
+
+For a practical exercise, choose one expired exception and collect state from every region, worker pool, cache, queue, and provider adapter. Compare effective policy, dependency generations, and rejected stale requests. A missing acknowledgement should keep the region out of the trusted pool.
+
+Safe regional recovery is agreement with evidence. Define the target, fence old generations, verify dependencies, contain unknown regions, and test failover. The goal is not that every location reports healthy; it is that every location can prove it enforces the same safe meaning.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, treat regional agreement as something to verify, not assume.
