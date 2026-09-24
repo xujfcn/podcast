@@ -1,0 +1,27 @@
+A post-closure review has identified corrective actions. The final risk is treating a ticket, deployment, or policy change as proof that the system is safer. This episode is about remediation verification: how an AI API gateway can prove that corrective actions change behavior and remain effective under normal change.
+
+Start with the failure mechanism, not the proposed fix. State how stale authority survived, which boundary failed to reject it, and what observable behavior must change. A remediation that only changes a dashboard or status field cannot prove that the original mechanism is gone.
+
+Turn every action into an acceptance test. Specify the request, worker generation, policy version, queue state, region, provider route, and expected decision. Include both the unsafe path that must fail and the legitimate baseline path that must continue to work.
+
+Test before and after. Capture a reproducible failing case before the change, apply the remediation, and run the same case again. The evidence should show a changed decision, enforcement point, audit event, or dependency state rather than only a successful deployment.
+
+Exercise stale state deliberately. Disconnect a worker, retain an old cache, delay a queue message, reconnect a previous image, and retry a provider call where safe. The repaired system should fence obsolete generations and make the rejection visible.
+
+Verify scope across shared dependencies. If the fix changes a library, worker image, credential issuer, policy compiler, cache service, or routing layer, test every consumer that inherits the change. A single corrected instance is not proof for a shared platform.
+
+Test normal change around the remediation. Deploy a new worker, rotate a credential, fail over a region, replay a queue item, and update a provider capability. Controls that pass only in a frozen environment are not durable controls.
+
+Measure false positives and availability impact. A safer rejection that blocks valid baseline traffic may create pressure to bypass the control. Record denied unsafe requests, accepted legitimate requests, latency, queue growth, and customer-visible errors before declaring success.
+
+Require independent review of evidence. The person who implemented the action can explain context, but another engineer should reproduce the test from the record and challenge the claimed scope. Reviewers should be able to distinguish direct proof from assumptions and sampling.
+
+Set a monitoring window. Some failures appear only after reconnect, delayed delivery, cache expiry, regional failover, or the next scheduled deployment. Keep the action open until the agreed observation period completes and all required signals remain within bounds.
+
+Do not close actions because the deadline arrived. If evidence is incomplete, extend with an explicit reason, escalate residual risk, and keep containment in place. Administrative closure is not remediation closure.
+
+For a practical exercise, choose one stale-authority failure, write its acceptance test, reproduce the old failure in a safe environment, apply the fix, and run the test through a deployment and reconnect cycle. Have an independent reviewer sign only after the evidence proves both safety and availability.
+
+Corrective action is complete only when behavior changed, shared consumers were checked, normal change was exercised, and the result stayed true during observation. That discipline turns incident learning into a control the gateway can continue to trust.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, close remediation with evidence that the system behaves differently, not merely that the ticket says it does.
