@@ -1,0 +1,27 @@
+Remediation evidence rarely stays inside one system. Test results move into release pipelines, policy decisions travel across regions, incident records are copied into review tools, and provider attestations become inputs to automated restoration. This episode is about evidence portability: how an AI API gateway can move proof without losing the context, integrity, and limits that make it trustworthy.
+
+Start by defining a portable evidence envelope. Include the claim being supported, control identifier, scope, subject version, environment, region, provider route, test corpus, observation window, collection method, producer identity, timestamp, expiry, and known exclusions. A screenshot or green status without this envelope is an observation, not durable assurance evidence.
+
+Preserve provenance from creation to decision. Record which component produced the evidence, which transformations occurred, where it was stored, who reviewed it, and which decision consumed it. If evidence is summarized, retain a reference to the underlying record and make the summarization method explicit.
+
+Protect integrity in transit and at rest. Sign evidence envelopes or bind them to tamper-evident hashes. Verify signatures, schema versions, and subject identifiers before accepting a record. Encryption protects confidentiality, but it does not prove that the evidence belongs to the release, route, or policy decision being evaluated.
+
+Keep meaning stable across schemas. A pass in one tool may mean all required tests succeeded, while another tool uses pass when no failures were reported. Define canonical assurance states and map external values explicitly. Unknown or unmapped states should remain unknown rather than becoming successful through a default conversion.
+
+Carry limitations with the evidence. Preserve sampling gaps, excluded regions, unavailable telemetry, test skips, confidence levels, and exception dependencies. Systems that import only the positive conclusion create stronger claims than the original producer authorized.
+
+Bind evidence to the exact subject. Use immutable image digests, policy hashes, dependency manifests, provider contract versions, and configuration fingerprints. Friendly release names and mutable tags are useful for humans but insufficient for deciding whether old proof applies to current execution.
+
+Govern expiry and renewal across boundaries. The receiving system should honor the earliest relevant expiry and recheck freshness at decision time. Copying a record into a new database must not restart its validity period. Renewal requires new evidence or an explicitly authorized extension with its own scope and obligations.
+
+Handle partial transfer safely. If attachments are missing, signatures fail, provenance is incomplete, or the receiving system cannot interpret a required field, mark an evidence gap. Do not accept the parts that arrived and silently discard the conditions that constrained them.
+
+Support independent verification. A reviewer should be able to retrieve the underlying fixture, reproduce the relevant check, compare the subject fingerprint, and confirm the decision threshold. Portable evidence becomes stronger when another system can challenge it without trusting the producer's dashboard.
+
+Minimize sensitive data. Evidence should prove the control without copying customer prompts, credentials, private model output, or unrestricted traces. Use redacted fixtures, pseudonymous identifiers, bounded excerpts, hashes, and controlled retrieval links so portability does not become data proliferation.
+
+For a practical exercise, take one remediation record and export it from the test system into the release gate and incident tracker. Verify that claim, scope, subject hash, provenance, signature, exclusions, expiry, and attachments survive both transfers. Then remove one required field and confirm that the receiving systems produce an evidence gap instead of approval.
+
+Evidence portability is not file copying. It is the preservation of meaning, context, integrity, limitations, and authority as proof crosses boundaries. Build a complete envelope, bind it to the subject, verify every transfer, preserve uncertainty, and let incomplete evidence remain incomplete.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, make assurance evidence portable without making its claims larger than the proof.
