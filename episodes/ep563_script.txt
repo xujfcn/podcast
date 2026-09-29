@@ -1,0 +1,27 @@
+Portable evidence can preserve the right facts and still fail to preserve the right authority. A test result may cross a system boundary, but its meaning, scope, and decision rights can be weakened during the handoff. This episode is about remediation assurance evidence portability: how to keep proof trustworthy when it moves across systems, teams, and regions.
+
+Begin with a canonical evidence envelope. It should identify the claim, control, subject, environment, region, provider route, policy version, dependency set, test corpus, collection method, producer, reviewer, timestamp, expiry, and exclusions. A portable record that omits these fields is easy to copy but unsafe to interpret.
+
+Bind the envelope to an immutable subject. Use image digests, policy hashes, configuration fingerprints, dependency manifests, and provider contract versions. Human-friendly release names and mutable tags are useful labels, but they cannot establish that the proof still applies to the code now serving traffic.
+
+Preserve provenance across every transformation. Record who created the evidence, which system stored it, what was redacted or summarized, who reviewed it, and which decision consumed it. Keep a retrievable link to the underlying record so a reviewer can distinguish original evidence from a later interpretation.
+
+Protect integrity as evidence moves. Use signatures or tamper-evident hashes, verify them at the receiving boundary, and reject records with an unexpected subject identifier or schema version. Encryption protects secrecy; it does not prove that a result belongs to the route, release, or policy being evaluated.
+
+Keep assurance states semantically stable. Define canonical states such as verified, conditional, unknown, expired, contradicted, rejected, and escalated. Map external tool values explicitly. If a receiving system cannot interpret a state, preserve it as unknown instead of converting it to pass through a convenient default.
+
+Carry limitations together with conclusions. Preserve excluded regions, skipped tests, sampling gaps, stale telemetry, confidence levels, exception dependencies, and unavailable providers. Importing only the positive summary creates a stronger claim than the evidence producer authorized.
+
+Honor the earliest expiry. Copying a record into another database must not restart its validity period. The receiving system should recheck freshness at decision time, and any renewal should require new proof or an explicitly approved extension with a new scope, owner, and deadline.
+
+Handle incomplete transfers conservatively. Missing attachments, failed signature checks, incomplete provenance, and unsupported required fields should create an evidence gap. Do not accept the portion that arrived while silently discarding the conditions that limited the original claim.
+
+Make portability independently verifiable. A reviewer should be able to retrieve the fixture, reproduce the relevant check, compare the subject fingerprint, inspect the transformation history, and confirm that the decision threshold was met. Evidence becomes more useful when the receiving team can challenge it without trusting the producer's dashboard.
+
+Avoid turning portability into data sprawl. Prove controls with redacted fixtures, pseudonymous identifiers, hashes, bounded excerpts, and controlled retrieval links. Do not copy customer prompts, credentials, private model output, or unrestricted traces merely because another system wants a local attachment.
+
+For a practical exercise, export one remediation record from a test system into a release gate and an incident tracker. Compare the original and imported envelopes field by field. Remove a subject hash, alter an expiry, and drop an exclusion; then confirm each receiver reports an evidence gap instead of granting approval.
+
+Evidence portability is disciplined preservation of meaning, context, integrity, limitations, and authority. Build complete envelopes, bind them to immutable subjects, verify every handoff, preserve uncertainty, honor expiry, and keep incomplete proof incomplete.
+
+Thank you for listening to the Crazyrouter Podcast. Until next time, move evidence across boundaries without allowing its claims to grow during the journey.
