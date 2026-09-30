@@ -1,0 +1,35 @@
+Welcome to the Crazyrouter Podcast. This is episode 565: Remediation Assurance Evidence Custody - Preserve Integrity Through Every Handoff.
+
+Yesterday we discussed evidence ownership: who is accountable for keeping remediation proof trustworthy. Ownership answers who must care. Custody answers a different question: who had control of the evidence at each moment, and what could they change? Without a reliable custody chain, even accurate evidence can become difficult to trust.
+
+Consider a production control test. A platform engineer runs the test, exports the result, attaches it to a ticket, and sends a summary to a reviewer. Later, the ticket is migrated, the attachment is renamed, and the original test environment no longer exists. The result may still look convincing, but the organization can no longer reconstruct how it moved from observation to accepted proof.
+
+Evidence custody begins at collection. Record the producer, collection time, source system, environment, control version, and subject identifier. Capture enough context to distinguish one execution from another. A passing result from staging must never be mistaken for production evidence, and a test against policy version twelve must not support a claim about version thirteen.
+
+Give every evidence artifact a stable identity. Do not rely only on filenames such as final report or latest screenshot. Use an immutable evidence identifier, then attach human-readable labels as metadata. The identity should survive storage migrations, ticket changes, and review workflows without changing what the artifact represents.
+
+Protect integrity as soon as evidence is created. Calculate a cryptographic digest, store it separately from the artifact, and record which service or principal produced it. For stronger claims, use signed attestations or an append-only evidence ledger. The goal is not to make every log entry a legal document. The goal is to detect substitution, silent editing, and accidental corruption before someone relies on the result.
+
+Custody records should describe every meaningful handoff. A handoff includes transfer from a test runner to storage, from storage to a reviewer, from one assurance system to another, and from an active case into an archive. Record the sender, receiver, timestamp, artifact identity, integrity value, purpose, and resulting custody state.
+
+Use explicit states instead of informal assumptions. Useful states include collected, sealed, transferred, received, under review, accepted, disputed, archived, and destroyed. Each transition should have an authorized actor and a validation rule. For example, received should require the destination to verify the digest before acknowledging custody.
+
+Keep the original artifact immutable. Reviewers can add findings, annotations, and acceptance decisions, but those should be separate records linked to the original evidence. Editing the underlying artifact to make it clearer destroys the distinction between observation and interpretation. If sensitive fields must be removed, preserve the original in a restricted store and create a derived, redacted artifact with its own identity and provenance.
+
+Access controls should reflect custody responsibilities. Collectors may create evidence but should not be able to rewrite accepted records. Reviewers may accept or dispute evidence but should not impersonate the producer. Archive operators may move artifacts into long-term storage but should not change their contents. Separation of duties turns custody from a narrative into an enforceable system property.
+
+Custody also applies to automated pipelines. If a gateway continuously tests route policy, tool boundaries, or billing reconciliation, record which workload identity collected each result and which software version evaluated it. Automation does not remove the need for custody. It makes stable identity and reproducible provenance more important because thousands of artifacts may be produced without direct human observation.
+
+Define what happens when custody is broken. A missing handoff record, failed digest check, unknown producer, or unexplained timestamp gap should move the evidence into a disputed or untrusted state. Do not repair the history by guessing. Recollect the evidence when possible, document the gap, and reassess any decision that depended on the affected artifact.
+
+Retention and destruction are custody events too. Evidence should remain available for the period required by the claim, incident, contract, or regulation, but not forever by default. When retention ends, record who authorized destruction, what was destroyed, when it occurred, and whether replicas and derived copies were included. A deletion claim without custody evidence is only another unsupported assertion.
+
+For AI API gateways, the custody chain may cross policy engines, request logs, provider receipts, tool execution records, response validators, and billing systems. A single remediation claim can depend on evidence from all of them. Use a common evidence envelope so every artifact carries compatible identity, subject, provenance, integrity, sensitivity, retention, and custody fields.
+
+Test the custody system with reconstruction exercises. Select an accepted remediation claim and ask an independent reviewer to trace every artifact from collection to acceptance. They should be able to verify integrity, identify every custodian, explain every transformation, and locate the authoritative copy. Any unexplained gap is assurance work that remains unfinished.
+
+Start pragmatically. Choose your highest-risk remediation evidence, assign stable identifiers, calculate digests at collection, make originals immutable, and log each handoff. Add explicit disputed states before building elaborate dashboards. These controls provide most of the value because they prevent ambiguous evidence from being treated as trusted proof.
+
+The central principle is simple: evidence must remain trustworthy while it moves. Ownership establishes accountability, but custody preserves integrity through time, systems, and teams. When every handoff is verifiable, remediation assurance can survive migration, review, incident pressure, and organizational change.
+
+Thanks for listening to the Crazyrouter Podcast. For more practical guidance on AI API gateways, model routing, reliability, and operational assurance, visit crazyrouter.com. See you in the next episode.
