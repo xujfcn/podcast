@@ -1,0 +1,53 @@
+Welcome to the Crazyrouter Podcast, where we make AI infrastructure practical for builders.
+
+Today’s episode is Remediation Assurance Exception Containment: prove the temporary boundary is real.
+
+When a remediation exception cannot be closed, the next decision is often containment. Restrict the affected traffic, disable the risky path, or reduce the permitted data class while the technical fix continues. But containment is not a sentence in a decision record. It is a runtime claim: requests outside the approved scope must be prevented from crossing the protected boundary.
+
+Containment can reduce risk only when its boundary is explicit, enforceable, observable, and tested. Otherwise a team may believe that only public traffic is allowed while a fallback, retry, tool connector, or regional worker still admits restricted work.
+
+Start by defining the allowed and denied sets. Specify tenants, data classes, routes, regions, providers, request modes, tools, time windows, and identities. Avoid phrases such as “low-risk traffic” without a classification rule. A containment decision must be precise enough for a policy engine and a test fixture to evaluate the same way.
+
+For an AI API gateway, containment may allow public prompts on a verified provider while blocking internal data, streaming, external tools, or background jobs. It may allow one region while removing a failover route. Each allowance creates a boundary that must be checked independently.
+
+The first artifact is a containment contract. Record the reason, protected behavior, allowed scope, denied scope, enforcement points, effective time, expiry, owner, authority, compensating controls, evidence signals, and restoration criteria. Include the expected behavior when the classification is missing, stale, or unknown. Unknown requests should not silently enter the allowed set.
+
+Containment should fail closed at the risky boundary, but that does not mean every system error must stop every request. Choose the failure behavior per data class and action. Public read-only work may continue with a degraded provider. Restricted prompts or external tool calls may need to block. The decision should be deliberate and technically encoded.
+
+The second step is to translate the scope into enforceable predicates. A route restriction is not enough if the provider account can still be selected by a fallback. A tenant restriction is not enough if an administrative token bypasses the same policy. A data-class restriction is not enough if streaming skips classification. Every predicate needs a location where it is enforced before the protected effect.
+
+Use deny tests for every excluded dimension. Try a restricted tenant on the allowed route. Try internal data with a public-data policy. Try the blocked region through failover. Try a tool call when tools are disabled. Try streaming when only synchronous requests are contained. Try a retry after the primary route rejects the request. The expected result is a controlled decision before egress or side effect.
+
+Do not stop at the client response. Verify the provider saw no unauthorized request, the tool connector made no external call, the cache stored no restricted result, and the evidence stream recorded the containment decision without retaining unnecessary payloads. A client error is weak evidence if the risky action already happened internally.
+
+The third artifact is an allowance proof. For each allowed path, show that it satisfies the remaining control contract. If public prompts may continue through one provider, verify classification, route, account, region, adapter, output handling, logging, and billing behavior for that path. Containment is not permission to stop testing the path that remains active.
+
+Make the boundary visible in telemetry. Emit a decision identifier, scope version, classification result, route, provider account, enforcement point, and outcome. Keep the event minimal and correlate it with the request trace. Operators should be able to distinguish allowed, denied, unknown, expired, and fail-closed outcomes without reading customer content.
+
+Propagation is a containment risk. A policy update may reach one worker before another. A region may cache the old allowlist. A queue may contain requests accepted before the boundary changed. Define the propagation window, drain or quarantine affected work, and do not report the containment as active everywhere until the required evidence exists.
+
+Credentials and capability discovery need the same treatment. Removing a route from configuration does not revoke a still-valid provider credential. Disabling a tool in one registry does not remove the connector’s ability to execute it. Containment should reduce both selection and capability where the protected effect demands it.
+
+Failover deserves explicit tests. A contained primary route can be undermined by a fallback that was configured before the exception. Test each region and provider account, including health-check behavior, retry policies, circuit breakers, and cached routing decisions. If failover cannot satisfy the containment contract, disable it for the affected scope rather than inheriting the primary route’s status.
+
+Background and asynchronous work often escape containment. A job accepted before the boundary changed may execute later with old context. A batch worker may use a broad service identity. A scheduled task may not evaluate the same policy as live traffic. Quarantine, cancel, or reclassify queued work, and verify that the worker checks current authorization before the protected action.
+
+The containment decision should have a restoration path. Define what evidence allows the broader scope to reopen, who can approve it, and which tests must pass. Do not expand the allowlist gradually through informal operator changes. Every scope increase should be a new evaluated transition with a current policy and evidence.
+
+Let’s walk through an example. A backup provider is not yet verified, so an exception decision permits only public prompts through the primary provider in one region. A containment test finds that retries can select the backup account after a timeout. The containment is not effective. Disable that retry path for the affected scope, invalidate cached decisions, and rerun the denied-path test before declaring the boundary active.
+
+Another example involves a disabled tool. The main route rejects tool requests, but a background worker accepts a queued function call created before containment. The right response is to quarantine the queue, reauthorize each pending action against the current policy, and prove that no external side effect occurs before approval. Containment must cover work already in motion, not only new requests.
+
+State models should be conservative. Proposed means the decision is drafted but not active. Propagating means enforcement is being installed and the effective boundary is not yet global. Active means required enforcement points report the current scope and negative tests pass. Degraded means a declared subset is unavailable or evidence is incomplete. Expired means the allowance cannot continue without a new decision. Unknown means the system cannot prove the state. Only Active should authorize the documented allowed set.
+
+Automation can compare declared scope with observed traffic. Alert on an allowed request using an undeclared provider, an excluded data class crossing an allowed route, a missing scope version, an old policy decision after expiry, or a denied request reaching a side-effect boundary. These checks should be independent enough to catch a policy engine that reports its own success incorrectly.
+
+Containment evidence must remain current. Recheck after deployments, route changes, credential rotations, provider incidents, policy updates, and classification changes. A containment decision can be correct at creation and unsafe later. Reopening broader traffic requires fresh proof, not confidence that no one changed anything important.
+
+The practical checklist is short. Define allowed and denied sets precisely. Encode the boundary as enforceable predicates. Test every excluded dimension and every fallback. Verify side effects, not only client errors. Prove that allowed paths remain compliant. Track propagation, caches, credentials, queues, and background work. Test every region, provider, retry, and tool path. Use minimal correlated telemetry. Model proposed, propagating, active, degraded, expired, and unknown states. Tie restoration to new evidence and authority. And never call containment active until the runtime boundary is actually proven.
+
+The larger lesson is simple: containment is a runtime control, not a paragraph. When an exception remains open, a real boundary can reduce harm while the fix proceeds, but only if the boundary is explicit, enforced everywhere that matters, and tested against the paths that operators tend to forget.
+
+That’s it for today’s episode of the Crazyrouter Podcast. If this was useful, share it with someone responsible for AI platform reliability, security, or compliance. You can learn more about building and operating multi-model AI infrastructure at crazyrouter.com.
+
+Thanks for listening, and we’ll be back with another practical AI infrastructure lesson.
