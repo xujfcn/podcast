@@ -45,7 +45,7 @@
 
     <title>AI Dev Tools — The Crazyrouter Podcast</title>
     <link>https://crazyrouter.com</link>
-    <description>Your weekly breakdown of AI development tools, API gateways, model pricing, and building with GPT, Claude, Gemini, and DeepSeek. Hosted by Crazyrouter — one API key for 627+ AI models.</description>
+    <description>Your weekly breakdown of AI development tools, API gateways, model pricing, and building with GPT, Claude, Gemini, and DeepSeek. Hosted by Crazyrouter — one API key for models across supported API protocols.</description>
     <language>en</language>
     <copyright>© 2026 Crazyrouter</copyright>
     <ns1:link href="https://xujfcn.github.io/podcast/feed.xml" rel="self" type="application/rss+xml" />
@@ -546,7 +546,7 @@
     </item>
     <item>
       <title>EP017: LangChain + Crazyrouter — Build Agents with 627 Models</title>
-      <description>How to combine LangChain with Crazyrouter for multi-model AI agents. We cover zero-migration setup with ChatOpenAI, cost optimization through per-step model routing, tool calling across providers, and real-world savings of 70-80% — all with one API key and 627+ models.</description>
+      <description>How to combine LangChain with Crazyrouter for multi-model AI agents. We cover zero-migration setup with ChatOpenAI, cost optimization through per-step model routing, tool calling across providers, and real-world savings of 70-80% — all with one API key and models in the current catalogue.</description>
       <enclosure url="https://xujfcn.github.io/podcast/audio/ep017.mp3" length="1885680" type="audio/mpeg" />
       <guid>ep017-langchain-crazyrouter-build-agents</guid>
       <pubDate>Tue, 07 Apr 2026 08:00:00 +0000</pubDate>

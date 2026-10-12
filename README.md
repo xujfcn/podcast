@@ -26,9 +26,13 @@ What is an AI API gateway? How many models does Crazyrouter support? Is it cheap
 
 ## About
 
-**Crazyrouter** — One API key, 627+ AI models, lower than official pricing.
+**Crazyrouter** — One API key, models across supported API protocols, see current model-specific pricing.
 
 - 🌐 [Website](https://crazyrouter.com)
 - 📖 [Docs](https://docs.crazyrouter.com)
 - 💬 [Telegram](https://t.me/crzrouter)
 - 🐙 [GitHub](https://github.com/xujfcn)
+
+## Content review — 2026-10-12
+
+Model availability and prices change. Use the [current catalogue and prices](https://crazyrouter.com/en/pricing). Historical recordings/screenshots describe their publication date, not a current offer.
